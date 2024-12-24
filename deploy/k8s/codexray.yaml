@@ -1,0 +1,79 @@
+# -----------------------------------
+# Namespace Definition
+# -----------------------------------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: codexray
+
+---
+# -----------------------------------
+# PersistentVolumeClaim Definition
+# -----------------------------------
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: codexray-pvc
+  namespace: codexray
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-path
+
+---
+# -----------------------------------
+# Service Definition
+# -----------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: codexray
+  namespace: codexray
+spec:
+  selector:
+    app: codexray
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      nodePort: 30080
+  type: NodePort
+
+---
+# -----------------------------------
+# Deployment Definition
+# -----------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: codexray
+  namespace: codexray
+  labels:
+    app: codexray
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: codexray
+  template:
+    metadata:
+      labels:
+        app: codexray
+    spec:
+      containers:
+      - name: codexray
+        image: saivyas99/codexray:latest  # Public Docker Hub Image
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            cpu: 200m
+            memory: 256Mi
+          limits:
+            cpu: 500m
+            memory: 1Gi
