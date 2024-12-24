@@ -114,7 +114,7 @@ jobs:
 
       - name: Replace Variables in Kubernetes YAML
         run: |
-          sed -i 's|\$DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g' codexray.yaml
+          sed -i 's|\$DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g' deploy/k8s/codexray.yaml
           cat deploy/k8s/codexray.yaml    
 
       - name: Apply Kubernetes Manifest
