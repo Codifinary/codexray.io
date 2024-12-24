@@ -96,9 +96,14 @@ jobs:
         with:
           version: 'latest'
 
+     # set gke auth      
+      - name: Set GKE Auth Plugin
+        run: echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
+        
       # Configure kubectl
       - name: Get GKE Credentials
         run: |
+          export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           gcloud container clusters get-credentials $GKE_CLUSTER --region $GKE_REGION --project ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Debug Kubernetes Connection
