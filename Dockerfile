@@ -1,5 +1,10 @@
 FROM golang:1.23-bullseye AS backend-builder
 RUN apt update && apt install -y liblz4-dev
+# Set Go Environment
+ENV GOARCH=amd64
+ENV GOOS=linux
+ENV CGO_ENABLED=0
+
 WORKDIR /tmp/src
 COPY go.mod .
 COPY go.sum .
