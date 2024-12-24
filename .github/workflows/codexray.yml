@@ -59,17 +59,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # - name: Login to Docker Hub
-      #   run: |
-      #     echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
-      # - name: Build Docker Image
-      #   run: |
-      #     docker build -t $DOCKER_IMAGE -f Dockerfile .
+      - name: Build Docker Image
+        run: |
+          docker build -t $DOCKER_IMAGE -f Dockerfile .
 
-      # - name: Push Docker Image to Docker Hub
-      #   run: |
-      #     docker push $DOCKER_IMAGE
+      - name: Push Docker Image to Docker Hub
+        run: |
+          docker push $DOCKER_IMAGE
 
 # -------------------------------------
 # Job 3: Deploy to GKE
