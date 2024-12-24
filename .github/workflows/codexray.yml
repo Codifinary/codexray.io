@@ -90,15 +90,10 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
-      # Install gke-gcloud-auth-plugin
-      - name: Install gke-gcloud-auth-plugin
-        run: |
-            curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-443.0.0-linux-x86_64.tar.gz
-            tar -xvf google-cloud-cli-443.0.0-linux-x86_64.tar.gz
-            sudo mv google-cloud-sdk/bin/gke-gcloud-auth-plugin /usr/local/bin/
-            sudo chmod +x /usr/local/bin/gke-gcloud-auth-plugin
-            export USE_GKE_GCLOUD_AUTH_PLUGIN=True
-            echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
+      # Install gke-gcloud-auth-plugin using GitHub Action
+      - name: Set Up GKE Auth Plugin
+        uses: simenandre/setup-gke-gcloud-auth-plugin@v1
+        
       # Set up gcloud CLI
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
