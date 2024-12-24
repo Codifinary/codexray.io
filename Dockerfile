@@ -8,7 +8,7 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 ARG VERSION=unknown
-RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=0 go build -mod=readonly -ldflags "-X main.version=$VERSION" -o codexray .
+RUN GOARCH=amd64 GOOS=linux CGO_ENABLED=1 go build -mod=readonly -ldflags "-X main.version=$VERSION" -o codexray .
 
 
 FROM debian:bullseye
