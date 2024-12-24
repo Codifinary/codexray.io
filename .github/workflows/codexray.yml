@@ -93,13 +93,7 @@ jobs:
       # Install gke-gcloud-auth-plugin
       - name: Install gke-gcloud-auth-plugin
         run: |
-          sudo apt-get update
-          sudo apt-get install -y google-cloud-cli-gke-gcloud-auth-plugin || \
-          gcloud components install gke-gcloud-auth-plugin || \
-          curl -O https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-443.0.0-linux-x86_64.tar.gz && \
-          tar -xvf google-cloud-cli-443.0.0-linux-x86_64.tar.gz && \
-          sudo mv google-cloud-sdk/bin/gke-gcloud-auth-plugin /usr/local/bin/ && \
-          sudo chmod +x /usr/local/bin/gke-gcloud-auth-plugin
+          gcloud components install gke-gcloud-auth-plugin
           export USE_GKE_GCLOUD_AUTH_PLUGIN=True
           echo "USE_GKE_GCLOUD_AUTH_PLUGIN=True" >> $GITHUB_ENV
       # Set up gcloud CLI
