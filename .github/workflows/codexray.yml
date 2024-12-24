@@ -93,7 +93,7 @@ jobs:
       # Install gke-gcloud-auth-plugin using GitHub Action
       - name: Set Up GKE Auth Plugin
         uses: simenandre/setup-gke-gcloud-auth-plugin@v1
-        
+
       # Set up gcloud CLI
       - name: Set up Google Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -115,7 +115,7 @@ jobs:
       - name: Replace Variables in Kubernetes YAML
         run: |
           sed -i 's|\$DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g' codexray.yaml
-          cat codexray.yaml    
+          cat deploy/k8s/codexray.yaml    
 
       - name: Apply Kubernetes Manifest
         run: |
