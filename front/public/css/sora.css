@@ -1,0 +1,105 @@
+/* Sora */
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 100;
+    src: url('../fonts/Sora-Thin.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-Thin.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-Thin.woff2') format('woff2'),
+        url('../fonts/Sora-Thin.woff') format('woff'),
+        url('../fonts/Sora-Thin.ttf') format('truetype'),
+        url('../fonts/Sora-Thin.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 200;
+    src: url('../fonts/Sora-ExtraLight.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-ExtraLight.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-ExtraLight.woff2') format('woff2'),
+        url('../fonts/Sora-ExtraLight.woff') format('woff'),
+        url('../fonts/Sora-ExtraLight.ttf') format('truetype'),
+        url('../fonts/Sora-ExtraLight.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 300;
+    src: url('../fonts/Sora-Light.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-Light.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-Light.woff2') format('woff2'),
+        url('../fonts/Sora-Light.woff') format('woff'),
+        url('../fonts/Sora-Light.ttf') format('truetype'),
+        url('../fonts/Sora-Light.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 400;
+    src: url('../fonts/Sora-Regular.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-Regular.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-Regular.woff2') format('woff2'),
+        url('../fonts/Sora-Regular.woff') format('woff'),
+        url('../fonts/Sora-Regular.ttf') format('truetype'),
+        url('../fonts/Sora-Regular.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 500;
+    src: url('../fonts/Sora-Medium.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-Medium.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-Medium.woff2') format('woff2'),
+        url('../fonts/Sora-Medium.woff') format('woff'),
+        url('../fonts/Sora-Medium.ttf') format('truetype'),
+        url('../fonts/Sora-Medium.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 600;
+    src: url('../fonts/Sora-SemiBold.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-SemiBold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-SemiBold.woff2') format('woff2'),
+        url('../fonts/Sora-SemiBold.woff') format('woff'),
+        url('../fonts/Sora-SemiBold.ttf') format('truetype'),
+        url('../fonts/Sora-SemiBold.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 700;
+    src: url('../fonts/Sora-Bold.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-Bold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-Bold.woff2') format('woff2'),
+        url('../fonts/Sora-Bold.woff') format('woff'),
+        url('../fonts/Sora-Bold.ttf') format('truetype'),
+        url('../fonts/Sora-Bold.svg#Sora') format('svg');
+}
+@font-face {
+    font-family: 'Sora';
+    font-style: normal;
+    font-weight: 800;
+    src: url('../fonts/Sora-ExtraBold.eot');
+    src:
+        local(''),
+        url('../fonts/Sora-ExtraBold.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/Sora-ExtraBold.woff2') format('woff2'),
+        url('../fonts/Sora-ExtraBold.woff') format('woff'),
+        url('../fonts/Sora-ExtraBold.ttf') format('truetype'),
+        url('../fonts/Sora-ExtraBold.svg#Sora') format('svg');
+}
