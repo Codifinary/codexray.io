@@ -12,7 +12,7 @@ on:
 # Define Environment Variables
 # -------------------------------------
 env:
-  DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/codexray:latest
+  GCR_IMAGE: gcr.io/${{ secrets.GCP_PROJECT_ID }}/codexray:latest
   GKE_CLUSTER: codexray-cluster
   GKE_REGION: asia-south1
   GKE_NAMESPACE: codexray
@@ -38,20 +38,11 @@ jobs:
         with:
           go-version: '1.21'
 
-#      - name: Run Tests
-#        run: |
-#          go test ./...
-
-#      - name: Run Linter
-#        run: |
-#          go fmt ./...
-#          go vet ./...
-
 # -------------------------------------
-# Job 2: Build and Push Docker Image
+# Job 2: Build and Push Docker Image to GCR
 # -------------------------------------
   build-and-push:
-    name: Build and Push Docker Image
+    name: Build and Push Docker Image to GCR
     runs-on: ubuntu-latest
     needs: ci  # Runs after CI passes
 
@@ -59,17 +50,33 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        run: |
-          echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+      # Authenticate to Google Cloud using Workload Identity Federation
+      - name: Authenticate with Workload Identity Federation
+        uses: google-github-actions/auth@v1
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
+      # Set up gcloud CLI
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          version: 'latest'
+
+      # Configure Docker to use GCR
+      - name: Configure Docker for GCR
+        run: |
+          gcloud auth configure-docker --quiet
+
+      # Build Docker Image
       - name: Build Docker Image
         run: |
-          docker build -t $DOCKER_IMAGE -f Dockerfile .
+          docker build -t $GCR_IMAGE -f Dockerfile .
 
-      - name: Push Docker Image to Docker Hub
+      # Push Docker Image to GCR
+      - name: Push Docker Image to GCR
         run: |
-          docker push $DOCKER_IMAGE
+          docker push $GCR_IMAGE
 
 # -------------------------------------
 # Job 3: Deploy to GKE
@@ -90,7 +97,7 @@ jobs:
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.GCP_SERVICE_ACCOUNT_EMAIL }}
 
-      # Install gke-gcloud-auth-plugin using GitHub Action
+      # Install gke-gcloud-auth-plugin
       - name: Set Up GKE Auth Plugin
         uses: simenandre/setup-gke-gcloud-auth-plugin@v1
 
@@ -112,9 +119,9 @@ jobs:
           echo "---- Kubernetes Nodes ----"
           kubectl get nodes
 
-      - name: Replace Variables in Kubernetes YAML
+      - name: Replace Image in Kubernetes Manifest
         run: |
-          sed -i 's|\$DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g' deploy/k8s/codexray.yaml
+          sed -i 's|gcr.io/YOUR_PROJECT_ID/codexray:latest|${{ env.GCR_IMAGE }}|g' deploy/k8s/codexray.yaml
           cat deploy/k8s/codexray.yaml    
 
       - name: Apply Kubernetes Manifest
