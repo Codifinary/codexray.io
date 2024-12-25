@@ -65,7 +65,7 @@ spec:
     spec:
       containers:
       - name: codexray
-        image: gcr.io/${GCP_PROJECT_ID}/codexray:latest  # Fetch project ID from GitHub Secrets
+        image: gcr.io/YOUR_PROJECT_ID/codexray:latest  # Fetch project ID from GitHub Secrets
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
