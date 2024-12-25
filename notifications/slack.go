@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
+	"codexray/db"
+	"codexray/model"
+
 	"github.com/slack-go/slack"
 )
 

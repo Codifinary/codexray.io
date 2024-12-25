@@ -3,9 +3,10 @@ package clickhouse
 import (
 	"context"
 
+	"codexray/model"
+	"codexray/timeseries"
+
 	"github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
 )
 
 type ProfileQuery struct {

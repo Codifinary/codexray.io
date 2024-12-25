@@ -1,7 +1,7 @@
 package rbac
 
 import (
-	"github.com/coroot/coroot/utils"
+	"codexray/utils"
 )
 
 type Permission struct {

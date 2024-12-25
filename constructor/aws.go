@@ -1,7 +1,7 @@
 package constructor
 
 import (
-	"github.com/coroot/coroot/model"
+	"codexray/model"
 )
 
 func loadAWSStatus(w *model.World, metrics map[string][]model.MetricValues) {

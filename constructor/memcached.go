@@ -1,8 +1,8 @@
 package constructor
 
 import (
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func memcached(instance *model.Instance, queryName string, m model.MetricValues) {

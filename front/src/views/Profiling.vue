@@ -59,7 +59,7 @@
 
                 <div class="grey--text my-4">
                     To configure an application to send profiles follow the
-                    <a href="https://docs.coroot.com/profiling" target="_blank">documentation</a>.
+                    <a href="https://codexray.com/docs/codexray/profiling" target="_blank">documentation</a>.
                 </div>
 
                 <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text class="my-3">
@@ -140,7 +140,7 @@ export default {
             this.get();
         },
         changeInstance(i) {
-            this.setQuery({ instance: i || undefined });
+            this.setQuery({ instance: i });
             this.get();
         },
         setSelection(s) {

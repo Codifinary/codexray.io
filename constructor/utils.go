@@ -1,6 +1,6 @@
 package constructor
 
-import "github.com/coroot/coroot/timeseries"
+import "codexray/timeseries"
 
 func merge(dest, ts *timeseries.TimeSeries, f timeseries.F) *timeseries.TimeSeries {
 	if dest == nil && ts == nil {

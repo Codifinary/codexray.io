@@ -1,8 +1,9 @@
 package inspections
 
 import (
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/utils"
+	"codexray/model"
+	"codexray/utils"
+
 	"k8s.io/klog"
 )
 

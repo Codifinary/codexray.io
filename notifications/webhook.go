@@ -11,10 +11,10 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/coroot/coroot/utils"
+	"codexray/utils"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
+	"codexray/db"
+	"codexray/model"
 )
 
 type Webhook struct {

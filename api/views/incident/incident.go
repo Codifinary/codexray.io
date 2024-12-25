@@ -1,7 +1,7 @@
 package incident
 
 import (
-	"github.com/coroot/coroot/model"
+	"codexray/model"
 )
 
 type View struct {

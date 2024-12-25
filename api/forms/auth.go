@@ -3,7 +3,7 @@ package forms
 import (
 	"strings"
 
-	"github.com/coroot/coroot/rbac"
+	"codexray/rbac"
 )
 
 type LoginForm struct {

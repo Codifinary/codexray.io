@@ -3,8 +3,8 @@ package model
 import (
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/timeseries"
+	"codexray/utils"
 )
 
 type AuditReportName string

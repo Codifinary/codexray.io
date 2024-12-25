@@ -1,9 +1,9 @@
 package overview
 
 import (
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
 )
 
 type resourceType int

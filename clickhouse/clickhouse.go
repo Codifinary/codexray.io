@@ -7,9 +7,10 @@ import (
 	"net"
 	"time"
 
+	"codexray/collector"
+
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
-	"github.com/coroot/coroot/collector"
 )
 
 type ClientConfig struct {

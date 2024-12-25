@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coroot/coroot/db"
+	"codexray/db"
 )
 
 type CustomApplicationsView struct {

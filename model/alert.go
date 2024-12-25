@@ -3,7 +3,8 @@ package model
 import (
 	"fmt"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
+
 	"github.com/dustin/go-humanize/english"
 )
 

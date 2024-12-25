@@ -1,8 +1,8 @@
 package users
 
 import (
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/rbac"
+	"codexray/db"
+	"codexray/rbac"
 )
 
 type View struct {

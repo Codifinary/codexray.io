@@ -1,9 +1,9 @@
 <template>
     <div>
-        <h1 class="text-h5">
-            {{ $utils.appId(id).name }}
+        <!-- <h1 class="text-h5 my-5">
+            <router-link :to="{ name: 'overview', query: $utils.contextQuery() }">Applications</router-link> / {{ $utils.appId(id).name }}
             <v-progress-linear v-if="loading" indeterminate color="green" />
-        </h1>
+        </h1> -->
 
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
@@ -12,9 +12,9 @@
         <div v-if="app">
             <AppMap v-if="app.app_map" :map="app.app_map" class="my-5" />
 
-            <v-tabs v-if="app.reports && app.reports.length" height="40" show-arrows slider-size="2">
+            <v-tabs v-if="app.reports && app.reports.length" show-arrows slider-size="2" slider-color="success">
                 <v-tab v-for="r in app.reports" :key="r.name" :to="{ params: { report: r.name }, query: $utils.contextQuery() }" exact-path>
-                    <Led v-if="r && (r.checks || r.instrumentation)" :status="r.status" />
+                    <Led class="mr-2" v-if="r && (r.checks || r.instrumentation)" :status="r.status" />
                     {{ r.name }}
                 </v-tab>
             </v-tabs>
@@ -107,3 +107,10 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.v-tab {
+    color: #013912 !important;
+    /* border-bottom: 2px solid rgba(0, 0, 0, 0.1); */
+}
+</style>

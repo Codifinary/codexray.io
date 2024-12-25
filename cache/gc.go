@@ -4,8 +4,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/db"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 

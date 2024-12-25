@@ -1,10 +1,6 @@
 <template>
-    <div class="traces">
-        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
-            {{ error }}
-        </v-alert>
-
-        <v-alert v-else-if="view.message" color="info" outlined text class="message">
+    <div v-if="view" class="traces">
+        <v-alert v-if="view.message" color="info" outlined text class="message">
             <template v-if="view.message === 'not_found'">
                 This page only shows traces from OpenTelemetry integrations, not from eBPF.
                 <div class="mt-2">
@@ -405,24 +401,21 @@ import FlameGraph from '../components/FlameGraph.vue';
 import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
 
 export default {
+    props: {
+        view: Object,
+        loading: Boolean,
+    },
+
     components: { OpenTelemetryIntegration, FlameGraph, TracingTrace, Heatmap },
 
     data() {
         return {
-            view: {},
             filters: [],
             form: {
                 excludeAux: true,
                 diff: false,
             },
-            loading: false,
-            error: '',
         };
-    },
-
-    mounted() {
-        this.get();
-        this.$events.watch(this, this.get, 'refresh');
     },
 
     watch: {
@@ -437,7 +430,6 @@ export default {
                 this.filters = (this.query.filters || []).map((f) => ({ ...f, edit: false }));
                 this.form.excludeAux = !this.query.include_aux;
                 this.form.diff = (this.selectionDefined ? this.query.diff : false) || false;
-                this.get();
             },
             immediate: true,
         },
@@ -494,19 +486,6 @@ export default {
     },
 
     methods: {
-        get() {
-            const query = this.$route.query.query || '';
-            this.loading = true;
-            this.error = '';
-            this.$api.getOverview('traces', query, (data, error) => {
-                this.loading = false;
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.view = data.traces || {};
-            });
-        },
         push(to) {
             this.$router.push(to).catch((err) => err);
         },

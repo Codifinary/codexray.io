@@ -5,7 +5,8 @@ import (
 	"math"
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
+
 	"github.com/dustin/go-humanize"
 	"github.com/hako/durafmt"
 )

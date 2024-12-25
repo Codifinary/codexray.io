@@ -11,10 +11,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coroot/coroot/api/forms"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/rbac"
-	"github.com/coroot/coroot/utils"
+	"codexray/api/forms"
+	"codexray/db"
+	"codexray/rbac"
+	"codexray/utils"
+
 	"k8s.io/klog"
 )
 
@@ -25,7 +26,7 @@ type Session struct {
 const (
 	AuthSecretSettingName = "auth_secret"
 	HashFunc              = crypto.SHA256
-	SessionCookieName     = "coroot_session"
+	SessionCookieName     = "codexray_session"
 	SessionCookieTTL      = 7 * 24 * time.Hour
 )
 

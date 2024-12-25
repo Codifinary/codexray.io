@@ -3,8 +3,8 @@ package constructor
 import (
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func (c *Constructor) loadJVM(metrics map[string][]model.MetricValues, containers containerCache) {

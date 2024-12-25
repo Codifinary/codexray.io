@@ -1,7 +1,7 @@
 <template>
     <div>
         <p>
-            This integration enables Coroot to discover RDS and ElastiCache instances and collect their telemetry data. It requires permissions to
+            This integration enables codexray to discover RDS and ElastiCache instances and collect their telemetry data. It requires permissions to
             describe RDS and ElastiCache instances, read their logs and read Enhanced Monitoring data from CloudWatch.
         </p>
 
@@ -65,7 +65,7 @@
 
         <v-form v-if="form" v-model="valid" ref="form">
             <div class="subtitle-1 mt-3">Region</div>
-            <div class="caption">Coroot only discovers RDS and ElastiCache instances within the specified region, e.g. <var>us-west-1</var></div>
+            <div class="caption">codexray only discovers RDS and ElastiCache instances within the specified region, e.g. <var>us-west-1</var></div>
             <v-text-field v-model="form.region" :rules="[$validators.notEmpty]" outlined dense hide-details single-line clearable />
 
             <div class="subtitle-1 mt-3">Access Key ID</div>
@@ -132,7 +132,7 @@
             :footer-props="{ itemsPerPageOptions: [10, 20, 50, 100, -1] }"
         >
             <template #item.application_id="{ item }">
-                <router-link :to="{ name: 'overview', params: { view: 'applications', id: item.application_id } }" class="text-no-wrap">
+                <router-link :to="{ name: 'application', params: { id: item.application_id } }" class="text-no-wrap">
                     {{ $utils.appId(item.application_id).name }}
                 </router-link>
             </template>

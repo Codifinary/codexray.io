@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/utils"
+	"codexray/model"
+	"codexray/utils"
 )
 
 const (
@@ -90,8 +90,8 @@ func (p *Project) GetCustomApplicationName(instance string) string {
 func (p *Project) PrometheusConfig(globalPrometheus *IntegrationsPrometheus) *IntegrationsPrometheus {
 	if globalPrometheus != nil {
 		gp := *globalPrometheus
-		gp.ExtraSelector = fmt.Sprintf(`{coroot_project_id="%s"}`, p.Id)
-		gp.ExtraLabels = map[string]string{"coroot_project_id": string(p.Id)}
+		gp.ExtraSelector = fmt.Sprintf(`{codexray_project_id="%s"}`, p.Id)
+		gp.ExtraLabels = map[string]string{"codexray_project_id": string(p.Id)}
 		return &gp
 	}
 	return &p.Prometheus
@@ -100,7 +100,7 @@ func (p *Project) PrometheusConfig(globalPrometheus *IntegrationsPrometheus) *In
 func (p *Project) ClickHouseConfig(globalClickHouse *IntegrationClickhouse) *IntegrationClickhouse {
 	if globalClickHouse != nil {
 		gc := *globalClickHouse
-		gc.Database = "coroot_" + string(p.Id)
+		gc.Database = "codexray_" + string(p.Id)
 		return &gc
 	}
 	return p.Settings.Integrations.Clickhouse

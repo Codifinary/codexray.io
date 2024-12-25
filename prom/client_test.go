@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"strings"
 
+	"codexray/db"
+	"codexray/model"
+
 	goteamsnotify "github.com/atc0005/go-teams-notify/v2"
 	"github.com/atc0005/go-teams-notify/v2/messagecard"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
 )
 
 type Teams struct {

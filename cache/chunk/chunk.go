@@ -9,9 +9,10 @@ import (
 	"os"
 	"unsafe"
 
+	"codexray/model"
+	"codexray/timeseries"
+
 	lz4 "github.com/DataDog/golz4"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
 )
 
 const (

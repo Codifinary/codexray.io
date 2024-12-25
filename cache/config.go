@@ -3,7 +3,7 @@ package cache
 import (
 	"time"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type Config struct {

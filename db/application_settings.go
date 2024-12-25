@@ -5,7 +5,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/coroot/coroot/model"
+	"codexray/model"
+
 	"k8s.io/klog"
 )
 

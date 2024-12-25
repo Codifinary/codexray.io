@@ -1,7 +1,8 @@
 package aws
 
 import (
-	"github.com/coroot/coroot/model"
+	"codexray/model"
+
 	"golang.org/x/exp/maps"
 )
 

@@ -3,10 +3,11 @@ package model
 import (
 	"time"
 
-	"github.com/coroot/coroot/utils"
+	"codexray/utils"
 
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/logparser"
+	"codexray/timeseries"
+
+	"codexray/logparser"
 )
 
 type LogLevel string

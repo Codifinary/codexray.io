@@ -46,12 +46,12 @@ func getCluster(ctx context.Context, chPool *chpool.Pool) (string, error) {
 		return "", nil
 	case len(clusters) == 1:
 		return maps.Keys(clusters)[0], nil
-	case clusters["coroot"]:
-		return "coroot", nil
+	case clusters["codexray"]:
+		return "codexray", nil
 	case clusters["default"]:
 		return "default", nil
 	}
-	return "", fmt.Errorf(`multiple ClickHouse clusters found, but neither "coroot" nor "default" cluster found`)
+	return "", fmt.Errorf(`multiple ClickHouse clusters found, but neither "codexray" nor "default" cluster found`)
 }
 
 func (c *Collector) migrate(ctx context.Context, client *chClient) error {

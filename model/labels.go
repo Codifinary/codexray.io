@@ -5,7 +5,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
+
 	"github.com/prometheus/common/model"
 )
 

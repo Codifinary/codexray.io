@@ -13,16 +13,17 @@ import (
 	"syscall"
 	"text/template"
 
-	"github.com/coroot/coroot/api"
-	"github.com/coroot/coroot/cache"
-	cloud_pricing "github.com/coroot/coroot/cloud-pricing"
-	"github.com/coroot/coroot/collector"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/rbac"
-	"github.com/coroot/coroot/stats"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
-	"github.com/coroot/coroot/watchers"
+	"codexray/api"
+	"codexray/cache"
+	cloud_pricing "codexray/cloud-pricing"
+	"codexray/collector"
+	"codexray/db"
+	"codexray/rbac"
+	"codexray/stats"
+	"codexray/timeseries"
+	"codexray/utils"
+	"codexray/watchers"
+
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"golang.org/x/term"
@@ -37,19 +38,19 @@ var static embed.FS
 
 func main() {
 	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
-	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run Coroot at a sub-path, e.g. /coroot/").Envar("URL_BASE_PATH").Default("/").String()
+	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
 	cacheGcInterval := kingpin.Flag("cache-gc-interval", "Cache GC interval").Envar("CACHE_GC_INTERVAL").Default("10m").Duration()
 	pgConnString := kingpin.Flag("pg-connection-string", "Postgres connection string (sqlite is used if not set)").Envar("PG_CONNECTION_STRING").String()
 	disableStats := kingpin.Flag("disable-usage-statistics", "Disable usage statistics").Envar("DISABLE_USAGE_STATISTICS").Bool()
-	bootstrapPrometheusUrl := kingpin.Flag("bootstrap-prometheus-url", "If set, Coroot will create a project for this Prometheus URL").Envar("BOOTSTRAP_PROMETHEUS_URL").String()
+	bootstrapPrometheusUrl := kingpin.Flag("bootstrap-prometheus-url", "If set, codexray will create a project for this Prometheus URL").Envar("BOOTSTRAP_PROMETHEUS_URL").String()
 	bootstrapRefreshInterval := kingpin.Flag("bootstrap-refresh-interval", "Refresh interval for the project created upon bootstrap").Envar("BOOTSTRAP_REFRESH_INTERVAL").Duration()
 	bootstrapPrometheusExtraSelector := kingpin.Flag("bootstrap-prometheus-extra-selector", "Prometheus extra selector for the project created upon bootstrap").Envar("BOOTSTRAP_PROMETHEUS_EXTRA_SELECTOR").String()
 	doNotCheckSLO := kingpin.Flag("do-not-check-slo", "Don't check SLO compliance").Envar("DO_NOT_CHECK_SLO").Bool()
 	doNotCheckForDeployments := kingpin.Flag("do-not-check-for-deployments", "Don't check for new deployments").Envar("DO_NOT_CHECK_FOR_DEPLOYMENTS").Bool()
 	doNotCheckForUpdates := kingpin.Flag("do-not-check-for-updates", "Don't check for new versions").Envar("DO_NOT_CHECK_FOR_UPDATES").Bool()
-	bootstrapClickhouseAddr := kingpin.Flag("bootstrap-clickhouse-address", "If set, Coroot will add a Clickhouse integration for the default project").Envar("BOOTSTRAP_CLICKHOUSE_ADDRESS").String()
+	bootstrapClickhouseAddr := kingpin.Flag("bootstrap-clickhouse-address", "If set, codexray will add a Clickhouse integration for the default project").Envar("BOOTSTRAP_CLICKHOUSE_ADDRESS").String()
 	bootstrapClickhouseUser := kingpin.Flag("bootstrap-clickhouse-user", "Clickhouse user").Envar("BOOTSTRAP_CLICKHOUSE_USER").Default("default").String()
 	bootstrapClickhousePassword := kingpin.Flag("bootstrap-clickhouse-password", "Clickhouse password").Envar("BOOTSTRAP_CLICKHOUSE_PASSWORD").String()
 	bootstrapClickhouseDatabase := kingpin.Flag("bootstrap-clickhouse-database", "Clickhouse database").Envar("BOOTSTRAP_CLICKHOUSE_DATABASE").Default("default").String()
@@ -58,7 +59,7 @@ func main() {
 	globalClickhouseUser := kingpin.Flag("global-clickhouse-user", "").Envar("GLOBAL_CLICKHOUSE_USER").Default("default").String()
 	globalClickhousePassword := kingpin.Flag("global-clickhouse-password", "").Envar("GLOBAL_CLICKHOUSE_PASSWORD").String()
 	globalClickhouseInitialDatabase := kingpin.Flag("global-clickhouse-initial-database", "").Envar("GLOBAL_CLICKHOUSE_INITIAL_DATABASE").Default("default").String()
-	globalClickhouseTlsEnabled := kingpin.Flag("global-clickhouse-tls-enabled", "").Envar("GLOBAL_CLICKHOUSE_TLS_ENABLED").Default("false").Bool()
+	globalClickhouseTlsEnabled := kingpin.Flag("global-clickhouse-tls-enabled", "").Envar("GLOBAL_CLICKHOUSE_TLS_ENABLES").Default("false").Bool()
 	globalClickhouseTlsSkipVerify := kingpin.Flag("global-clickhouse-tls-skip-verify", "").Envar("GLOBAL_CLICKHOUSE_TLS_SKIP_VERIFY").Default("false").Bool()
 
 	globalPrometheusUrl := kingpin.Flag("global-prometheus-url", "").Envar("GLOBAL_PROMETHEUS_URL").String()
@@ -68,11 +69,11 @@ func main() {
 	globalPrometheusPassword := kingpin.Flag("global-prometheus-password", "").Envar("GLOBAL_PROMETHEUS_PASSWORD").String()
 	globalPrometheusCustomHeaders := kingpin.Flag("global-prometheus-custom-headers", "").Envar("GLOBAL_PROMETHEUS_CUSTOM_HEADER").StringMap()
 
-	developerMode := kingpin.Flag("developer-mode", "If enabled, Coroot will not use embedded static assets").Envar("DEVELOPER_MODE").Default("false").Bool()
+	developerMode := kingpin.Flag("developer-mode", "If enabled, codexray will not use embedded static assets").Envar("DEVELOPER_MODE").Default("false").Bool()
 	authAnonymousRole := kingpin.Flag("auth-anonymous-role", "Disable authentication and assign one of the following roles to the anonymous user: Admin, Editor, or Viewer.").Envar("AUTH_ANONYMOUS_ROLE").String()
 	authBootstrapAdminPassword := kingpin.Flag("auth-bootstrap-admin-password", "Password for the default Admin user").Envar("AUTH_BOOTSTRAP_ADMIN_PASSWORD").Default(db.AdminUserDefaultPassword).String()
 
-	kingpin.Command("run", "Run Coroot server").Default()
+	kingpin.Command("run", "Run codexray server").Default()
 	cmdSetAdminPassword := kingpin.Command("set-admin-password", "Set password for the default Admin user")
 
 	cmd := kingpin.Parse()

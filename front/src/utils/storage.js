@@ -1,4 +1,4 @@
-const itemKey = 'coroot';
+const itemKey = 'codexray';
 
 function getOrSet(stor, key, value) {
     const data = JSON.parse(stor.getItem(itemKey) || '{}');

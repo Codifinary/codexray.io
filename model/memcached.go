@@ -1,7 +1,7 @@
 package model
 
 import (
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type Memcached struct {

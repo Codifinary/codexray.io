@@ -3,10 +3,12 @@ package constructor
 import (
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
-	"github.com/coroot/logparser"
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
+	"codexray/logparser"
+
 	"k8s.io/klog"
 )
 

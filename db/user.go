@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/coroot/coroot/rbac"
+	"codexray/rbac"
+
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/coroot/coroot/rbac"
+	"codexray/rbac"
 )
 
 type View struct {

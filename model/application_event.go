@@ -3,7 +3,7 @@ package model
 import (
 	"strconv"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type ApplicationEventType int

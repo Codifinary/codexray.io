@@ -4,8 +4,9 @@ import (
 	"sort"
 	"time"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
+	"codexray/db"
+	"codexray/model"
+
 	"k8s.io/klog"
 )
 

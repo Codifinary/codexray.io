@@ -2,7 +2,7 @@
     <div>
         <v-progress-linear v-if="loading" indeterminate color="green" />
 
-        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text class="mt-2">
             {{ error }}
         </v-alert>
 
@@ -52,7 +52,7 @@
                     <div>
                         <span class="field-name">Application</span>:
                         <router-link
-                            :to="{ name: 'overview', params: { view: 'applications', id: incident.application_id }, query: $utils.contextQuery() }"
+                            :to="{ name: 'application', params: { id: incident.application_id }, query: $utils.contextQuery() }"
                             class="name"
                         >
                             {{ $utils.appId(incident.application_id).name }}
@@ -136,8 +136,6 @@ import Tracing from '@/views/Tracing.vue';
 import RCA from '@/views/RCA.vue';
 
 export default {
-    components: { Tracing, CheckForm, Widget, RCA, NoData },
-
     computed: {
         view() {
             return this.$route.query.view || 'overview';
@@ -150,6 +148,9 @@ export default {
             ];
         },
     },
+    props: {},
+
+    components: { Tracing, CheckForm, Widget, RCA, NoData },
 
     data() {
         return {

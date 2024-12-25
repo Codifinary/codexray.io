@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type Table struct {

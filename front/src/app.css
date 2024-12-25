@@ -4,7 +4,7 @@
     --text-dark: rgba(255, 255, 255, 0.87);
     --text-dark-dimmed: rgba(255, 255, 255, 0.6);
     --background-light: white;
-    --background-light-hi: #eeeeee;
+    --background-light-hi: rgba(29, 191, 115, 0.5);
     --background-dark: #121212;
     --background-dark-hi: #616161;
     --brightness-dimmed: 80%;
@@ -13,10 +13,10 @@
     --tooltip-light: white;
     --tooltip-dark: #424242;
 
-    --status-unknown: grey;
-    --status-ok: #23d160;
-    --status-warning: #ffdd57;
-    --status-critical: #f44034;
+    --status-unknown: gray;
+    --status-ok: #1dbf73;
+    --status-warning: #ffa726;
+    --status-critical: #ef5350;
 }
 .v-application {
     --text-color: var(--text-light);
@@ -90,10 +90,10 @@ a {
     font-size: inherit !important;
 }
 /* don't want smaller and bold items in dense lists, e.g. <v-select dense /> */
-.v-list--dense .v-list-item .v-list-item__title {
+/* .v-list--dense .v-list-item .v-list-item__title {
     font-size: inherit;
     font-weight: inherit;
-}
+} */
 
 .nowrap {
     display: block;

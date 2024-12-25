@@ -7,17 +7,17 @@
         </thead>
         <tbody>
             <tr v-for="r in rows" :id="r.id" :class="{ hi: r.id && $route.hash && $route.hash === '#' + r.id }">
-                <td v-for="c in r.cells" class="py-1">
-                    <v-progress-linear
-                        v-if="c.progress"
-                        :background-color="c.progress.color + ' lighten-3'"
-                        height="16"
-                        :color="c.progress.color + ' lighten-1'"
-                        :value="c.progress.percent"
-                        style="min-width: 64px"
-                    >
-                        <span style="font-size: 14px">{{ c.progress.percent }}%</span>
-                    </v-progress-linear>
+                <td v-for="c in r.cells" class="py-2">
+                    <div v-if="c.progress" class="d-flex align-items-center">
+                        <v-progress-linear
+                            :background-color="c.progress.color + ' lighten-3'"
+                            height="16"
+                            :color="c.progress.color + ' lighten-1'"
+                            :value="c.progress.percent"
+                            style="min-width: 64px; flex-grow: 1"
+                        />
+                        <span style="font-size: 14px; margin-left: 8px; color: gray">{{ c.progress.percent }}%</span>
+                    </div>
 
                     <div v-else-if="c.bandwidth">
                         <span class="text-no-wrap"> <v-icon small color="green">mdi-arrow-down-thick</v-icon>{{ c.bandwidth.Rx }} </span>
@@ -30,7 +30,7 @@
                         fill
                         smooth
                         padding="4"
-                        color="blue lighten-2"
+                        color="green lighten-2"
                         height="32"
                         style="min-width: 100px"
                     />
@@ -52,11 +52,7 @@
                     <div v-else-if="c.deployment_summaries" v-for="s in c.deployment_summaries" class="d-flex">
                         <span class="text-no-wrap">{{ s.ok ? '&#127881;' : '&#128148;' }} {{ s.message }}</span>
                         <router-link
-                            :to="{
-                                name: 'overview',
-                                params: { view: 'applications', report: s.report },
-                                query: { from: s.time - 1800000, to: s.time + 1800000 },
-                            }"
+                            :to="{ name: 'application', params: { report: s.report }, query: { from: s.time - 1800000, to: s.time + 1800000 } }"
                             class="d-flex"
                         >
                             <v-icon small>mdi-chart-box-outline</v-icon>
@@ -127,5 +123,16 @@ export default {
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
+}
+thead {
+    background-color: rgba(231, 248, 239, 1);
+}
+
+th {
+    font-weight: 500;
+    font-size: 14px;
+    color: #013912 !important;
+    text-align: left;
+    padding: 8px 16px;
 }
 </style>

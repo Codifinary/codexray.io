@@ -106,9 +106,8 @@ export default {
         },
         showLogMessages(hyp) {
             return {
-                name: 'overview',
+                name: 'application',
                 params: {
-                    view: 'applications',
                     id: hyp.service,
                     report: 'Logs',
                 },
@@ -197,7 +196,7 @@ export default {
     font-size: 14px;
     background-color: var(--background-color-hi);
     padding: 4px 8px;
-    //border-radius: 3px;
+    /*border-radius: 3px;*/
 }
 .barColumn {
     display: flex;

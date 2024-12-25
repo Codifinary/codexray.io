@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
+
 	"github.com/xhit/go-str2duration/v2"
 	"golang.org/x/net/http/httpguts"
 	"k8s.io/klog"

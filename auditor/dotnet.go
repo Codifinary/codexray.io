@@ -1,8 +1,8 @@
 package auditor
 
 import (
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func (a *appAuditor) dotnet() {

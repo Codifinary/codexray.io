@@ -3,7 +3,7 @@ package model
 import (
 	"fmt"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type PgConnectionKey struct {

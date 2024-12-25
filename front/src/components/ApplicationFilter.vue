@@ -1,25 +1,17 @@
 <template>
     <div class="d-flex flex-column flex-sm-row flex-wrap flex-md-nowrap" style="gap: 12px">
-        <div>
-            <v-text-field
-                v-model="searchString"
-                label="search"
-                clearable
-                dense
-                hide-details
-                prepend-inner-icon="mdi-magnify"
-                outlined
-                class="search"
-            />
+        <div class="search-bar d-flex">
+            <label for="search">Search:</label>
+            <v-text-field v-model="searchString" label="Please enter" clearable dense hide-details outlined class="search-input" color="success" />
         </div>
 
         <div>
             <v-autocomplete
                 :items="namespaces"
                 v-model="selectedNamespaces"
-                label="namespaces"
+                label="Namespaces"
                 :disabled="namespacesDisabled"
-                color="primary"
+                color="success"
                 multiple
                 outlined
                 dense
@@ -50,7 +42,7 @@
         <div class="d-none d-sm-block flex-grow-1" />
 
         <div class="d-flex flex-wrap align-center categories">
-            <v-checkbox
+            <!-- <v-checkbox
                 v-for="c in categories"
                 :key="c"
                 :value="c"
@@ -60,15 +52,35 @@
                 class="category"
                 color="primary"
                 hide-details
-            />
+            /> -->
+
+            <v-menu offset-y>
+                <template #activator="{ on, attrs }">
+                    <v-btn outlined v-bind="attrs" v-on="on" class="category-select">
+                        Select application
+                        <v-icon>mdi-chevron-down</v-icon>
+                    </v-btn>
+                </template>
+
+                <v-list class="category-list">
+                    <v-list-item v-for="category in categories" :key="category" class="category-item">
+                        <v-checkbox
+                            v-model="selectedCategories"
+                            :value="category"
+                            :label="category"
+                            :disabled="categoriesDisabled"
+                            class="category-checkbox"
+                            color="success"
+                            hide-details
+                        />
+                    </v-list-item>
+                </v-list>
+            </v-menu>
 
             <v-tooltip bottom>
                 <template #activator="{ on }">
-                    <v-btn :to="{ name: 'project_settings', params: { tab: 'applications' } }" v-on="on" icon x-small>
-                        <v-icon>mdi-plus</v-icon>
-                    </v-btn>
+                    <v-btn class="button success" v-if="configureTo" :to="configureTo" v-on="on"> <v-icon>mdi-plus</v-icon> Add New </v-btn>
                 </template>
-                <v-card class="px-2">configure categories</v-card>
             </v-tooltip>
         </div>
     </div>
@@ -100,6 +112,10 @@ export default {
     props: {
         applications: Array,
         autoSelectNamespaceThreshold: Number,
+        configureTo: {
+            type: Object,
+            default: () => ({ name: 'project_settings', params: { tab: 'applications' } }),
+        },
     },
 
     data() {
@@ -229,23 +245,20 @@ export default {
 </script>
 
 <style scoped>
-.categories {
+/* searchbar */
+
+.search-bar label {
+    width: 50px;
+    font-weight: 400;
+    height: 22px;
+    font-size: 14px;
+    line-height: 22px;
+    margin-right: 12px;
+    padding-top: 10px;
+    color: rgba(0, 0, 0, 0.85);
 }
-.category {
-    white-space: nowrap;
-    margin: 0 12px 0 0;
-    padding: 0;
-}
-.category:deep(.v-input--selection-controls__input) {
-    margin-right: 2px !important;
-}
-*:deep(.v-list-item) {
-    font-size: 14px !important;
-    padding: 0 8px !important;
-}
-*:deep(.v-list-item__action) {
-    margin: 4px !important;
-}
+
+/* namespace */
 .namespaces:deep(input) {
     width: 0 !important;
 }
@@ -262,9 +275,68 @@ export default {
     text-overflow: ellipsis;
 }
 .namespace:deep(.v-icon) {
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
+
+/* category */
+.categories {
+    gap: 8px;
+}
+.v-menu__content {
+    top: 140px !important;
+}
+
+.category-checkbox {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.category-select,
+.v-label {
+    color: rgba(0, 0, 0, 0.5) !important;
+    font-weight: 400 !important;
+    font-size: 16px !important;
+    line-height: 22px;
+    padding: 5px 16px !important;
+}
+
+.v-btn {
+    height: 40px !important;
+}
+
+.category-select .v-icon {
+    margin-left: 3px;
+}
+
+.category-select:hover {
+    transition: unset !important;
+}
+
+.category-list {
+    width: auto;
+    max-height: 200px;
+    padding: 40px 20px;
+    line-height: 22px;
+    font-size: 12px;
+    overflow-y: auto;
+}
+
 .search:deep(input) {
     width: 100px !important;
+}
+
+/* button */
+.button {
+    color: white;
+    font-weight: 400 !important;
+    font-size: 14px !important;
+    line-height: 22px !important;
+    padding: 5px 16px !important;
+    border-radius: 2px;
+    box-shadow: none;
+}
+.button .v-icon {
+    font-size: 18px;
+    margin-right: 3px;
 }
 </style>

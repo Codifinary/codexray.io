@@ -1,12 +1,11 @@
 <template>
-    <div>
-        <Led :status="check.status" />
+    <div :class="`status-${check.status}`">
         <span>{{ check.title }}: </span>
         <template v-if="check.message">
             {{ check.message }}
         </template>
         <template v-else>ok</template>
-        <div class="grey--text condition">
+        <div class="condition">
             <span>Condition: </span>
             <span>{{ condition.head }}</span>
             <a @click="$emit('configure')">{{ threshold }}</a>
@@ -16,14 +15,10 @@
 </template>
 
 <script>
-import Led from './Led.vue';
-
 export default {
     props: {
         check: Object,
     },
-
-    components: { Led },
 
     computed: {
         condition() {
@@ -52,7 +47,20 @@ export default {
 </script>
 
 <style scoped>
-.condition {
-    margin-left: 14px;
+.condition,
+.condition a {
+    color: rgba(32, 34, 36, 0.5);
+}
+.status-ok {
+    color: var(--status-ok);
+}
+.status-warning {
+    color: var(--status-warning);
+}
+.status-critical {
+    color: var(--status-critical);
+}
+.status-unknown {
+    color: var(--status-unknown);
 }
 </style>

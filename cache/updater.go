@@ -10,13 +10,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coroot/coroot/cache/chunk"
-	"github.com/coroot/coroot/constructor"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/prom"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/cache/chunk"
+	"codexray/constructor"
+	"codexray/db"
+	"codexray/model"
+	"codexray/prom"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	promModel "github.com/prometheus/common/model"
 	"k8s.io/klog"
 )

@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type Annotation struct {

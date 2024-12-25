@@ -8,10 +8,11 @@ import (
 	"time"
 	"unicode"
 
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
 	"golang.org/x/exp/maps"
 )
 

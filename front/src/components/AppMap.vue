@@ -8,9 +8,10 @@
                 :class="{ hi: highlighted.clients.has(app.id) }"
                 @mouseenter="focus('client', app.id)"
                 @mouseleave="unfocus"
+                :style="getStatusStyle(app.status)"
             >
                 <div>
-                    <router-link :to="{ name: 'overview', params: { view: 'applications', id: app.id }, query: $utils.contextQuery() }" class="name">
+                    <router-link :to="{ name: 'application', params: { id: app.id }, query: $utils.contextQuery() }" class="name">
                         <AppHealth :app="app" />
                     </router-link>
                     <Labels v-if="!hideLabels(clients)" :labels="app.labels" class="d-none d-sm-block label" />
@@ -35,7 +36,7 @@
         </div>
 
         <div class="column">
-            <div v-if="map.application" class="app" :ref="map.application.id">
+            <div v-if="map.application" class="app" :ref="map.application.id" :style="getStatusStyle(map.application.status)">
                 <div>
                     <span class="name">
                         <AppHealth :app="map.application" />
@@ -51,6 +52,7 @@
                         :class="{ hi: highlighted.instances.has(i.id) }"
                         @mouseenter="focus('instance', i.id)"
                         @mouseleave="unfocus"
+                        :style="[getInstanceStatusStyle(map.application.status), { opacity: highlighted.instances.has(i.id) ? 1 : 0.8 }]"
                     >
                         <div class="d-flex align-center" style="gap: 2px">
                             <div class="name flex-grow-1" :title="i.id">{{ i.id }}</div>
@@ -147,9 +149,10 @@
                 :class="{ hi: highlighted.dependencies.has(app.id) }"
                 @mouseenter="focus('dependency', app.id)"
                 @mouseleave="unfocus"
+                :style="getStatusStyle(app.status)"
             >
                 <div>
-                    <router-link :to="{ name: 'overview', params: { view: 'applications', id: app.id }, query: $utils.contextQuery() }" class="name">
+                    <router-link :to="{ name: 'application', params: { id: app.id }, query: $utils.contextQuery() }" class="name">
                         <AppHealth :app="app" />
                     </router-link>
                     <Labels v-if="!hideLabels(dependencies)" :labels="app.labels" class="d-none d-sm-block label" />
@@ -449,6 +452,28 @@ export default {
             });
             this.arrows = arrows;
         },
+        getStatusStyle(status) {
+            const statuses = {
+                critical: { background: '#FFCDD2', color: '#EF5350' },
+                warning: { background: '#FFE0B2', color: '#FFA726' },
+                unknown: { background: '#F5F5F5', color: '#757575' },
+                ok: { background: '#e7f8ef', color: '#1DBF73' },
+            };
+            const statusStyle = statuses[status] || {};
+            return {
+                backgroundColor: statusStyle.background,
+                borderLeft: `4px solid ${statusStyle.color}`,
+            };
+        },
+        getInstanceStatusStyle(status) {
+            const statuses = {
+                critical: { background: '#EF5350' },
+                warning: { background: '#FFA726' },
+                unknown: { background: '#757575' },
+                ok: { background: '#1DBF73' },
+            };
+            return statuses[status] || {};
+        },
     },
 };
 </script>
@@ -464,7 +489,7 @@ export default {
     padding: 10px 0;
 }
 .column {
-    flex-basis: 10%; /* to keep some space if no clients or no dependencies */
+    flex-basis: 10%;
     display: flex;
     flex-direction: column;
     row-gap: 16px;
@@ -474,8 +499,6 @@ export default {
 .client,
 .dependency {
     max-width: 300px;
-    border-radius: 3px;
-    border: 1px solid #bdbdbd;
     white-space: nowrap;
     padding: 4px 8px;
 }
@@ -486,8 +509,6 @@ export default {
     gap: 8px;
 }
 .instance {
-    border-radius: 3px;
-    border: 1px solid #bdbdbd;
     white-space: nowrap;
     padding: 4px 8px;
     max-width: 16rem;
@@ -504,17 +525,13 @@ export default {
     margin-left: 14px;
 }
 
-.hi {
-    border: 1px solid var(--text-color);
-    background-color: var(--background-color-hi);
-}
 svg {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* to allow interactions with html below */
+    pointer-events: none;
     overflow: visible;
 }
 .arrow {
@@ -573,7 +590,6 @@ svg {
     position: absolute;
     font-size: 12px;
     line-height: 12px;
-    background-color: var(--background-color-hi);
     padding: 2px;
     border-radius: 2px;
 }

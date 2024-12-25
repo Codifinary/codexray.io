@@ -14,40 +14,24 @@
             <p>
                 <a href="https://opentelemetry.io/" target="_blank">OpenTelemetry</a> is a vendor-neutral, open-source project that provides a set of
                 APIs, SDKs, and tooling for collecting and exporting telemetry data. OpenTelemetry provides SDKs for many popular programming
-                languages and a collector that allows you to export telemetry data into to one or more open-source or commercial back-ends. Coroot can
-                serve as an OpenTelemetry backend for traces and logs. Telemetry data can be ingested directly into Coroot or through the
+                languages and a collector that allows you to export telemetry data into to one or more open-source or commercial back-ends. codexray can
+                serve as an OpenTelemetry backend for traces and logs. Telemetry data can be ingested directly into codexray or through the
                 OpenTelemetry collector.
             </p>
 
             <v-form v-model="valid">
-                <div class="subtitle-2 mt-2">Coroot URL (must be accessible by instrumented applications or the OpenTelemetry collector):</div>
-                <v-text-field
-                    v-model="coroot_url"
-                    :rules="[$validators.notEmpty, $validators.isUrl]"
-                    placeholder="http://coroot:8080"
-                    outlined
-                    dense
-                    hide-details
-                />
+                <div class="subtitle-2">codexray URL (must be accessible by instrumented applications or the OpenTelemetry collector):</div>
 
-                <div class="subtitle-2 mt-2">
-                    API Key (can be managed in the
-                    <router-link :to="{ name: 'project_settings' }"><span @click="dialog = false">project settings</span></router-link
-                    >):
-                </div>
-                <v-select
-                    v-model="api_key"
-                    :rules="[$validators.notEmpty]"
-                    :items="api_keys === 'permission denied' ? [] : api_keys.map((k) => ({ value: k.key, text: `${k.key} (${k.description})` }))"
+                <v-text-field
+                    v-model="codexray_url"
+                    :rules="[$validators.notEmpty, $validators.isUrl]"
+                    placeholder="http://codexray:8080"
                     outlined
                     dense
-                    hide-details
-                    :menu-props="{ offsetY: true }"
-                    :no-data-text="api_keys === 'permission denied' ? 'Only project Admins can access API keys.' : 'No keys available'"
                 />
 
                 <template v-if="tab === 0">
-                    <div class="subtitle-2 mt-2">Service name:</div>
+                    <div class="subtitle-2">Service name:</div>
                     <v-text-field v-model="service_name" :rules="[$validators.notEmpty, $validators.isSlug]" placeholder="catalog" outlined dense />
                 </template>
             </v-form>
@@ -61,9 +45,9 @@
                     <p>Instrument your apps with the relevant OpenTelemetry SDK:</p>
 
                     <ul class="my-2">
-                        <li><a href="https://docs.coroot.com/tracing/opentelemetry-go" target="_blank">Go</a></li>
-                        <li><a href="https://docs.coroot.com/tracing/opentelemetry-java" target="_blank">Java</a></li>
-                        <li><a href="https://docs.coroot.com/tracing/opentelemetry-python" target="_blank">Python</a></li>
+                        <li><a href="https://codexray.com/docs/codexray/tracing/opentelemetry-go" target="_blank">Go</a></li>
+                        <li><a href="https://codexray.com/docs/codexray/tracing/opentelemetry-java" target="_blank">Java</a></li>
+                        <li><a href="https://codexray.com/docs/codexray/tracing/opentelemetry-python" target="_blank">Python</a></li>
                         <li><a href="https://opentelemetry.io/docs/languages/cpp/getting-started/" target="_blank">C++</a></li>
                         <li><a href="https://opentelemetry.io/docs/languages/net/getting-started/" target="_blank">.NET</a></li>
                         <li><a href="https://opentelemetry.io/docs/languages/js/getting-started/" target="_blank">JavaScript</a></li>
@@ -72,13 +56,13 @@
                         <li><a href="https://opentelemetry.io/docs/languages/rust/getting-started/" target="_blank">Rust</a></li>
                     </ul>
 
-                    <p>Use the following environment variables to configure the SDKs to send traces and logs directly to Coroot:</p>
+                    <p>Use the following environment variables to configure the SDKs to send traces and logs directly to codexray:</p>
 
                     <Code :disabled="!valid">
                         <pre>
 OTEL_SERVICE_NAME="{{ service_name }}" \
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="{{ coroot_url }}/v1/traces" \
-OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="{{ coroot_url }}/v1/logs" \
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT="{{ codexray_url }}/v1/traces" \
+OTEL_EXPORTER_OTLP_LOGS_ENDPOINT="{{ codexray_url }}/v1/logs" \
 OTEL_EXPORTER_OTLP_PROTOCOL="http/protobuf" \
 OTEL_METRICS_EXPORTER="none" \
 OTEL_EXPORTER_OTLP_HEADERS="x-api-key={{ api_key }}"
@@ -89,7 +73,7 @@ OTEL_EXPORTER_OTLP_HEADERS="x-api-key={{ api_key }}"
                 <v-tab-item transition="none">
                     <p>
                         If your apps are already configured to send logs and traces to the OpenTelemetry collector, you can simply add an additional
-                        exporter to send data to Coroot using the OTLP protocol:
+                        exporter to send data to codexray using the OTLP protocol:
                     </p>
 
                     <Code :disabled="!valid">
@@ -106,8 +90,8 @@ processors:
   batch:
 
 exporters:
-  otlphttp/coroot:
-    endpoint: "{{ coroot_url }}"
+  otlphttp/codexray:
+    endpoint: "{{ codexray_url }}"
     encoding: proto
     headers:
       "x-api-key": "{{ api_key }}"
@@ -117,11 +101,11 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlphttp/coroot]
+      exporters: [otlphttp/codexray]
     logs:
        receivers: [otlp]
        processors: [batch]
-       exporters: [otlphttp/coroot]
+       exporters: [otlphttp/codexray]
                         </pre>
                     </Code>
                 </v-tab-item>
@@ -148,9 +132,8 @@ export default {
             error: '',
             dialog: false,
             tab: null,
-            coroot_url: !local ? location.origin : '',
+            codexray_url: !local ? location.origin : '',
             service_name: '',
-            api_keys: [],
             api_key: '',
             valid: false,
         };
@@ -169,7 +152,7 @@ export default {
                     this.error = error;
                     return;
                 }
-                this.api_keys = data.api_keys || [];
+                this.api_key = data.api_key;
             });
         },
     },

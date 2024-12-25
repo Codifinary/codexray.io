@@ -12,33 +12,19 @@
                 <v-btn icon @click="dialog = false"><v-icon>mdi-close</v-icon></v-btn>
             </div>
             <p>
-                <a href="https://github.com/coroot/coroot-node-agent" target="_blank">Coroot-node-agent</a> gathers metrics, traces, logs, and
-                profiles, and sends them to Coroot. To ingest telemetry data, the agent must have the address of the Coroot instance and the
+                <a href="https://github.com/codexray/codexray-node-agent" target="_blank">codexray-node-agent</a> gathers metrics, traces, logs, and
+                profiles, and sends them to codexray. To ingest telemetry data, the agent must have the address of the codexray instance and the
                 capability to establish TCP connections with it.
             </p>
 
+            <div class="subtitle-1">codexray URL:</div>
             <v-form v-model="valid">
-                <div class="subtitle-1">Coroot URL:</div>
                 <v-text-field
-                    v-model="coroot_url"
+                    v-model="codexray_url"
                     :rules="[$validators.notEmpty, $validators.isUrl]"
-                    placeholder="http://coroot:8080"
+                    placeholder="http://codexray:8080"
                     outlined
                     dense
-                />
-                <div class="subtitle-1">
-                    API Key (can be managed in the
-                    <router-link :to="{ name: 'project_settings' }"><span @click="dialog = false">project settings</span></router-link
-                    >):
-                </div>
-                <v-select
-                    v-model="api_key"
-                    :rules="[$validators.notEmpty]"
-                    :items="api_keys === 'permission denied' ? [] : api_keys.map((k) => ({ value: k.key, text: `${k.key} (${k.description})` }))"
-                    outlined
-                    dense
-                    :menu-props="{ offsetY: true }"
-                    :no-data-text="api_keys === 'permission denied' ? 'Only project Admins can access API keys.' : 'No keys available'"
                 />
             </v-form>
 
@@ -55,9 +41,9 @@
                     </p>
                     <Code :disabled="!valid">
                         <pre>
-curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/install.sh | \
-  COLLECTOR_ENDPOINT={{ coroot_url || '&lt;COROOT_URL_HERE&gt;' }} \
-  API_KEY={{ api_key || '&lt;API_KEY_HERE&gt;' }} \
+curl -sfL https://raw.githubusercontent.com/codexray/codexray-node-agent/main/install.sh | \
+  COLLECTOR_ENDPOINT={{ codexray_url || '&lt;codexray_URL_HERE&gt;' }} \
+  API_KEY={{ api_key }} \
   SCRAPE_INTERVAL={{ scrape_interval }} \
   sh -
                         </pre>
@@ -65,13 +51,13 @@ curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/instal
                     <p>You can read the agent log using the <var>journalctl</var> command:</p>
                     <Code>
                         <pre>
-sudo journalctl -u coroot-node-agent
+sudo journalctl -u codexray-node-agent
                         </pre>
                     </Code>
                     <p>To uninstall the agent run the command below:</p>
                     <Code>
                         <pre>
-/usr/bin/coroot-node-agent-uninstall.sh
+/usr/bin/codexray-node-agent-uninstall.sh
                         </pre>
                     </Code>
                 </v-tab-item>
@@ -79,14 +65,14 @@ sudo journalctl -u coroot-node-agent
                 <v-tab-item transition="none">
                     <Code :disabled="!valid">
                         <pre>
-docker run --detach --name coroot-node-agent \
+docker run --detach --name codexray-node-agent \
   --pull=always \
   --privileged --pid host \
   -v /sys/kernel/debug:/sys/kernel/debug:rw \
   -v /sys/fs/cgroup:/host/sys/fs/cgroup:ro \
-  ghcr.io/coroot/coroot-node-agent:latest \
+  ghcr.io/codexray/codexray-node-agent:latest \
   --cgroupfs-root=/host/sys/fs/cgroup \
-  --collector-endpoint={{ coroot_url || '&lt;COROOT_URL_HERE&gt;' }} \
+  --collector-endpoint={{ codexray_url || '&lt;codexray_URL_HERE&gt;' }} \
   --api-key={{ api_key }} \
   --scrape-interval={{ scrape_interval }}
                         </pre>
@@ -94,39 +80,39 @@ docker run --detach --name coroot-node-agent \
                     <p>To read the agent log:</p>
                     <Code>
                         <pre>
-docker logs coroot-node-agent
+docker logs codexray-node-agent
                         </pre>
                     </Code>
                     <p>To uninstall the agent run the command below:</p>
                     <Code>
                         <pre>
-docker rm -f coroot-node-agent
+docker rm -f codexray-node-agent
                         </pre>
                     </Code>
                 </v-tab-item>
                 <v-tab-item transition="none">
-                    <p>Add the Coroot helm chart repo:</p>
+                    <p>Add the codexray helm chart repo:</p>
 
                     <Code>
                         <pre>
-helm repo add coroot https://coroot.github.io/helm-charts
-helm repo update coroot
+helm repo add codexray https://codexray.github.io/helm-charts
+helm repo update codexray
                         </pre>
                     </Code>
 
-                    <p>Next, install the Coroot Operator:</p>
+                    <p>Next, install the codexray Operator:</p>
 
                     <Code>
                         <pre>
-helm install -n coroot --create-namespace coroot-operator coroot/coroot-operator
+helm install -n codexray --create-namespace codexray-operator codexray/codexray-operator
                         </pre>
                     </Code>
 
-                    <p>Install Coroot's agents (node-agent and cluster-agent):</p>
+                    <p>Install codexray's agents (node-agent and cluster-agent):</p>
 
                     <Code :disabled="!valid">
                         <pre>
-helm install -n coroot coroot coroot/{{ helm_chart }} --set "apiKey={{ api_key }},agentsOnly.corootURL={{ coroot_url || '&lt;COROOT_URL_HERE&gt;' }}"
+helm install -n codexray codexray codexray/{{ helm_chart }} --set "apiKey={{ api_key }},agentsOnly.codexrayURL={{ codexray_url || '&lt;codexray_URL_HERE&gt;' }}"
                         </pre>
                     </Code>
                 </v-tab-item>
@@ -153,9 +139,8 @@ export default {
             error: '',
             dialog: false,
             tab: null,
-            coroot_url: !local ? location.origin : '',
-            helm_chart: window.coroot.edition === 'Enterprise' ? 'coroot-ee' : 'coroot-ce',
-            api_keys: [],
+            codexray_url: !local ? location.origin : '',
+            helm_chart: window.codexray.edition === 'Enterprise' ? 'codexray-ee' : 'codexray-ce',
             api_key: '',
             scrape_interval: '15s',
             valid: false,

@@ -1,13 +1,12 @@
 <template>
     <v-menu close-on-content-click offset-y attach=".v-app-bar">
         <template #activator="{ on, attrs }">
-            <v-btn v-on="on" plain outlined height="40" class="px-2">
-                <v-icon>mdi-clock-outline</v-icon>
+            <div v-on="on" height="40" class="time-selector-btn">
                 <span v-if="!small" class="ml-2">{{ intervals.find((i) => i.active).text }}</span>
                 <v-icon v-if="!small" small class="ml-2"> mdi-chevron-{{ attrs['aria-expanded'] === 'true' ? 'up' : 'down' }} </v-icon>
-            </v-btn>
+            </div>
         </template>
-        <v-list dense dark>
+        <v-list>
             <v-list-item v-for="i in intervals" :key="i.text" :to="{ query: i.query }" exact>
                 {{ i.text }}
             </v-list-item>
@@ -55,4 +54,27 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.time-selector-btn {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    color: white;
+    margin: 0 20px;
+}
+.v-application .v-app-bar .v-list {
+    background-color: white !important;
+    width: 180px;
+}
+
+.v-menu__content {
+    top: 60px !important;
+}
+.v-list .v-list-item {
+    color: rgba(0, 0, 0, 0.85);
+    margin-right: 0;
+    padding: 0 40px 0 15px;
+    font-size: 14px;
+    font-weight: 400;
+}
+</style>

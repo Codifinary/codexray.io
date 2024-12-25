@@ -6,16 +6,16 @@ COPY go.sum .
 RUN go mod download
 COPY . .
 ARG VERSION=unknown
-RUN go build -mod=readonly -ldflags "-X main.version=$VERSION" -o coroot .
+RUN go build -mod=readonly -ldflags "-X main.version=$VERSION" -o codexray .
 
 
 FROM debian:bullseye
 RUN apt update && apt install -y ca-certificates && apt clean
 
-WORKDIR /opt/coroot
-COPY --from=backend-builder /tmp/src/coroot /opt/coroot/coroot
+WORKDIR /opt/codexray
+COPY --from=backend-builder /tmp/src/codexray /opt/codexray/codexray
 
 VOLUME /data
 EXPOSE 8080
 
-ENTRYPOINT ["/opt/coroot/coroot"]
+ENTRYPOINT ["/opt/codexray/codexray"]

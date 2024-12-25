@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/db"
+	"codexray/model"
+	"codexray/timeseries"
+
 	promModel "github.com/prometheus/common/model"
 )
 

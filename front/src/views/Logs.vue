@@ -57,7 +57,7 @@
                                 </v-chip>
                             </template>
                         </v-text-field>
-                        <v-btn @click="runQuery" :disabled="disabled" color="primary" height="40">Query</v-btn>
+                        <v-btn @click="runQuery" :disabled="disabled" color="success" height="40">Query</v-btn>
                     </div>
                 </div>
 
@@ -145,10 +145,9 @@
                                         <td>
                                             <router-link
                                                 v-if="k === 'host.name'"
-                                                :to="{ name: 'overview', params: { view: 'nodes', id: v }, query: $utils.contextQuery() }"
+                                                :to="{ name: 'node', params: { name: v }, query: $utils.contextQuery() }"
+                                                >{{ v }}</router-link
                                             >
-                                                {{ v }}
-                                            </router-link>
                                             <pre v-else>{{ v }}</pre>
                                         </td>
                                     </tr>
@@ -223,7 +222,7 @@
 
                 <div class="grey--text my-4">
                     To configure an application to send logs follow the
-                    <a href="https://coroot.com/docs/coroot/logs" target="_blank">documentation</a>.
+                    <a href="https://codexray.com/docs/codexray/logs" target="_blank">documentation</a>.
                 </div>
 
                 <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text class="my-3">

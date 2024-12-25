@@ -10,12 +10,12 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/coroot/coroot/clickhouse"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/notifications"
-	"github.com/coroot/coroot/prom"
-	"github.com/coroot/coroot/utils"
+	"codexray/clickhouse"
+	"codexray/db"
+	"codexray/model"
+	"codexray/notifications"
+	"codexray/prom"
+	"codexray/utils"
 )
 
 var (

@@ -8,9 +8,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/coroot/coroot/clickhouse"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/clickhouse"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"golang.org/x/exp/maps"
 	"k8s.io/klog"
 )

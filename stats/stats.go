@@ -13,20 +13,21 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coroot/coroot/auditor"
-	"github.com/coroot/coroot/cache"
-	cloud_pricing "github.com/coroot/coroot/cloud-pricing"
-	"github.com/coroot/coroot/constructor"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/auditor"
+	"codexray/cache"
+	cloud_pricing "codexray/cloud-pricing"
+	"codexray/constructor"
+	"codexray/db"
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"github.com/grafana/pyroscope-go/godeltaprof"
 	"k8s.io/klog"
 )
 
 const (
-	collectUrl      = "https://coroot.com/ce/usage-statistics"
+	collectUrl      = "https://codexray.com/ce/usage-statistics"
 	collectInterval = time.Hour
 	sendTimeout     = time.Minute
 	worldWindow     = timeseries.Hour
@@ -375,25 +376,24 @@ func (c *Collector) collect() Stats {
 			}
 		}
 
-		corootComponents := map[model.ApplicationId]*model.Application{}
+		codexrayComponents := map[model.ApplicationId]*model.Application{}
 		for _, a := range w.Applications {
 			switch {
 			case strings.HasSuffix(a.Id.Name, "node-agent"):
-				corootComponents[a.Id] = a
 			case strings.HasSuffix(a.Id.Name, "cluster-agent"):
-				corootComponents[a.Id] = a
-			case strings.HasSuffix(a.Id.Name, "operator") && strings.Contains(a.Id.Name, "coroot"):
-				corootComponents[a.Id] = a
-			case strings.HasSuffix(a.Id.Name, "coroot"):
-				corootComponents[a.Id] = a
+			case strings.HasSuffix(a.Id.Name, "operator") && strings.Contains(a.Id.Name, "codexray"):
+			case strings.HasSuffix(a.Id.Name, "codexray"):
 				for _, i := range a.Instances {
 					for _, u := range i.Upstreams { // prometheus and clickhouse
 						if u.RemoteInstance != nil {
-							corootComponents[u.RemoteInstance.Owner.Id] = u.RemoteInstance.Owner
+							codexrayComponents[u.RemoteInstance.Owner.Id] = u.RemoteInstance.Owner
 						}
 					}
 				}
+			default:
+				continue
 			}
+			codexrayComponents[a.Id] = a
 
 			if a.IsStandalone() || a.Category.Auxiliary() {
 				continue
@@ -420,7 +420,7 @@ func (c *Collector) collect() Stats {
 				}
 			}
 		}
-		for _, a := range corootComponents {
+		for _, a := range codexrayComponents {
 			if usage := lastUsage(a); len(usage) > 0 {
 				stats.Performance.ResourcesUsage[a.Id] = append(stats.Performance.ResourcesUsage[a.Id], usage...)
 			}

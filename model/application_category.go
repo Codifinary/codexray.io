@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/coroot/coroot/utils"
+	"codexray/utils"
 )
 
 type ApplicationCategory string
@@ -78,8 +78,8 @@ var BuiltinCategoryPatterns = map[ApplicationCategory][]string{
 		"grafana/*",
 		"*/*grafana*",
 		"*/*alertmanager*",
-		"coroot/*",
-		"*/*coroot*",
+		"codexray/*",
+		"*/*codexray*",
 		"metrics-server/*",
 		"loki/*",
 		"observability/*",

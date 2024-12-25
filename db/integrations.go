@@ -3,10 +3,10 @@ package db
 import (
 	"fmt"
 
-	"github.com/coroot/coroot/model"
+	"codexray/model"
 
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/timeseries"
+	"codexray/utils"
 )
 
 type IntegrationType string

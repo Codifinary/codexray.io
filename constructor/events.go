@@ -3,8 +3,8 @@ package constructor
 import (
 	"sort"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func calcAppEvents(w *model.World) {

@@ -5,7 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
+
 	"github.com/stretchr/testify/assert"
 )
 

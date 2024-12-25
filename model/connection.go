@@ -3,7 +3,7 @@ package model
 import (
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type Protocol string

@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"github.com/dustin/go-humanize/english"
 	"k8s.io/klog"
 )

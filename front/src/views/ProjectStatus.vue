@@ -18,7 +18,7 @@
 
             <div class="d-flex align-center mt-2">
                 <Led :status="status.node_agent.status" />
-                <span class="font-weight-medium">coroot-node-agent</span>:
+                <span class="font-weight-medium">codexray-node-agent</span>:
                 <span class="ml-1 mr-2">
                     <template v-if="status.node_agent.status === 'unknown'"> unknown </template>
                     <template v-else>
@@ -42,6 +42,7 @@
                     <template v-if="loading">checking...</template>
                     <template v-else>no kube-state-metrics installed</template>
                 </template>
+                (<a href="https://codexray.com/docs/metric-exporters/kube-state-metrics" target="_blank">docs</a>)
             </div>
         </div>
     </div>

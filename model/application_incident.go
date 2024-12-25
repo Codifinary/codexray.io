@@ -1,6 +1,6 @@
 package model
 
-import "github.com/coroot/coroot/timeseries"
+import "codexray/timeseries"
 
 type ApplicationIncident struct {
 	ApplicationId ApplicationId   `json:"application_id"`

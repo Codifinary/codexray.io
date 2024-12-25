@@ -3,13 +3,14 @@ package overview
 import (
 	"context"
 
-	"github.com/coroot/coroot/api/views/incident"
-	"github.com/coroot/coroot/clickhouse"
-	"github.com/coroot/coroot/model"
+	"codexray/api/views/incident"
+	"codexray/clickhouse"
+	"codexray/model"
 )
 
 type Overview struct {
 	Applications []*ApplicationStatus        `json:"applications"`
+	Health       []*ApplicationStatus        `json:"health"`
 	Incidents    []incident.Summary          `json:"incidents"`
 	Map          []*Application              `json:"map"`
 	Nodes        *model.Table                `json:"nodes"`

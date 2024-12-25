@@ -1,7 +1,7 @@
 package integrations
 
 import (
-	"github.com/coroot/coroot/db"
+	"codexray/db"
 )
 
 type View struct {

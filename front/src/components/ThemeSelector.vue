@@ -1,6 +1,6 @@
 <template>
     <v-list-item-group v-model="theme">
-        <v-list-item v-for="(icon, name) in themes" @click="setTheme(name)" :value="name">
+        <v-list-item v-for="(icon, name) in themes" @click="setTheme(name)" :value="name" class="px-4">
             <v-icon small class="mr-1">{{ icon }}</v-icon>
             {{ name }}
         </v-list-item>
@@ -53,3 +53,11 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.v-list-item,
+.v-icon {
+    cursor: pointer;
+    color: rgba(0, 0, 0, 0.85) !important;
+}
+</style>

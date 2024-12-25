@@ -122,7 +122,6 @@ export default {
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
-
     computed: {
         applications() {
             if (!this.anomalyApplications) {
@@ -141,7 +140,6 @@ export default {
             return this.anomalyApplications.filter((i) => this.filter.has(i.id));
         },
     },
-
     methods: {
         calcWidth() {
             this.sparklineWidth = (this.$refs.table.$el.clientWidth * this.sparklineWidthPercent) / 100;

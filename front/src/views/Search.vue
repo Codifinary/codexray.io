@@ -1,9 +1,9 @@
 <template>
     <v-menu :value="!!query" offset-y max-height="50vh" attach=".v-app-bar">
         <template #activator="{}">
-            <v-text-field v-model="query" dense outlined hide-details flat placeholder="search for apps and nodes" @blur="close" @keydown.esc="close">
-                <template #prepend-inner>
-                    <v-icon color="grey">mdi-magnify</v-icon>
+            <v-text-field v-model="query" dense outlined flat hide-details placeholder="search for apps and nodes" @blur="close" @keydown.esc="close">
+                <template #append>
+                    <v-icon>mdi-magnify</v-icon>
                 </template>
             </v-text-field>
         </template>
@@ -27,11 +27,7 @@
                         <v-list-item-title>Applications</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item
-                    v-for="a in results.apps"
-                    :key="a.id"
-                    :to="{ name: 'overview', params: { view: 'applications', id: a.id }, query: $utils.contextQuery() }"
-                >
+                <v-list-item v-for="a in results.apps" :key="a.id" :to="{ name: 'application', params: { id: a.id }, query: $utils.contextQuery() }">
                     <v-list-item-title class="ml-3">
                         <Led :status="a.status" />
                         <span>{{ a.name }}</span>
@@ -46,11 +42,7 @@
                         <v-list-item-title>Nodes</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item
-                    v-for="n in results.nodes"
-                    :key="n.name"
-                    :to="{ name: 'overview', params: { view: 'nodes', id: n.name }, query: $utils.contextQuery() }"
-                >
+                <v-list-item v-for="n in results.nodes" :key="n.name" :to="{ name: 'node', params: { name: n.name }, query: $utils.contextQuery() }">
                     <v-list-item-title class="ml-3">
                         <Led :status="n.status" />
                         <span>{{ n.name }}</span>
@@ -113,4 +105,13 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.v-text-field input {
+    color: white !important;
+}
+.v-text-field ::placeholder {
+    color: white !important;
+    font-size: 14px;
+    font-weight: 400;
+}
+</style>

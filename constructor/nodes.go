@@ -6,8 +6,8 @@ import (
 
 	"k8s.io/klog"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func initNodesList(w *model.World, metrics map[string][]model.MetricValues, nodesByID map[model.NodeId]*model.Node) {

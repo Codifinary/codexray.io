@@ -1,8 +1,8 @@
 <template>
     <div>
         <v-alert v-if="disabled" color="info" outlined text>
-            Single Sign-On through SAML is available only in Coroot Enterprise (from $1 per CPU core/month).
-            <a href="https://coroot.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
+            Single Sign-On through SAML is available only in codexray Enterprise (from $1 per CPU core/month).
+            <a href="https://codexray.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
         </v-alert>
         <v-simple-table dense class="params">
             <tbody>
@@ -40,7 +40,7 @@
                 <tr>
                     <td class="font-weight-medium text-no-wrap">Attribute mapping:</td>
                     <td>
-                        Coroot expects to receive the <b>Email</b>, <b>FirstName</b>, and <b>LastName</b> attributes.
+                        codexray expects to receive the <b>Email</b>, <b>FirstName</b>, and <b>LastName</b> attributes.
                         <br />
                         Please configure Attribute Mapping on your Identity Provider's side.
                     </td>
@@ -82,7 +82,7 @@ export default {
     components: { CopyButton },
     computed: {
         asc_url() {
-            return location.origin + this.$coroot.base_path + 'sso/saml';
+            return location.origin + this.$codexray.base_path + 'sso/saml';
         },
     },
 

@@ -6,8 +6,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/db"
+	"codexray/timeseries"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 

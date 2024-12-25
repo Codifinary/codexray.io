@@ -7,9 +7,10 @@ import (
 	"sync"
 	"time"
 
+	"codexray/model"
+
 	"github.com/ClickHouse/ch-go"
 	chproto "github.com/ClickHouse/ch-go/proto"
-	"github.com/coroot/coroot/model"
 	"github.com/google/pprof/profile"
 	"k8s.io/klog"
 )

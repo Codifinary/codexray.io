@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 

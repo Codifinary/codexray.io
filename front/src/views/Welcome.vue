@@ -1,9 +1,9 @@
 <template>
     <div class="wrapper">
         <div class="text-center" style="max-width: 800px">
-            <img :src="`${$coroot.base_path}static/icon.svg`" height="80" />
+            <img :src="`${$codexray.base_path}static/icon.svg`" height="80" />
 
-            <h1 class="text-h4 mt-5 mb-3">Welcome to Coroot</h1>
+            <h1 class="text-h4 mt-5 mb-3">Welcome to codexray</h1>
 
             <p>Looks like everything is working. Now let's create your first project!</p>
 

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"strings"
 
+	"codexray/db"
+	"codexray/model"
+
 	"github.com/PagerDuty/go-pagerduty"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
 )
 
 type Pagerduty struct {
@@ -27,11 +28,11 @@ func (pd *Pagerduty) SendIncident(ctx context.Context, baseUrl string, n *db.Inc
 		e.Action = "resolve"
 	} else {
 		e.Action = "trigger"
-		e.Client = "Coroot"
+		e.Client = "codexray"
 		e.ClientURL = incidentUrl(baseUrl, n)
 		e.Payload = &pagerduty.V2Payload{
 			Summary:   fmt.Sprintf("[%s] %s is not meeting its SLOs", strings.ToUpper(n.Status.String()), n.ApplicationId.Name),
-			Source:    "Coroot",
+			Source:    "codexray",
 			Severity:  n.Status.String(),
 			Timestamp: n.Timestamp.ToStandard().String(),
 		}

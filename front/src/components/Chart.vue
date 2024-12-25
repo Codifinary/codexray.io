@@ -6,8 +6,8 @@
             </slot>
             <a v-if="doc" :href="doc" target="_blank" class="ml-1"><v-icon small>mdi-information-outline</v-icon></a>
 
-            <v-btn v-if="link" :to="link" x-small color="primary" class="ml-3">
-                {{ link.title }}
+            <v-btn v-if="link" :to="link" x-small color="success" class="ml-3">
+                {{ link.title.charAt(0).toUpperCase() + link.title.slice(1) }}
             </v-btn>
         </div>
 
@@ -516,5 +516,10 @@ export default {
 
 .loading {
     pointer-events: none;
+}
+
+.title .v-btn {
+    padding: 15px 10px;
+    border-radius: 0;
 }
 </style>

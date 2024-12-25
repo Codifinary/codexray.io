@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/coroot/coroot/prom"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/utils"
+
+	"codexray/prom"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 

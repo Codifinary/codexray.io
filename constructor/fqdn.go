@@ -1,8 +1,8 @@
 package constructor
 
 import (
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/utils"
+	"codexray/model"
+	"codexray/utils"
 )
 
 func loadFQDNs(metrics map[string][]model.MetricValues, ip2fqdn map[string]*utils.StringSet) {

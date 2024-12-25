@@ -6,8 +6,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 
@@ -209,7 +210,7 @@ func podLabels(metrics []model.MetricValues, pods map[string]*model.Instance) {
 			if m.Labels["label_app_kubernetes_io_name"] != "" && m.Labels["label_app_kubernetes_io_instance"] != "" {
 				cluster = m.Labels["label_app_kubernetes_io_instance"] + "-" + m.Labels["label_app_kubernetes_io_name"]
 			}
-		case m.Labels["label_app_kubernetes_io_managed_by"] == "coroot-operator" && m.Labels["label_app_kubernetes_io_component"] == "clickhouse":
+		case m.Labels["label_app_kubernetes_io_managed_by"] == "codexray-operator" && m.Labels["label_app_kubernetes_io_component"] == "clickhouse":
 			cluster = m.Labels["label_app_kubernetes_io_part_of"] + "-" + m.Labels["label_app_kubernetes_io_component"]
 		default:
 			continue

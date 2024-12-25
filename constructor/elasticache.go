@@ -3,8 +3,8 @@ package constructor
 import (
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func loadElasticacheMetadata(w *model.World, metrics map[string][]model.MetricValues, pjs promJobStatuses, ecInstancesById map[string]*model.Instance) {

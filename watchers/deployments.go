@@ -6,12 +6,13 @@ import (
 	"sort"
 	"time"
 
-	cloud_pricing "github.com/coroot/coroot/cloud-pricing"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/notifications"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	cloud_pricing "codexray/cloud-pricing"
+	"codexray/db"
+	"codexray/model"
+	"codexray/notifications"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"k8s.io/klog"
 )
 

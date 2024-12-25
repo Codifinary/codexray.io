@@ -4,8 +4,8 @@ import (
 	"math"
 	"sort"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 type DnsTypeStats struct {

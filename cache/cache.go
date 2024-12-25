@@ -9,11 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coroot/coroot/cache/chunk"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/prom"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/cache/chunk"
+	"codexray/db"
+	"codexray/prom"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"k8s.io/klog"
 )
@@ -103,12 +104,12 @@ func NewCache(cfg Config, database *db.DB, promClientFactory PrometheusClientFac
 
 		pendingCompactions: prometheus.NewGauge(
 			prometheus.GaugeOpts{
-				Name: "coroot_pending_compactions",
+				Name: "codexray_pending_compactions",
 			},
 		),
 		compactedChunks: prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: "coroot_compacted_chunks_total",
+				Name: "codexray_compacted_chunks_total",
 			},
 			[]string{"src", "dst"},
 		),

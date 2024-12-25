@@ -3,8 +3,9 @@ package auditor
 import (
 	"net"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"inet.af/netaddr"
 )
 

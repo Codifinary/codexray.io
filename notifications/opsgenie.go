@@ -6,8 +6,9 @@ import (
 	"io"
 	"strings"
 
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
+	"codexray/db"
+	"codexray/model"
+
 	"github.com/opsgenie/opsgenie-go-sdk-v2/alert"
 	"github.com/opsgenie/opsgenie-go-sdk-v2/client"
 	"github.com/sirupsen/logrus"
@@ -36,7 +37,7 @@ func (og *Opsgenie) SendIncident(ctx context.Context, baseUrl string, n *db.Inci
 		req := &alert.CloseAlertRequest{
 			IdentifierType:  alert.ALIAS,
 			IdentifierValue: n.ExternalKey,
-			Source:          "Coroot",
+			Source:          "codexray",
 		}
 		_, err := og.client.Close(ctx, req)
 		return err
@@ -45,7 +46,7 @@ func (og *Opsgenie) SendIncident(ctx context.Context, baseUrl string, n *db.Inci
 	req := &alert.CreateAlertRequest{
 		Message: fmt.Sprintf("[%s] %s is not meeting its SLOs", strings.ToUpper(n.Status.String()), n.ApplicationId.Name),
 		Alias:   n.ExternalKey,
-		Source:  "Coroot",
+		Source:  "codexray",
 	}
 	switch n.Status {
 	case model.CRITICAL:

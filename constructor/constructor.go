@@ -9,11 +9,12 @@ import (
 	"sync"
 	"time"
 
-	pricing "github.com/coroot/coroot/cloud-pricing"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	pricing "codexray/cloud-pricing"
+	"codexray/db"
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"golang.org/x/exp/maps"
 	"k8s.io/klog"
 )
@@ -508,5 +509,5 @@ func getActualServiceInstance(instance *model.Instance, applicationTypes ...mode
 }
 
 func metricFromInternalExporter(ls model.Labels) bool {
-	return ls["job"] == "coroot-cluster-agent"
+	return ls["job"] == "codexray-cluster-agent"
 }

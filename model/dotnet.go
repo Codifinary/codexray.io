@@ -1,6 +1,6 @@
 package model
 
-import "github.com/coroot/coroot/timeseries"
+import "codexray/timeseries"
 
 type DotNet struct {
 	RuntimeVersion LabelLastValue

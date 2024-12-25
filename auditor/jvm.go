@@ -1,7 +1,7 @@
 package auditor
 
 import (
-	"github.com/coroot/coroot/model"
+	"codexray/model"
 )
 
 func (a *appAuditor) jvm() {

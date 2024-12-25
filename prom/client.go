@@ -16,10 +16,11 @@ import (
 	"sync"
 	"time"
 
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"github.com/buger/jsonparser"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
 	"github.com/gorilla/mux"
 	promModel "github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/promql/parser"

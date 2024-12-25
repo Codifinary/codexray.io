@@ -5,15 +5,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coroot/coroot/cache"
-	pricing "github.com/coroot/coroot/cloud-pricing"
-	"github.com/coroot/coroot/constructor"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/cache"
+	cloud_pricing "codexray/cloud-pricing"
+	"codexray/constructor"
+	"codexray/db"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 
-func Start(db *db.DB, cache *cache.Cache, pricing *pricing.Manager, checkIncidents, checkDeployments bool) {
+func Start(db *db.DB, cache *cache.Cache, pricing *cloud_pricing.Manager, checkIncidents, checkDeployments bool) {
 	var incidents *Incidents
 	if checkIncidents {
 		incidents = NewIncidents(db)

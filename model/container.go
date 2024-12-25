@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/coroot/coroot/timeseries"
+	"codexray/timeseries"
 )
 
 type ContainerStatus string

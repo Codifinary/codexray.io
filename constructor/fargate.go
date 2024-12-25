@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/model"
+	"codexray/timeseries"
 )
 
 func (c *Constructor) loadFargateNodes(metrics map[string][]model.MetricValues, nodesById map[model.NodeId]*model.Node) {

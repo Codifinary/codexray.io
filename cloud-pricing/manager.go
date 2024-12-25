@@ -14,14 +14,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
-	"github.com/coroot/coroot/utils"
+	"codexray/model"
+	"codexray/timeseries"
+	"codexray/utils"
+
 	"k8s.io/klog"
 )
 
 const (
-	dumpURL        = "https://coroot.github.io/cloud-pricing/data/cloud-pricing.json.gz"
+	dumpURL        = "https://codexray.github.io/cloud-pricing/data/cloud-pricing.json.gz"
 	dumpFileName   = "cloud-pricing.json.gz"
 	dumpTimeout    = time.Second * 30
 	updateInterval = time.Hour * 24

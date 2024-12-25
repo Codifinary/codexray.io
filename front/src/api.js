@@ -153,6 +153,200 @@ export default class Api {
         this.get(this.projectPath(`status`), {}, cb);
     }
 
+    getOverview(view, query, cb) {
+        if (view === 'incidents') {
+            const showResolved = this.router.currentRoute.query.show_resolved === '1';
+            // Return static data for incidents based on show_resolved
+            const staticData = {
+                categories: ['control-plane', 'demo-apps'],
+                incidents: showResolved
+                    ? [
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 260050000,
+                            affected_request_percent: 74.28391,
+                            error_budget_consumed_percent: 7428.3906,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.72%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733986110000,
+                        },
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 260050000,
+                            affected_request_percent: 74.28391,
+                            error_budget_consumed_percent: 7428.3906,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.72%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733986110000,
+                        },
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 260050000,
+                            affected_request_percent: 74.28391,
+                            error_budget_consumed_percent: 7428.3906,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.72%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733986110000,
+                        },
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 257050000,
+                            affected_request_percent: 74.05657,
+                            error_budget_consumed_percent: 7405.657,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.94%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733983110000,
+                        },
+                    ]
+                    : [
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 257050000,
+                            affected_request_percent: 74.05657,
+                            error_budget_consumed_percent: 7405.657,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.94%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733983110000,
+                        },
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 257050000,
+                            affected_request_percent: 74.05657,
+                            error_budget_consumed_percent: 7405.657,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.94%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733983110000,
+                        },
+                        {
+                            application_id: 'external:ExternalService:metadata.google.internal:80',
+                            key: 'zqjr9qai',
+                            opened_at: 1733726060000,
+                            resolved_at: null,
+                            severity: 'critical',
+                            application_category: 'application',
+                            duration: 257050000,
+                            affected_request_percent: 74.05657,
+                            error_budget_consumed_percent: 7405.657,
+                            availability_slo: {
+                                objective: '99% of requests should not fail',
+                                compliance: '100%',
+                                violated: false,
+                                threshold: 0,
+                            },
+                            latency_slo: {
+                                objective: '99% of requests should be served faster than 500ms',
+                                compliance: '25.94%',
+                                violated: true,
+                                threshold: 0.5,
+                            },
+                            actual_from: 1733725760000,
+                            actual_to: 1733983110000,
+                        },
+                    ],
+            };
+
+            cb(staticData, '');
+        } else {
+            this.get(this.projectPath(`overview/${view}`), { query }, cb);
+        }
+    }
+
     apiKeys(form, cb) {
         const url = this.projectPath('api_keys');
         if (form) {
@@ -160,10 +354,6 @@ export default class Api {
         } else {
             this.get(url, {}, cb);
         }
-    }
-
-    getOverview(view, query, cb) {
-        this.get(this.projectPath(`overview/${view}`), { query }, cb);
     }
 
     getInspections(cb) {

@@ -8,10 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coroot/coroot/cache/chunk"
-	"github.com/coroot/coroot/db"
-	"github.com/coroot/coroot/model"
-	"github.com/coroot/coroot/timeseries"
+	"codexray/cache/chunk"
+	"codexray/db"
+	"codexray/model"
+	"codexray/timeseries"
+
 	"k8s.io/klog"
 )
 
