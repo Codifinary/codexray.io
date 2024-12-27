@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: codexray-node-agent
+  namespace: codexray
+  labels:
+    app: codexray-node-agent
+spec:
+  selector:
+    matchLabels:
+      app: codexray-node-agent
+  template:
+    metadata:
+      labels:
+        app: codexray-node-agent
+    spec:
+      hostNetwork: true
+      hostPID: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: codexray-node-agent
+          image: ghcr.io/coroot/coroot-node-agent:latest
+          imagePullPolicy: IfNotPresent
+          args:
+            - --listen=:10300
+            - --collector-endpoint=http://34.47.179.163:30080
+          env:
+            - name: CODERAY_BACKEND_URL
+              value: "http://34.47.179.163:30080"
+          ports:
+            - name: metrics
+              containerPort: 10300  # Updated to match the Service targetPort
+              hostPort: 10300       # Updated to ensure consistent exposure
+              protocol: TCP
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - name: proc
+              mountPath: /host/proc
+              readOnly: true
+            - name: sys
+              mountPath: /host/sys
+              readOnly: true
+            - name: root
+              mountPath: /host/root
+              readOnly: true
+            - name: tracing
+              mountPath: /sys/kernel/tracing
+            - name: debug
+              mountPath: /sys/kernel/debug
+            - name: cgroup
+              mountPath: /sys/fs/cgroup
+              readOnly: true
+      volumes:
+        - name: proc
+          hostPath:
+            path: /proc
+            type: Directory
+        - name: sys
+          hostPath:
+            path: /sys
+            type: Directory
+        - name: root
+          hostPath:
+            path: /
+            type: Directory
+        - name: tracing
+          hostPath:
+            path: /sys/kernel/tracing
+            type: Directory
+        - name: debug
+          hostPath:
+            path: /sys/kernel/debug
+            type: Directory
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+            type: Directory
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoSchedule
+
+---
+## ✅ **Updated `codexray-node-agent-svc`**
+apiVersion: v1
+kind: Service
+metadata:
+  name: codexray-node-agent-svc
+  namespace: codexray
+spec:
+  selector:
+    app: codexray-node-agent
+  ports:
+    - protocol: TCP
+      port: 10300
+      targetPort: 10300
+  type: ClusterIP
