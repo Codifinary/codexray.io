@@ -189,7 +189,7 @@ export default {
                 }
                 this.categories = data.categories;
                 this.incidents = data.incidents || [];
-                this.health = data.health;
+                this.health = data.applications;
                 this.map = data.map;
                 this.nodes = data.nodes;
                 this.deployments = data.deployments;
