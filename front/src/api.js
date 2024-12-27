@@ -343,7 +343,12 @@ export default class Api {
 
             cb(staticData, '');
         } else {
-            this.get(this.projectPath(`overview/${view}`), { query }, cb);
+            if (view == "health") {
+                this.get(this.projectPath(`overview/applications`), { query }, cb);
+            } else {
+                this.get(this.projectPath(`overview/${view}`), { query }, cb);
+
+            }
         }
     }
 
