@@ -1,19 +1,42 @@
-# -----------------------------------
-# Namespace Definition
-# -----------------------------------
+# Namespace
 apiVersion: v1
 kind: Namespace
 metadata:
   name: codexray
 
 ---
-# -----------------------------------
-# PersistentVolumeClaim Definition
-# -----------------------------------
+
+# Persistent Volume Claims (Reduced Storage for Demo Purposes)
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: codexray-pvc
+  name: prometheus-pv
+  namespace: codexray
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: clickhouse-pv
+  namespace: codexray
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: codexray-pv
   namespace: codexray
 spec:
   accessModes:
@@ -21,38 +44,120 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: local-path
 
 ---
-# -----------------------------------
-# Service Definition
-# -----------------------------------
+
+# ClickHouse Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clickhouse
+  namespace: codexray
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: clickhouse
+  template:
+    metadata:
+      labels:
+        app: clickhouse
+    spec:
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:24.3
+          ports:
+            - containerPort: 9000
+          volumeMounts:
+            - name: clickhouse-data
+              mountPath: /var/lib/clickhouse
+            - name: clickhouse-logs
+              mountPath: /var/log/clickhouse-server
+      volumes:
+        - name: clickhouse-data
+          persistentVolumeClaim:
+            claimName: clickhouse-pv
+        - name: clickhouse-logs
+          emptyDir: {}
+
+---
 apiVersion: v1
 kind: Service
 metadata:
-  name: codexray
+  name: clickhouse
   namespace: codexray
 spec:
   selector:
-    app: codexray
+    app: clickhouse
   ports:
-    - port: 80
-      targetPort: http
-      protocol: TCP
-      nodePort: 30080
-  type: NodePort
+    - name: clickhouse
+      port: 9000
+      targetPort: 9000
+  type: ClusterIP
 
 ---
-# -----------------------------------
-# Deployment Definition
-# -----------------------------------
+
+# Prometheus Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: codexray
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      securityContext:
+        fsGroup: 65534   # Group ID for "nobody"
+        runAsUser: 65534 # User ID for "nobody"
+        runAsGroup: 65534
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v2.45.4
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--web.enable-lifecycle"
+            - "--web.enable-remote-write-receiver"
+          ports:
+            - containerPort: 9090
+          volumeMounts:
+            - name: prometheus-data
+              mountPath: /prometheus
+      volumes:
+        - name: prometheus-data
+          persistentVolumeClaim:
+            claimName: prometheus-pv
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: codexray
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - port: 9090
+      targetPort: 9090
+  type: ClusterIP
+
+---
+
+# Codexray Backend Deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: codexray
   namespace: codexray
-  labels:
-    app: codexray
 spec:
   replicas: 1
   selector:
@@ -64,16 +169,145 @@ spec:
         app: codexray
     spec:
       containers:
-      - name: codexray
-        image: gcr.io/YOUR_PROJECT_ID/codexray:latest  # Fetch project ID from GitHub Secrets
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
-          name: http
-        resources:
-          requests:
-            cpu: 200m
-            memory: 256Mi
-          limits:
-            cpu: 500m
-            memory: 1Gi
+        - name: codexray
+          image: ghcr.io/coroot/coroot:latest
+          #image: gcr.io/analog-button-445616-k0/codexray:latest
+
+          args:
+            - '--data-dir=/data'
+            - '--bootstrap-prometheus-url=http://prometheus:9090'
+            - '--bootstrap-refresh-interval=15s'
+            - '--bootstrap-clickhouse-address=clickhouse:9000'
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: codexray-data
+              mountPath: /data
+      volumes:
+        - name: codexray-data
+          persistentVolumeClaim:
+            claimName: codexray-pv
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: codexray
+  namespace: codexray
+spec:
+  selector:
+    app: codexray
+  ports:
+    - port: 8080
+      targetPort: 8080
+  type: NodePort
+
+
+---
+
+# Node Agent DaemonSet (Using `emptyDir` for Demo Purposes)
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-agent
+  namespace: codexray
+spec:
+  selector:
+    matchLabels:
+      app: node-agent
+  template:
+    metadata:
+      labels:
+        app: node-agent
+    spec:
+      hostNetwork: false
+      hostPID: true
+      containers:
+        - name: node-agent
+          image: ghcr.io/coroot/coroot-node-agent
+          args:
+            - '--collector-endpoint=http://codexray.codexray.svc.cluster.local:8080'
+            - '--cgroupfs-root=/host/sys/fs/cgroup'
+            - '--wal-dir=/data'
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            runAsGroup: 0
+            readOnlyRootFilesystem: false
+          ports:
+            - name: metrics
+              containerPort: 10300
+              hostPort: 10300
+              protocol: TCP
+          volumeMounts:
+            - name: node-agent-data
+              mountPath: /data
+            - name: sys-tracing
+              mountPath: /sys/kernel/tracing
+            - name: sys-debug
+              mountPath: /sys/kernel/debug
+            - name: cgroup
+              mountPath: /host/sys/fs/cgroup
+      volumes:
+        - name: node-agent-data
+          emptyDir: {}
+        - name: sys-tracing
+          hostPath:
+            path: /sys/kernel/tracing
+        - name: sys-debug
+          hostPath:
+            path: /sys/kernel/debug
+        - name: cgroup
+          hostPath:
+            path: /sys/fs/cgroup
+
+
+---
+# Codexray Cluster Agent Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cluster-agent
+  namespace: codexray
+  labels:
+    app: cluster-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cluster-agent
+  template:
+    metadata:
+      labels:
+        app: cluster-agent
+    spec:
+      containers:
+        - name: cluster-agent
+          image: ghcr.io/coroot/coroot-cluster-agent
+          args:
+            - '--coroot-url=http://codexray:8080'
+            - '--metrics-scrape-interval=15s'
+            - '--metrics-wal-dir=/data'
+          volumeMounts:
+            - name: cluster-agent-data
+              mountPath: /data
+      volumes:
+        - name: cluster-agent-data
+          emptyDir: {}
+
+---
+
+# Cluster Agent Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: cluster-agent
+  namespace: codexray
+spec:
+  selector:
+    app: cluster-agent
+  ports:
+    - name: metrics
+      port: 10301
+      targetPort: 10301
+  type: ClusterIP            
