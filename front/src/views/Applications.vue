@@ -165,6 +165,7 @@ export default {
             }
 
             const applications = this.applications.filter((a) => this.filter.has(a.id)).map((a) => ({ ...a }));
+            console.log("applications",applications)
             const names = {};
             applications.forEach((a) => {
                 const id = this.$utils.appId(a.id);
