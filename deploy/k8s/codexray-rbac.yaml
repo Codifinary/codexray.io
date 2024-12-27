@@ -1,0 +1,24 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: codexray-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "nodes", "services", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets", "statefulsets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: codexray-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: codexray
+    namespace: codexray
+roleRef:
+  kind: ClusterRole
+  name: codexray-role
+  apiGroup: rbac.authorization.k8s.io
