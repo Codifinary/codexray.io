@@ -53,7 +53,7 @@
                 <div v-if="type" class="d-flex align-center">
                     <img
                         v-if="type.icon"
-                        :src="`${$coroot.base_path}static/img/tech-icons/${type.icon}.svg`"
+                        :src="`${$codexray.base_path}static/img/tech-icons/${type.icon}.svg`"
                         onerror="this.style.display='none'"
                         height="16"
                         width="16"
@@ -165,7 +165,7 @@ export default {
             }
 
             const applications = this.applications.filter((a) => this.filter.has(a.id)).map((a) => ({ ...a }));
-            console.log("applications",applications)
+            console.log('applications', applications);
             const names = {};
             applications.forEach((a) => {
                 const id = this.$utils.appId(a.id);

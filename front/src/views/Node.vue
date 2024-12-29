@@ -29,7 +29,6 @@ import NoData from '../components/NoData';
 
 export default {
     props: {
-        id: String,
         name: String,
     },
 
