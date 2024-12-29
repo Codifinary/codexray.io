@@ -1,11 +1,5 @@
 <template>
-    <div class="content">
-        <v-progress-linear indeterminate v-if="loading" color="green" class="mt-2" />
-
-        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text class="mt-2">
-            {{ error }}
-        </v-alert>
-
+    <div>
         <template v-if="view === 'applications'">
             <Application v-if="id" :id="id" :report="report" />
             <Applications v-else />

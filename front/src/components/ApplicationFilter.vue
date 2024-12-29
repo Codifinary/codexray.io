@@ -79,7 +79,9 @@
 
             <v-tooltip bottom>
                 <template #activator="{ on }">
-                    <v-btn class="button success" v-if="configureTo" :to="configureTo" v-on="on"> <v-icon>mdi-plus</v-icon> Add New </v-btn>
+                    <v-btn class="button success" :to="{ name: 'project_settings', params: { tab: 'applications' } }" v-on="on">
+                        <v-icon>mdi-plus</v-icon> Add New
+                    </v-btn>
                 </template>
             </v-tooltip>
         </div>
@@ -112,10 +114,6 @@ export default {
     props: {
         applications: Array,
         autoSelectNamespaceThreshold: Number,
-        configureTo: {
-            type: Object,
-            default: () => ({ name: 'project_settings', params: { tab: 'applications' } }),
-        },
     },
 
     data() {
