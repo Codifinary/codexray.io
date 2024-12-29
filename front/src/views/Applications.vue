@@ -15,7 +15,7 @@
         <CustomTable :items="items" :headers="headers" class="table">
             <template #item.application="{ item: { id, name, ns, color } }">
                 <div class="application">
-                    <div class="status" :class="color" />
+                    <div class="status" :style="{ backgroundColor: color }" />
                     <div class="name">
                         <router-link :to="link(id, undefined)">{{ name }}</router-link>
                         <span v-if="ns" class="caption grey--text"> (ns:{{ ns }})</span>
