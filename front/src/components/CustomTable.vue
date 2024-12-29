@@ -237,32 +237,36 @@ button .v-icon {
 .page-dropdown-list .v-list-item {
     padding-left: 30px;
 }
+
 .table {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 10px;
+    box-shadow: 1px 1px 5px 0 rgba(0, 0, 0, 0.1);
 }
 .table:deep(table) {
     min-width: 500px;
 }
-.table:deep(th) {
-    background-color: #e7f8ef;
-    font-weight: 400;
-    font-size: 12px !important;
-    line-height: 13px;
-    color: #013912 !important;
-    height: 40px !important;
-    padding: 0 8px !important;
-}
 
-.table:deep(th:first-child) {
-    padding-left: 20px !important;
-}
+.table:deep(th),
 .table:deep(td) {
-    font-family: sans-serif;
+    padding: 8px !important;
+    text-align: left !important;
+    vertical-align: middle !important;
     font-weight: 400;
     font-size: 12px !important;
     line-height: 13px;
     color: #202224 !important;
 }
+
+.table:deep(th) {
+    background-color: #e7f8ef;
+    color: #013912 !important;
+    height: 40px !important;
+}
+
+.table:deep(th:first-child),
+.table:deep(td:first-child) {
+    padding-left: 20px !important;
+}
+
 .table .application {
     display: flex;
     gap: 4px;
@@ -301,7 +305,7 @@ button .v-icon {
 .table:deep(td:has(.logs)) {
     width: 120px;
     min-width: 120px;
-    padding: 0 !important;
+    padding: 8px !important;
 }
 .header-content {
     display: flex;
