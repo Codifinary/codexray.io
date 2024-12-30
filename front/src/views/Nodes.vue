@@ -6,7 +6,7 @@
             {{ error }}
         </v-alert>
 
-        <Table v-if="nodes && nodes.rows" :header="nodes.header" :rows="nodes.rows" />
+        <Table v-if="nodes && nodes.rows" :header="nodes.header" :rows="nodes.rows" class="nodes-table" />
         <NoData v-else-if="!loading && !error" />
         <div class="mt-4">
             <AgentInstallation color="primary">Add nodes</AgentInstallation>
@@ -51,3 +51,10 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.nodes-table {
+    margin-top: 20px;
+    box-shadow: 1px 1px 5px 0 rgba(0, 0, 0, 0.1);
+}
+</style>

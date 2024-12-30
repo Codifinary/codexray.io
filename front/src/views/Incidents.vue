@@ -1,6 +1,11 @@
 <template>
     <div>
-        <ApplicationFilter :applications="applications" :configureTo="categoriesTo" @filter="setFilter" class="my-4" />
+        <v-progress-linear indeterminate v-if="loading" color="green" />
+
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+            {{ error }}
+        </v-alert>
+        <ApplicationFilter :applications="applications" @filter="setFilter" class="my-4" />
 
         <div class="cards my-4">
             <Card v-for="s in statuses" :key="s.name" :name="s.name" :count="s.count" :background="s.background" :icon="s.color" />
@@ -24,7 +29,7 @@
                         :to="{
                             name: 'overview',
                             params: { view: 'incidents' },
-                            query: { incident: item.key },
+                            query: { ...$utils.contextQuery(), incident: item.key },
                         }"
                     >
                         <span class="key" style="font-family: monospace">i-{{ item.key }}</span>
@@ -122,20 +127,18 @@ const statuses = {
 };
 
 export default {
-    props: {
-        incidents: Array,
-        categoriesTo: Object,
-    },
-
     components: { CheckForm, ApplicationFilter, Card, CustomTable },
 
     data() {
         return {
+            incidents: [],
             filter: new Set(),
             showResolved: false,
             editing: {
                 active: false,
             },
+            loading: false,
+            error: '',
             headers: [
                 { value: 'incident', text: 'Incident', sortable: false },
                 { value: 'application', text: 'Application', sortable: false },
@@ -150,6 +153,8 @@ export default {
         };
     },
     mounted() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
         this.showResolved = this.$route.query.show_resolved === '1';
     },
     watch: {
@@ -157,6 +162,9 @@ export default {
             if (this.items.some((i) => i.resolved_at) && !this.showResolved) {
                 this.showResolved = true;
             }
+        },
+        showResolved() {
+            this.get();
         },
     },
 
@@ -203,6 +211,18 @@ export default {
         },
     },
     methods: {
+        get() {
+            this.loading = true;
+            this.error = '';
+            this.$api.getOverview('incidents', '', (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.incidents = data.incidents || [];
+            });
+        },
         changeShowResolved() {
             this.showResolved = !this.showResolved;
             this.$router.push({ query: { ...this.$route.query, show_resolved: this.showResolved ? '1' : '0' } }).catch((err) => err);
