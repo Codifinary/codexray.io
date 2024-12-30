@@ -14,8 +14,8 @@
             <p>
                 <a href="https://opentelemetry.io/" target="_blank">OpenTelemetry</a> is a vendor-neutral, open-source project that provides a set of
                 APIs, SDKs, and tooling for collecting and exporting telemetry data. OpenTelemetry provides SDKs for many popular programming
-                languages and a collector that allows you to export telemetry data into to one or more open-source or commercial back-ends. codexray can
-                serve as an OpenTelemetry backend for traces and logs. Telemetry data can be ingested directly into codexray or through the
+                languages and a collector that allows you to export telemetry data into to one or more open-source or commercial back-ends. codexray
+                can serve as an OpenTelemetry backend for traces and logs. Telemetry data can be ingested directly into codexray or through the
                 OpenTelemetry collector.
             </p>
 
@@ -28,10 +28,27 @@
                     placeholder="http://codexray:8080"
                     outlined
                     dense
+                    hide-details
+                />
+
+                <div class="subtitle-2 mt-2">
+                    API Key (can be managed in the
+                    <router-link :to="{ name: 'project_settings' }"><span @click="dialog = false">project settings</span></router-link
+                    >):
+                </div>
+                <v-select
+                    v-model="api_key"
+                    :rules="[$validators.notEmpty]"
+                    :items="api_keys === 'permission denied' ? [] : api_keys.map((k) => ({ value: k.key, text: `${k.key} (${k.description})` }))"
+                    outlined
+                    dense
+                    hide-details
+                    :menu-props="{ offsetY: true }"
+                    :no-data-text="api_keys === 'permission denied' ? 'Only project Admins can access API keys.' : 'No keys available'"
                 />
 
                 <template v-if="tab === 0">
-                    <div class="subtitle-2">Service name:</div>
+                    <div class="subtitle-2 mt-2">Service name:</div>
                     <v-text-field v-model="service_name" :rules="[$validators.notEmpty, $validators.isSlug]" placeholder="catalog" outlined dense />
                 </template>
             </v-form>
@@ -134,6 +151,7 @@ export default {
             tab: null,
             codexray_url: !local ? location.origin : '',
             service_name: '',
+            api_keys: [],
             api_key: '',
             valid: false,
         };
@@ -152,7 +170,7 @@ export default {
                     this.error = error;
                     return;
                 }
-                this.api_key = data.api_key;
+                this.api_keys = data.api_keys || [];
             });
         },
     },
