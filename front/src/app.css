@@ -26,6 +26,7 @@
     --brightness: 100%;
     --border-color: var(--border-light);
     --tooltip-color: var(--tooltip-light);
+    font-family: Sora;
 }
 .v-application.theme--dark {
     --text-color: var(--text-dark);

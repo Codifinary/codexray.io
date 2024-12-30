@@ -71,7 +71,7 @@ export default {
     },
 
     mounted() {
-        this.selectedView = localStorage.getItem('selectedView') || this.$route.params.view || 'health';
+        this.selectedView = localStorage.getItem('selectedView') || this.$route.params.view || 'applications';
     },
 
     methods: {

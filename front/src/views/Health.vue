@@ -1,13 +1,11 @@
 <template>
     <div>
-        <ApplicationFilter :applications="applications" :configureTo="categoriesTo" @filter="setFilter" class="my-4" />
+        <v-progress-linear indeterminate v-if="loading" color="green" />
 
-        <!-- <div class="legend mb-3">
-            <div v-for="s in statuses" class="item">
-                <div class="count" :class="s.color">{{ s.count }}</div>
-                <div class="label">{{ s.name }}</div>
-            </div>
-        </div> -->
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+            {{ error }}
+        </v-alert>
+        <ApplicationFilter :applications="applications" @filter="setFilter" class="my-4" />
 
         <div class="cards">
             <Card v-for="s in statuses" :key="s.name" :name="s.name" :count="s.count" :background="s.background" :icon="s.color" />
@@ -107,15 +105,13 @@ const statuses = {
 };
 
 export default {
-    props: {
-        applications: Array,
-        categoriesTo: Object,
-    },
-
     components: { ApplicationFilter, Card, CustomTable },
 
     data() {
         return {
+            applications: [],
+            loading: false,
+            error: '',
             filter: new Set(),
             headers: [
                 { value: 'application', text: 'Application', sortable: false },
@@ -134,6 +130,10 @@ export default {
                 { value: 'logs', text: 'Logs', sortable: false, align: 'center' },
             ],
         };
+    },
+    mounted() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
     computed: {
         categories() {
@@ -175,6 +175,18 @@ export default {
     },
 
     methods: {
+        get() {
+            this.loading = true;
+            this.error = '';
+            this.$api.getOverview('applications', '', (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.applications = data.applications;
+            });
+        },
         setFilter(filter) {
             this.filter = filter;
         },
