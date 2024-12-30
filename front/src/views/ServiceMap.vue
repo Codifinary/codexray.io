@@ -22,7 +22,14 @@
                 :style="{ rowGap: 200 / apps.length + 'px', maxWidth: 100 / levels.length + '%' }"
             >
                 <div v-for="a in apps" style="text-align: center">
-                    <div :ref="a.id" class="app" :class="{ selected: a.hi(hi) }" @mouseenter="hi = a.id" @mouseleave="hi = null">
+                    <div
+                        :ref="a.id"
+                        class="app"
+                        :class="{ selected: a.hi(hi) }"
+                        @mouseenter="hi = a.id"
+                        @mouseleave="hi = null"
+                        :style="getStatusStyle(a.status)"
+                    >
                         <div class="d-flex">
                             <div class="flex-grow-1 name">
                                 <router-link :to="{ name: 'overview', params: { view: 'applications', id: a.id }, query: $utils.contextQuery() }">
@@ -305,6 +312,19 @@ export default {
                 a.dd = `M${a.x1},${a.y1} A${r},${r} 0,0,0 ${a.x2},${a.y2} A${r},${r} 0,0,0 ${a.x1},${a.y1}`;
             });
         },
+        getStatusStyle(status) {
+            const statuses = {
+                critical: { background: '#FFCDD2', color: '#EF5350' },
+                warning: { background: '#FFE0B2', color: '#FFA726' },
+                unknown: { background: '#F5F5F5', color: '#757575' },
+                ok: { background: '#e7f8ef', color: '#1DBF73' },
+            };
+            const statusStyle = statuses[status] || {};
+            return {
+                backgroundColor: statusStyle.background,
+                borderLeft: `4px solid ${statusStyle.color}`,
+            };
+        },
     },
 };
 </script>
@@ -327,8 +347,6 @@ export default {
 }
 .app {
     max-width: 100%;
-    border: 1px solid #bdbdbd;
-    border-radius: 3px;
     white-space: nowrap;
     padding: 4px 8px;
     background-color: var(--background-color);
@@ -337,10 +355,7 @@ export default {
     line-height: 1.1;
     text-align: left;
 }
-.app.selected {
-    border: 1px solid var(--text-color);
-    background-color: var(--background-color-hi);
-}
+
 .name {
     white-space: nowrap;
     display: inline-block;
@@ -351,6 +366,7 @@ export default {
 
 .label {
     margin-left: 14px;
+    font-size: 12px;
 }
 
 svg {
@@ -400,7 +416,6 @@ svg {
     position: absolute;
     font-size: 12px;
     line-height: 12px;
-    background-color: var(--background-color-hi);
     padding: 2px;
     border-radius: 2px;
     text-align: right;
