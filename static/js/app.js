@@ -4553,6 +4553,106 @@ eval("// style-loader: Adds some css to the DOM by adding a <style> tag\n\n// lo
 
 /***/ }),
 
+/***/ "./src/assets/icons/alert.svg":
+/*!************************************!*\
+  !*** ./src/assets/icons/alert.svg ***!
+  \************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"25\",\"height\":\"24\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M11.108 10h2.012v5h-2.012v-5zm-.001 6h2.012v2h-2.012v-2z\"}}),_c('path',{attrs:{\"d\":\"M13.891 4.2a2.012 2.012 0 00-1.778-1.062A2.01 2.01 0 0010.334 4.2L2.953 18.064a1.977 1.977 0 00.054 1.968A1.99 1.99 0 004.73 21h14.766a2 2 0 001.724-.968 1.98 1.98 0 00.054-1.968L13.891 4.2zM4.731 19l7.382-13.863L19.5 19H4.73z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/alert.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/deployments.svg":
+/*!******************************************!*\
+  !*** ./src/assets/icons/deployments.svg ***!
+  \******************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"20\",\"height\":\"20\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M15 6.5a5 5 0 01-5 5m5-5a5 5 0 00-5-5m5 5H5m5 5a5 5 0 01-5-5m5 5c1.105 0 2-2.239 2-5s-.895-5-2-5m0 10c-1.105 0-2-2.239-2-5s.895-5 2-5m-5 5a5 5 0 015-5m2 15a2 2 0 11-4 0m4 0a2 2 0 10-4 0m4 0h6m-10 0H2\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/deployments.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/eum.svg":
+/*!**********************************!*\
+  !*** ./src/assets/icons/eum.svg ***!
+  \**********************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"18\",\"height\":\"18\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('g',{attrs:{\"clip-path\":\"url(#clip0_401_1057)\"}},[_c('path',{attrs:{\"d\":\"M3.375 10.125a2.25 2.25 0 104.5 0 2.25 2.25 0 00-4.5 0zm3.375 0a1.125 1.125 0 11-2.25 0 1.125 1.125 0 012.25 0zM8.438 13.5H2.811A2.812 2.812 0 000 16.313 1.687 1.687 0 001.688 18h7.875a1.687 1.687 0 001.687-1.688A2.812 2.812 0 008.437 13.5zm1.124 3.375H1.689a.563.563 0 01-.563-.563 1.687 1.687 0 011.688-1.687h5.624a1.687 1.687 0 011.688 1.688.562.562 0 01-.563.562zM18 .562v9a.563.563 0 01-.563.563H11.25v1.125h2.813a.562.562 0 110 1.125h-4.5a.563.563 0 010-1.125h.562v-1.125h-.563a.563.563 0 010-1.125h7.313V1.125H4.5v5.063a.563.563 0 11-1.125 0V.563A.562.562 0 013.938 0h13.5A.562.562 0 0118 .563zM7.312 6.75a.529.529 0 01-.393-.169.54.54 0 010-.787l2.25-2.25a.54.54 0 01.787 0l1.857 1.845 2.98-2.97a.558.558 0 01.788.787l-3.375 3.375a.54.54 0 01-.787 0L9.562 4.736 7.707 6.581a.529.529 0 01-.394.169z\"}})]),_c('defs',[_c('clipPath',{attrs:{\"id\":\"clip0_401_1057\"}},[_c('path',{attrs:{\"fill\":\"#fff\",\"d\":\"M0 0h18v18H0z\"}})])])])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/eum.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/health.svg":
+/*!*************************************!*\
+  !*** ./src/assets/icons/health.svg ***!
+  \*************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"16\",\"height\":\"14\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M1.333 6.722h3.334l1.7-5.555 3.665 11.666 1.293-6.111h3.342\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/health.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/incidents.svg":
+/*!****************************************!*\
+  !*** ./src/assets/icons/incidents.svg ***!
+  \****************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"20\",\"height\":\"20\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M10 10V6.25m0 6.53v.032m7.5-7.5v9.375a2.813 2.813 0 01-2.813 2.813H5.313A2.813 2.813 0 012.5 14.687V5.313A2.812 2.812 0 015.313 2.5h9.375A2.812 2.812 0 0117.5 5.312z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/incidents.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/map.svg":
+/*!**********************************!*\
+  !*** ./src/assets/icons/map.svg ***!
+  \**********************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"14\",\"height\":\"18\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M4.555 15.475a.5.5 0 100-1v1zM.556 12.309h-.5.5zM1.056 1a.5.5 0 10-1 0h1zm3.5 4.597a.5.5 0 000-1v1zm8 1.625v-.5.5zm-4 0v.5-.5zM13.444 1h.5a.5.5 0 00-.5-.5V1zm0 5.333h.5-.5zm-5.778 0h-.5.5zm0-3.555l-.333-.374a.5.5 0 00-.167.374h.5zm2-1.778V.5a.5.5 0 00-.333.126L9.667 1zm2.889 16v-.5.5zm-4 0v.5-.5zm4.889-6.222h.5a.5.5 0 00-.5-.5v.5zm0 5.333h.5-.5zm-5.778 0h-.5.5zm0-3.555l-.333-.374a.5.5 0 00-.167.374h.5zm2-1.778v-.5a.5.5 0 00-.333.126l.333.374zm-5.112 3.697H3.223v1h1.332v-1zm-3.499-2.166V5.097h-1v7.212h1zm0-7.212V1h-1v4.097h1zm3.5-.5h-4v1h4v-1zm-1.333 9.878a2.167 2.167 0 01-2.167-2.166h-1a3.167 3.167 0 003.167 3.166v-1zm9.332-7.753h-4v1h4v-1zM12.946 1v5.333h1V1h-1zm-.39 6.722c.768 0 1.39-.622 1.39-1.389h-1a.389.389 0 01-.39.39v1zM7.168 6.333c0 .767.621 1.39 1.388 1.39v-1a.389.389 0 01-.388-.39h-1zm1 0V2.778h-1v3.555h1zm1.5-4.833h3.777v-1H9.668v1zM9.334.626l-2 1.778.665.747 2-1.777-.665-.748zM12.556 16.5h-4v1h4v-1zm.389-5.722v5.333h1v-5.333h-1zm-.39 6.722c.768 0 1.39-.622 1.39-1.389h-1a.389.389 0 01-.39.389v1zm-5.388-1.389c0 .767.621 1.389 1.388 1.389v-1a.389.389 0 01-.388-.389h-1zm1 0v-3.555h-1v3.555h1zm1.5-4.833h3.777v-1H9.668v1zm-.333-.874l-2 1.778.665.747 2-1.777-.665-.748z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/map.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/nodes.svg":
+/*!************************************!*\
+  !*** ./src/assets/icons/nodes.svg ***!
+  \************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"20\",\"height\":\"20\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M10 18l6.928-4V6L10 2 3.072 6v8L10 18zm0 0v-7.5m0 0l-6.5-4m6.5 4l6.5-4\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/nodes.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/settings.svg":
+/*!***************************************!*\
+  !*** ./src/assets/icons/settings.svg ***!
+  \***************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"20\",\"height\":\"20\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"fill-rule\":\"evenodd\",\"clip-rule\":\"evenodd\",\"d\":\"M11.397 3.597c-.356-1.463-2.438-1.463-2.794 0a1.436 1.436 0 01-2.143.889c-1.286-.784-2.758.688-1.975 1.974.507.83.058 1.914-.887 2.144-1.464.355-1.464 2.438 0 2.792a1.436 1.436 0 01.887 2.144c-.783 1.286.689 2.758 1.975 1.975a1.436 1.436 0 012.144.887c.355 1.464 2.438 1.464 2.792 0a1.436 1.436 0 012.144-.887c1.286.783 2.758-.689 1.975-1.975a1.437 1.437 0 01.887-2.144c1.464-.355 1.464-2.437 0-2.792a1.436 1.436 0 01-.888-2.144c.784-1.286-.688-2.758-1.974-1.974a1.436 1.436 0 01-2.144-.888v-.001z\"}}),_c('path',{attrs:{\"d\":\"M11.667 10a1.667 1.667 0 11-3.334 0 1.667 1.667 0 013.334 0z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/settings.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/traces.svg":
+/*!*************************************!*\
+  !*** ./src/assets/icons/traces.svg ***!
+  \*************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"18\",\"height\":\"18\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M12.802 1.323l-.363.344.363-.344zM14 2.5l.334-.373L14 2.5zm1.225 1.213l-.36.347.36-.347zm.275.685H15h.5zM2.5 3H2h.5zM1 11a.5.5 0 000 1v-1zm16 1a.5.5 0 000-1v1zM2 7.5a.5.5 0 101 0H2zm13 0a.5.5 0 001 0h-1zM3 15a.5.5 0 00-1 0h1zm-1 2a.5.5 0 001 0H2zm8-2a.5.5 0 00-1 0h1zm-1 2a.5.5 0 001 0H9zm8-2a.5.5 0 10-1 0h1zm-1 2a.5.5 0 001 0h-1zm-9.5-2a.5.5 0 00-1 0h1zm-1 1a.5.5 0 001 0h-1zm8-1a.5.5 0 10-1 0h1zm-1 1a.5.5 0 001 0h-1zm-8-14.5h7v-1h-7v1zm7 0h.558v-1H11.5v1zm.94.167c.294.31.767.794 1.227 1.206l.667-.746c-.43-.384-.881-.845-1.17-1.149l-.725.69zm1.227 1.206c.333.297.868.844 1.198 1.187l.72-.694a28.984 28.984 0 00-1.251-1.239l-.667.746zM16 4.398c0-.383-.146-.754-.415-1.032l-.72.694c.086.089.135.21.135.338h1zM12.058 1.5c.14 0 .279.06.381.167l.725-.689A1.528 1.528 0 0012.058.5v1zM4.5.5A2.5 2.5 0 002 3h1a1.5 1.5 0 011.5-1.5v-1zM11 1v3h1V1h-1zm1.5 4.5h3v-1h-3v1zM11 4a1.5 1.5 0 001.5 1.5v-1A.5.5 0 0112 4h-1zM1 12h16v-1H1v1zm1-9v4.5h1V3H2zm13 1.398V5h1v-.602h-1zM15 5v2.5h1V5h-1zM2 15v2h1v-2H2zm7 0v2h1v-2H9zm7 0v2h1v-2h-1zM5.5 15v1h1v-1h-1zm7 0v1h1v-1h-1z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/traces.svg?");
+
+/***/ }),
+
+/***/ "./src/assets/icons/user-profile.svg":
+/*!*******************************************!*\
+  !*** ./src/assets/icons/user-profile.svg ***!
+  \*******************************************/
+/***/ (function(module) {
+
+eval("\n      module.exports = {\n        functional: true,\n        render(_h, _vm) {\n          const { _c, _v, data, children = [] } = _vm;\n\n          const {\n            class: classNames,\n            staticClass,\n            style,\n            staticStyle,\n            attrs = {},\n            ...rest\n          } = data;\n\n          return _c(\n            'svg',\n            {\n              class: [classNames,staticClass],\n              style: [style,staticStyle],\n              attrs: Object.assign({\"width\":\"20\",\"height\":\"18\",\"xmlns\":\"http://www.w3.org/2000/svg\"}, attrs),\n              ...rest,\n            },\n            children.concat([_c('path',{attrs:{\"d\":\"M1.244 16.5c1.325-2.21 4.23-3.724 8.762-3.724s7.437 1.513 8.762 3.724M13.606 5.1a3.6 3.6 0 11-7.2 0 3.6 3.6 0 017.2 0z\"}})])\n          )\n        }\n      }\n    \n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/user-profile.svg?");
+
+/***/ }),
+
 /***/ "./src/App.vue?vue&type=template&id=7ba5bd90&scoped=true":
 /*!***************************************************************!*\
   !*** ./src/App.vue?vue&type=template&id=7ba5bd90&scoped=true ***!
@@ -6363,7 +6463,7 @@ eval("__webpack_require__.r(__webpack_exports__);\n/* harmony export */ __webpac
   \****************************************************/
 /***/ (function(module, __unused_webpack_exports, __webpack_require__) {
 
-eval("var map = {};\n\n\nfunction webpackContext(req) {\n\tvar id = webpackContextResolve(req);\n\treturn __webpack_require__(id);\n}\nfunction webpackContextResolve(req) {\n\tif(!__webpack_require__.o(map, req)) {\n\t\tvar e = new Error(\"Cannot find module '\" + req + \"'\");\n\t\te.code = 'MODULE_NOT_FOUND';\n\t\tthrow e;\n\t}\n\treturn map[req];\n}\nwebpackContext.keys = function webpackContextKeys() {\n\treturn Object.keys(map);\n};\nwebpackContext.resolve = webpackContextResolve;\nmodule.exports = webpackContext;\nwebpackContext.id = \"./src/assets/icons sync \\\\.svg$\";\n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/_sync_nonrecursive_\\.svg$?");
+eval("var map = {\n\t\"./alert.svg\": \"./src/assets/icons/alert.svg\",\n\t\"./deployments.svg\": \"./src/assets/icons/deployments.svg\",\n\t\"./eum.svg\": \"./src/assets/icons/eum.svg\",\n\t\"./health.svg\": \"./src/assets/icons/health.svg\",\n\t\"./incidents.svg\": \"./src/assets/icons/incidents.svg\",\n\t\"./map.svg\": \"./src/assets/icons/map.svg\",\n\t\"./nodes.svg\": \"./src/assets/icons/nodes.svg\",\n\t\"./settings.svg\": \"./src/assets/icons/settings.svg\",\n\t\"./traces.svg\": \"./src/assets/icons/traces.svg\",\n\t\"./user-profile.svg\": \"./src/assets/icons/user-profile.svg\"\n};\n\n\nfunction webpackContext(req) {\n\tvar id = webpackContextResolve(req);\n\treturn __webpack_require__(id);\n}\nfunction webpackContextResolve(req) {\n\tif(!__webpack_require__.o(map, req)) {\n\t\tvar e = new Error(\"Cannot find module '\" + req + \"'\");\n\t\te.code = 'MODULE_NOT_FOUND';\n\t\tthrow e;\n\t}\n\treturn map[req];\n}\nwebpackContext.keys = function webpackContextKeys() {\n\treturn Object.keys(map);\n};\nwebpackContext.resolve = webpackContextResolve;\nmodule.exports = webpackContext;\nwebpackContext.id = \"./src/assets/icons sync \\\\.svg$\";\n\n//# sourceURL=webpack://@codexray/codexray/./src/assets/icons/_sync_nonrecursive_\\.svg$?");
 
 /***/ })
 

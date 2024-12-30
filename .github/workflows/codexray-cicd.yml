@@ -127,6 +127,7 @@ jobs:
       - name: Apply Kubernetes Manifest
         run: |
           kubectl apply -f deploy/k8s/codexray.yaml
+          kubectl rollout status deployment codexray -n codexray
 
       - name: Verify Deployment
         run: |
