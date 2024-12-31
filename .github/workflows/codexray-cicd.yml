@@ -62,7 +62,7 @@ jobs:
       - name: Build Frontend
         run: |
           cd front
-          npm run build-dev
+          npm run build-prod
 
 
 # -------------------------------------
