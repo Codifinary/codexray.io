@@ -5,21 +5,6 @@ metadata:
   name: codexray
 
 ---
-
-# Persistent Volume Claims (Reduced Storage for Demo Purposes)
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: prometheus-pv
-  namespace: codexray
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-
----
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -30,7 +15,22 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 2Gi
+      storage: 100Gi
+  storageClassName: standard-rwo
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-pv
+  namespace: codexray
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard-rwo
 
 ---
 apiVersion: v1
@@ -43,7 +43,9 @@ spec:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
+  storageClassName: standard-rwo
+
 
 ---
 
