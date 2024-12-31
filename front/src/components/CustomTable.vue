@@ -9,7 +9,6 @@
         :items="paginatedItems"
         :headers="headers"
         :options.sync="options"
-        no-data-text="No Data found"
     >
         <template v-slot:header>
             <tr>
@@ -26,6 +25,9 @@
         </template>
         <template v-for="(_, slotName) in $scopedSlots" v-slot:[slotName]="slotProps">
             <slot :name="slotName" v-bind="slotProps"></slot>
+        </template>
+        <template slot="no-data">
+            <div class="empty-table">No data found</div>
         </template>
         <template v-slot:footer>
             <div class="customize-footer">
@@ -335,5 +337,10 @@ button .v-icon {
 }
 .sort-icon-active {
     color: #1dbf73;
+}
+.empty-table {
+    text-align: center;
+    font-size: 16px;
+    color: #013912;
 }
 </style>
