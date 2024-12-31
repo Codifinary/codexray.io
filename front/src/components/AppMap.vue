@@ -11,7 +11,7 @@
                 :style="getStatusStyle(app.status)"
             >
                 <div>
-                    <router-link :to="{ name: 'application', params: { id: app.id }, query: $utils.contextQuery() }" class="name">
+                    <router-link :to="{ name: 'overview', params: { view: 'applications', id: app.id }, query: $utils.contextQuery() }" class="name">
                         <AppHealth :app="app" />
                     </router-link>
                     <Labels v-if="!hideLabels(clients)" :labels="app.labels" class="d-none d-sm-block label" />
@@ -152,7 +152,7 @@
                 :style="getStatusStyle(app.status)"
             >
                 <div>
-                    <router-link :to="{ name: 'application', params: { id: app.id }, query: $utils.contextQuery() }" class="name">
+                    <router-link :to="{ name: 'overview', params: { view: 'applications', id: app.id }, query: $utils.contextQuery() }" class="name">
                         <AppHealth :app="app" />
                     </router-link>
                     <Labels v-if="!hideLabels(dependencies)" :labels="app.labels" class="d-none d-sm-block label" />
