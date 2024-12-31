@@ -47,8 +47,7 @@ export default {
 </script>
 
 <style scoped>
-.condition,
-.condition a {
+.condition {
     color: rgba(32, 34, 36, 0.5);
 }
 .status-ok {
@@ -62,5 +61,8 @@ export default {
 }
 .status-unknown {
     color: var(--status-unknown);
+}
+.condition a {
+    color: #013912;
 }
 </style>
