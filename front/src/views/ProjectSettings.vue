@@ -1,10 +1,13 @@
 <template>
-    <v-form v-if="form" v-model="valid" ref="form" style="max-width: 800px">
-        <div class="caption">
+    <div class="container">
+    <v-form v-if="form" v-model="valid" ref="form" >
+        <h2 class="text-body-1 ">Project name</h2>
+        <div class="text-caption">
             Project is a separate infrastructure or environment with a dedicated Prometheus, e.g. <var>production</var>, <var>staging</var> or
             <var>prod-us-west</var>.
         </div>
-        <v-text-field v-model="form.name" :rules="[$validators.isSlug]" outlined dense required />
+        <div class="project-name py-3">
+        <v-text-field class="custom-text-field" v-model="form.name" :rules="[$validators.isSlug]" outlined dense required />
 
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
@@ -12,8 +15,10 @@
         <v-alert v-if="message" color="green" outlined text>
             {{ message }}
         </v-alert>
-        <v-btn block color="primary" @click="save" :disabled="!valid" :loading="loading">Save</v-btn>
+        <v-btn color="success"  @click="save" :disabled="!valid" :loading="loading">Save</v-btn>
+    </div>
     </v-form>
+</div>
 </template>
 
 <script>
@@ -85,4 +90,32 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.custom-text-field {
+    height: 36px !important;
+  border-radius: 8px !important;    
+  font-size:14px;  
+  font-weight:100!important;
+  
+}
+.text-caption{
+    font-weight: 400;
+    color: rgba(128, 128, 128, 0.55);
+}
+.project-name{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 700px;
+    
+}
+.container{
+    margin-top:20px;
+    margin-left:15px;
+}
+
+.v-btn{
+    font-size:14px !important;
+}
+
+</style>

@@ -1,12 +1,13 @@
 <template>
-    <div style="max-width: 800px">
+    <div class="container" style="max-width: 800px">
+        <h2 class="text-body-1 mt-5 mb-3">Status</h2>
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
         </v-alert>
-        <div v-if="status">
+        <div class="status-container" v-if="status">
             <div class="text-truncate">
-                <Led :status="status.prometheus.status" />
-                <span class="font-weight-medium">prometheus</span>:
+                <Led class="led-icon" :status="status.prometheus.status"/>
+                <span class="font-weight-light">prometheus</span>:
                 <span v-if="status.prometheus.error">
                     {{ status.prometheus.error }}
                 </span>
@@ -17,8 +18,8 @@
             </div>
 
             <div class="d-flex align-center mt-2">
-                <Led :status="status.node_agent.status" />
-                <span class="font-weight-medium">codexray-node-agent</span>:
+                <Led class="led-icon" :status="status.node_agent.status" />
+                <span class="font-weight-light">codexray-node-agent</span>:
                 <span class="ml-1 mr-2">
                     <template v-if="status.node_agent.status === 'unknown'"> unknown </template>
                     <template v-else>
@@ -29,11 +30,11 @@
                         </template>
                     </template>
                 </span>
-                <AgentInstallation color="primary" small>Install</AgentInstallation>
+                <!-- <AgentInstallation color="primary" small>Install</AgentInstallation> -->
             </div>
 
             <div v-if="status.kube_state_metrics" class="d-flex align-center mt-2">
-                <Led :status="status.kube_state_metrics.status" />
+                <Led class="led-icon" :status="status.kube_state_metrics.status" />
                 <span class="font-weight-medium">kube-state-metrics</span>:
                 <template v-if="status.kube_state_metrics.status === 'ok'">
                     {{ $pluralize('application', status.kube_state_metrics.applications, true) }} found
@@ -50,14 +51,14 @@
 
 <script>
 import Led from '../components/Led.vue';
-import AgentInstallation from './AgentInstallation.vue';
+// import AgentInstallation from './AgentInstallation.vue';
 
 export default {
     props: {
         projectId: String,
     },
 
-    components: { Led, AgentInstallation },
+    components: { Led, },
 
     data() {
         return {
@@ -105,7 +106,23 @@ export default {
 </script>
 
 <style scoped>
+.container{
+    padding-top: 0;
+    margin-left:15px;
+    width:auto;
+}
 .muted {
     color: grey;
 }
+.status-container{
+    color:var(--primary-green) !important;
+
+    font-size: 14px;
+    gap:10px;
+}
+.led-icon {
+  margin-right: 10px;
+}
+
+
 </style>

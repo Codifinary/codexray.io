@@ -1,12 +1,12 @@
 <template>
-    <div style="max-width: 800px">
+    <div class="container" style="max-width: 700px">
         <div class="d-block d-md-flex align-center">
             <div class="flex-grow-1">
-                <div><b>Delete this project</b></div>
-                <div>Once you delete a project, there is no going back. Please be certain.</div>
+                <div class="text-body-1">Danger Zone</div>
+                <div class="text-caption">Once you delete a project, there is no going back. Please be certain.</div>
             </div>
             <div>
-                <v-btn block @click="dialog = true" color="red" outlined>Delete this project</v-btn>
+                <v-btn class="delete-btn" @click="dialog = true" color="red">Delete this project</v-btn>
             </div>
         </div>
         <v-dialog v-model="dialog" max-width="600">
@@ -90,4 +90,18 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.container{
+    margin-top: 25px;
+    margin-left:15px;
+    gap:9px;
+    width:auto;
+}
+.text-caption{
+    color: rgba(128, 128, 128, 0.55);
+}
+.delete-btn{
+    color:white;
+    font-size: 14px !important;
+}
+</style>

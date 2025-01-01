@@ -20,7 +20,7 @@
                     <div v-if="user">
                         <v-menu dark offset-y tile attach=".v-app-bar">
                             <template #activator="{ on, attrs }">
-                                <v-btn v-on="on" plain outlined class="ml-3 px-2 project-name-btn" height="40">
+                                <v-btn v-on="on" plain outlined class="ml-3 px-2 project-name-btn" height="40" width="200">
                                     <template v-if="$vuetify.breakpoint.smAndUp">
                                         <span class="project-name">
                                             <template v-if="project">{{ project.name }}</template>
@@ -51,7 +51,7 @@
                     <v-menu dark offset-y tile attach=".v-app-bar">
                         <template #activator="{ on }">
                             <div v-on="on" class="header-icon pb-2">
-                                <v-icon>mdi-help-circle-outline</v-icon>
+                                <v-icon color="white">mdi-help-circle-outline</v-icon>
                             </div>
                         </template>
                         <!-- need to exchange with a new link for documentation instead of drop-down  -->
