@@ -35,10 +35,10 @@
 </template>
 
 <script>
-import CheckForm from '../components/CheckForm.vue';
+// import CheckForm from '../components/CheckForm.vue';
 
 export default {
-    components: { CheckForm },
+    // components: { CheckForm },
 
     data() {
         return {
