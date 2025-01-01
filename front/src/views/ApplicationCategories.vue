@@ -1,8 +1,13 @@
 <template>
-    <div>
+    <div class="ml-7 mr-10">
+        <p style="font-size:14px !important;">
+                You can organize your applications into groups by defining
+                <a href="https://en.wikipedia.org/wiki/Glob_(programming)" target="_blank" style="text-decoration: underline!important; color:var(--status-ok)">glob patterns</a>
+                in the <var>&lt;namespace&gt;/&lt;application_name&gt;</var> format.
+            </p>
         <v-simple-table>
             <thead>
-                <tr>
+                <tr class="tab-heading">
                     <th>Category</th>
                     <th>Patterns</th>
                     <th>Notify of deployments</th>
@@ -36,7 +41,7 @@
             </tbody>
         </v-simple-table>
 
-        <v-btn color="primary" class="mt-2" @click="openForm()" small>Add a category</v-btn>
+        <v-btn color="success" class="mt-7 ml-3" @click="openForm()">Add a category</v-btn>
 
         <v-dialog v-model="form.active" max-width="800">
             <v-card class="pa-4">
@@ -102,7 +107,7 @@
                     <div class="d-flex align-center">
                         <v-spacer />
                         <v-btn v-if="form.del" color="error" :loading="saving" @click="save">Delete</v-btn>
-                        <v-btn v-else color="primary" :disabled="!form.valid" :loading="saving" @click="save">Save</v-btn>
+                        <v-btn v-else color="success" :disabled="!form.valid" :loading="saving" @click="save">Save</v-btn>
                     </div>
                 </v-form>
             </v-card>
@@ -223,9 +228,15 @@ export default {
 
 <style scoped>
 .pattern {
-    border: 1px solid #bdbdbd;
+    border: 1px solid var(--status-ok);
     border-radius: 4px;
     padding: 2px 4px;
     white-space: nowrap;
+}
+.tab-heading{
+    background-color: #e7f8ef;
+}
+.v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table > .v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper > table > thead > tr > th, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > td, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > th{
+    padding:10px 16px;
 }
 </style>

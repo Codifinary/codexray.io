@@ -1,19 +1,19 @@
 <template>
-    <div>
+    <div class="pl-7 pt-5 pb-3 mr-10" >
         <v-alert v-if="disabled" color="info" outlined text>
             Single Sign-On through SAML is available only in codexray Enterprise (from $1 per CPU core/month).
             <a href="https://codexray.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
         </v-alert>
         <v-simple-table dense class="params">
             <tbody>
-                <tr>
+                <tr class="tab-heading">
                     <td class="font-weight-medium text-no-wrap">Status</td>
                     <td>
                         <div v-if="active">
                             <v-icon v-if="active" color="success" class="mr-1" size="20">mdi-check-circle</v-icon>
                             Enabled
                         </div>
-                        <div v-else>Disabled</div>
+                        <div style="font-weight: 500 !important;" v-else>Disabled</div>
                     </td>
                 </tr>
                 <tr>
@@ -190,5 +190,16 @@ export default {
 }
 .roles:deep(.v-input__append-inner) {
     margin-top: 4px !important;
+}
+.tab-heading{
+    background-color: #E7F8EF;
+    color:var(--text-light);
+    
+}
+.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > th{
+    height: 40px !important;
+}
+.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > td, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > td{
+    height:48px;
 }
 </style>

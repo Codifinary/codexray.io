@@ -1,24 +1,24 @@
 <template>
-    <div>
+    <div class="pl-4 pt-5 pb-3 mr-10">
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
         </v-alert>
 
         <v-simple-table v-if="!error" dense>
             <thead>
-                <tr>
-                    <th>Email (Login)</th>
-                    <th>Name</th>
-                    <th>Role</th>
-                    <th></th>
+                <tr class="tab-heading">
+                    <th class="custom-column">Email (Login)</th>
+                    <th class="custom-column">Role</th>
+                    <th class="custom-column">Name</th>
+                    <th class="custom-column"></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="u in users">
-                    <td>{{ u.email }}</td>
-                    <td>{{ u.name }}</td>
-                    <td>{{ u.role }}</td>
-                    <td>
+                    <td class="custom-column">{{ u.email }}</td>
+                    <td class="custom-column">{{ u.name }}</td>
+                    <td class="custom-column">{{ u.role }}</td>
+                    <td class="custom-column">
                         <template v-if="!u.readonly">
                             <v-btn small icon @click="update(u)"><v-icon small>mdi-pencil</v-icon></v-btn>
                             <v-btn small icon @click="del(u)"><v-icon small>mdi-trash-can-outline</v-icon></v-btn>
@@ -27,7 +27,7 @@
                 </tr>
             </tbody>
             <tfoot>
-                <v-btn color="primary" small class="mt-3" @click="create(false)">Add user</v-btn>
+                <v-btn color="success" small class="mt-3" @click="create(false)">Add user</v-btn>
             </tfoot>
         </v-simple-table>
 
@@ -78,7 +78,7 @@
 
                     <v-alert v-if="form.error" color="red" icon="mdi-alert-octagon-outline" outlined text>{{ form.error }}</v-alert>
                     <v-alert v-if="form.message" color="green" outlined text>{{ form.message }}</v-alert>
-                    <div class="d-flex align-center">
+                    <div class="d-flex align-center pl-3">
                         <v-spacer />
                         <v-btn :color="form.button.color" :disabled="!form.valid" :loading="form.loading" @click="post">{{ form.button.text }}</v-btn>
                     </div>
@@ -202,4 +202,15 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.tab-heading{
+    background-color: #E7F8EF;
+
+}
+.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > th{    
+    height:48px;
+}
+.theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr:last-child > th{
+border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+</style>

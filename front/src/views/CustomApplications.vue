@@ -1,8 +1,8 @@
 <template>
-    <div>
+    <div class="ml-10 mt-5 mr-10">
         <v-simple-table>
             <thead>
-                <tr>
+                <tr class="tab-heading">
                     <th>Application name</th>
                     <th>Instance patterns</th>
                     <th>Actions</th>
@@ -29,7 +29,7 @@
             </tbody>
         </v-simple-table>
 
-        <v-btn color="primary" class="mt-3" @click="openForm()" small>Add an application</v-btn>
+        <v-btn color="success" class="mt-10 p-3" @click="openForm()" >Add an application</v-btn>
 
         <v-dialog v-model="form.active" max-width="800">
             <v-card class="pa-4">
@@ -175,9 +175,12 @@ export default {
 
 <style scoped>
 .pattern {
-    border: 1px solid #bdbdbd;
+    border: 1px solid var(--status-ok);
     border-radius: 4px;
     padding: 2px 4px;
     white-space: nowrap;
+}
+.tab-heading {
+    background-color: #e7f8ef;
 }
 </style>
