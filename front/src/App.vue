@@ -226,7 +226,7 @@ export default {
         views() {
             return {
                 health: 'Application',
-                map: 'Topology.',
+                map: 'Topology..',
                 traces: 'Traces',
                 nodes: 'Nodes',
                 EUM: 'EUM',
