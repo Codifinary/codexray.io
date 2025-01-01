@@ -211,4 +211,8 @@ export default {
   font-size:14px !important;  
   margin-top:30px !important;
 }
+    .v-alert{
+    margin-top: 20px;
+    width: 700px;
+}
 </style>
