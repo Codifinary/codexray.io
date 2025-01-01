@@ -49,7 +49,7 @@
                     <v-icon small>mdi-trash-can-outline</v-icon>
                 </v-btn>
             </div>
-            <v-btn color="success" @click="form.custom_headers.push({ key: '', value: '' })" :disabled="form.global">Add header</>
+            <v-btn color="success" @click="form.custom_headers.push({ key: '', value: '' })" :disabled="form.global">Add header</v-btn>
         </template>
 
         <div class="heading-name mt-6">Refresh interval</div>
