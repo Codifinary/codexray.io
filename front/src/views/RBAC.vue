@@ -9,7 +9,7 @@
         <v-simple-table dense class="mt-5">
             <thead>
                 <tr class="tab-heading">
-                    <th class="custom-column">Action</th>
+                    <th >Action</th>
                     <th v-for="r in roles" class="text-no-wrap">
                         <span>{{ r.name }}</span>
                         <span v-if="disabled && r.custom">*</span>
@@ -18,8 +18,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="a in actions">
-                    <td class="custom-column">{{ a.name }}</td>
+                <tr v-for="a in actions"  class="custom-column">
+                    <tr v-for="a in actions"  >
+                    <td >{{ a.name }}</td>
                     <td v-for="r in a.roles">
                         <v-icon v-if="!r.objects" small color="red">mdi-close-thick</v-icon>
                         <v-icon v-else-if="!r.objects.length" small color="green">mdi-check-bold</v-icon>
@@ -63,7 +64,7 @@
                         </thead>
                         <tbody>
                             <tr v-for="(p, i) in form.permissions">
-                                <td class="custom-column">
+                                <td >
                                     <v-select
                                         v-model="p.scope"
                                         :items="scopes.map((s) => s.name)"
@@ -74,7 +75,7 @@
                                         :rules="[$validators.notEmpty]"
                                     />
                                 </td>
-                                <td class="custom-column">
+                                <td >
                                     <v-select
                                         v-model="p.action"
                                         :items="(scopes.find((s) => s.name === p.scope) || {}).actions"
@@ -85,10 +86,10 @@
                                         :rules="[$validators.notEmpty]"
                                     />
                                 </td>
-                                <td class="custom-column">
+                                <td >
                                     <v-text-field v-model="p.object" outlined dense hide-details />
                                 </td>
-                                <td class="custom-column">
+                                <td >
                                     <v-btn small icon :disabled="disabled" @click="form.permissions.splice(i, 1)">
                                         <v-icon small>mdi-trash-can-outline</v-icon>
                                     </v-btn>

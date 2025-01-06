@@ -207,8 +207,8 @@ export default {
     background-color: #E7F8EF;
 
 }
-.table:deep(th){
-    height:48px;
+.v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th:deep(th){
+    height:48px !important;
 }
 
 .table:deep(th:first-child){
