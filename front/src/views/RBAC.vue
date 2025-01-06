@@ -55,10 +55,10 @@
                     <v-simple-table dense class="mb-4 mt-2">
                         <thead>
                             <tr class="tab-heading">
-                                <th class="tab-heading" style="width: 40%">Scope</th>
-                                <th class="tab-heading" style="width: 15%">Action</th>
-                                <th class="tab-heading">Object</th>
-                                <th class="tab-heading" style="width: 5%"></th>
+                                <th style="width: 40%">Scope</th>
+                                <th style="width: 15%">Action</th>
+                                <th >Object</th>
+                                <th  style="width: 5%"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -248,9 +248,12 @@ export default {
 .tab-heading{
     background-color: #E7F8EF;
 }
-.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > th{    height:40px;
+
+.table:deep(th){
+    height:40px;
 }
-.theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:not(.v-data-table__mobile-row){
+
+.table:deep(th:first-child){
     border-bottom: thin solid rgba(0, 0, 0, 0.05);
 }
 </style>

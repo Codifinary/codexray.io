@@ -18,31 +18,31 @@
         <v-simple-table>
             <thead>
                 <tr class="tab-heading">
-                    <th class="custom-column">Type</th>
-                    <th class="custom-column">Notify of incidents</th>
-                    <th class="custom-column">Notify of deployments</th>
-                    <th class="custom-column">Actions</th>
+                    <th >Type</th>
+                    <th >Notify of incidents</th>
+                    <th >Notify of deployments</th>
+                    <th >Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="i in integrations">
-                    <td class="custom-column">
+                    <td >
                         {{ i.title }}
                         <div class="caption">{{ i.details }}</div>
                     </td>
-                    <td class="custom-column">
+                    <td >
                         <v-icon v-if="i.configured" small :color="i.incidents ? 'green' : ''">
                             {{ i.incidents ? 'mdi-check' : 'mdi-minus' }}
                         </v-icon>
                         <div v-else>-</div>
                     </td>
-                    <td class="custom-column">
+                    <td >
                         <v-icon v-if="i.configured" small :color="i.deployments ? 'green' : ''">
                             {{ i.deployments ? 'mdi-check' : 'mdi-minus' }}
                         </v-icon>
                         <div v-else>-</div>
                     </td>
-                    <td class="custom-column">
+                    <td >
                         <v-btn v-if="!i.configured" small @click="open(i, 'new')" color="success" >Configure</v-btn>
                         <div v-else class="d-flex">
                             <v-btn icon small @click="open(i, 'edit')"><v-icon small>mdi-pencil</v-icon></v-btn>
@@ -187,14 +187,11 @@ export default {
     width: 100%;
 
 }
-
-.custom-column {
-    width: 25%; 
-}
-.v-data-table > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table > .v-data-table__wrapper > table > thead > tr > td, .v-data-table > .v-data-table__wrapper > table > tfoot > tr > td{
+.table:deep(td){
     height:58px;
 }
-.theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > td:not(.v-data-table__mobile-row), .theme--light.v-data-table > .v-data-table__wrapper > table > tbody > tr:not(:last-child) > th:not(.v-data-table__mobile-row){
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+.table:deep(th:first-child){
+    border-bottom: thin solid rgba(0, 0, 0, 0.05);
 }
 </style>

@@ -196,10 +196,11 @@ export default {
     color:var(--text-light);
     
 }
-.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > th{
-    height: 40px !important;
+.table:deep(th){
+    height:48px !important;
 }
-.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > td, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > td, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > td{
-    height:48px;
+.table:deep(td){
+    height:40px;
 }
+
 </style>

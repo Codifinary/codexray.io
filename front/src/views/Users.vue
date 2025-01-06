@@ -207,10 +207,11 @@ export default {
     background-color: #E7F8EF;
 
 }
-.v-data-table--dense > .v-data-table__wrapper > table > tbody > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th, .v-data-table--dense > .v-data-table__wrapper > table > tfoot > tr > th{    
+.table:deep(th){
     height:48px;
 }
-.theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr:last-child > th{
-border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+.table:deep(th:first-child){
+    border-bottom: thin solid rgba(0, 0, 0, 0.08);
 }
 </style>
