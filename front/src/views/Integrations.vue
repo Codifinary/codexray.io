@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container">
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
         </v-alert>
@@ -7,41 +7,43 @@
             {{ message }}
         </v-alert>
         <v-form>
-            <div class="subtitle-1">Base url</div>
-            <div class="caption">This URL is used for things like creating links in alerts.</div>
-            <div class="d-flex">
+            <div class="heading-name">Base url</div>
+            <div class="text-caption">This URL is used for things like creating links in alerts.</div>
+            <div class="d-flex mb-8 mt-3" style="max-width: 700px;">
                 <v-text-field v-model="form.base_url" :rules="[$validators.isUrl]" outlined dense />
-                <v-btn @click="save" color="primary" :loading="saving" class="ml-2" height="38">Save</v-btn>
+                <v-btn @click="save" color="success" :loading="saving" class="ml-2" height="38">Save</v-btn>
             </div>
         </v-form>
 
         <v-simple-table>
             <thead>
-                <tr>
-                    <th>Type</th>
-                    <th>Notify of incidents</th>
-                    <th>Notify of deployments</th>
-                    <th>Actions</th>
+                <tr class="tab-heading">
+                    <th >Type</th>
+                    <th >Notify of incidents</th>
+                    <th >Notify of deployments</th>
+                    <th >Actions</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="i in integrations">
-                    <td>
+                    <td >
                         {{ i.title }}
                         <div class="caption">{{ i.details }}</div>
                     </td>
-                    <td>
+                    <td >
                         <v-icon v-if="i.configured" small :color="i.incidents ? 'green' : ''">
                             {{ i.incidents ? 'mdi-check' : 'mdi-minus' }}
                         </v-icon>
+                        <div v-else>-</div>
                     </td>
-                    <td>
+                    <td >
                         <v-icon v-if="i.configured" small :color="i.deployments ? 'green' : ''">
                             {{ i.deployments ? 'mdi-check' : 'mdi-minus' }}
                         </v-icon>
+                        <div v-else>-</div>
                     </td>
-                    <td>
-                        <v-btn v-if="!i.configured" small @click="open(i, 'new')" color="primary">Configure</v-btn>
+                    <td >
+                        <v-btn v-if="!i.configured" small @click="open(i, 'new')" color="success" >Configure</v-btn>
                         <div v-else class="d-flex">
                             <v-btn icon small @click="open(i, 'edit')"><v-icon small>mdi-pencil</v-icon></v-btn>
                             <v-btn icon small @click="open(i, 'del')"><v-icon small>mdi-trash-can-outline</v-icon></v-btn>
@@ -134,4 +136,62 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.container{
+    margin-left:15px;
+   
+}
+@media (min-width: 960px) {
+    .container {
+        max-width: 100%;
+        padding-right: 50px;
+
+    }
+}
+@media (min-width: 1264px) {
+    .container {
+        max-width:100%!important;
+        padding-right: 50px;
+    }
+}
+.v-input{
+    
+    height: 36px !important;
+  border-radius: 8px !important;    
+  font-size:14px;  
+  
+}
+.text-caption{
+    font-weight: 400;
+    color: rgba(128, 128, 128, 0.55);
+    margin:3px 0px;
+    margin-bottom:8px !important;
+    
+}
+.heading-name{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 700px;
+}
+.v-btn{
+    height: 36px !important;
+  border-radius: 8px !important;    
+  font-size:14px !important;  
+
+}
+.tab-heading{
+    background-color: #E7F8EF;
+}
+.custom-table {
+    width: 100%;
+
+}
+.table:deep(td){
+    height:58px;
+}
+
+.table:deep(th:first-child){
+    border-bottom: thin solid rgba(0, 0, 0, 0.05);
+}
+</style>

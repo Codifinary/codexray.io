@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="pl-7  pb-3 mr-10">
         <v-alert v-if="disabled" color="info" outlined text>
             codexray Community Edition includes three predefined roles: Admin, Editor, and Viewer.
             <br />
@@ -8,8 +8,8 @@
         </v-alert>
         <v-simple-table dense class="mt-5">
             <thead>
-                <tr>
-                    <th>Action</th>
+                <tr class="tab-heading">
+                    <th >Action</th>
                     <th v-for="r in roles" class="text-no-wrap">
                         <span>{{ r.name }}</span>
                         <span v-if="disabled && r.custom">*</span>
@@ -18,8 +18,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="a in actions">
-                    <td>{{ a.name }}</td>
+                <tr v-for="a in actions"  class="custom-column">
+                    <tr v-for="a in actions"  >
+                    <td >{{ a.name }}</td>
                     <td v-for="r in a.roles">
                         <v-icon v-if="!r.objects" small color="red">mdi-close-thick</v-icon>
                         <v-icon v-else-if="!r.objects.length" small color="green">mdi-check-bold</v-icon>
@@ -54,16 +55,16 @@
                     <div class="font-weight-medium">Permission policies</div>
                     <v-simple-table dense class="mb-4 mt-2">
                         <thead>
-                            <tr>
+                            <tr class="tab-heading">
                                 <th style="width: 40%">Scope</th>
                                 <th style="width: 15%">Action</th>
-                                <th>Object</th>
-                                <th style="width: 5%"></th>
+                                <th >Object</th>
+                                <th  style="width: 5%"></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="(p, i) in form.permissions">
-                                <td>
+                                <td >
                                     <v-select
                                         v-model="p.scope"
                                         :items="scopes.map((s) => s.name)"
@@ -74,7 +75,7 @@
                                         :rules="[$validators.notEmpty]"
                                     />
                                 </td>
-                                <td>
+                                <td >
                                     <v-select
                                         v-model="p.action"
                                         :items="(scopes.find((s) => s.name === p.scope) || {}).actions"
@@ -85,10 +86,10 @@
                                         :rules="[$validators.notEmpty]"
                                     />
                                 </td>
-                                <td>
+                                <td >
                                     <v-text-field v-model="p.object" outlined dense hide-details />
                                 </td>
-                                <td>
+                                <td >
                                     <v-btn small icon :disabled="disabled" @click="form.permissions.splice(i, 1)">
                                         <v-icon small>mdi-trash-can-outline</v-icon>
                                     </v-btn>
@@ -244,5 +245,16 @@ export default {
 *:deep(.v-list-item) {
     min-height: 32px !important;
     padding: 0 8px !important;
+}
+.tab-heading{
+    background-color: #E7F8EF;
+}
+
+.table:deep(th){
+    height:40px;
+}
+
+.table:deep(th:first-child){
+    border-bottom: thin solid rgba(0, 0, 0, 0.05);
 }
 </style>
