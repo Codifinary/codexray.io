@@ -4,7 +4,7 @@
             <img :src="`${$codexray.base_path}static/icon.svg`" alt=":~#" height="80" />
         </div>
 
-        <h2 class="text-h4 my-5 text-center">Welcome to codexray</h2>
+        <h2 class="text-h4 my-5 text-center">Login</h2>
 
         <v-form v-model="valid" @submit.prevent="post" ref="form">
             <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
@@ -14,7 +14,7 @@
                 {{ message }}
             </v-alert>
 
-            <div class="font-weight-medium">Email</div>
+            <div class="font-weight-medium">User Name</div>
             <v-text-field
                 outlined
                 dense
@@ -46,7 +46,7 @@
         </v-form>
 
         <div v-if="!set_admin_password" class="caption grey--text text-center mt-10">
-            Contact your codexray administrator if you forgot your email or password.
+            Contact your administrator if you forgot your email or password.
         </div>
     </div>
 </template>
