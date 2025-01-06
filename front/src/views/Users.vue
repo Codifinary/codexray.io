@@ -7,18 +7,18 @@
         <v-simple-table v-if="!error" dense>
             <thead>
                 <tr class="tab-heading">
-                    <th class="custom-column">Email (Login)</th>
-                    <th class="custom-column">Role</th>
-                    <th class="custom-column">Name</th>
-                    <th class="custom-column"></th>
+                    <th >Email (Login)</th>
+                    <th >Role</th>
+                    <th >Name</th>
+                    <th ></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="u in users">
-                    <td class="custom-column">{{ u.email }}</td>
-                    <td class="custom-column">{{ u.name }}</td>
-                    <td class="custom-column">{{ u.role }}</td>
-                    <td class="custom-column">
+                    <td >{{ u.email }}</td>
+                    <td >{{ u.name }}</td>
+                    <td >{{ u.role }}</td>
+                    <td >
                         <template v-if="!u.readonly">
                             <v-btn small icon @click="update(u)"><v-icon small>mdi-pencil</v-icon></v-btn>
                             <v-btn small icon @click="del(u)"><v-icon small>mdi-trash-can-outline</v-icon></v-btn>
