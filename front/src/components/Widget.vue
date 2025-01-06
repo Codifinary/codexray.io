@@ -45,7 +45,7 @@ export default {
             if (!l) {
                 return null;
             }
-            return `https://codexray.com/docs/codexray/${l.group}/${l.item}${l.hash ? '#' + l.hash : ''}`;
+            return `https://codexray.io/docs/codexray/${l.group}/${l.item}${l.hash ? '#' + l.hash : ''}`;
         },
     },
 
