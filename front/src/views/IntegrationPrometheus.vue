@@ -1,10 +1,11 @@
 <template>
-    <v-form v-model="valid" ref="form" style="max-width: 800px">
+    <div class="container">
+    <v-form v-model="valid" ref="form">
         <v-alert v-if="form.global" color="primary" outlined text
             >This project uses a global Prometheus configuration that can't be changed through the UI</v-alert
         >
-        <div class="subtitle-1">Prometheus URL</div>
-        <div class="caption">codexray works on top of the telemetry data stored in your Prometheus server.</div>
+        <div class="heading-name">Prometheus URL</div>
+        <div class="text-caption">codexray works on top of the telemetry data stored in your Prometheus server.</div>
         <v-text-field
             outlined
             dense
@@ -12,7 +13,7 @@
             :rules="[$validators.notEmpty, $validators.isUrl]"
             placeholder="https://prom.example.com:9090"
             hide-details="auto"
-            class="flex-grow-1"
+            class="flex-grow-1 custom-text-field mb-5"
             single-line
             :disabled="form.global"
         />
@@ -42,17 +43,17 @@
         <v-checkbox v-model="custom_headers" label="Custom HTTP headers" class="my-2" hide-details :disabled="form.global" />
         <template v-if="custom_headers">
             <div v-for="(h, i) in form.custom_headers" :key="i" class="d-flex gap mb-2 align-center">
-                <v-text-field outlined dense v-model="h.key" label="header" hide-details single-line :disabled="form.global" />
-                <v-text-field outlined dense v-model="h.value" type="password" label="value" hide-details single-line :disabled="form.global" />
-                <v-btn @click="form.custom_headers.splice(i, 1)" icon small :disabled="form.global">
+                <v-text-field  outlined dense v-model="h.key" label="header" hide-details single-line :disabled="form.global" />
+                <v-text-field  outlined dense v-model="h.value" type="password" label="value" hide-details single-line :disabled="form.global" />
+                <v-btn color="success" @click="form.custom_headers.splice(i, 1)" icon small :disabled="form.global">
                     <v-icon small>mdi-trash-can-outline</v-icon>
                 </v-btn>
             </div>
-            <v-btn color="primary" @click="form.custom_headers.push({ key: '', value: '' })" :disabled="form.global">Add header</v-btn>
+            <v-btn color="success" @click="form.custom_headers.push({ key: '', value: '' })" :disabled="form.global">Add header</v-btn>
         </template>
 
-        <div class="subtitle-1 mt-3">Refresh interval</div>
-        <div class="caption">
+        <div class="heading-name mt-6">Refresh interval</div>
+        <div class="text-caption">
             How often codexray retrieves telemetry data from a Prometheus. The value must be greater than the
             <a href="https://prometheus.io/docs/prometheus/latest/configuration/configuration/" target="_blank" rel="noopener noreferrer"
                 ><var>scrape_interval</var></a
@@ -61,9 +62,9 @@
         </div>
         <v-select v-model="form.refresh_interval" :items="refreshIntervals" outlined dense :menu-props="{ offsetY: true }" :disabled="form.global" />
 
-        <div class="subtitle-1">Extra selector</div>
-        <div class="caption">An additional metric selector that will be added to every Prometheus query (e.g. <var>{cluster="us-west-1"}</var>)</div>
-        <v-text-field outlined dense v-model="form.extra_selector" :rules="[$validators.isPrometheusSelector]" single-line :disabled="form.global" />
+        <div class="heading-name pt-10">Extra selector</div>
+        <div class="text-caption">An additional metric selector that will be added to every Prometheus query (e.g. <var>{cluster="us-west-1"}</var>)</div>
+        <v-text-field outlined dense v-model="form.extra_selector" :rules="[$validators.isPrometheusSelector]" single-line :disabled="form.global" class="custom-text-field "/>
 
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
@@ -71,8 +72,9 @@
         <v-alert v-if="message" color="green" outlined text>
             {{ message }}
         </v-alert>
-        <v-btn block color="primary" @click="save" :disabled="!valid || form.global" :loading="loading">Save</v-btn>
-    </v-form>
+        <v-btn block color="success" class="save-btn" @click="save" :disabled="!valid || form.global" :loading="loading">Save</v-btn>
+    </v-form></div>
+
 </template>
 
 <script>
@@ -177,5 +179,40 @@ export default {
 <style scoped>
 .gap {
     gap: 16px;
+}
+.container{
+    margin-left:15px;
+    
+}
+.v-input{
+    width:700px;
+    height: 36px !important;
+  border-radius: 8px !important;    
+  font-size:14px;  
+  
+}
+.text-caption{
+    font-weight: 400;
+    color: rgba(128, 128, 128, 0.55);
+    margin:3px 0px;
+    margin-bottom:8px !important;
+    
+}
+.heading-name{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 700px;
+}
+.v-btn{
+    min-width:700px !important;
+    height: 36px !important;
+  border-radius: 8px !important;    
+  font-size:14px !important;  
+  margin-top:30px !important;
+}
+    .v-alert{
+    margin-top: 20px;
+    width: 700px;
 }
 </style>

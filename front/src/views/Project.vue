@@ -1,90 +1,81 @@
 <template>
-    <div class="mx-auto">
-        <h1 class="text-h5 my-5">Configuration</h1>
+    
+    <div class="settings-container">
 
-        <v-tabs height="40" show-arrows slider-size="2">
-            <v-tab v-for="t in tabs" :key="t.id" :to="{ params: { tab: t.id } }" :disabled="t.disabled" exact>
+        <v-tabs height="40" slider-color="success" show-arrows slider-size="2">
+            <v-tab  v-for="t in tabs" :key="t.id" :to="{ params: { tab: t.id } }" :disabled="t.disabled" exact>
                 {{ t.name }}
             </v-tab>
         </v-tabs>
 
         <template v-if="!tab">
-            <h2 class="text-h5 my-5">Project name</h2>
+            
             <ProjectSettings :projectId="projectId" />
 
             <template v-if="projectId">
-                <h2 class="text-h5 mt-10 mb-5">Status</h2>
+                
                 <ProjectStatus :projectId="projectId" />
 
-                <h2 class="text-h5 mt-10 mb-5">Danger zone</h2>
+                
                 <ProjectDelete :projectId="projectId" />
             </template>
         </template>
 
         <template v-if="tab === 'prometheus'">
-            <h1 class="text-h5 my-5">
+            <div class="font-weight-bold tab-heading" >
                 Prometheus integration
-                <a href="https://codexray.com/docs/codexray/configuration/prometheus" target="_blank">
-                    <v-icon>mdi-information-outline</v-icon>
-                </a>
-            </h1>
+                
+            </div>
             <IntegrationPrometheus />
         </template>
 
         <template v-if="tab === 'clickhouse'">
-            <h1 class="text-h5 my-5">
+            <div class="font-weight-bold tab-heading">
                 ClickHouse integration
-                <a href="https://codexray.com/docs/codexray/configuration/clickhouse" target="_blank">
-                    <v-icon>mdi-information-outline</v-icon>
+            
+                <a href="https://codexray.com/docs/codexray/configuration/clickhouse" target="_blank" >
+                    <v-icon >mdi-information-outline</v-icon>
                 </a>
-            </h1>
-            <p>
+            </div>
+            <p class="pl-7">
                 codexray stores
-                <a href="https://codexray.com/docs/codexray/logs" target="_blank">logs</a>,
-                <a href="https://codexray.com/docs/codexray/tracing" target="_blank">traces</a>, and
-                <a href="https://codexray.com/docs/codexray/profiling" target="_blank">profiles</a> in the ClickHouse database.
+                <a style="text-decoration: underline!important;" href="https://codexray.com/docs/codexray/logs" target="_blank">logs</a>,
+                <a style="text-decoration: underline!important;" href="https://codexray.com/docs/codexray/tracing" target="_blank">traces</a>, and
+                <a style="text-decoration: underline!important;" href="https://codexray.com/docs/codexray/profiling" target="_blank">profiles</a> in the ClickHouse database.
             </p>
             <IntegrationClickhouse />
         </template>
 
-        <template v-if="tab === 'aws'">
+        <!-- <template v-if="tab === 'aws'">
             <h1 class="text-h5 my-5">AWS integration</h1>
             <IntegrationAWS />
-        </template>
+        </template> -->
 
         <template v-if="tab === 'inspections'">
-            <h1 class="text-h5 my-5">
+            <div class="font-weight-bold tab-heading">
                 Inspection configs
                 <a href="https://codexray.com/docs/codexray/inspections/overview" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h1>
+            </div>
             <Inspections />
         </template>
 
         <template v-if="tab === 'applications'">
-            <h2 class="text-h5 my-5" id="categories">
+            <div class="font-weight-bold tab-heading" id="categories">
                 Application categories
                 <a href="https://codexray.com/docs/codexray/configuration/application-categories" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h2>
-            <p>
-                You can organize your applications into groups by defining
-                <a href="https://en.wikipedia.org/wiki/Glob_(programming)" target="_blank">glob patterns</a>
-                in the <var>&lt;namespace&gt;/&lt;application_name&gt;</var> format.
-            </p>
+            </div>
+            
             <ApplicationCategories />
-
-            <h2 class="text-h5 mt-10 mb-5" id="custom-applications">
+            <div class="ml-10 mt-13 mb-5 mr-10">
+            <h2  class="text-h5 mb-3" style="font-weight: 600;" id="custom-applications">
                 Custom applications
-                <a href="https://codexray.com/docs/codexray/configuration/custom-applications" target="_blank">
-                    <v-icon>mdi-information-outline</v-icon>
-                </a>
             </h2>
-
+            <div class="font-weight-regular">
             <p>codexray groups individual containers into applications using the following approach:</p>
-
             <ul>
                 <li><b>Kubernetes metadata</b>: Pods are grouped into Deployments, StatefulSets, etc.</li>
                 <li>
@@ -97,44 +88,45 @@
             <p class="my-5">
                 This default approach works well in most cases. However, since no one knows your system better than you do, codexray allows you to
                 manually adjust application groupings to better fit your specific needs. You can match desired application instances by defining
-                <a href="https://en.wikipedia.org/wiki/Glob_(programming)" target="_blank">glob patterns</a>
+                <a href="https://en.wikipedia.org/wiki/Glob_(programming)" style="text-decoration: underline!important;" target="_blank">glob patterns</a>
                 for <var>instance_name</var>. Note that this is not applicable to Kubernetes applications.
             </p>
-
+        </div>
+</div>
             <CustomApplications />
         </template>
 
         <template v-if="tab === 'notifications'">
-            <h1 class="text-h5 my-5">
+            <div class="font-weight-bold tab-heading">
                 Notification integrations
                 <a href="https://codexray.com/docs/codexray/alerting/slo-monitoring" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h1>
+            </div>
             <Integrations />
         </template>
 
         <template v-if="tab === 'organization'">
-            <h1 class="text-h5 my-5">
+            <div class="font-weight-bold tab-heading">
                 Users
                 <a href="https://codexray.com/docs/codexray/configuration/authentication" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h1>
+            </div>
             <Users />
-            <h1 class="text-h5 mt-10 mb-5">
-                Role-Based Access Control (RBAC)
+            <div class="font-weight-bold tab-heading">
+                                Role-Based Access Control (RBAC)
                 <a href="https://codexray.com/docs/codexray/configuration/rbac" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h1>
+            </div>
             <RBAC />
-            <h1 class="text-h5 mt-10 mb-5">
-                Single Sign-On (SAML)
+            <div class="font-weight-bold tab-heading">
+                                Single Sign-On (SAML)
                 <a href="https://codexray.com/docs/codexray/configuration/authentication" target="_blank">
                     <v-icon>mdi-information-outline</v-icon>
                 </a>
-            </h1>
+            </div>
             <SSO />
         </template>
     </div>
@@ -149,7 +141,7 @@ import ApplicationCategories from './ApplicationCategories.vue';
 import Integrations from './Integrations.vue';
 import IntegrationPrometheus from './IntegrationPrometheus.vue';
 import IntegrationClickhouse from './IntegrationClickhouse.vue';
-import IntegrationAWS from './IntegrationAWS.vue';
+// import IntegrationAWS from './IntegrationAWS.vue';
 import CustomApplications from './CustomApplications.vue';
 import Users from './Users.vue';
 import RBAC from './RBAC.vue';
@@ -165,7 +157,7 @@ export default {
         CustomApplications,
         IntegrationPrometheus,
         IntegrationClickhouse,
-        IntegrationAWS,
+        // IntegrationAWS,
         Inspections,
         ProjectSettings,
         ProjectStatus,
@@ -190,7 +182,7 @@ export default {
                 { id: undefined, name: 'General' },
                 { id: 'prometheus', name: 'Prometheus', disabled },
                 { id: 'clickhouse', name: 'Clickhouse', disabled },
-                { id: 'aws', name: 'AWS', disabled },
+                // { id: 'aws', name: 'AWS', disabled },
                 { id: 'inspections', name: 'Inspections', disabled },
                 { id: 'applications', name: 'Applications', disabled },
                 { id: 'notifications', name: 'Notifications', disabled },
@@ -201,4 +193,42 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style>
+
+
+.settings-container {
+padding-bottom: 70px;
+  margin-left: 20px !important;
+  margin-right: 20px !important;
+  margin-top: 30px !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+}
+.v-tab{
+    color:var(--primary-green) !important;
+    margin-left:15px;
+    text-decoration:none !important;
+    text-transform:none !important;
+    margin-top:5px;
+    font-weight:400!important;
+    
+}
+.v-slide-group__wrapper {
+    width:100%;
+}
+.v-slide-group__content {
+   position:static;
+    border-bottom: 2px solid #0000001A !important; 
+}
+
+.tab-heading{
+    margin-top:20px;
+    margin-left:15px;
+    padding:12px;
+    font-weight: 700;
+    color: var(--status-ok);
+    font-size:18px !important;
+}
+.v-icon{
+    color:var(--status-ok) !important; font-size:22px!important; padding-left:5px;
+}
+</style>
