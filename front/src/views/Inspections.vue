@@ -1,20 +1,20 @@
 <template>
-    <div class="container mr-10">
+    <div class="ml-5 mr-10">
         <v-simple-table class="custom-table">
             <thead>
-                <tr class="tab-heading">
-                    <th class="custom-column">Inspection</th>
-                    <th class="custom-column">Project-level override</th>
-                    <th class="custom-column">Application-level override</th>
+                <tr>
+                    <th>Inspection</th>
+                    <th>Project-level override</th>
+                    <th>Application-level override</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="c in checks">
-                    <td class="custom-column">
+                    <td>
                         {{ c.title }}
                         <div class="grey--text text-no-wrap">Condition: {{ formatCondition(c) }}</div>
                     </td>
-                    <td class="custom-column">
+                    <td>
                         <template v-if="c.id === 'SLOAvailability' || c.id === 'SLOLatency'"> &mdash; </template>
                         <a v-else @click="edit('::', c)">
                             <template v-if="c.project_threshold === null">
@@ -25,8 +25,13 @@
                             </template>
                         </a>
                     </td>
-                    <td class="custom-column">
-                        <div v-for="a in c.application_overrides" class="text-no-wrap">{{ $utils.appId(a.id).name }}:</div>
+                    <td>
+                        <div v-for="a in c.application_overrides" class="text-no-wrap">
+                            {{ $utils.appId(a.id).name }}:
+                            <a @click="edit(a.id, c)">
+                                {{ format(a.threshold, c.unit, a.details) }}
+                            </a>
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -35,11 +40,7 @@
 </template>
 
 <script>
-// import CheckForm from '../components/CheckForm.vue';
-
 export default {
-    // components: { CheckForm },
-
     data() {
         return {
             checks: [],
@@ -113,17 +114,15 @@ export default {
         padding-right: 50px;
     }
 }
-.container {
-    margin-left: 20px;
-}
-.tab-heading {
+thead tr {
     background-color: #e7f8ef;
 }
 .custom-table {
     width: 100%;
 }
 
-.custom-column {
+th,
+td {
     width: 33%;
 }
 </style>
