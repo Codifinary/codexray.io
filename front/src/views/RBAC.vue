@@ -4,7 +4,7 @@
             <thead>
                 <tr class="tab-heading">
                     <th>Action</th>
-                    <th v-for="r in roles" v-if="r.name !== 'QA' && r.name !== 'DBA'" class="text-no-wrap">
+                    <th v-for="r in filteredRoles" class="text-no-wrap">
                         <span>{{ r.name }}</span>
                         <span v-if="disabled && r.custom">*</span>
                         <v-btn v-if="r.custom" @click="edit(r)" small icon><v-icon x-small>mdi-pencil</v-icon></v-btn>
@@ -14,7 +14,7 @@
             <tbody>
                 <tr v-for="a in actions" class="custom-column">
                     <td>{{ a.name }}</td>
-                    <td v-for="r in a.roles" v-if="r.name !== 'QA' && r.name !== 'DBA'">
+                    <td v-for="r in filteredActionsRoles(a.roles)">
                         <v-icon v-if="!r.objects" small color="red">mdi-close-thick</v-icon>
                         <v-icon v-else-if="!r.objects.length" small color="green">mdi-check-bold</v-icon>
                         <v-tooltip v-else bottom>
@@ -150,7 +150,15 @@ export default {
         this.get();
     },
 
+    computed: {
+        filteredRoles() {
+            return this.roles.filter((r) => r.name !== 'QA' && r.name !== 'DBA');
+        },
+    },
     methods: {
+        filteredActionsRoles(roles) {
+            return roles.filter((r) => r.name !== 'QA' && r.name !== 'DBA');
+        },
         get() {
             this.loading = true;
             this.error = '';
