@@ -67,7 +67,7 @@ func (c *Collector) Metrics(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	cfg := project.PrometheusConfig(c.globalPrometheus)
