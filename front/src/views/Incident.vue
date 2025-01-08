@@ -99,7 +99,6 @@
 
             <v-tabs height="32" show-arrows hide-slider>
                 <v-tab v-for="v in views" :key="v.name" :to="openView(v.name)" class="view" :class="{ active: view === v.name }">
-                    <v-icon small class="mr-1">{{ v.icon }}</v-icon>
                     {{ v.title }}
                 </v-tab>
             </v-tabs>
@@ -119,10 +118,6 @@
             <template v-else-if="view === 'traces'">
                 <Tracing :appId="incident.application_id" compact />
             </template>
-
-            <template v-else-if="view === 'rca'">
-                <RCA :appId="incident.application_id" />
-            </template>
         </div>
         <NoData v-else-if="!loading && !error" />
     </div>
@@ -133,10 +128,9 @@ import NoData from '@/components/NoData';
 import Widget from '@/components/Widget.vue';
 import CheckForm from '@/components/CheckForm.vue';
 import Tracing from '@/views/Tracing.vue';
-import RCA from '@/views/RCA.vue';
 
 export default {
-    components: { Tracing, CheckForm, Widget, RCA, NoData },
+    components: { Tracing, CheckForm, Widget, NoData },
 
     computed: {
         view() {
@@ -146,7 +140,6 @@ export default {
             return [
                 { name: 'overview', title: 'overview', icon: 'mdi-format-list-checkbox' },
                 { name: 'traces', title: 'traces', icon: 'mdi-chart-timeline' },
-                { name: 'rca', title: 'root cause analysis', icon: 'mdi-creation' },
             ];
         },
     },
@@ -199,11 +192,11 @@ export default {
 
 <style scoped>
 .view {
-    color: var(--text-color-dimmed);
+    color: #013901 !important;
+    text-transform: capitalize;
 }
 .view.active {
-    color: var(--text-color);
-    border-bottom: 2px solid var(--text-color);
+    border-bottom: 2px solid var(--status-ok);
 }
 
 .table:deep(table) {
