@@ -71,16 +71,16 @@ spec:
           ports:
             - containerPort: 9000
           volumeMounts:
-            - name: clickhouse-data
+            - name: clickhouse-pv
               mountPath: /var/lib/clickhouse
-            - name: clickhouse-logs
+              subPath: data
+            - name: clickhouse-pv
               mountPath: /var/log/clickhouse-server
+              subPath: logs
       volumes:
-        - name: clickhouse-data
+        - name: clickhouse-pv
           persistentVolumeClaim:
             claimName: clickhouse-pv
-        - name: clickhouse-logs
-          emptyDir: {}
 
 ---
 apiVersion: v1
@@ -196,7 +196,7 @@ spec:
   ports:
     - port: 9090
       targetPort: 9090
-  type: ClusterIP
+  type: NodePort
 
 ---
 
