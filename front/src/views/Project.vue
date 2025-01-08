@@ -180,7 +180,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .settings-container {
     padding-bottom: 70px;
     margin-left: 20px !important;
