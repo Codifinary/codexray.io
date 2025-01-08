@@ -74,7 +74,7 @@ func (c *Collector) Metrics(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(cfg.Url)
 	if err != nil {
 		klog.Errorln(err)
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
