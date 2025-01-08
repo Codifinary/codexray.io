@@ -17,7 +17,7 @@
         <template v-else>
             <div class="mt-4 d-flex">
                 <v-spacer />
-                <OpenTelemetryIntegration small color="primary">Integrate OpenTelemetry</OpenTelemetryIntegration>
+                <OpenTelemetryIntegration small color="success">Integrate OpenTelemetry</OpenTelemetryIntegration>
             </div>
 
             <v-alert v-if="view.error" color="error" icon="mdi-alert-octagon-outline" outlined text>
@@ -28,7 +28,6 @@
 
             <v-tabs height="32" show-arrows hide-slider>
                 <v-tab v-for="v in views" :key="v.name" :to="openView(v.name)" class="view" :class="{ active: query.view === v.name }">
-                    <v-icon small class="mr-1">{{ v.icon }}</v-icon>
                     {{ v.title }}
                 </v-tab>
             </v-tabs>
@@ -148,27 +147,7 @@
             </div>
 
             <div v-else-if="query.view === 'overview'" class="mt-5" style="min-height: 50vh">
-                <v-data-table
-                    :items="view.summary ? view.summary.stats : []"
-                    :items-per-page="50"
-                    sort-by="total"
-                    sort-desc
-                    must-sort
-                    dense
-                    class="table"
-                    mobile-breakpoint="0"
-                    no-data-text="No traces found"
-                    :headers="[
-                        { value: 'service_name', text: 'Root Service Name', align: 'start' },
-                        { value: 'span_name', text: 'Root Span Name', align: 'start' },
-                        { value: 'total', text: 'Requests', align: 'end' },
-                        { value: 'failed', text: 'Errors', align: 'end' },
-                        { value: 'duration_quantiles[0]', text: 'p50', align: 'end' },
-                        { value: 'duration_quantiles[1]', text: 'p95', align: 'end' },
-                        { value: 'duration_quantiles[2]', text: 'p99', align: 'end' },
-                    ]"
-                    :footer-props="{ itemsPerPageOptions: [10, 20, 50, 100, -1] }"
-                >
+                <CustomTable :items="view.summary ? view.summary.stats : []" class="table" :headers="headers">
                     <template #item.service_name="{ item }">
                         <router-link :to="filterTraces(item.service_name)">
                             {{ item.service_name }}
@@ -234,7 +213,7 @@
                             </tr>
                         </tfoot>
                     </template>
-                </v-data-table>
+                </CustomTable>
             </div>
 
             <div v-else-if="query.view === 'traces'" class="mt-5" style="min-height: 50vh">
@@ -325,15 +304,9 @@
                     This section highlights the underlying reasons why traces within the selected range contain errors. It identifies the tracing
                     spans where errors originated.
                 </div>
-                <v-data-table
+                <CustomTable
                     :items="view.errors || []"
-                    :items-per-page="20"
-                    sort-by="count"
-                    sort-desc
-                    must-sort
                     class="table errors"
-                    mobile-breakpoint="0"
-                    no-data-text="No errors found"
                     :headers="[
                         { value: 'service_name', text: 'Service Name', width: '15%' },
                         { value: 'span_name', text: 'Span', width: '25%' },
@@ -341,7 +314,6 @@
                         { value: 'sample_trace_id', text: 'Sample Trace', sortable: false, width: '16ch' },
                         { value: 'count', text: 'Percentage', width: '16ch' },
                     ]"
-                    :footer-props="{ itemsPerPageOptions: [10, 20, 50, 100, -1] }"
                 >
                     <template #item.service_name="{ item }">
                         <span :title="item.service_name" class="service nowrap" :style="{ borderColor: color(item.service_name) }">
@@ -377,7 +349,7 @@
                             </div>
                         </div>
                     </template>
-                </v-data-table>
+                </CustomTable>
             </div>
 
             <div v-else-if="query.view === 'latency'">
@@ -403,9 +375,10 @@ import Heatmap from '../components/Heatmap.vue';
 import TracingTrace from '../components/TracingTrace.vue';
 import FlameGraph from '../components/FlameGraph.vue';
 import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
+import CustomTable from '@/components/CustomTable.vue';
 
 export default {
-    components: { OpenTelemetryIntegration, FlameGraph, TracingTrace, Heatmap },
+    components: { OpenTelemetryIntegration, FlameGraph, TracingTrace, Heatmap, CustomTable },
 
     data() {
         return {
@@ -417,6 +390,15 @@ export default {
             },
             loading: false,
             error: '',
+            headers: [
+                { value: 'service_name', text: 'Root Service Name', align: 'start' },
+                { value: 'span_name', text: 'Root Span Name', align: 'start' },
+                { value: 'total', text: 'Requests', align: 'end' },
+                { value: 'failed', text: 'Errors', align: 'end' },
+                { value: 'duration_quantiles[0]', text: 'p50', align: 'end' },
+                { value: 'duration_quantiles[1]', text: 'p95', align: 'end' },
+                { value: 'duration_quantiles[2]', text: 'p99', align: 'end' },
+            ],
         };
     },
 
@@ -680,11 +662,11 @@ export default {
 }
 
 .view {
-    color: var(--text-color-dimmed);
+    color: #013901 !important;
+    text-transform: capitalize;
 }
 .view.active {
-    color: var(--text-color);
-    border-bottom: 2px solid var(--text-color);
+    border-bottom: 2px solid var(--status-ok);
 }
 
 .query {
