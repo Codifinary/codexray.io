@@ -31,9 +31,9 @@
             </div>
             <p class="pl-7">
                 codexray stores
-                <a style="text-decoration: underline !important" href="https://codexray.com/docs/codexray/logs" target="_blank">logs</a>,
-                <a style="text-decoration: underline !important" href="https://codexray.com/docs/codexray/tracing" target="_blank">traces</a>, and
-                <a style="text-decoration: underline !important" href="https://codexray.com/docs/codexray/profiling" target="_blank">profiles</a> in
+                <a style="text-decoration: underline !important" href="https://codexray.io/docs/codexray/logs" target="_blank">logs</a>,
+                <a style="text-decoration: underline !important" href="https://codexray.io/docs/codexray/tracing" target="_blank">traces</a>, and
+                <a style="text-decoration: underline !important" href="https://codexray.io/docs/codexray/profiling" target="_blank">profiles</a> in
                 the ClickHouse database.
             </p>
             <IntegrationClickhouse />
@@ -110,13 +110,6 @@
                 </a>
             </div>
             <RBAC />
-            <div class="font-weight-bold tab-heading">
-                Single Sign-On (SAML)
-                <a href="https://codexray.io/docs/codexray/configuration/authentication" target="_blank">
-                    <v-icon>mdi-information-outline</v-icon>
-                </a>
-            </div>
-            <SSO />
         </template>
     </div>
 </template>
@@ -133,7 +126,6 @@ import IntegrationClickhouse from './IntegrationClickhouse.vue';
 import CustomApplications from './CustomApplications.vue';
 import Users from './Users.vue';
 import RBAC from './RBAC.vue';
-import SSO from './SSO.vue';
 
 export default {
     props: {
@@ -153,7 +145,6 @@ export default {
         Integrations,
         Users,
         RBAC,
-        SSO,
     },
 
     mounted() {
@@ -169,7 +160,6 @@ export default {
                 { id: undefined, name: 'General' },
                 { id: 'prometheus', name: 'Prometheus', disabled },
                 { id: 'clickhouse', name: 'Clickhouse', disabled },
-                // { id: 'aws', name: 'AWS', disabled },
                 { id: 'inspections', name: 'Inspections', disabled },
                 { id: 'applications', name: 'Applications', disabled },
                 { id: 'notifications', name: 'Notifications', disabled },
