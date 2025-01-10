@@ -53,12 +53,9 @@
                         <span class="text-no-wrap">{{ s.ok ? '&#127881;' : '&#128148;' }} {{ s.message }}</span>
                         <router-link
                             :to="{
-                                path: $route.path.replace('Deployments', s.report),
-                                query: {
-                                    ...$route.query,
-                                    from: s.time - 1800000,
-                                    to: s.time + 1800000,
-                                },
+                                name: 'overview',
+                                params: { view: 'applications', id: id, report: s.report },
+                                query: { from: s.time - 1800000, to: s.time + 1800000 },
                             }"
                             class="d-flex"
                         >
@@ -104,6 +101,7 @@ export default {
     props: {
         header: Array,
         rows: Array,
+        id: String,
     },
 
     components: { Led },

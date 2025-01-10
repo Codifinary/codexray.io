@@ -24,7 +24,7 @@
                 <Check v-for="check in r.checks" :key="check.id" :appId="id" :check="check" class="mb-2" />
             </v-card>
 
-            <Dashboard v-if="r" :name="r.name" :widgets="r.widgets" />
+            <Dashboard v-if="r" :name="r.name" :widgets="r.widgets" :id="id" />
         </div>
         <NoData v-else-if="!loading && !error" />
     </div>
