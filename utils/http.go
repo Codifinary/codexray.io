@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+const FRONTE_END_BRUM = "http://34.47.146.55:3000"
+
 type StaticFSWrapper struct {
 	http.FileSystem
 	modTime time.Time
@@ -40,9 +42,9 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 	return f.modTime
 }
 
-func EnableCORS(next http.Handler, host string) http.Handler {
+func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", host)
+		w.Header().Set("Access-Control-Allow-Origin", FRONTE_END_BRUM)
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
