@@ -219,6 +219,7 @@ func main() {
 	cleanUrlBasePath(urlBasePath)
 	if *urlBasePath != "/" {
 		r = router.PathPrefix(strings.TrimRight(*urlBasePath, "/")).Subrouter()
+		r.Use(utils.EnableCORS)
 	}
 	r.HandleFunc("/api/login", a.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/logout", a.Logout).Methods(http.MethodPost)
