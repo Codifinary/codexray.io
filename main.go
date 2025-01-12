@@ -205,6 +205,7 @@ func main() {
 	}
 
 	router := mux.NewRouter()
+	router.Use(utils.EnableCORS)
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {}).Methods(http.MethodGet)
 
@@ -263,9 +264,8 @@ func main() {
 	})
 
 	router.PathPrefix("").Handler(http.RedirectHandler(*urlBasePath, http.StatusMovedPermanently))
-	handler := utils.EnableCORS(router, "http://34.47.146.55:3000")
 	klog.Infoln("listening on", *listen)
-	klog.Fatalln(http.ListenAndServe(*listen, handler))
+	klog.Fatalln(http.ListenAndServe(*listen, router))
 }
 
 func readIndexHtml(basePath, version, instanceUuid string, checkForUpdates bool, developerMode bool) []byte {
