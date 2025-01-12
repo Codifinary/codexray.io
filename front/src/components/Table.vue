@@ -54,7 +54,7 @@
                         <router-link
                             :to="{
                                 name: 'overview',
-                                params: { view: 'applications', report: s.report },
+                                params: { view: 'applications', id: id, report: s.report },
                                 query: { from: s.time - 1800000, to: s.time + 1800000 },
                             }"
                             class="d-flex"
@@ -101,6 +101,7 @@ export default {
     props: {
         header: Array,
         rows: Array,
+        id: String,
     },
 
     components: { Led },
