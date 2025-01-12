@@ -1,16 +1,10 @@
 <template>
     <div class="pl-7 pb-3 mr-10">
-        <v-alert v-if="disabled" color="info" outlined text>
-            codexray Community Edition includes three predefined roles: Admin, Editor, and Viewer.
-            <br />
-            For more granular Role-Based Access Control (RBAC), upgrade to codexray Enterprise (from $1 per CPU core/month).
-            <a href="https://codexray.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
-        </v-alert>
         <v-simple-table dense class="mt-5">
             <thead>
                 <tr class="tab-heading">
                     <th>Action</th>
-                    <th v-for="r in roles" class="text-no-wrap">
+                    <th v-for="r in filteredRoles" class="text-no-wrap">
                         <span>{{ r.name }}</span>
                         <span v-if="disabled && r.custom">*</span>
                         <v-btn v-if="r.custom" @click="edit(r)" small icon><v-icon x-small>mdi-pencil</v-icon></v-btn>
@@ -20,7 +14,7 @@
             <tbody>
                 <tr v-for="a in actions" class="custom-column">
                     <td>{{ a.name }}</td>
-                    <td v-for="r in a.roles">
+                    <td v-for="r in filteredActionsRoles(a.roles)">
                         <v-icon v-if="!r.objects" small color="red">mdi-close-thick</v-icon>
                         <v-icon v-else-if="!r.objects.length" small color="green">mdi-check-bold</v-icon>
                         <v-tooltip v-else bottom>
@@ -35,8 +29,6 @@
                 </tr>
             </tbody>
         </v-simple-table>
-        <v-btn color="primary" @click="add()" small :disabled="disabled" class="mt-3">Add role</v-btn>
-        <div v-if="disabled" class="mt-2 grey--text">* - examples of fine-grained custom roles</div>
 
         <v-dialog v-model="form.active" max-width="800">
             <v-card class="pa-4">
@@ -158,7 +150,15 @@ export default {
         this.get();
     },
 
+    computed: {
+        filteredRoles() {
+            return this.roles.filter((r) => r.name !== 'QA' && r.name !== 'DBA');
+        },
+    },
     methods: {
+        filteredActionsRoles(roles) {
+            return roles.filter((r) => r.name !== 'QA' && r.name !== 'DBA');
+        },
         get() {
             this.loading = true;
             this.error = '';

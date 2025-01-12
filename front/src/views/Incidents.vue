@@ -238,18 +238,18 @@ export default {
 </script>
 
 <style scoped>
-.incident {
+.table .incident {
     gap: 4px;
     display: flex;
 }
-.incident .status {
+.table .incident .status {
     height: 6px;
     width: 6px;
     border-radius: 50%;
     align-self: center;
 }
 
-.incident .key {
+.table .incident .key {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
