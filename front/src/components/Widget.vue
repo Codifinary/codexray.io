@@ -10,7 +10,7 @@
             :doc="doc_link"
         />
         <DependencyMap v-if="w.dependency_map" :nodes="w.dependency_map.nodes" :links="w.dependency_map.links" />
-        <Table v-if="w.table" :header="w.table.header" :rows="w.table.rows" />
+        <Table v-if="w.table" :header="w.table.header" :rows="w.table.rows" :id="id" />
         <Heatmap v-if="w.heatmap" :heatmap="w.heatmap" :selection="heatmapSelection" @select="heatmapDrillDown" />
         <Logs v-if="w.logs" :appId="w.logs.application_id" :check="w.logs.check" />
         <Profiling v-if="w.profiling" :appId="w.profiling.application_id" />
@@ -31,6 +31,7 @@ import Tracing from '../views/Tracing';
 export default {
     props: {
         w: Object,
+        id: String,
     },
 
     components: { Chart, ChartGroup, DependencyMap, Table, Heatmap, Logs, Profiling, Tracing },

@@ -6,6 +6,7 @@
             :w="w"
             class="my-5"
             :style="{ width: $vuetify.breakpoint.mdAndUp ? w.width || '50%' : '100%' }"
+            :id="id"
         />
     </div>
 </template>
@@ -17,6 +18,7 @@ export default {
     props: {
         name: String,
         widgets: Array,
+        id: String,
     },
 
     components: { Widget },
