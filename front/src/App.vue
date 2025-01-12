@@ -48,33 +48,11 @@
                 <v-spacer />
 
                 <div v-if="$vuetify.breakpoint.smAndUp">
-                    <v-menu dark offset-y tile attach=".v-app-bar">
-                        <template #activator="{ on }">
-                            <div v-on="on" class="header-icon pb-2">
-                                <v-icon color="white">mdi-help-circle-outline</v-icon>
-                            </div>
-                        </template>
-                        <!-- need to exchange with a new link for documentation instead of drop-down  -->
-                        <v-list dense class="help-dropdown">
-                            <v-list-item href="https://codexray.com/docs/" target="_blank">
-                                <v-icon small class="mr-1">mdi-book-open-outline</v-icon>Documentation</v-list-item
-                            >
-                            <v-list-item href="https://github.com/codexray/codexray" target="_blank">
-                                <v-icon small class="mr-1">mdi-github</v-icon>GitHub
-                            </v-list-item>
-                            <v-list-item
-                                href="https://join.slack.com/t/codexray-community/shared_invite/zt-1gsnfo0wj-I~Zvtx5CAAb8vr~r~vecyw"
-                                target="_blank"
-                            >
-                                <v-icon small class="mr-1">mdi-slack</v-icon>Slack chat
-                            </v-list-item>
-                            <v-divider />
-                            <v-list-item class="px-4"> codexray Edition: {{ $codexray.edition }} </v-list-item>
-                            <v-list-item class="px-4" href="https://github.com/codexray/codexray/releases" target="_blank">
-                                Version: {{ $codexray.version }}
-                            </v-list-item>
-                        </v-list>
-                    </v-menu>
+                    <div v-if="$vuetify.breakpoint.smAndUp" class="mb-2 header-icon">
+                        <a href="http://codexray.io/docs" target="_blank">
+                            <v-icon>mdi-book-open-outline</v-icon>
+                        </a>
+                    </div>
                 </div>
                 <div v-if="project && $route.name !== 'project_settings'" class="pb-1">
                     <TimePicker :small="$vuetify.breakpoint.xsOnly" />
@@ -88,11 +66,11 @@
                 <!-- v-menu.eager is necessary to apply the selected theme -->
                 <v-menu dark offset-y left tile eager attach=".v-app-bar">
                     <template #activator="{ on }">
-                        <div v-on="on" class="header-icon px-4">
+                        <div v-on="on" class="header-icon pr-8 pl-2">
                             <BaseIcon name="user-profile" class="userIcon" />
                         </div>
                     </template>
-                    <v-list dense>
+                    <v-list dense v-if="user && !user.anonymous && $route.name !== 'login'">
                         <v-list-item v-if="user" class="px-4">
                             <div>
                                 <div>{{ user.name }}</div>
@@ -100,11 +78,8 @@
                                 <div v-if="user.role" class="caption grey--text">role: {{ user.role }}</div>
                             </div>
                         </v-list-item>
-                        <v-divider v-if="user" class="my-2 px-4" />
-                        <v-subheader class="px-4">Theme</v-subheader>
-                        <ThemeSelector />
                         <template v-if="user && !user.anonymous">
-                            <v-divider class="my-2" />
+                            <v-divider class="mt-2" />
                             <v-list-item @click="changePassword = true" class="px-4">Change password</v-list-item>
                             <!-- <v-list-item :to="{ name: 'logout' }">Sing out</v-list-item> -->
                         </template>
@@ -182,7 +157,6 @@ import TimePicker from './components/TimePicker.vue';
 import Search from './views/Search.vue';
 // import Led from './components/Led.vue';
 import CheckForUpdates from './components/CheckForUpdates.vue';
-import ThemeSelector from './components/ThemeSelector.vue';
 import AgentInstallation from './views/AgentInstallation.vue';
 import ChangePassword from './views/auth/ChangePassword.vue';
 import './app.css';
@@ -190,7 +164,7 @@ import Sidebar from './components/Sidebar.vue';
 import BaseIcon from '@/components/BaseIcon.vue';
 
 export default {
-    components: { Search, TimePicker, CheckForUpdates, ThemeSelector, AgentInstallation, ChangePassword, Sidebar, BaseIcon },
+    components: { Search, TimePicker, CheckForUpdates, AgentInstallation, ChangePassword, Sidebar, BaseIcon },
 
     data() {
         return {
@@ -328,6 +302,9 @@ export default {
     cursor: pointer;
     color: 'white';
     height: 40px;
+}
+.header-icon:hover {
+    cursor: pointer;
 }
 .project-name-btn {
     width: 150px;
