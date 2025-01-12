@@ -11,6 +11,7 @@ import (
 	chproto "github.com/ClickHouse/ch-go/proto"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 	v1 "go.opentelemetry.io/proto/otlp/collector/logs/v1"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 	"k8s.io/klog"
 )
@@ -33,6 +34,7 @@ func (c *Collector) Logs(w http.ResponseWriter, r *http.Request) {
 	contentType := r.Header.Get("Content-Type")
 	switch contentType {
 	case "application/x-protobuf":
+	case "application/json":
 	default:
 		http.Error(w, "unsupported content type: "+contentType, http.StatusBadRequest)
 		return
@@ -51,7 +53,12 @@ func (c *Collector) Logs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	req := &v1.ExportLogsServiceRequest{}
-	err = proto.Unmarshal(data, req)
+	switch contentType {
+	case "application/x-protobuf":
+		err = proto.Unmarshal(data, req)
+	case "application/json":
+		err = protojson.Unmarshal(data, req)
+	}
 	if err != nil {
 		klog.Errorln(err)
 		http.Error(w, "", http.StatusBadRequest)
