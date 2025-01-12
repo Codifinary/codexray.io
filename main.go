@@ -263,9 +263,9 @@ func main() {
 	})
 
 	router.PathPrefix("").Handler(http.RedirectHandler(*urlBasePath, http.StatusMovedPermanently))
-
+	handler := utils.EnableCORS(router, "http://34.47.146.55:3000")
 	klog.Infoln("listening on", *listen)
-	klog.Fatalln(http.ListenAndServe(*listen, router))
+	klog.Fatalln(http.ListenAndServe(*listen, handler))
 }
 
 func readIndexHtml(basePath, version, instanceUuid string, checkForUpdates bool, developerMode bool) []byte {
