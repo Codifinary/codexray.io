@@ -1,18 +1,20 @@
 <template>
     <v-container class="my-10">
-        <v-card>
-            <v-card-title>Errors</v-card-title>
-            <v-data-table :headers="headers" :items="data.errors" item-key="error" class="elevation-1">
-                <template v-slot:[`item.error`]="{ item }">
-                    <span>{{ item.error }}</span>
-                </template>
-            </v-data-table>
-        </v-card>
+        <CustomTable :headers="headers" :items="data.errors" item-key="error" class="elevation-1">
+            <template v-slot:[`item.error`]="{ item }">
+                <span>{{ item.error }}</span>
+            </template>
+        </CustomTable>
     </v-container>
 </template>
 
 <script>
+import CustomTable from '@/components/CustomTable.vue';
+
 export default {
+    components: {
+        CustomTable,
+    },
     name: 'Errors',
     props: {
         data: {

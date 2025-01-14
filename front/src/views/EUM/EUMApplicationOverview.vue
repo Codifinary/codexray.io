@@ -1,26 +1,33 @@
 <template>
-    <v-container>
-        <v-card>
-            <v-card-title>Overview: {{ applicationName }}</v-card-title>
+    <div>
+        <div class="mb-5">{{ applicationName }}</div>
 
-            <v-tabs v-model="activeTab">
-                <v-tab>Page Performance</v-tab>
-                <v-tab>Errors</v-tab>
-                <v-tab>Logs</v-tab>
-            </v-tabs>
-            <v-tabs-items v-model="activeTab">
-                <v-tab-item>
-                    <PagePerformance v-if="pagePerformance" :data="pagePerformance" />
-                </v-tab-item>
-                <v-tab-item>
-                    <Errors v-if="errors" :data="errors" />
-                </v-tab-item>
-                <v-tab-item>
-                    <Logs v-if="logs" :data="logs" />
-                </v-tab-item>
-            </v-tabs-items>
-        </v-card>
-    </v-container>
+        <v-tabs v-model="activeTab">
+            <v-tab>Page Performance</v-tab>
+            <v-tab>Errors</v-tab>
+            <v-tab>Second Layer Error</v-tab>
+            <v-tab>Error Details</v-tab>
+            <v-tab>Logs</v-tab>
+            <v-tab>Traces</v-tab>
+        </v-tabs>
+        <v-tabs-items v-model="activeTab">
+            <v-tab-item>
+                <PagePerformance v-if="pagePerformance" :data="pagePerformance" />
+            </v-tab-item>
+            <v-tab-item>
+                <Errors v-if="errors" :data="errors" />
+            </v-tab-item>
+            <v-tab-item>
+                <Error />
+            </v-tab-item>
+            <v-tab-item>
+                <ErrorDetails />
+            </v-tab-item>
+            <v-tab-item>
+                <Logs v-if="logs" :data="logs" />
+            </v-tab-item>
+        </v-tabs-items>
+    </div>
 </template>
 
 <script>
@@ -28,6 +35,8 @@ import { getApplicationData } from './api/EUMapi';
 import PagePerformance from './PagePerformance.vue';
 import Errors from './Errors.vue';
 import Logs from './Logs.vue';
+import ErrorDetails from './ErrorDetail.vue';
+import Error from './Error.vue';
 
 export default {
     name: 'EUMApplicationOverview',
@@ -35,6 +44,8 @@ export default {
         PagePerformance,
         Errors,
         Logs,
+        ErrorDetails,
+        Error,
     },
     props: {
         applicationName: {

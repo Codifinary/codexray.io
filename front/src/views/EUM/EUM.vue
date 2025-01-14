@@ -5,19 +5,17 @@
         </template>
 
         <template v-else>
-            <v-card>
-                <v-card-title>Applications</v-card-title>
-                <v-data-table :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1" @click:row="navigateToOverview">
-                    <template v-slot:[`item.applicationName`]="{ item }">
-                        <a href="#" @click.prevent="navigateToOverview(item)">{{ item.applicationName }}</a>
-                    </template>
-                </v-data-table>
-            </v-card>
+            <CustomTable :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1" @click:row="navigateToOverview">
+                <template v-slot:[`item.applicationName`]="{ item }">
+                    <a href="#" @click.prevent="navigateToOverview(item)">{{ item.applicationName }}</a>
+                </template>
+            </CustomTable>
         </template>
     </v-container>
 </template>
 
 <script>
+import CustomTable from '@/components/CustomTable.vue';
 import { getApplications } from './api/EUMapi';
 import EUMApplicationOverview from './EUMApplicationOverview.vue';
 
@@ -25,6 +23,7 @@ export default {
     name: 'EUM',
     components: {
         EUMApplicationOverview,
+        CustomTable,
     },
     data() {
         return {

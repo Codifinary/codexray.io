@@ -1,19 +1,20 @@
 <template>
     <v-container>
-        <v-card>
-            <v-card-title>Page Performance</v-card-title>
-            <v-data-table :headers="headers" :items="data.pages" item-key="pagePath" class="elevation-1">
-                <template v-slot:[`item.pagePath`]="{ item }">
-                    <span>{{ item.pagePath }}</span>
-                </template>
-            </v-data-table>
-        </v-card>
+        <CustomTable :headers="headers" :items="data.pages" item-key="pagePath" class="elevation-1 mt-10">
+            <template v-slot:[`item.pagePath`]="{ item }">
+                <span>{{ item.pagePath }}</span>
+            </template>
+        </CustomTable>
     </v-container>
 </template>
 
 <script>
+import CustomTable from '@/components/CustomTable.vue';
 export default {
     name: 'PagePerformance',
+    components: {
+        CustomTable,
+    },
     props: {
         data: {
             type: Object,
