@@ -1,0 +1,799 @@
+{
+    "applications": [
+      {
+        "applicationType": "webapp",
+        "applicationName": "CodeXRay",
+        "noOfPages": 40,
+        "loadRequestsPerSecond": 35,
+        "responseTimeMs": 200,
+        "jsErrorPercentage": 32,
+        "apiErrorPercentage": 25,
+        "usersImpacted": 54
+      },
+      {
+        "applicationType": "webapp",
+        "applicationName": "Taskify",
+        "noOfPages": 25,
+        "loadRequestsPerSecond": 50,
+        "responseTimeMs": 150,
+        "jsErrorPercentage": 12,
+        "apiErrorPercentage": 10,
+        "usersImpacted": 30
+      },
+      {
+        "applicationType": "mobile",
+        "applicationName": "HealthTrack",
+        "noOfPages": 15,
+        "loadRequestsPerSecond": 20,
+        "responseTimeMs": 300,
+        "jsErrorPercentage": 20,
+        "apiErrorPercentage": 15,
+        "usersImpacted": 75
+      },
+      {
+        "applicationType": "webapp",
+        "applicationName": "EduConnect",
+        "noOfPages": 50,
+        "loadRequestsPerSecond": 40,
+        "responseTimeMs": 250,
+        "jsErrorPercentage": 18,
+        "apiErrorPercentage": 22,
+        "usersImpacted": 65
+      },
+      {
+        "applicationType": "mobile",
+        "applicationName": "ShopEase",
+        "noOfPages": 30,
+        "loadRequestsPerSecond": 60,
+        "responseTimeMs": 180,
+        "jsErrorPercentage": 25,
+        "apiErrorPercentage": 30,
+        "usersImpacted": 120
+      },
+      {
+        "applicationType": "webapp",
+        "applicationName": "TravelBuddy",
+        "noOfPages": 20,
+        "loadRequestsPerSecond": 45,
+        "responseTimeMs": 220,
+        "jsErrorPercentage": 10,
+        "apiErrorPercentage": 5,
+        "usersImpacted": 40
+      },
+      {
+        "applicationType": "mobile",
+        "applicationName": "FitnessPro",
+        "noOfPages": 35,
+        "loadRequestsPerSecond": 70,
+        "responseTimeMs": 210,
+        "jsErrorPercentage": 15,
+        "apiErrorPercentage": 12,
+        "usersImpacted": 90
+      },
+      {
+        "applicationType": "webapp",
+        "applicationName": "FoodZone",
+        "noOfPages": 45,
+        "loadRequestsPerSecond": 30,
+        "responseTimeMs": 170,
+        "jsErrorPercentage": 20,
+        "apiErrorPercentage": 18,
+        "usersImpacted": 55
+      },
+      {
+        "applicationType": "mobile",
+        "applicationName": "NewsFlash",
+        "noOfPages": 10,
+        "loadRequestsPerSecond": 25,
+        "responseTimeMs": 350,
+        "jsErrorPercentage": 28,
+        "apiErrorPercentage": 30,
+        "usersImpacted": 100
+      },
+      {
+        "applicationType": "webapp",
+        "applicationName": "TechForum",
+        "noOfPages": 60,
+        "loadRequestsPerSecond": 80,
+        "responseTimeMs": 140,
+        "jsErrorPercentage": 8,
+        "apiErrorPercentage": 5,
+        "usersImpacted": 20
+      }
+    ],
+    "pagePerformance":{
+            "applications": [
+              {
+                "applicationName": "CodeXRay",
+                "pages": [
+                  {
+                    "pagePath": "/dashboard",
+                    "loadRequestsPerSecond": 35,
+                    "responseTimeMs": 210,
+                    "jsErrorPercentage": 25,
+                    "apiErrorPercentage": 20,
+                    "usersImpacted": 50
+                  },
+                  {
+                    "pagePath": "/settings",
+                    "loadRequestsPerSecond": 25,
+                    "responseTimeMs": 230,
+                    "jsErrorPercentage": 18,
+                    "apiErrorPercentage": 15,
+                    "usersImpacted": 35
+                  },
+                  {
+                    "pagePath": "/profile",
+                    "loadRequestsPerSecond": 15,
+                    "responseTimeMs": 190,
+                    "jsErrorPercentage": 30,
+                    "apiErrorPercentage": 25,
+                    "usersImpacted": 40
+                  }
+                ]
+              },
+              {
+                "applicationName": "Taskify",
+                "pages": [
+                  {
+                    "pagePath": "/home",
+                    "loadRequestsPerSecond": 50,
+                    "responseTimeMs": 150,
+                    "jsErrorPercentage": 10,
+                    "apiErrorPercentage": 12,
+                    "usersImpacted": 25
+                  },
+                  {
+                    "pagePath": "/tasks",
+                    "loadRequestsPerSecond": 35,
+                    "responseTimeMs": 170,
+                    "jsErrorPercentage": 14,
+                    "apiErrorPercentage": 8,
+                    "usersImpacted": 20
+                  },
+                  {
+                    "pagePath": "/analytics",
+                    "loadRequestsPerSecond": 40,
+                    "responseTimeMs": 180,
+                    "jsErrorPercentage": 5,
+                    "apiErrorPercentage": 10,
+                    "usersImpacted": 15
+                  }
+                ]
+              },
+              {
+                "applicationName": "HealthTrack",
+                "pages": [
+                  {
+                    "pagePath": "/overview",
+                    "loadRequestsPerSecond": 20,
+                    "responseTimeMs": 300,
+                    "jsErrorPercentage": 20,
+                    "apiErrorPercentage": 12,
+                    "usersImpacted": 60
+                  },
+                  {
+                    "pagePath": "/exercise",
+                    "loadRequestsPerSecond": 15,
+                    "responseTimeMs": 280,
+                    "jsErrorPercentage": 25,
+                    "apiErrorPercentage": 18,
+                    "usersImpacted": 50
+                  },
+                  {
+                    "pagePath": "/diet",
+                    "loadRequestsPerSecond": 18,
+                    "responseTimeMs": 290,
+                    "jsErrorPercentage": 15,
+                    "apiErrorPercentage": 10,
+                    "usersImpacted": 45
+                  }
+                ]
+              },
+              {
+                "applicationName": "EduConnect",
+                "pages": [
+                  {
+                    "pagePath": "/courses",
+                    "loadRequestsPerSecond": 45,
+                    "responseTimeMs": 220,
+                    "jsErrorPercentage": 12,
+                    "apiErrorPercentage": 10,
+                    "usersImpacted": 50
+                  },
+                  {
+                    "pagePath": "/schedule",
+                    "loadRequestsPerSecond": 30,
+                    "responseTimeMs": 200,
+                    "jsErrorPercentage": 18,
+                    "apiErrorPercentage": 22,
+                    "usersImpacted": 40
+                  },
+                  {
+                    "pagePath": "/profile",
+                    "loadRequestsPerSecond": 25,
+                    "responseTimeMs": 250,
+                    "jsErrorPercentage": 20,
+                    "apiErrorPercentage": 15,
+                    "usersImpacted": 30
+                  }
+                ]
+              },
+              {
+                "applicationName": "ShopEase",
+                "pages": [
+                  {
+                    "pagePath": "/products",
+                    "loadRequestsPerSecond": 60,
+                    "responseTimeMs": 190,
+                    "jsErrorPercentage": 20,
+                    "apiErrorPercentage": 25,
+                    "usersImpacted": 80
+                  },
+                  {
+                    "pagePath": "/cart",
+                    "loadRequestsPerSecond": 50,
+                    "responseTimeMs": 210,
+                    "jsErrorPercentage": 18,
+                    "apiErrorPercentage": 15,
+                    "usersImpacted": 70
+                  },
+                  {
+                    "pagePath": "/checkout",
+                    "loadRequestsPerSecond": 40,
+                    "responseTimeMs": 220,
+                    "jsErrorPercentage": 25,
+                    "apiErrorPercentage": 20,
+                    "usersImpacted": 60
+                  }
+                ]
+              }
+            ]          
+        },
+        "errorTab":{
+            "applications": [
+              {
+                "applicationName": "CodeXRay",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/error, status: 500",
+                    "numberOfEvents": 150,
+                    "usersImpacted": 120,
+                    "lastReportedTime": "2025-01-08T10:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/authenticate, status: 403",
+                    "numberOfEvents": 120,
+                    "usersImpacted": 100,
+                    "lastReportedTime": "2025-01-08T12:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: NetworkError when attempting to fetch resource, status: 0",
+                    "numberOfEvents": 110,
+                    "usersImpacted": 80,
+                    "lastReportedTime": "2025-01-08T14:15:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: Uncaught TypeError: Cannot read property 'data' of null",
+                    "numberOfEvents": 90,
+                    "usersImpacted": 70,
+                    "lastReportedTime": "2025-01-08T16:30:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/userdata, status: 404",
+                    "numberOfEvents": 85,
+                    "usersImpacted": 60,
+                    "lastReportedTime": "2025-01-09T09:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Timeout exceeded for GET request to /dashboard",
+                    "numberOfEvents": 80,
+                    "usersImpacted": 50,
+                    "lastReportedTime": "2025-01-09T12:30:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: ReferenceError: x is not defined",
+                    "numberOfEvents": 70,
+                    "usersImpacted": 40,
+                    "lastReportedTime": "2025-01-09T15:45:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: Internal Server Error when connecting to /api/v1/payment",
+                    "numberOfEvents": 65,
+                    "usersImpacted": 30,
+                    "lastReportedTime": "2025-01-09T17:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Failed to fetch from WebSocket connection",
+                    "numberOfEvents": 55,
+                    "usersImpacted": 45,
+                    "lastReportedTime": "2025-01-10T08:00:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: WebSocket Error: Connection refused",
+                    "numberOfEvents": 50,
+                    "usersImpacted": 35,
+                    "lastReportedTime": "2025-01-10T09:00:00Z",
+                    "category": "Network"
+                  }
+                ]
+              },
+              {
+                "applicationName": "Taskify",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/create-task, status: 401",
+                    "numberOfEvents": 200,
+                    "usersImpacted": 150,
+                    "lastReportedTime": "2025-01-08T10:45:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Uncaught SyntaxError: Unexpected token",
+                    "numberOfEvents": 180,
+                    "usersImpacted": 120,
+                    "lastReportedTime": "2025-01-08T13:00:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: Error 503: Service Unavailable for /task-list",
+                    "numberOfEvents": 160,
+                    "usersImpacted": 130,
+                    "lastReportedTime": "2025-01-08T14:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Failed to load resource: the server responded with a status of 403 (Forbidden)",
+                    "numberOfEvents": 140,
+                    "usersImpacted": 110,
+                    "lastReportedTime": "2025-01-09T09:15:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: WebSocket connection timed out",
+                    "numberOfEvents": 130,
+                    "usersImpacted": 100,
+                    "lastReportedTime": "2025-01-09T11:00:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/user-data, status: 404",
+                    "numberOfEvents": 120,
+                    "usersImpacted": 90,
+                    "lastReportedTime": "2025-01-09T12:45:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Internal Server Error when accessing /user-profile",
+                    "numberOfEvents": 110,
+                    "usersImpacted": 85,
+                    "lastReportedTime": "2025-01-09T15:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: TypeError: Cannot read property 'map' of undefined",
+                    "numberOfEvents": 100,
+                    "usersImpacted": 80,
+                    "lastReportedTime": "2025-01-10T08:15:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: 504 Gateway Timeout while accessing /tasks",
+                    "numberOfEvents": 90,
+                    "usersImpacted": 70,
+                    "lastReportedTime": "2025-01-10T09:30:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/task-details, status: 500",
+                    "numberOfEvents": 80,
+                    "usersImpacted": 60,
+                    "lastReportedTime": "2025-01-10T10:00:00Z",
+                    "category": "API"
+                  }
+                ]
+              },
+              {
+                "applicationName": "HealthTrack",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/overview, status: 500",
+                    "numberOfEvents": 150,
+                    "usersImpacted": 120,
+                    "lastReportedTime": "2025-01-08T10:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Error 404: Not Found for /exercise-log",
+                    "numberOfEvents": 140,
+                    "usersImpacted": 110,
+                    "lastReportedTime": "2025-01-08T13:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Failed to fetch user data from /user-profile",
+                    "numberOfEvents": 130,
+                    "usersImpacted": 100,
+                    "lastReportedTime": "2025-01-08T15:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: ReferenceError: workout is not defined",
+                    "numberOfEvents": 120,
+                    "usersImpacted": 90,
+                    "lastReportedTime": "2025-01-09T08:00:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: Timeout error for /calories-burned",
+                    "numberOfEvents": 110,
+                    "usersImpacted": 80,
+                    "lastReportedTime": "2025-01-09T10:15:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/login, status: 403",
+                    "numberOfEvents": 100,
+                    "usersImpacted": 70,
+                    "lastReportedTime": "2025-01-09T12:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: WebSocket connection lost to /live-updates",
+                    "numberOfEvents": 90,
+                    "usersImpacted": 60,
+                    "lastReportedTime": "2025-01-09T14:00:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: Internal Server Error for /user-stats",
+                    "numberOfEvents": 80,
+                    "usersImpacted": 50,
+                    "lastReportedTime": "2025-01-10T08:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Cannot read property 'map' of null",
+                    "numberOfEvents": 70,
+                    "usersImpacted": 40,
+                    "lastReportedTime": "2025-01-10T09:30:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: NetworkError when attempting to fetch from /exercise-plan",
+                    "numberOfEvents": 60,
+                    "usersImpacted": 30,
+                    "lastReportedTime": "2025-01-10T10:00:00Z",
+                    "category": "Network"
+                  }
+                ]
+              },
+              {
+                "applicationName": "EduConnect",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/courses, status: 500",
+                    "numberOfEvents": 200,
+                    "usersImpacted": 160,
+                    "lastReportedTime": "2025-01-08T11:30:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Uncaught SyntaxError: Unexpected token in JSON at position 0",
+                    "numberOfEvents": 180,
+                    "usersImpacted": 140,
+                    "lastReportedTime": "2025-01-08T13:15:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: Service Unavailable while accessing /student-data",
+                    "numberOfEvents": 170,
+                    "usersImpacted": 120,
+                    "lastReportedTime": "2025-01-08T15:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Failed to fetch data from /assignment-submissions",
+                    "numberOfEvents": 160,
+                    "usersImpacted": 100,
+                    "lastReportedTime": "2025-01-09T09:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: WebSocket disconnected unexpectedly from /classroom-updates",
+                    "numberOfEvents": 150,
+                    "usersImpacted": 90,
+                    "lastReportedTime": "2025-01-09T10:30:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: Failed to load resource from /student-performance",
+                    "numberOfEvents": 140,
+                    "usersImpacted": 80,
+                    "lastReportedTime": "2025-01-09T12:00:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Internal Server Error while accessing /profile-info",
+                    "numberOfEvents": 130,
+                    "usersImpacted": 70,
+                    "lastReportedTime": "2025-01-09T13:45:00Z",
+                    "category": "API"
+                  },
+                  {
+                    "error": "Error: Timeout Error for /student-grades",
+                    "numberOfEvents": 120,
+                    "usersImpacted": 60,
+                    "lastReportedTime": "2025-01-09T15:15:00Z",
+                    "category": "Network"
+                  },
+                  {
+                    "error": "Error: Cannot read property 'subjects' of undefined",
+                    "numberOfEvents": 110,
+                    "usersImpacted": 50,
+                    "lastReportedTime": "2025-01-10T08:00:00Z",
+                    "category": "JavaScript"
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/assignments, status: 400",
+                    "numberOfEvents": 100,
+                    "usersImpacted": 40,
+                    "lastReportedTime": "2025-01-10T09:00:00Z",
+                    "category": "API"
+                  }
+                ]
+              }
+            ]
+          },
+          "errorLogs":{
+            "applications": [
+              {
+                "applicationName": "CodeXRay",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/error, status: 500",
+                    "eventLogs": [
+                      {
+                        "eventId": "ERR123456",
+                        "userId": "USER001",
+                        "device": "Pixel 6",
+                        "os": "Android 13",
+                        "browserAndVersion": "Chrome 108.0",
+                        "lastReportedTime": "2025-01-08T10:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR123457",
+                        "userId": "USER002",
+                        "device": "iPhone 12",
+                        "os": "iOS 15.3",
+                        "browserAndVersion": "Safari 15.1",
+                        "lastReportedTime": "2025-01-08T11:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR123458",
+                        "userId": "USER003",
+                        "device": "OnePlus 9",
+                        "os": "Android 12",
+                        "browserAndVersion": "Chrome 107.0",
+                        "lastReportedTime": "2025-01-08T11:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR123459",
+                        "userId": "USER004",
+                        "device": "Samsung Galaxy S20",
+                        "os": "Android 11",
+                        "browserAndVersion": "Chrome 108.0",
+                        "lastReportedTime": "2025-01-08T12:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR123460",
+                        "userId": "USER005",
+                        "device": "iPhone 13 Pro",
+                        "os": "iOS 16",
+                        "browserAndVersion": "Safari 16.0",
+                        "lastReportedTime": "2025-01-08T12:30:00Z"
+                      }
+                    ]
+                  },
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/authenticate, status: 403",
+                    "eventLogs": [
+                      {
+                        "eventId": "ERR223456",
+                        "userId": "USER006",
+                        "device": "Pixel 5",
+                        "os": "Android 12",
+                        "browserAndVersion": "Chrome 108.0",
+                        "lastReportedTime": "2025-01-08T12:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR223457",
+                        "userId": "USER007",
+                        "device": "iPhone XR",
+                        "os": "iOS 14.7",
+                        "browserAndVersion": "Safari 14.0",
+                        "lastReportedTime": "2025-01-08T13:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR223458",
+                        "userId": "USER008",
+                        "device": "OnePlus 8T",
+                        "os": "Android 10",
+                        "browserAndVersion": "Firefox 96.0",
+                        "lastReportedTime": "2025-01-08T14:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR223459",
+                        "userId": "USER009",
+                        "device": "Samsung Galaxy Note 20",
+                        "os": "Android 11",
+                        "browserAndVersion": "Edge 95.0",
+                        "lastReportedTime": "2025-01-08T14:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR223460",
+                        "userId": "USER010",
+                        "device": "iPhone 14",
+                        "os": "iOS 16",
+                        "browserAndVersion": "Safari 16.0",
+                        "lastReportedTime": "2025-01-08T15:00:00Z"
+                      }
+                    ]
+                  },
+                  {
+                    "error": "Error: NetworkError when attempting to fetch resource, status: 0",
+                    "eventLogs": [
+                      {
+                        "eventId": "ERR323456",
+                        "userId": "USER011",
+                        "device": "Pixel 4",
+                        "os": "Android 9",
+                        "browserAndVersion": "Chrome 107.0",
+                        "lastReportedTime": "2025-01-08T16:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR323457",
+                        "userId": "USER012",
+                        "device": "iPhone SE",
+                        "os": "iOS 13.6",
+                        "browserAndVersion": "Safari 13.1",
+                        "lastReportedTime": "2025-01-08T16:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR323458",
+                        "userId": "USER013",
+                        "device": "OnePlus Nord",
+                        "os": "Android 10",
+                        "browserAndVersion": "Opera 78.0",
+                        "lastReportedTime": "2025-01-08T17:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR323459",
+                        "userId": "USER014",
+                        "device": "Samsung Galaxy S10",
+                        "os": "Android 10",
+                        "browserAndVersion": "Firefox 95.0",
+                        "lastReportedTime": "2025-01-08T17:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR323460",
+                        "userId": "USER015",
+                        "device": "iPhone 11 Pro",
+                        "os": "iOS 14.5",
+                        "browserAndVersion": "Safari 14.1",
+                        "lastReportedTime": "2025-01-08T18:00:00Z"
+                      }
+                    ]
+                  },
+                  {
+                    "error": "Error: Uncaught TypeError: Cannot read property 'data' of null",
+                    "eventLogs": [
+                      {
+                        "eventId": "ERR423456",
+                        "userId": "USER016",
+                        "device": "Pixel 6",
+                        "os": "Android 13",
+                        "browserAndVersion": "Chrome 108.0",
+                        "lastReportedTime": "2025-01-08T19:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR423457",
+                        "userId": "USER017",
+                        "device": "iPhone 12 Pro",
+                        "os": "iOS 15.4",
+                        "browserAndVersion": "Safari 15.1",
+                        "lastReportedTime": "2025-01-08T19:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR423458",
+                        "userId": "USER018",
+                        "device": "OnePlus 9 Pro",
+                        "os": "Android 12",
+                        "browserAndVersion": "Chrome 107.0",
+                        "lastReportedTime": "2025-01-08T20:00:00Z"
+                      },
+                      {
+                        "eventId": "ERR423459",
+                        "userId": "USER019",
+                        "device": "Samsung Galaxy Z Flip",
+                        "os": "Android 11",
+                        "browserAndVersion": "Firefox 96.0",
+                        "lastReportedTime": "2025-01-08T20:30:00Z"
+                      },
+                      {
+                        "eventId": "ERR423460",
+                        "userId": "USER020",
+                        "device": "iPhone 13 Mini",
+                        "os": "iOS 16",
+                        "browserAndVersion": "Safari 16.0",
+                        "lastReportedTime": "2025-01-08T21:00:00Z"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "applicationName": "Taskify",
+                "errors": [
+                  {
+                    "error": "Error: XMLHttpRequest method:POST, url: http://10.196.141.12:8005/api/v1/create-task, status: 401",
+                    "eventLogs": [
+                      {
+                        "eventId": "ERR523456",
+                        "userId": "USER021",
+                        "device": "Pixel 4",
+                        "os": "Android 9",
+                        "browserAndVersion": "Chrome 107.0",
+                        "lastReportedTime": "2025-01-08T16:15:00Z"
+                      },
+                      {
+                        "eventId": "ERR523457",
+                        "userId": "USER022",
+                        "device": "iPhone XR",
+                        "os": "iOS 14.7",
+                        "browserAndVersion": "Safari 14.0",
+                        "lastReportedTime": "2025-01-08T16:45:00Z"
+                      },
+                      {
+                        "eventId": "ERR523458",
+                        "userId": "USER023",
+                        "device": "OnePlus 8T",
+                        "os": "Android 10",
+                        "browserAndVersion": "Firefox 96.0",
+                        "lastReportedTime": "2025-01-08T17:15:00Z"
+                      },
+                      {
+                        "eventId": "ERR523459",
+                        "userId": "USER024",
+                        "device": "Samsung Galaxy Note 20",
+                        "os": "Android 11",
+                        "browserAndVersion": "Edge 95.0",
+                        "lastReportedTime": "2025-01-08T17:45:00Z"
+                      },
+                      {
+                        "eventId": "ERR523460",
+                        "userId": "USER025",
+                        "device": "iPhone 12 Pro",
+                        "os": "iOS 15.1",
+                        "browserAndVersion": "Safari 15.0",
+                        "lastReportedTime": "2025-01-08T18:15:00Z"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+                    
+          
+  }
+  

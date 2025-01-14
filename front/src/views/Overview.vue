@@ -20,7 +20,7 @@
         </template>
 
         <template v-if="view === 'EUM'">
-            <NoData />
+            <EUM />
         </template>
 
         <template v-if="view === 'traces'">
@@ -45,7 +45,7 @@ import Nodes from '@/views/Nodes.vue';
 import Node from '@/views/Node.vue';
 import Anomalies from '@/views/Anomalies.vue';
 import RCA from '@/views/RCA.vue';
-import NoData from '@/components/NoData.vue';
+import EUM from '@/views/EUM/EUM.vue';
 
 export default {
     components: {
@@ -59,7 +59,8 @@ export default {
         Node,
         Anomalies,
         RCA,
-        NoData,
+        // NoData,
+        EUM,
     },
     props: {
         view: String,
