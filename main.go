@@ -213,6 +213,7 @@ func main() {
 	router.HandleFunc("/v1/traces", coll.Traces)
 	router.HandleFunc("/v1/logs", coll.Logs)
 	router.HandleFunc("/v1/profiles", coll.Profiles)
+	router.HandleFunc("/v1/perf", coll.Perf)
 	router.HandleFunc("/v1/config", coll.Config)
 
 	r := router
