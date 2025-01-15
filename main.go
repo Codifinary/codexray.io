@@ -214,6 +214,7 @@ func main() {
 	router.HandleFunc("/v1/logs", coll.Logs)
 	router.HandleFunc("/v1/profiles", coll.Profiles)
 	router.HandleFunc("/v1/perf", coll.Perf)
+	router.HandleFunc("/v1/errlog", coll.ErrLog)
 	router.HandleFunc("/v1/config", coll.Config)
 
 	r := router
