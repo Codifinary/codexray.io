@@ -250,6 +250,33 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, PageName, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
+
+		`
+CREATE TABLE IF NOT EXISTS err_log_data (
+    UniqueId      String CODEC(ZSTD(1)),
+    Timestamp     DateTime64(9) CODEC(Delta, ZSTD(1)),
+    ServiceName   LowCardinality(String) CODEC(ZSTD(1)),
+    PagePath      String CODEC(ZSTD(1)),
+    Category      String CODEC(ZSTD(1)),
+    Grade         String CODEC(ZSTD(1)),
+    ErrorUrl      String CODEC(ZSTD(1)),
+    Line          Int64 CODEC(ZSTD(1)),
+    Col           Int64 CODEC(ZSTD(1)),
+    Message       String CODEC(ZSTD(1)),
+    Stack         String CODEC(ZSTD(1)),
+    UserId        String CODEC(ZSTD(1)),
+    RawData       String CODEC(ZSTD(1)),
+
+    INDEX idx_unique_id    UniqueId      TYPE bloom_filter(0.001) GRANULARITY 1,
+    INDEX idx_service_name ServiceName   TYPE bloom_filter(0.001) GRANULARITY 1,
+    INDEX idx_category     Category      TYPE bloom_filter(0.01)  GRANULARITY 1,
+    INDEX idx_page_path    PagePath      TYPE bloom_filter(0.001) GRANULARITY 1,
+    INDEX idx_user_id      UserId        TYPE bloom_filter(0.01)  GRANULARITY 1,
+) ENGINE = MergeTree()
+PARTITION BY toDate(Timestamp)
+ORDER BY (ServiceName, PagePath, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity = 8192;
+`,
 	}
 
 	distributedTables = []string{
