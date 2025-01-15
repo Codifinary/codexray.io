@@ -2,7 +2,16 @@
     <v-container class="my-10">
         <CustomTable :headers="headers" :items="data.errors" item-key="error" class="elevation-1">
             <template v-slot:[`item.error`]="{ item }">
-                <span>{{ item.error }}</span>
+                <router-link
+                    :to="{
+                        name: 'overview',
+                        params: { view: 'EUM', id: $route.params.id },
+                        query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error) },
+                    }"
+                    @click.native.prevent="handleErrorClick(item.error)"
+                >
+                    <span>{{ item.error }}</span>
+                </router-link>
             </template>
         </CustomTable>
     </v-container>
@@ -31,20 +40,26 @@ export default {
                 { text: 'Last Reported Time', value: 'lastReportedTime' },
                 { text: 'Category', value: 'category' },
             ],
-            tableItems: [],
         };
     },
     watch: {
-        errors: {
+        '$route.query.error': {
             immediate: true,
-            handler(newVal) {
-                if (newVal && newVal.errors) {
-                    this.tableItems = newVal.errors;
-                }
+            handler(newError) {
+                this.$emit('update:error', newError);
             },
+        },
+        '$route.query.eventId': {
+            immediate: true,
+            handler(newEventId) {
+                this.$emit('update:eventId', newEventId);
+            },
+        },
+    },
+    methods: {
+        handleErrorClick(error) {
+            this.$emit('error-clicked', error);
         },
     },
 };
 </script>
-
-<style scoped></style>

@@ -312,7 +312,7 @@
                         "category": "API"
                     },
                     {
-                        "error": "Error: Failed to fetch from WebSocket connection",
+                        "error": "JS_Error_80",
                         "numberOfEvents": 55,
                         "usersImpacted": 45,
                         "lastReportedTime": "2025-01-10T08:00:00Z",
@@ -554,13 +554,13 @@
             }
         ]
     },
-    "errorLogs": {
+    "specificErrors": {
         "applications": [
             {
                 "applicationName": "CodeXRay",
                 "errors": [
                     {
-                        "error": "Error: XMLHttpRequest method:GET, url: http://10.196.141.12:8005/api/v1/error, status: 500",
+                        "error": "JS_Error_80",
                         "eventLogs": [
                             {
                                 "eventId": "ERR123456",
@@ -794,6 +794,7 @@
         ]
     },
     "errorDetails": {
+        "errorId": "ERR123456",
         "errorMessage": "An unexpected error occurred.",
         "errorDetails": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book",
         "errorUrl": "https://example.com/error",
@@ -854,48 +855,5 @@
                 "time": "2025-01-08T10:32:00Z"
             }
         ]
-    },
-
-    "specificErrors": [
-        {
-            "eventId": "ERR123456",
-            "userId": "USER001",
-            "device": "Pixel 6",
-            "os": "Android 13",
-            "browserAndVersion": "Chrome 108.0",
-            "lastReportedTime": "2025-01-08T10:30:00Z"
-        },
-        {
-            "eventId": "ERR123457",
-            "userId": "USER002",
-            "device": "iPhone 12",
-            "os": "iOS 15.3",
-            "browserAndVersion": "Safari 15.1",
-            "lastReportedTime": "2025-01-08T11:00:00Z"
-        },
-        {
-            "eventId": "ERR123458",
-            "userId": "USER003",
-            "device": "OnePlus 9",
-            "os": "Android 12",
-            "browserAndVersion": "Chrome 107.0",
-            "lastReportedTime": "2025-01-08T11:30:00Z"
-        },
-        {
-            "eventId": "ERR123459",
-            "userId": "USER004",
-            "device": "Samsung Galaxy S20",
-            "os": "Android 11",
-            "browserAndVersion": "Chrome 108.0",
-            "lastReportedTime": "2025-01-08T12:00:00Z"
-        },
-        {
-            "eventId": "ERR123460",
-            "userId": "USER005",
-            "device": "iPhone 13 Pro",
-            "os": "iOS 16",
-            "browserAndVersion": "Safari 16.0",
-            "lastReportedTime": "2025-01-08T12:30:00Z"
-        }
-    ]
+    }
 }

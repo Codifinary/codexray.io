@@ -45,7 +45,6 @@
             </div>
         </div>
         <div class="mt-10">
-            <!-- need a filter -->
             <CustomTable :headers="headers" :items="errorDetails.breadcrumb" />
         </div>
     </v-container>
@@ -59,6 +58,12 @@ export default {
     components: {
         CustomTable,
     },
+    props: {
+        eventId: {
+            type: String,
+            required: true,
+        },
+    },
     data() {
         return {
             errorDetails: null,
@@ -71,8 +76,14 @@ export default {
             ],
         };
     },
+    methods: {
+        fetchErrorDetails(eventId) {
+            console.log(eventId);
+            this.errorDetails = getErrorDetails();
+        },
+    },
     created() {
-        this.errorDetails = getErrorDetails();
+        this.fetchErrorDetails(this.eventId);
     },
 };
 </script>

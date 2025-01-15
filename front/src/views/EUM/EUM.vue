@@ -1,28 +1,29 @@
 <template>
     <v-container class="my-10">
-        <template v-if="selectedApplication">
-            <EUMApplicationOverview :application-name="selectedApplication" />
-        </template>
-
-        <template v-else>
-            <CustomTable :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1" @click:row="navigateToOverview">
-                <template v-slot:[`item.applicationName`]="{ item }">
-                    <a href="#" @click.prevent="navigateToOverview(item)">{{ item.applicationName }}</a>
-                </template>
-            </CustomTable>
-        </template>
+        <CustomTable :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1">
+            <template v-slot:item.applicationName="{ item }">
+                <div class="name">
+                    <router-link
+                        :to="{
+                            name: 'overview',
+                            params: { view: 'EUM', id: item.applicationName },
+                        }"
+                    >
+                        {{ item.applicationName }}
+                    </router-link>
+                </div>
+            </template>
+        </CustomTable>
     </v-container>
 </template>
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import { getApplications } from './api/EUMapi';
-import EUMApplicationOverview from './EUMApplicationOverview.vue';
 
 export default {
     name: 'EUM',
     components: {
-        EUMApplicationOverview,
         CustomTable,
     },
     data() {
@@ -45,12 +46,5 @@ export default {
         const applications = getApplications();
         this.tableItems = applications;
     },
-    methods: {
-        navigateToOverview(item) {
-            this.selectedApplication = item.applicationName;
-        },
-    },
 };
 </script>
-
-<style scoped></style>

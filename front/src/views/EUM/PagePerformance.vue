@@ -2,7 +2,16 @@
     <v-container>
         <CustomTable :headers="headers" :items="data.pages" item-key="pagePath" class="elevation-1 mt-10">
             <template v-slot:[`item.pagePath`]="{ item }">
-                <span>{{ item.pagePath }}</span>
+                <router-link
+                    :to="{
+                        name: 'overview',
+                        params: { view: 'EUM', id: id, report: 'page-performance' },
+                        query: { pagePath: item.pagePath },
+                    }"
+                    class="clickable"
+                >
+                    {{ item.pagePath }}
+                </router-link>
             </template>
         </CustomTable>
     </v-container>
@@ -10,6 +19,7 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+
 export default {
     name: 'PagePerformance',
     components: {
@@ -18,6 +28,10 @@ export default {
     props: {
         data: {
             type: Object,
+            required: true,
+        },
+        id: {
+            type: String,
             required: true,
         },
     },
@@ -36,4 +50,10 @@ export default {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.clickable {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+</style>
