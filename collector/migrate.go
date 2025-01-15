@@ -227,6 +227,29 @@ PARTITION BY toDate(LastSeen)`,
 		`
 CREATE MATERIALIZED VIEW IF NOT EXISTS profiling_profiles_mv @on_cluster TO profiling_profiles AS
 SELECT ServiceName, Type, max(End) AS LastSeen FROM profiling_samples group by ServiceName, Type`,
+
+		`
+CREATE TABLE IF NOT EXISTS perf_data @on_cluster (
+     Timestamp        DateTime64(9) CODEC(Delta, ZSTD(1)),
+     ServiceName      LowCardinality(String) CODEC(ZSTD(1)),
+     PageName         LowCardinality(String) CODEC(ZSTD(1)),
+     DeviceId         String CODEC(ZSTD(1)),
+     UserId           String CODEC(ZSTD(1)),
+     TransTime        Int64 CODEC(ZSTD(1)),
+     LoadPageTime     Int64 CODEC(ZSTD(1)),
+     ResTime          Int64 CODEC(ZSTD(1)),
+     RawData          String CODEC(ZSTD(1)),
+
+     INDEX idx_service_name ServiceName TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_page_name PageName TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_device_id DeviceId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (ServiceName, PageName, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
 	}
 
 	distributedTables = []string{

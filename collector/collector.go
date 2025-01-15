@@ -54,6 +54,9 @@ type Collector struct {
 	logBatchesLock     sync.Mutex
 	profileBatches     map[db.ProjectId]*ProfilesBatch
 	profileBatchesLock sync.Mutex
+
+	perfBatches     map[db.ProjectId]*PerfBatch
+	perfBatchesLock sync.Mutex
 }
 
 func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationClickhouse, globalPrometheus *db.IntegrationsPrometheus) *Collector {
@@ -66,6 +69,7 @@ func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationCl
 		traceBatches:      map[db.ProjectId]*TracesBatch{},
 		profileBatches:    map[db.ProjectId]*ProfilesBatch{},
 		logBatches:        map[db.ProjectId]*LogsBatch{},
+		perfBatches:       map[db.ProjectId]*PerfBatch{},
 	}
 
 	c.updateProjects()
@@ -324,6 +328,19 @@ func (c *Collector) getProfilesBatch(project *db.Project) *ProfilesBatch {
 			return c.clickhouseDo(context.TODO(), project, query)
 		})
 		c.profileBatches[project.Id] = b
+	}
+	return b
+}
+
+func (c *Collector) getPerfBatch(project *db.Project) *PerfBatch {
+	c.perfBatchesLock.Lock()
+	defer c.perfBatchesLock.Unlock()
+	b := c.perfBatches[project.Id]
+	if b == nil {
+		b = NewPerfBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.perfBatches[project.Id] = b
 	}
 	return b
 }
