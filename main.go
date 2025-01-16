@@ -250,6 +250,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
+	r.HandleFunc("/api/project/{project}/perfview", a.Auth(a.PerfView)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
