@@ -1,8 +1,9 @@
 <template>
-    <v-container class="my-10">
+    <div class="my-10 mx-5">
         <CustomTable :headers="headers" :items="data.errors" item-key="error" class="elevation-1">
             <template v-slot:[`item.error`]="{ item }">
                 <router-link
+                    class="clickable"
                     :to="{
                         name: 'overview',
                         params: { view: 'EUM', id: $route.params.id },
@@ -14,7 +15,7 @@
                 </router-link>
             </template>
         </CustomTable>
-    </v-container>
+    </div>
 </template>
 
 <script>
@@ -63,3 +64,10 @@ export default {
     },
 };
 </script>
+<style scoped>
+.clickable {
+    cursor: pointer;
+    color: var(--status-ok);
+    text-decoration: none !important;
+}
+</style>

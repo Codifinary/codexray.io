@@ -15,7 +15,6 @@
         </ol>
     </nav>
 </template>
-
 <script>
 export default {
     props: {
@@ -59,9 +58,21 @@ export default {
     padding: 0;
     margin: 0;
     list-style: none;
+    display: flex !important;
+    color: var(--status-ok) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+}
+.breadcrumb-item {
+    display: inline;
+    color: var(--status-ok) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
 }
 .breadcrumb-item + .breadcrumb-item::before {
     content: '>';
-    padding: 0 5px;
+    padding: 0 8px;
 }
 </style>

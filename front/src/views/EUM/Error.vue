@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="my-10 mx-5">
         <div v-if="selectedEventId">
             <ErrorDetail :eventId="selectedEventId" />
         </div>
@@ -97,7 +97,7 @@ export default {
 <style scoped>
 .clickable {
     cursor: pointer;
-    color: blue;
-    text-decoration: underline;
+    color: var(--status-ok);
+    text-decoration: none !important;
 }
 </style>

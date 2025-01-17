@@ -1,0 +1,1285 @@
+{
+    "data": {
+        "status": "ok",
+        "message": "Using container logs",
+        "sources": [
+            "agent"
+        ],
+        "source": "agent",
+        "services": [
+            "Client App-UI",
+            "accountingservice",
+            "adservice",
+            "cartservice",
+            "currencyservice",
+            "frauddetectionservice",
+            "kafka",
+            "loadgenerator",
+            "quoteservice",
+            "recommendationservice",
+            "test-service-name"
+        ],
+        "service": "",
+        "views": [
+            "messages",
+            "patterns"
+        ],
+        "view": "messages",
+        "severities": [
+            "info",
+            "warning"
+        ],
+        "severity": [
+            "info",
+            "warning"
+        ],
+        "chart": {
+            "ctx": {
+                "from": 1737011640000,
+                "to": 1737015240000,
+                "step": 15000,
+                "raw_step": 15000
+            },
+            "title": "",
+            "series": [
+                {
+                    "name": "warning",
+                    "data": [
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        2,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        8,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        4,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        4,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        10,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        6,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        6,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null
+                    ],
+                    "value": ""
+                },
+                {
+                    "name": "info",
+                    "data": [
+                        4,
+                        2,
+                        4,
+                        null,
+                        3,
+                        2,
+                        6,
+                        null,
+                        2,
+                        2,
+                        2,
+                        2,
+                        null,
+                        4,
+                        2,
+                        2,
+                        null,
+                        2,
+                        4,
+                        2,
+                        2,
+                        null,
+                        4,
+                        null,
+                        4,
+                        null,
+                        2,
+                        2,
+                        2,
+                        4,
+                        3,
+                        2,
+                        null,
+                        null,
+                        8,
+                        null,
+                        null,
+                        null,
+                        4,
+                        2,
+                        null,
+                        2,
+                        2,
+                        2,
+                        1,
+                        null,
+                        4,
+                        null,
+                        null,
+                        2,
+                        6,
+                        2,
+                        null,
+                        2,
+                        2,
+                        null,
+                        null,
+                        2,
+                        4,
+                        null,
+                        null,
+                        2,
+                        4,
+                        null,
+                        4,
+                        null,
+                        2,
+                        2,
+                        null,
+                        2,
+                        5,
+                        null,
+                        2,
+                        2,
+                        2,
+                        null,
+                        2,
+                        null,
+                        4,
+                        4,
+                        null,
+                        null,
+                        4,
+                        null,
+                        3,
+                        2,
+                        10,
+                        null,
+                        4,
+                        2,
+                        2,
+                        2,
+                        2,
+                        null,
+                        2,
+                        2,
+                        null,
+                        2,
+                        4,
+                        4,
+                        2,
+                        6,
+                        4,
+                        2,
+                        1,
+                        4,
+                        6,
+                        2,
+                        6,
+                        2,
+                        6,
+                        null,
+                        2,
+                        2,
+                        2,
+                        null,
+                        null,
+                        2,
+                        2,
+                        null,
+                        2,
+                        null,
+                        2,
+                        null,
+                        3,
+                        null,
+                        2,
+                        null,
+                        null,
+                        null,
+                        2,
+                        null,
+                        2,
+                        null,
+                        10,
+                        null,
+                        2,
+                        6,
+                        2,
+                        null,
+                        4,
+                        null,
+                        4,
+                        2,
+                        8,
+                        null,
+                        4,
+                        2,
+                        null,
+                        2,
+                        5,
+                        2,
+                        null,
+                        null,
+                        4,
+                        2,
+                        2,
+                        2,
+                        6,
+                        null,
+                        2,
+                        null,
+                        4,
+                        null,
+                        3,
+                        null,
+                        2,
+                        null,
+                        2,
+                        2,
+                        4,
+                        null,
+                        null,
+                        null,
+                        2,
+                        2,
+                        null,
+                        2,
+                        2,
+                        2,
+                        2,
+                        4,
+                        2,
+                        null,
+                        3,
+                        null,
+                        6,
+                        4,
+                        6,
+                        2,
+                        4,
+                        null,
+                        2,
+                        null,
+                        4,
+                        null,
+                        null,
+                        2,
+                        2,
+                        null,
+                        null,
+                        2,
+                        2,
+                        2,
+                        1,
+                        null,
+                        4,
+                        2,
+                        null,
+                        null,
+                        2,
+                        null,
+                        2,
+                        null,
+                        4,
+                        null,
+                        4,
+                        2,
+                        4,
+                        null,
+                        2,
+                        2,
+                        4,
+                        null,
+                        3,
+                        2,
+                        2,
+                        2,
+                        null,
+                        2,
+                        3,
+                        2,
+                        2,
+                        4,
+                        2,
+                        2,
+                        null,
+                        null,
+                        2,
+                        null
+                    ],
+                    "value": ""
+                }
+            ],
+            "threshold": null,
+            "featured": false,
+            "stacked": true,
+            "sorted": false,
+            "column": true,
+            "color_shift": 0,
+            "annotations": null,
+            "drill_down_link": null,
+            "hide_legend": false
+        },
+        "entries": [
+            {
+                "timestamp": 1737015214349,
+                "severity": "info",
+                "message": "I0116 08:13:34.349413    1102 profiling.go:147] uploaded 8 profiles in 289ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015214059,
+                "severity": "info",
+                "message": "I0116 08:13:34.059789    1102 profiling.go:137] collected 8 profiles in 15ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015168387,
+                "severity": "info",
+                "message": "I0116 08:12:48.387580    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610267",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015168387,
+                "severity": "info",
+                "message": "I0116 08:12:48.387484    1102 registry.go:323] calculated container id 610267 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015154397,
+                "severity": "info",
+                "message": "I0116 08:12:34.397867    1102 profiling.go:147] uploaded 10 profiles in 333ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015154064,
+                "severity": "info",
+                "message": "I0116 08:12:34.064537    1102 profiling.go:137] collected 10 profiles in 20ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015137934,
+                "severity": "info",
+                "message": "I0116 08:12:17.934192    1102 registry.go:328] \"ignoring\" cg=\"\" pid=610244",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015137934,
+                "severity": "info",
+                "message": "I0116 08:12:17.934131    1102 registry.go:323] calculated container id 610244 -\u003e  -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015137831,
+                "severity": "info",
+                "message": "I0116 08:12:17.831060    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610243",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015137831,
+                "severity": "info",
+                "message": "I0116 08:12:17.830978    1102 registry.go:323] calculated container id 610243 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015127565,
+                "severity": "info",
+                "message": "I0116 08:12:07.564452    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610231",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015127564,
+                "severity": "info",
+                "message": "I0116 08:12:07.564335    1102 registry.go:323] calculated container id 610231 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015107085,
+                "severity": "info",
+                "message": "I0116 08:11:47.085832    1102 registry.go:328] \"ignoring\" cg=\"\" pid=610209",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015107085,
+                "severity": "info",
+                "message": "I0116 08:11:47.085727    1102 registry.go:323] calculated container id 610209 -\u003e  -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098793,
+                "severity": "warning",
+                "message": "W0116 08:11:38.793327    1102 fd.go:38] failed to read link '294': readlink /proc/1102/fd/294: no such file or directory",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "54d9fdcd237edfc58bb4d7940fda95cb",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098793,
+                "severity": "warning",
+                "message": "W0116 08:11:38.793327    1102 fd.go:38] failed to read link '294': readlink /proc/1102/fd/294: no such file or directory",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "54d9fdcd237edfc58bb4d7940fda95cb",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098793,
+                "severity": "warning",
+                "message": "W0116 08:11:38.792791    1102 fd.go:38] failed to read link '285': readlink /proc/1102/fd/285: no such file or directory",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "54d9fdcd237edfc58bb4d7940fda95cb",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098793,
+                "severity": "warning",
+                "message": "W0116 08:11:38.792791    1102 fd.go:38] failed to read link '285': readlink /proc/1102/fd/285: no such file or directory",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "54d9fdcd237edfc58bb4d7940fda95cb",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098780,
+                "severity": "info",
+                "message": "I0116 08:11:38.780736    1102 container.go:472] TCP listen open pid=808 id=/system.slice/containerd.service addr=127.0.0.1:37787",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098780,
+                "severity": "warning",
+                "message": "W0116 08:11:38.780647    1102 container.go:1100] missing listen found: 127.0.0.1:37787 808",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "8d7e8e7127753fff17420a9a764f1018",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015098780,
+                "severity": "warning",
+                "message": "W0116 08:11:38.780647    1102 container.go:1100] missing listen found: 127.0.0.1:37787 808",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "pattern.hash": "8d7e8e7127753fff17420a9a764f1018",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015094362,
+                "severity": "info",
+                "message": "I0116 08:11:34.362101    1102 profiling.go:147] uploaded 9 profiles in 294ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015094067,
+                "severity": "info",
+                "message": "I0116 08:11:34.067703    1102 profiling.go:137] collected 9 profiles in 23ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015086374,
+                "severity": "info",
+                "message": "I0116 08:11:26.374850    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610175",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015086374,
+                "severity": "info",
+                "message": "I0116 08:11:26.374767    1102 registry.go:323] calculated container id 610175 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015053184,
+                "severity": "info",
+                "message": "I0116 08:10:53.184822    1102 registry.go:328] \"ignoring\" cg=\"\" pid=610140",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015053184,
+                "severity": "info",
+                "message": "I0116 08:10:53.184717    1102 registry.go:323] calculated container id 610140 -\u003e  -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015034397,
+                "severity": "info",
+                "message": "I0116 08:10:34.397489    1102 profiling.go:147] uploaded 10 profiles in 335ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015034062,
+                "severity": "info",
+                "message": "I0116 08:10:34.062296    1102 profiling.go:137] collected 10 profiles in 18ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015024878,
+                "severity": "info",
+                "message": "I0116 08:10:24.877209    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610107",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015024877,
+                "severity": "info",
+                "message": "I0116 08:10:24.876875    1102 registry.go:323] calculated container id 610107 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015004380,
+                "severity": "info",
+                "message": "I0116 08:10:04.379948    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610085",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015004379,
+                "severity": "info",
+                "message": "I0116 08:10:04.379245    1102 registry.go:323] calculated container id 610085 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737015001649,
+                "severity": "info",
+                "message": "I0116 08:10:01.649424    1102 tls.go:115] pid=610082 libssl_version=v3.0.13: libssl uprobes attached",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014983885,
+                "severity": "info",
+                "message": "I0116 08:09:43.885522    1102 registry.go:323] calculated container id 610055 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014983885,
+                "severity": "info",
+                "message": "I0116 08:09:43.885595    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610055",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014974332,
+                "severity": "info",
+                "message": "I0116 08:09:34.332278    1102 profiling.go:147] uploaded 8 profiles in 269ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014974063,
+                "severity": "info",
+                "message": "I0116 08:09:34.062670    1102 profiling.go:137] collected 8 profiles in 18ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014967177,
+                "severity": "info",
+                "message": "I0116 08:09:27.177903    1102 registry.go:328] \"ignoring\" cg=\"\" pid=610042",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014967177,
+                "severity": "info",
+                "message": "I0116 08:09:27.177817    1102 registry.go:323] calculated container id 610042 -\u003e  -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014942885,
+                "severity": "info",
+                "message": "I0116 08:09:02.885654    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=610009",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014942885,
+                "severity": "info",
+                "message": "I0116 08:09:02.885579    1102 registry.go:323] calculated container id 610009 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014922633,
+                "severity": "info",
+                "message": "I0116 08:08:42.632999    1102 registry.go:328] \"ignoring\" cg=\"\" pid=609997",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014922633,
+                "severity": "info",
+                "message": "I0116 08:08:42.632913    1102 registry.go:323] calculated container id 609997 -\u003e  -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014914352,
+                "severity": "info",
+                "message": "I0116 08:08:34.352429    1102 profiling.go:147] uploaded 8 profiles in 291ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014914061,
+                "severity": "info",
+                "message": "I0116 08:08:34.060944    1102 profiling.go:137] collected 8 profiles in 17ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014902075,
+                "severity": "info",
+                "message": "I0116 08:08:22.075482    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609974",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014902075,
+                "severity": "info",
+                "message": "I0116 08:08:22.075381    1102 registry.go:323] calculated container id 609974 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014881587,
+                "severity": "info",
+                "message": "I0116 08:08:01.587563    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609952",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014881587,
+                "severity": "info",
+                "message": "I0116 08:08:01.587460    1102 registry.go:323] calculated container id 609952 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014881389,
+                "severity": "info",
+                "message": "I0116 08:08:01.389186    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609942",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014881388,
+                "severity": "info",
+                "message": "I0116 08:08:01.388160    1102 registry.go:323] calculated container id 609942 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014860887,
+                "severity": "info",
+                "message": "I0116 08:07:40.887778    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609919",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014860887,
+                "severity": "info",
+                "message": "I0116 08:07:40.887702    1102 registry.go:323] calculated container id 609919 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014854398,
+                "severity": "info",
+                "message": "I0116 08:07:34.398225    1102 profiling.go:147] uploaded 9 profiles in 336ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014854062,
+                "severity": "info",
+                "message": "I0116 08:07:34.062073    1102 profiling.go:137] collected 9 profiles in 18ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014830133,
+                "severity": "info",
+                "message": "I0116 08:07:10.133395    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609886",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014830133,
+                "severity": "info",
+                "message": "I0116 08:07:10.133313    1102 registry.go:323] calculated container id 609886 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014794326,
+                "severity": "info",
+                "message": "I0116 08:06:34.326450    1102 profiling.go:147] uploaded 8 profiles in 263ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014794063,
+                "severity": "info",
+                "message": "I0116 08:06:34.062959    1102 profiling.go:137] collected 8 profiles in 19ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014758383,
+                "severity": "info",
+                "message": "I0116 08:05:58.383197    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609810",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014758383,
+                "severity": "info",
+                "message": "I0116 08:05:58.382949    1102 registry.go:323] calculated container id 609810 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014737892,
+                "severity": "info",
+                "message": "I0116 08:05:37.892821    1102 registry.go:323] calculated container id 609788 -\u003e /init.scope -\u003e",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014737892,
+                "severity": "info",
+                "message": "I0116 08:05:37.892898    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609788",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014734507,
+                "severity": "info",
+                "message": "I0116 08:05:34.507818    1102 profiling.go:147] uploaded 12 profiles in 438ms",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            },
+            {
+                "timestamp": 1737014461128,
+                "severity": "info",
+                "message": "I0116 08:01:01.127540    1102 registry.go:326] \"ignoring without persisting\" cg=\"/init.scope\" pid=609476",
+                "attributes": {
+                    "container.id": "/system.slice/coroot-node-agent.service",
+                    "host.id": "d9dd066559264684a3779a1c6a80004a",
+                    "host.name": "amit-vm",
+                    "service.name": "/system.slice/coroot-node-agent.service"
+                }
+            }
+        ],
+        "patterns": null,
+        "limit": 100
+    }
+}

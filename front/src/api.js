@@ -260,7 +260,13 @@ export default class Api {
     getNode(nodeName, cb) {
         this.get(this.projectPath(`node/${nodeName}`), {}, cb);
     }
+    getApplications() {
+        this.get(this.projectPath(`eumapps`));
+    }
 
+    getAppOverview = (applicationName) => {
+        this.get(this.projectPath(`perfview?query=${applicationName}`));
+    };
     getPrometheusCompleteConfiguration() {
         return {
             remote: {
