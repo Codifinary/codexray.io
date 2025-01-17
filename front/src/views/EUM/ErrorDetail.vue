@@ -1,5 +1,5 @@
 <template>
-    <div class="my-10 mx-5">
+    <v-container>
         <div class="error-details">
             <div class="mr-10">
                 <div>
@@ -44,16 +44,15 @@
                 <pre>{{ errorDetails.stackTrace }}</pre>
             </div>
         </div>
-        <div class="mt-5">
-            <v-select :items="filterOptions" v-model="selectedFilter" label="Filter by Type" @change="fetchData"></v-select>
-            <CustomTable :headers="headers" :items="tableData" />
+        <div class="mt-10">
+            <CustomTable :headers="headers" :items="errorDetails.breadcrumb" />
         </div>
-    </div>
+    </v-container>
 </template>
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import { getErrorDetails, getBreadcrumbsByType } from './api/EUMapi';
+import { getErrorDetails } from './api/EUMapi';
 
 export default {
     components: {
@@ -68,9 +67,6 @@ export default {
     data() {
         return {
             errorDetails: null,
-            tableData: [],
-            selectedFilter: 'all',
-            filterOptions: ['all', 'console', 'ui', 'xhr'],
             headers: [
                 { text: 'Type', value: 'type' },
                 { text: 'Category', value: 'category' },
@@ -85,17 +81,9 @@ export default {
             console.log(eventId);
             this.errorDetails = getErrorDetails();
         },
-        fetchData() {
-            if (this.selectedFilter === 'all') {
-                this.tableData = getErrorDetails().breadcrumb;
-            } else {
-                this.tableData = getBreadcrumbsByType(this.selectedFilter);
-            }
-        },
     },
     created() {
         this.fetchErrorDetails(this.eventId);
-        this.fetchData();
     },
 };
 </script>

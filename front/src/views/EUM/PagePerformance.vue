@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <v-container>
         <CustomTable :headers="headers" :items="data.pages" item-key="pagePath" class="elevation-1 mt-10">
             <template v-slot:[`item.pagePath`]="{ item }">
                 <router-link
@@ -14,7 +14,7 @@
                 </router-link>
             </template>
         </CustomTable>
-    </div>
+    </v-container>
 </template>
 
 <script>
@@ -53,7 +53,7 @@ export default {
 <style scoped>
 .clickable {
     cursor: pointer;
-    color: var(--status-ok);
+    color: blue;
     text-decoration: underline;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="my-10 mx-5">
+    <v-container class="my-10">
         <CustomTable :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1">
             <template v-slot:item.applicationName="{ item }">
                 <div class="name">
@@ -14,7 +14,7 @@
                 </div>
             </template>
         </CustomTable>
-    </div>
+    </v-container>
 </template>
 
 <script>
@@ -48,11 +48,3 @@ export default {
     },
 };
 </script>
-<style scoped>
-.eum-container {
-    padding-bottom: 70px;
-    margin-left: 20px !important;
-    margin-right: 20px !important;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
-}
-</style>
