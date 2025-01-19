@@ -1,8 +1,8 @@
 <template>
-    <div>
-        <Navigation :id="id" :error="selectedError" :eventId="eventId" @update:error="updateError" @update:eventId="updateEventId" />
+    <div class="eum-container my-10 mx-5">
+        <Navigation class="my-3" :id="id" :error="selectedError" :eventId="eventId" @update:error="updateError" @update:eventId="updateEventId" />
 
-        <v-tabs v-model="activeTab" @change="updateUrl">
+        <v-tabs height="40" slider-color="success" show-arrows slider-size="2" v-model="activeTab" @change="updateUrl">
             <v-tab>Page Performance</v-tab>
             <v-tab>Errors</v-tab>
             <v-tab>Logs</v-tab>
@@ -21,7 +21,10 @@
                 </div>
             </v-tab-item>
             <v-tab-item>
-                <Logs v-if="activeTab === 2" :data="logs" />
+                <Logs v-if="activeTab === 2" />
+            </v-tab-item>
+            <v-tab-item>
+                <EUMTraces v-if="activeTab === 3" />
             </v-tab-item>
         </v-tabs-items>
     </div>
@@ -29,11 +32,13 @@
 
 <script>
 import { getApplicationData } from './api/EUMapi';
+
 import PagePerformance from './PagePerformance.vue';
 import Errors from './Errors.vue';
 import Logs from './Logs.vue';
 import Error from './Error.vue';
 import Navigation from './Navigation.vue';
+import EUMTraces from './EUMTraces.vue';
 
 export default {
     name: 'EUMApplicationOverview',
@@ -42,6 +47,7 @@ export default {
         Errors,
         Logs,
         Error,
+        EUMTraces,
         Navigation,
     },
     props: {
@@ -100,6 +106,8 @@ export default {
             const data = getApplicationData(id);
             this.pagePerformance = data.pagePerformance;
             this.errors = data.errors;
+            // const appData = getAppOverview(id);
+            // this.pagePerformance = appData.overviews;
         },
         updateUrl(tabIndex) {
             if (tabIndex < 0 || tabIndex >= this.reports.length) {
@@ -158,6 +166,24 @@ export default {
 
 <style scoped>
 .v-tab {
-    color: #013912 !important;
+    color: var(--primary-green) !important;
+    margin-left: 15px;
+    text-decoration: none !important;
+    text-transform: none !important;
+    margin-top: 5px;
+    font-weight: 400 !important;
+}
+.v-slide-group__wrapper {
+    width: 100%;
+}
+.v-slide-group__content {
+    position: static;
+    border-bottom: 2px solid #0000001a !important;
+}
+.eum-container {
+    padding-bottom: 70px;
+    margin-left: 20px !important;
+    margin-right: 20px !important;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
 }
 </style>

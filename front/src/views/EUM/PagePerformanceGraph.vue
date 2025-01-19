@@ -1,14 +1,14 @@
 <template>
-    <div>
+    <div class="eum-application-overview my-10 mx-5">
         <Navigation :id="id" :pagePath="pagePath" />
-        <div class="d-flex justify-space-between">
+        <div class="d-flex my-10 justify-space-between">
             <Chart :chart="loadChartConfig" />
             <Chart :chart="responseChartConfig" />
             <Chart :chart="errorChartConfig" />
         </div>
         <div class="d-flex justify-space-between">
             <Chart :chart="firstUserPaintChartConfig" />
-            <Chart :chart="userImpactedChartConfig" />
+            <Chart :chart="userImpactedChartConfig" :selection="{}" @select="zoomChart" />
         </div>
     </div>
 </template>
@@ -41,7 +41,6 @@ export default {
                         name: 'Users Impacted',
                         data: this.generateRandomData(50, 100, 50),
                         color: 'green',
-                        bars: true,
                     },
                 ],
             },
@@ -105,7 +104,16 @@ export default {
 
 <style scoped>
 .chart {
-    width: 45%;
+    width: 30%;
     height: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    margin: 10px;
+}
+.eum-container {
+    padding-bottom: 70px;
+    margin-left: 20px !important;
+    margin-right: 20px !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    margin-top: 10px;
 }
 </style>
