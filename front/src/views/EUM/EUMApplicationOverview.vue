@@ -105,7 +105,7 @@ export default {
         fetchApplicationData(id) {
             const data = getApplicationData(id);
             this.pagePerformance = data.pagePerformance;
-            // this.errors = data.errors;
+            this.errors = data.errors;
             // const appData = getAppOverview(id);
             // this.pagePerformance = appData.overviews;
         },

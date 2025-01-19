@@ -45,7 +45,9 @@
             </div>
         </div>
         <div class="mt-5">
-            <v-select :items="filterOptions" v-model="selectedFilter" label="Filter by Type" @change="fetchData"></v-select>
+            <div class="errorFilter">
+                <v-select :items="filterOptions" v-model="selectedFilter" label="Filter by Type" class="filterByType" @change="fetchData"></v-select>
+            </div>
             <CustomTable :headers="headers" :items="tableData" />
         </div>
     </div>
@@ -131,5 +133,8 @@ h5 {
 }
 .error-details__meta div {
     margin-right: 30px;
+}
+.filterByType {
+    width: 400px;
 }
 </style>

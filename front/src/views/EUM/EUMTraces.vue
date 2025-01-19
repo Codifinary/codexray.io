@@ -20,10 +20,10 @@
                 <tbody>
                     <tr v-for="trace in view.traces" :key="trace.trace_id">
                         <td>
-                            <router-link :to="openTrace(trace.trace_id)" exact class="text-no-wrap">
-                                <v-icon small style="vertical-align: baseline">mdi-chart-timeline</v-icon>
-                                {{ trace.trace_id.substring(0, 8) }}
-                            </router-link>
+                            <!-- <router-link :to="openTrace(trace.trace_id)" exact class="text-no-wrap"> -->
+                            <v-icon small style="vertical-align: baseline">mdi-chart-timeline</v-icon>
+                            {{ trace.trace_id.substring(0, 8) }}
+                            <!-- </router-link> -->
                         </td>
                         <td class="text-no-wrap">{{ trace.service }}</td>
                         <td class="text-no-wrap">{{ trace.name }}</td>
@@ -83,9 +83,6 @@ export default {
             } finally {
                 this.loading = false;
             }
-        },
-        openTrace(traceId) {
-            return `/trace/${traceId}`;
         },
         setSelection(selection) {
             this.selection = selection;

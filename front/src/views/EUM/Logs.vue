@@ -1,9 +1,5 @@
 <template>
     <div class="my-10 mx-5">
-        <!-- <slot name="check">
-            <Check :appId="appId" :check="check" />
-        </slot> -->
-
         <v-form>
             <div class="subtitle-1 mt-3">Filter:</div>
             <div class="d-flex flex-wrap flex-md-nowrap align-center" style="gap: 8px">
@@ -43,7 +39,7 @@
             <Chart v-if="chart" :chart="chart" :selection="{}" @select="zoomChart" class="my-3" />
 
             <!-- Table for Messages -->
-            <v-simple-table v-if="entries && query.view === 'messages'" dense>
+            <v-simple-table v-if="filteredEntries.length && query.view === 'messages'" dense>
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -72,7 +68,9 @@
                         {{ new Date(selectedEntry.timestamp).toLocaleString() }}
                     </div>
                     <v-spacer />
-                    <v-btn icon @click="selectedEntry = null"><v-icon>mdi-close</v-icon></v-btn>
+                    <v-btn icon @click="selectedEntry = null">
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
                 </div>
 
                 <div class="font-weight-medium my-3">Message</div>
@@ -95,12 +93,10 @@
 <script>
 import { getEventLogs } from './api/EUMapi';
 import Chart from '@/components/Chart.vue';
-import Check from '@/components/Check.vue';
 
 export default {
     components: {
         Chart,
-        Check,
     },
     data() {
         return {
@@ -109,23 +105,17 @@ export default {
             loading: true,
             loadingError: null,
             query: {
-                source: '',
                 severity: [],
                 search: '',
                 view: 'messages',
             },
-            status: 'loading',
-            message: '',
             severities: ['info', 'warning'],
-            sources: ['agent'],
-            configure: false,
-            disabled: false,
             selectedEntry: null,
         };
     },
     computed: {
         filteredEntries() {
-            let filtered = this.entries;
+            let filtered = this.entries || [];
 
             if (this.query.severity.length) {
                 filtered = filtered.filter((entry) => this.query.severity.includes(entry.severity));
@@ -144,50 +134,25 @@ export default {
     },
     methods: {
         async fetchData() {
+            this.loading = true;
             try {
                 const { entries, chart } = await getEventLogs();
                 this.entries = entries;
                 this.chart = chart;
-                this.status = 'ok';
-                this.message = 'Using container logs';
             } catch (error) {
                 console.error('Error fetching logs:', error);
                 this.loadingError = 'Failed to load logs data.';
-                this.status = 'error';
             } finally {
                 this.loading = false;
             }
         },
-        changeSource() {
-            // Handle source change logic
-            this.runQuery(); // Re-run the query after source change
-        },
         runQuery() {
-            this.loading = true;
-
-            // Apply severity filter and search query to `entries`
-            let filtered = this.entries || [];
-
-            if (this.query.severity.length) {
-                filtered = filtered.filter((entry) => this.query.severity.includes(entry.severity));
-            }
-
-            if (this.query.search) {
-                const searchLower = this.query.search.toLowerCase();
-                filtered = filtered.filter((entry) => entry.message.toLowerCase().includes(searchLower));
-            }
-
-            // Simulate an asynchronous operation for querying/filtering
-            setTimeout(() => {
-                this.entries = filtered;
-                this.loading = false;
-            }, 300); // Add a slight delay for better UX
+            console.log('Query triggered:', this.query);
         },
         selectEntry(entry) {
             this.selectedEntry = entry;
         },
         zoomChart(selection) {
-            // Handle zooming into the chart based on user interaction
             console.log('Chart zoom triggered:', selection);
         },
     },
@@ -195,11 +160,6 @@ export default {
 </script>
 
 <style scoped>
-.entry:deep(tr:hover) {
-    background-color: unset !important;
-    cursor: pointer;
-}
-
 .message {
     font-family: monospace, monospace;
     font-size: 14px;

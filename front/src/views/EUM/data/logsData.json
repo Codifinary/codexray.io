@@ -2,9 +2,7 @@
     "data": {
         "status": "ok",
         "message": "Using container logs",
-        "sources": [
-            "agent"
-        ],
+        "sources": ["agent"],
         "source": "agent",
         "services": [
             "Client App-UI",
@@ -20,19 +18,10 @@
             "test-service-name"
         ],
         "service": "",
-        "views": [
-            "messages",
-            "patterns"
-        ],
+        "views": ["messages", "patterns"],
         "view": "messages",
-        "severities": [
-            "info",
-            "warning"
-        ],
-        "severity": [
-            "info",
-            "warning"
-        ],
+        "severities": ["info", "warning"],
+        "severity": ["info", "warning"],
         "chart": {
             "ctx": {
                 "from": 1737011640000,

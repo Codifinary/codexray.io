@@ -71,7 +71,12 @@ export default {
     font-size: 14px !important;
     font-weight: 600 !important;
 }
+.router-link-active {
+    color: var(--status-ok) !important;
+}
 .breadcrumb-item + .breadcrumb-item::before {
+    color: var(--status-ok) !important;
+
     content: '>';
     padding: 0 8px;
 }
