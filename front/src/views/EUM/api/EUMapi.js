@@ -4,7 +4,7 @@ export const getApplications = () => {
     return data.applications;
 };
 
-export const getApplicationData = (applicationName) => {
+export const getApplicationData = () => {
     const { pagePerformance, errorTab } = data;
     const appData = {
         pagePerformance: pagePerformance || null,
@@ -17,7 +17,7 @@ export const getErrorDetails = () => {
     return data.errorDetails || null;
 };
 
-export const getSpecificErrors = (applicationName, error) => {
+export const getSpecificErrors = () => {
     const appData = data.specificErrors || null;
     if (appData) {
         return appData.eventLogs;
