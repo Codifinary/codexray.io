@@ -24,8 +24,8 @@ export const getSpecificErrors = () => {
     }
     return [];
 };
-export const getBreadcrumbsByType = (category) => {
-    const tableData = data.errorDetails.breadcrumb.filter((breadcrumb) => breadcrumb.category === category) || [];
+export const getBreadcrumbsByType = (type) => {
+    const tableData = data.errorDetails.breadcrumb.filter((breadcrumb) => breadcrumb.type === type) || [];
     console.log(tableData);
     return tableData;
 };

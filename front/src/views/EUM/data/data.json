@@ -308,6 +308,27 @@
                 "description": "Debugging the issue with the data fetch.",
                 "level": "info",
                 "time": "2025-01-08T10:32:00Z"
+            },
+            {
+                "type": "http",
+                "category": "xhr",
+                "description": "HTTP request to /api/v1/data failed.",
+                "level": "warning",
+                "time": "2025-01-08T10:31:00Z"
+            },
+            {
+                "type": "navigation",
+                "category": "ui",
+                "description": "User navigated to the dashboard page.",
+                "level": "info",
+                "time": "2025-01-08T10:31:30Z"
+            },
+            {
+                "type": "debug",
+                "category": "console",
+                "description": "Debugging the issue with the data fetch.",
+                "level": "info",
+                "time": "2025-01-08T10:32:00Z"
             }
         ]
     }
