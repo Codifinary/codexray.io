@@ -98,13 +98,12 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import { getErrorDetails, getBreadcrumbsByType } from './api/EUMapi';
-import { VSelect, VCheckbox, VIcon } from 'vuetify/lib';
+import { VSelect, VIcon } from 'vuetify/lib';
 
 export default {
     components: {
         CustomTable,
         VSelect,
-        VCheckbox,
         VIcon,
     },
     props: {
