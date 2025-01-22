@@ -46,6 +46,7 @@ type DataPoint struct {
 	TransTime         int64
 	LoadPageTime      int64
 	ResTime           int64
+	Browser           string
 }
 
 type PerfRequestType struct {
@@ -67,6 +68,7 @@ type PerfBatch struct {
 	TransTime    *chproto.ColInt64
 	LoadPageTime *chproto.ColInt64
 	ResTime      *chproto.ColInt64
+	Browser      *chproto.ColStr
 	RawData      *chproto.ColStr
 }
 
@@ -83,6 +85,7 @@ func NewPerfBatch(limit int, timeout time.Duration, exec func(query ch.Query) er
 		TransTime:    new(chproto.ColInt64),
 		LoadPageTime: new(chproto.ColInt64),
 		ResTime:      new(chproto.ColInt64),
+		Browser:      new(chproto.ColStr),
 		RawData:      new(chproto.ColStr),
 	}
 	go func() {
@@ -109,7 +112,7 @@ func (b *PerfBatch) Close() {
 	b.save()
 }
 
-func (b *PerfBatch) Add(perfData *PerfRequestType) {
+func (b *PerfBatch) Add(perfData *PerfRequestType, raw string) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	for _, dataPoint := range perfData.DataPoints {
@@ -121,12 +124,8 @@ func (b *PerfBatch) Add(perfData *PerfRequestType) {
 		b.TransTime.Append(dataPoint.TransTime)
 		b.LoadPageTime.Append(dataPoint.LoadPageTime)
 		b.ResTime.Append(dataPoint.ResTime)
-		rawBytes, err := json.Marshal(dataPoint)
-		if err == nil {
-			b.RawData.Append(string(rawBytes))
-		} else {
-			b.RawData.Append("")
-		}
+		b.Browser.Append(dataPoint.Browser)
+		b.RawData.Append(raw)
 	}
 	if b.Timestamp.Rows() >= b.limit {
 		b.save()
@@ -146,6 +145,7 @@ func (b *PerfBatch) save() {
 		{Name: "TransTime", Data: b.TransTime},
 		{Name: "LoadPageTime", Data: b.LoadPageTime},
 		{Name: "ResTime", Data: b.ResTime},
+		{Name: "Browser", Data: b.Browser},
 		{Name: "RawData", Data: b.RawData},
 	}
 	err := b.exec(ch.Query{Body: input.Into("perf_data"), Input: input})
@@ -201,7 +201,7 @@ func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 		ResTime:           payload.ResTime,
 	}
 	perfReq := &PerfRequestType{DataPoints: []DataPoint{dp}}
-	c.getPerfBatch(project).Add(perfReq)
+	c.getPerfBatch(project).Add(perfReq, string(data))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{}`))
