@@ -14,6 +14,7 @@ type PerfRow struct {
 	JsErrorPercentage  float64
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
+	Browser            string
 }
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time) ([]PerfRow, error) {
@@ -25,6 +26,7 @@ SELECT
     countIf(e.Category = 'js') * 100.0 / count() AS jsErrorPercentage,
     countIf(e.Category = 'api') * 100.0 / count() AS apiErrorPercentage,
     countDistinct(e.UserId) AS impactedUsers
+	p.Browser AS Browser
 FROM 
     perf_data p
 LEFT JOIN 
@@ -63,7 +65,7 @@ GROUP BY
 	var results []PerfRow
 	for rows.Next() {
 		var row PerfRow
-		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
+		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Browser); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
