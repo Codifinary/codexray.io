@@ -26,7 +26,6 @@ SELECT
     countIf(e.Category = 'js') * 100.0 / count() AS jsErrorPercentage,
     countIf(e.Category = 'api') * 100.0 / count() AS apiErrorPercentage,
     countDistinct(e.UserId) AS impactedUsers
-	p.Browser AS Browser
 FROM 
     perf_data p
 LEFT JOIN 
@@ -65,7 +64,7 @@ GROUP BY
 	var results []PerfRow
 	for rows.Next() {
 		var row PerfRow
-		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Browser); err != nil {
+		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
