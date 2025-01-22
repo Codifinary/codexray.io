@@ -33,6 +33,8 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
+	Requests           uint64  `json:"requests"`
+	Browser            string  `json:"browser"`
 }
 
 func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time) *View {
@@ -68,6 +70,8 @@ func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, 
 			JsErrorPercentage:  row.JsErrorPercentage,
 			ApiErrorPercentage: row.ApiErrorPercentage,
 			ImpactedUsers:      row.ImpactedUsers,
+			Requests:           row.Requests,
+			Browser:            row.Browser,
 		})
 	}
 
