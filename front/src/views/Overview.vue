@@ -20,7 +20,9 @@
         </template>
 
         <template v-if="view === 'EUM'">
-            <NoData />
+            <PagePerformanceGraph v-if="id && pagePath" :id="id" :pagePath="pagePath" />
+            <EUMApplicationOverview v-else-if="id" :id="id" />
+            <EUM v-else />
         </template>
 
         <template v-if="view === 'traces'">
@@ -45,7 +47,9 @@ import Nodes from '@/views/Nodes.vue';
 import Node from '@/views/Node.vue';
 import Anomalies from '@/views/Anomalies.vue';
 import RCA from '@/views/RCA.vue';
-import NoData from '@/components/NoData.vue';
+import EUM from '@/views/EUM/EUM.vue';
+import EUMApplicationOverview from '@/views/EUM/EUMApplicationOverview.vue';
+import PagePerformanceGraph from '@/views/EUM/PagePerformanceGraph.vue';
 
 export default {
     components: {
@@ -59,7 +63,10 @@ export default {
         Node,
         Anomalies,
         RCA,
-        NoData,
+        // NoData,
+        EUM,
+        EUMApplicationOverview,
+        PagePerformanceGraph,
     },
     props: {
         view: String,
@@ -81,6 +88,9 @@ export default {
                 res.anomalies = 'Anomalies';
             }
             return res;
+        },
+        pagePath() {
+            return this.$route.query.pagePath;
         },
     },
 
