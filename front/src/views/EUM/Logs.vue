@@ -5,11 +5,12 @@
             <div class="d-flex flex-wrap flex-md-nowrap align-center" style="gap: 8px">
                 <v-checkbox
                     v-for="s in severities"
-                    :key="s"
-                    :value="s"
+                    :key="s.name"
+                    :value="s.name"
                     v-model="query.severity"
                     @change="runQuery"
-                    :label="s"
+                    :label="s.name"
+                    :color="s.color"
                     class="ma-0 text-no-wrap text-capitalize checkbox"
                     dense
                     hide-details
@@ -93,6 +94,7 @@
 <script>
 import { getEventLogs, getFilteredEventLogs } from './api/EUMapi';
 import Chart from '@/components/Chart.vue';
+import { palette } from '@/utils/colors';
 
 export default {
     components: {
@@ -109,7 +111,13 @@ export default {
                 search: '',
                 view: 'messages',
             },
-            severities: ['info', 'warning'],
+            severities: [
+                { name: 'info', color: palette.get('blue-lighten2') },
+                {
+                    name: 'warning',
+                    color: palette.get('orange-lighten1'),
+                },
+            ],
             selectedEntry: null,
         };
     },
