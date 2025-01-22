@@ -37,7 +37,7 @@ var version = "unknown"
 var static embed.FS
 
 func main() {
-	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
+	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8082").String()
 	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
@@ -250,6 +250,8 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
+	r.HandleFunc("/api/project/{project}/perfview", a.Auth(a.PerfView)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eumapps", a.Auth(a.EumApps)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
