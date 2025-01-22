@@ -14,7 +14,6 @@ type PerfRow struct {
 	JsErrorPercentage  float64
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
-	Browser            string
 }
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time) ([]PerfRow, error) {
