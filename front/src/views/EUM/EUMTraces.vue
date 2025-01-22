@@ -5,8 +5,16 @@
         <div v-else-if="loading" class="text-center">Loading heatmap...</div>
         <div v-else class="text-center text-grey">No heatmap data available.</div>
 
+        <div class="mt-5" v-if="selectedTrace.length">
+            <!-- Trace Details -->
+            <div class="text-md-h6 mb-3">
+                <v-icon class="clickable-icon" @click="clearSelectedTrace">mdi-arrow-left</v-icon>
+                Trace {{ selectedTrace[0].trace_id }}
+            </div>
+            <TracingTrace :spans="selectedTrace" />
+        </div>
         <!-- Traces Table -->
-        <div class="mt-5" style="min-height: 50vh">
+        <div v-else class="mt-5" style="min-height: 50vh">
             <v-simple-table dense>
                 <thead>
                     <tr>
@@ -20,10 +28,10 @@
                 <tbody>
                     <tr v-for="trace in view.traces" :key="trace.trace_id">
                         <td>
-                            <!-- <router-link :to="openTrace(trace.trace_id)" exact class="text-no-wrap"> -->
-                            <v-icon small style="vertical-align: baseline">mdi-chart-timeline</v-icon>
-                            {{ trace.trace_id.substring(0, 8) }}
-                            <!-- </router-link> -->
+                            <span class="trace-id clickable text-no-wrap" @click="selectTrace(trace)" title="View Trace Details">
+                                <v-icon small style="vertical-align: baseline">mdi-chart-timeline</v-icon>
+                                {{ trace.trace_id.substring(0, 8) }}
+                            </span>
                         </td>
                         <td class="text-no-wrap">{{ trace.service }}</td>
                         <td class="text-no-wrap">{{ trace.name }}</td>
@@ -34,7 +42,7 @@
                         </td>
                         <td class="text-no-wrap">
                             {{ format(trace.duration, 'ms') }}
-                            <span class="caption grey--text"> ms</span>
+                            <span class="caption grey--text"></span>
                         </td>
                     </tr>
                 </tbody>
@@ -50,10 +58,12 @@
 <script>
 import { getHeatmapData, getApplicationTraces } from './api/EUMapi';
 import Heatmap from '@/components/Heatmap.vue';
+import TracingTrace from '@/components/TracingTrace.vue';
 
 export default {
     components: {
         Heatmap,
+        TracingTrace,
     },
     data() {
         return {
@@ -63,6 +73,7 @@ export default {
                 limit: 0,
             },
             selection: null,
+            selectedTrace: [],
             loading: false,
         };
     },
@@ -84,11 +95,17 @@ export default {
                 this.loading = false;
             }
         },
+        selectTrace(trace) {
+            this.selectedTrace = [trace];
+        },
         setSelection(selection) {
             this.selection = selection;
         },
         format(duration, unit) {
             return `${duration.toFixed(2)} ${unit}`;
+        },
+        clearSelectedTrace() {
+            this.selectedTrace = [];
         },
     },
     mounted() {
@@ -106,5 +123,17 @@ export default {
 }
 .pa-3 {
     padding: 1rem;
+}
+.clickable {
+    cursor: pointer;
+    color: var(--status-ok);
+    text-decoration: underline;
+}
+.clickable:hover {
+    color: var(--status-ok);
+}
+.clickable-icon {
+    cursor: pointer;
+    color: var(--status-ok);
 }
 </style>
