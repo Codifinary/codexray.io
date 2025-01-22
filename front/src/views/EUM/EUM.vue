@@ -2,7 +2,14 @@
     <div class="my-10 mx-5">
         <CustomTable :headers="headers" :items="tableItems" item-key="applicationName" class="elevation-1">
             <template v-slot:item.applicationName="{ item }">
-                <div class="name">
+                <div class="name d-flex">
+                    <div class="mr-3">
+                        <img
+                            :src="`${$codexray.base_path}static/img/tech-icons/${item.applicationType}.svg`"
+                            style="width: 16px; height: 16px"
+                            alt="App Icon"
+                        />
+                    </div>
                     <router-link
                         :to="{
                             name: 'overview',
@@ -20,7 +27,6 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import { getApplications } from './api/EUMapi';
-
 export default {
     name: 'EUM',
     components: {
@@ -29,8 +35,7 @@ export default {
     data() {
         return {
             headers: [
-                { text: 'Application Name', value: 'applicationName' },
-                { text: 'Application Type', value: 'applicationType' },
+                { text: 'Application', value: 'applicationName' },
                 { text: 'Number of Pages', value: 'noOfPages' },
                 { text: 'Load Requests/Second', value: 'loadRequestsPerSecond' },
                 { text: 'Response time (ms)', value: 'responseTimeMs' },
