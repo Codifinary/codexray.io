@@ -33,9 +33,10 @@ type PerfOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
+	Requests           uint64  `json:"requests"`
 }
 
-func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time) *View {
+func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time, serviceName string) *View {
 	v := &View{}
 
 	var q Query
@@ -56,7 +57,7 @@ func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, 
 	}
 
 	// Fetch performance data
-	rows, err := ch.GetPerformanceOverview(ctx, from, to)
+	rows, err := ch.GetPerformanceOverview(ctx, from, to, serviceName)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -72,6 +73,7 @@ func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, 
 			JsErrorPercentage:  row.JsErrorPercentage,
 			ApiErrorPercentage: row.ApiErrorPercentage,
 			ImpactedUsers:      row.ImpactedUsers,
+			Requests:           row.Requests,
 		})
 	}
 

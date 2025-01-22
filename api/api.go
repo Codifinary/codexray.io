@@ -1121,7 +1121,14 @@ func (api *Api) Node(w http.ResponseWriter, r *http.Request, u *db.User) {
 func (api *Api) PerfView(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
 	projectId := vars["project"]
+	serviceName := vars["serviceName"]
 	ctx := r.Context()
+
+	if serviceName == "" {
+		klog.Warningln("serviceName is empty")
+		http.Error(w, "serviceName is empty", http.StatusBadRequest)
+		return
+	}
 
 	project, err := api.db.GetProject(db.ProjectId(projectId))
 	// for local purpose
@@ -1155,7 +1162,7 @@ func (api *Api) PerfView(w http.ResponseWriter, r *http.Request, u *db.User) {
 	}
 	from, to := utils.ParseTimeRange(r.URL.Query())
 
-	view := perf.Render(ctx, ch, r.URL.Query(), from, to)
+	view := perf.Render(ctx, ch, r.URL.Query(), from, to, serviceName)
 	utils.WriteJson(w, view)
 }
 
