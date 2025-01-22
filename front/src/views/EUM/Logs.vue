@@ -8,6 +8,7 @@
                     :key="s"
                     :value="s"
                     v-model="query.severity"
+                    @change="runQuery"
                     :label="s"
                     class="ma-0 text-no-wrap text-capitalize checkbox"
                     dense
@@ -23,7 +24,6 @@
                         hide-details
                         single-line
                         outlined
-                        clearable
                     />
                     <v-btn @click="runQuery" color="success" height="40">Query</v-btn>
                 </div>
@@ -39,7 +39,7 @@
             <Chart v-if="chart" :chart="chart" :selection="{}" @select="zoomChart" class="my-3" />
 
             <!-- Table for Messages -->
-            <v-simple-table v-if="filteredEntries.length && query.view === 'messages'" dense>
+            <v-simple-table v-if="entries.length" dense>
                 <thead>
                     <tr>
                         <th>Date</th>
@@ -47,7 +47,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="entry in filteredEntries" :key="entry.timestamp" @click="selectEntry(entry)">
+                    <tr v-for="entry in entries" :key="entry.timestamp" @click="selectEntry(entry)">
                         <td>{{ new Date(entry.timestamp).toLocaleString() }}</td>
                         <td>{{ entry.message }}</td>
                     </tr>
@@ -91,7 +91,7 @@
 </template>
 
 <script>
-import { getEventLogs } from './api/EUMapi';
+import { getEventLogs, getFilteredEventLogs } from './api/EUMapi';
 import Chart from '@/components/Chart.vue';
 
 export default {
@@ -102,7 +102,7 @@ export default {
         return {
             entries: null,
             chart: null,
-            loading: true,
+            loading: false,
             loadingError: null,
             query: {
                 severity: [],
@@ -113,22 +113,6 @@ export default {
             selectedEntry: null,
         };
     },
-    computed: {
-        filteredEntries() {
-            let filtered = this.entries || [];
-
-            if (this.query.severity.length) {
-                filtered = filtered.filter((entry) => this.query.severity.includes(entry.severity));
-            }
-
-            if (this.query.search) {
-                const searchLower = this.query.search.toLowerCase();
-                filtered = filtered.filter((entry) => entry.message.toLowerCase().includes(searchLower));
-            }
-
-            return filtered;
-        },
-    },
     mounted() {
         this.fetchData();
     },
@@ -136,7 +120,7 @@ export default {
         async fetchData() {
             this.loading = true;
             try {
-                const { entries, chart } = await getEventLogs();
+                const { entries, chart } = getEventLogs();
                 this.entries = entries;
                 this.chart = chart;
             } catch (error) {
@@ -146,8 +130,21 @@ export default {
                 this.loading = false;
             }
         },
-        runQuery() {
-            console.log('Query triggered:', this.query);
+        async runQuery() {
+            this.loading = true;
+            this.loadingError = null;
+
+            try {
+                const severity = this.query.severity;
+                const search = this.query.search.trim();
+
+                this.entries = await getFilteredEventLogs(severity, search);
+            } catch (error) {
+                console.error('Error fetching logs:', error);
+                this.loadingError = 'Failed to fetch logs.';
+            } finally {
+                this.loading = false;
+            }
         },
         selectEntry(entry) {
             this.selectedEntry = entry;

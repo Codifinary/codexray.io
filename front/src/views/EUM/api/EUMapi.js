@@ -33,9 +33,21 @@ export const getBreadcrumbsByType = (type) => {
 import logsData from '../data/logsData.json';
 
 export const getEventLogs = () => {
-    console.log(logsData);
     const { entries, chart } = logsData.data;
     return { entries, chart };
+};
+
+export const getFilteredEventLogs = (severity = [], search = '') => {
+    console.log('Filtering logs data:', { severity, search });
+    const { entries } = logsData.data;
+    const searchLower = search.toLowerCase();
+    const filteredEntries = entries.filter((entry) => {
+        const filterSeverity = severity.length === 0 || severity.includes(entry.severity);
+        const filterSearch = search === '' || entry.message.toLowerCase().includes(searchLower);
+        return filterSeverity && filterSearch;
+    });
+
+    return filteredEntries;
 };
 
 import tracesData from '../data/tracesData.json';
