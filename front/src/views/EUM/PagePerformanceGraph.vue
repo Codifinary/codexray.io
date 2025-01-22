@@ -1,13 +1,14 @@
 <template>
     <div class="eum-application-overview my-10 mx-5">
         <Navigation :id="id" :pagePath="pagePath" />
-        <div class="d-flex my-10 justify-space-between">
+        <div class="d-flex mt-10 justify-space-between">
             <Chart :chart="loadChartConfig" />
             <Chart :chart="responseChartConfig" />
             <Chart :chart="errorChartConfig" />
         </div>
-        <div class="d-flex justify-space-between">
+        <div class="d-flex">
             <Chart :chart="firstUserPaintChartConfig" />
+            <div class="ml-10"></div>
             <Chart :chart="userImpactedChartConfig" :selection="{}" @select="zoomChart" />
         </div>
     </div>
@@ -73,7 +74,7 @@ export default {
                 ctx: { from: 0, to: 50, step: 1 },
                 series: [
                     {
-                        name: 'Time to Paint (ms)',
+                        name: 'First Meaningful Paint(ms)',
                         data: this.generateRandomData(30, 300, 100),
                         color: 'teal',
                         points: { show: true },
@@ -106,7 +107,6 @@ export default {
 .chart {
     width: 30%;
     height: 300px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
     margin: 10px;
 }
 .eum-container {

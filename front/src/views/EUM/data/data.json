@@ -21,7 +21,7 @@
             "usersImpacted": 30
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "HealthTrack",
             "noOfPages": 15,
             "loadRequestsPerSecond": 20,
@@ -41,7 +41,7 @@
             "usersImpacted": 65
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "ShopEase",
             "noOfPages": 30,
             "loadRequestsPerSecond": 60,
@@ -61,7 +61,7 @@
             "usersImpacted": 40
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "FitnessPro",
             "noOfPages": 35,
             "loadRequestsPerSecond": 70,
@@ -81,7 +81,7 @@
             "usersImpacted": 55
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "NewsFlash",
             "noOfPages": 10,
             "loadRequestsPerSecond": 25,
@@ -287,6 +287,27 @@
                 "description": "An error occurred while processing the request.",
                 "level": "error",
                 "time": "2025-01-08T10:30:30Z"
+            },
+            {
+                "type": "http",
+                "category": "xhr",
+                "description": "HTTP request to /api/v1/data failed.",
+                "level": "warning",
+                "time": "2025-01-08T10:31:00Z"
+            },
+            {
+                "type": "navigation",
+                "category": "ui",
+                "description": "User navigated to the dashboard page.",
+                "level": "info",
+                "time": "2025-01-08T10:31:30Z"
+            },
+            {
+                "type": "debug",
+                "category": "console",
+                "description": "Debugging the issue with the data fetch.",
+                "level": "info",
+                "time": "2025-01-08T10:32:00Z"
             },
             {
                 "type": "http",

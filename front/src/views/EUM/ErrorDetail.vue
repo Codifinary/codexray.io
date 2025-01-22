@@ -35,7 +35,9 @@
                     </div>
                     <div class="pl-4">
                         <h5>Level of Severity</h5>
-                        <p>{{ errorDetails.levelOfSeverity }}</p>
+                        <p>
+                            {{ errorDetails.levelOfSeverity }}
+                        </p>
                     </div>
                 </div>
             </div>
@@ -44,11 +46,51 @@
                 <pre>{{ errorDetails.stackTrace }}</pre>
             </div>
         </div>
+
+        <!-- Move filter above the table -->
+        <div class="filter-container mt-5">
+            <v-select
+                :items="filterOptions"
+                v-model="selectedFilter"
+                label="Filter by Type"
+                class="filterByType"
+                dense
+                @change="fetchData"
+                outlined
+                :menu-props="{ offsetY: true }"
+            >
+                <template v-slot:selection="data">
+                    <v-icon :color="data.item.color" left>{{ data.item.icon }}</v-icon>
+                    <span>{{ data.item.text }}</span>
+                </template>
+                <template v-slot:item="data">
+                    <v-icon class="px-5" :color="data.item.color">{{ data.item.icon }}</v-icon>
+                    <span>{{ data.item.text }}</span>
+                </template>
+            </v-select>
+        </div>
+
+        <!-- Table -->
         <div class="mt-5">
-            <div class="errorFilter">
-                <v-select :items="filterOptions" v-model="selectedFilter" label="Filter by Type" class="filterByType" @change="fetchData"></v-select>
-            </div>
-            <CustomTable :headers="headers" :items="tableData" />
+            <CustomTable :headers="headers" :items="tableData">
+                <template #item.type="{ item }">
+                    <div v-if="item.type" class="d-flex align-center">
+                        <v-icon :color="types[item.type]?.color">{{ types[item.type]?.icon }}</v-icon>
+                    </div>
+                </template>
+                <template #item.level="{ item }">
+                    <div v-if="item.level" class="d-flex align-center">
+                        <p
+                            :style="{
+                                color:
+                                    item.level === 'info' ? '#42A5F5' : item.level === 'warning' ? 'var(--status-warning)' : 'var(--status-critical)',
+                            }"
+                        >
+                            {{ item.level }}
+                        </p>
+                    </div>
+                </template>
+            </CustomTable>
         </div>
     </div>
 </template>
@@ -56,10 +98,13 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import { getErrorDetails, getBreadcrumbsByType } from './api/EUMapi';
+import { VSelect, VIcon } from 'vuetify/lib';
 
 export default {
     components: {
         CustomTable,
+        VSelect,
+        VIcon,
     },
     props: {
         eventId: {
@@ -72,7 +117,21 @@ export default {
             errorDetails: null,
             tableData: [],
             selectedFilter: 'all',
-            filterOptions: ['all', 'console', 'ui', 'xhr'],
+            filterOptions: [
+                { text: 'All', value: 'all', color: 'green', icon: 'mdi-select-all', selected: true },
+                { text: 'Debug', value: 'debug', color: 'red', icon: 'mdi-bug', selected: false },
+                { text: 'Navigation', value: 'navigation', color: 'purple', icon: 'mdi-compass', selected: false },
+                { text: 'User Action', value: 'userAction', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
+                { text: 'Error', value: 'error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
+                { text: 'HTTP', value: 'http', icon: 'mdi-web', color: 'blue', selected: false },
+            ],
+            types: {
+                debug: { text: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
+                navigation: { text: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
+                userAction: { text: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
+                error: { text: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
+                http: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
+            },
             headers: [
                 { text: 'Type', value: 'type' },
                 { text: 'Category', value: 'category' },
@@ -94,6 +153,11 @@ export default {
                 this.tableData = getBreadcrumbsByType(this.selectedFilter);
             }
         },
+        toggleSelection(filterItem) {
+            filterItem.selected = !filterItem.selected;
+            this.selectedFilter = filterItem.selected ? filterItem.value : 'all';
+            this.fetchData();
+        },
     },
     created() {
         this.fetchErrorDetails(this.eventId);
@@ -106,6 +170,18 @@ export default {
 .error-details {
     display: flex;
 }
+.filter-container {
+    width: 100%;
+    display: flex;
+    position: relative;
+    justify-content: flex-end;
+}
+.filterByType {
+    max-width: 400px !important;
+    border-radius: 4px;
+    padding: 5px;
+}
+
 p {
     color: #1b1f26b8;
     font-size: 14px;
@@ -133,8 +209,5 @@ h5 {
 }
 .error-details__meta div {
     margin-right: 30px;
-}
-.filterByType {
-    width: 400px;
 }
 </style>
