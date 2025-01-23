@@ -199,6 +199,7 @@ func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 		TransTime:         payload.TransTime,
 		LoadPageTime:      payload.LoadPageTime,
 		ResTime:           payload.ResTime,
+		Browser:           payload.Browser,
 	}
 	perfReq := &PerfRequestType{DataPoints: []DataPoint{dp}}
 	c.getPerfBatch(project).Add(perfReq, string(data))
