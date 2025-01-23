@@ -6,7 +6,7 @@
                     class="clickable"
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: $route.params.id },
+                        params: { view: 'EUM', id: $route.params.id, report: 'errors' },
                         query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error) },
                     }"
                     @click.native.prevent="handleErrorClick(item.error)"
@@ -50,20 +50,20 @@ export default {
                 this.$emit('update:error', newError);
             },
         },
-        '$route.query.eventId': {
-            immediate: true,
-            handler(newEventId) {
-                this.$emit('update:eventId', newEventId);
-            },
-        },
     },
     methods: {
         handleErrorClick(error) {
             this.$emit('error-clicked', error);
+            this.$router.push({
+                name: 'overview',
+                params: { view: 'EUM', id: this.$route.params.id },
+                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(error) },
+            });
         },
     },
 };
 </script>
+
 <style scoped>
 .clickable {
     cursor: pointer;
