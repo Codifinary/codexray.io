@@ -18,6 +18,8 @@ type Overview struct {
 	Traces       *Traces                     `json:"traces"`
 	Costs        *Costs                      `json:"costs"`
 	Categories   []model.ApplicationCategory `json:"categories"`
+	EumApps      *EumView                    `json:"eumapps"`
+	Perfs        *PerfView                   `json:"perfs"`
 }
 
 func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, query string) *Overview {
@@ -51,6 +53,10 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 		v.Traces = renderTraces(ctx, ch, w, query)
 	case "costs":
 		v.Costs = renderCosts(w)
+	case "eumapps":
+		v.EumApps = renderEumApps(ctx, ch, w, query)
+	case "perfs":
+		v.Perfs = renderPerfs(ctx, ch, w, query)
 	}
 	return v
 }

@@ -250,8 +250,13 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
-	r.HandleFunc("/api/project/{project}/perfview", a.Auth(a.PerfView)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/perfview", a.PerfView).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/perfdetails/{serviceName}:{pageName}", a.PerfDetails).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eumapps", a.Auth(a.EumApps)).Methods(http.MethodGet)
+
+	r.HandleFunc("/api/project/{project}/eum/overview", a.Auth(a.EumApps)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/perf/details", (a.PerfDetails)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
