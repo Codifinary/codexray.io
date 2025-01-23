@@ -15,6 +15,7 @@ type PerfRow struct {
 	JsErrorPercentage  float64
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
+	Requests           uint64
 }
 type ChartRow struct {
 	Timestamp     uint64
@@ -25,7 +26,7 @@ type ChartRow struct {
 	UsersImpacted uint64
 }
 
-func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time) ([]PerfRow, error) {
+func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
 	// Build the base query
 	query := `
 SELECT 
@@ -33,7 +34,8 @@ SELECT
     avg(p.LoadPageTime) AS avgLoadPageTime,
     countIf(e.Category = 'js') * 100.0 / count() AS jsErrorPercentage,
     countIf(e.Category = 'api') * 100.0 / count() AS apiErrorPercentage,
-    countDistinct(e.UserId) AS impactedUsers
+    countDistinct(e.UserId) AS impactedUsers,
+    count(p.PageName) AS Requests
 FROM 
     perf_data p
 LEFT JOIN 
@@ -41,7 +43,7 @@ LEFT JOIN
 ON 
     p.PageName = e.PagePath`
 
-	// Conditionally add time range filtering
+	// Conditionally add time range and service name filtering
 	var filters []string
 	var args []any
 	if from != nil {
@@ -51,6 +53,10 @@ ON
 	if to != nil {
 		filters = append(filters, "p.Timestamp <= @to")
 		args = append(args, clickhouse.Named("to", *to))
+	}
+	if serviceName != "" {
+		filters = append(filters, "p.ServiceName = @serviceName")
+		args = append(args, clickhouse.Named("serviceName", serviceName))
 	}
 
 	if len(filters) > 0 {
@@ -72,7 +78,7 @@ GROUP BY
 	var results []PerfRow
 	for rows.Next() {
 		var row PerfRow
-		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
+		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
