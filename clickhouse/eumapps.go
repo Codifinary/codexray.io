@@ -24,9 +24,9 @@ SELECT
     avg(p.LoadPageTime) AS avgLoadPageTime,
     round(countIf(e.Category = 'js') * 100.0 / count(), 2) AS jsErrorPercentage,
     round(countIf(e.Category = 'api') * 100.0 / count(), 2) AS apiErrorPercentage,
-    countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers
-	count(p.ServiceName) AS Requests,
-	p.Browser AS Browser
+    countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers,
+    count(p.ServiceName) AS requests,
+    p.Browser
 FROM 
     perf_data p
 LEFT JOIN 
@@ -37,7 +37,7 @@ WHERE
     (? IS NULL OR p.Timestamp >= parseDateTimeBestEffort(?)) 
     AND (? IS NULL OR p.Timestamp <= parseDateTimeBestEffort(?))
 GROUP BY 
-    p.ServiceName
+    p.ServiceName, p.Browser
 ORDER BY 
     pages DESC
 `

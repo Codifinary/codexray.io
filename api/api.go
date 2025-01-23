@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"slices"
 	"sort"
 	"time"
@@ -1121,7 +1122,12 @@ func (api *Api) Node(w http.ResponseWriter, r *http.Request, u *db.User) {
 func (api *Api) PerfView(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
 	projectId := vars["project"]
-	serviceName := vars["serviceName"]
+	encodedServiceName := vars["serviceName"]
+	serviceName, err := url.QueryUnescape(encodedServiceName)
+	if err != nil {
+		http.Error(w, "Invalid service name", http.StatusBadRequest)
+		return
+	}
 	ctx := r.Context()
 
 	if serviceName == "" {
