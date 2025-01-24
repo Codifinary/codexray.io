@@ -334,23 +334,6 @@ func (api *Api) Overview(w http.ResponseWriter, r *http.Request, u *db.User) {
 	projectId := vars["project"]
 	view := vars["view"]
 
-	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
-	// 	Name: "default",
-	// 	Prometheus: db.IntegrationsPrometheus{
-	// 		Url: "http://prometheus:9090",
-	// 	},
-	// 	Settings: db.ProjectSettings{
-	// 		Integrations: db.Integrations{
-	// 			Clickhouse: &db.IntegrationClickhouse{
-	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
-	// 				Protocol: "http",
-	// 			},
-	// 		},
-	// 	},
-	// }
-
 	switch view {
 	case "traces":
 		if !api.IsAllowed(u, rbac.Actions.Project(projectId).Traces().View()) {
