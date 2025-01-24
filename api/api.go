@@ -331,7 +331,7 @@ func (api *Api) Status(w http.ResponseWriter, r *http.Request, u *db.User) {
 
 func (api *Api) Overview(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
-	// projectId := vars["project"]
+	projectId := vars["project"]
 	view := vars["view"]
 
 	// project := &db.Project{
@@ -351,18 +351,18 @@ func (api *Api) Overview(w http.ResponseWriter, r *http.Request, u *db.User) {
 	// 	},
 	// }
 
-	// switch view {
-	// case "traces":
-	// 	if !api.IsAllowed(u, rbac.Actions.Project(projectId).Traces().View()) {
-	// 		http.Error(w, "You are not allowed to view traces.", http.StatusForbidden)
-	// 		return
-	// 	}
-	// case "costs":
-	// 	if !api.IsAllowed(u, rbac.Actions.Project(projectId).Costs().View()) {
-	// 		http.Error(w, "You are not allowed to view costs.", http.StatusForbidden)
-	// 		return
-	// 	}
-	// }
+	switch view {
+	case "traces":
+		if !api.IsAllowed(u, rbac.Actions.Project(projectId).Traces().View()) {
+			http.Error(w, "You are not allowed to view traces.", http.StatusForbidden)
+			return
+		}
+	case "costs":
+		if !api.IsAllowed(u, rbac.Actions.Project(projectId).Costs().View()) {
+			http.Error(w, "You are not allowed to view costs.", http.StatusForbidden)
+			return
+		}
+	}
 
 	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
 	if err != nil {
