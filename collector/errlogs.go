@@ -228,6 +228,10 @@ func (c *Collector) ErrLog(w http.ResponseWriter, r *http.Request) {
 		Message:     payload.Message,
 		Stack:       payload.Stack,
 		UserId:      payload.UserId,
+		ErrorName:   payload.ErrorName,
+		Device:      payload.Device,
+		OS:          payload.OS,
+		Browser:     payload.Browser,
 	}
 	c.getErrLogBatch(project).Add(dp, string(data))
 	w.Header().Set("Content-Type", "application/json")

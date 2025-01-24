@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/url"
 	"sort"
-	"time"
 
 	"codexray/clickhouse"
 	"codexray/model"
@@ -36,7 +35,7 @@ type PerfOverview struct {
 	Requests           uint64  `json:"requests"`
 }
 
-func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time, serviceName string) *View {
+func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query url.Values, serviceName string) *View {
 	v := &View{}
 
 	var q Query
@@ -56,8 +55,11 @@ func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, 
 		return v
 	}
 
+	from := w.Ctx.From.ToStandard()
+	to := w.Ctx.To.ToStandard()
+
 	// Fetch performance data
-	rows, err := ch.GetPerformanceOverview(ctx, from, to, serviceName)
+	rows, err := ch.GetPerformanceOverview(ctx, &from, &to, serviceName)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING

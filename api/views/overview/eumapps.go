@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"time"
 
 	"codexray/clickhouse"
 	"codexray/model"
@@ -26,13 +25,15 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
-	Requests           uint64  `json:"requests"`
 	Browser            string  `json:"browser"`
+	Requests           uint64  `json:"requests"`
 }
 
 func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *EumView {
 	v := &EumView{}
 
+	from := w.Ctx.From.ToStandard()
+	to := w.Ctx.To.ToStandard()
 	// Default time range
 	// if from == nil || to == nil {
 	// 	now := time.Now()
@@ -46,7 +47,7 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 	// 	}
 	// }
 
-	rows, err := ch.GetServiceOverviews(ctx, &time.Time{}, &time.Time{})
+	rows, err := ch.GetServiceOverviews(ctx, &from, &to)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING

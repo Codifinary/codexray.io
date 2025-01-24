@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sort"
-	"time"
 
 	"codexray/clickhouse"
 	"codexray/model"
@@ -36,9 +35,10 @@ type PerfOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
+	Requests           uint64  `json:"requests"`
 }
 
-func renderPerfs(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *PerfView {
+func renderPerfs(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, serviceName string) *PerfView {
 	v := &PerfView{}
 
 	var q PerfQuery
@@ -53,8 +53,11 @@ func renderPerfs(ctx context.Context, ch *clickhouse.Client, w *model.World, que
 		return v
 	}
 
+	from := w.Ctx.From.ToStandard()
+	to := w.Ctx.To.ToStandard()
+
 	// Fetch performance data
-	rows, err := ch.GetPerformanceOverview(ctx, &time.Time{}, &time.Time{})
+	rows, err := ch.GetPerformanceOverview(ctx, &from, &to, serviceName)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -70,6 +73,7 @@ func renderPerfs(ctx context.Context, ch *clickhouse.Client, w *model.World, que
 			JsErrorPercentage:  row.JsErrorPercentage,
 			ApiErrorPercentage: row.ApiErrorPercentage,
 			ImpactedUsers:      row.ImpactedUsers,
+			Requests:           row.Requests,
 		})
 	}
 

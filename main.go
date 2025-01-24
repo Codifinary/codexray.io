@@ -252,6 +252,8 @@ func main() {
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
 
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}", a.Auth(a.EumPerf)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}", a.Auth(a.EumErrLog)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
