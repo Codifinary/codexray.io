@@ -1,9 +1,8 @@
-package eumapps
+package overview
 
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"sort"
 	"time"
 
@@ -13,17 +12,11 @@ import (
 	"k8s.io/klog"
 )
 
-const defaultLimit = 100
-
-type View struct {
+type EumView struct {
 	Status    model.Status      `json:"status"`
 	Message   string            `json:"message"`
 	Overviews []ServiceOverview `json:"overviews"`
 	Limit     int               `json:"limit"`
-}
-
-type Query struct {
-	Limit int `json:"limit"`
 }
 
 type ServiceOverview struct {
@@ -37,23 +30,23 @@ type ServiceOverview struct {
 	Browser            string  `json:"browser"`
 }
 
-func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time) *View {
-	v := &View{}
+func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *EumView {
+	v := &EumView{}
 
 	// Default time range
-	if from == nil || to == nil {
-		now := time.Now()
-		if from == nil {
-			defaultFrom := now.Add(-24 * time.Hour)
-			from = &defaultFrom
-		}
-		if to == nil {
-			defaultTo := now
-			to = &defaultTo
-		}
-	}
+	// if from == nil || to == nil {
+	// 	now := time.Now()
+	// 	if from == nil {
+	// 		defaultFrom := now.Add(-24 * time.Hour)
+	// 		from = &defaultFrom
+	// 	}
+	// 	if to == nil {
+	// 		defaultTo := now
+	// 		to = &defaultTo
+	// 	}
+	// }
 
-	rows, err := ch.GetServiceOverviews(ctx, from, to)
+	rows, err := ch.GetServiceOverviews(ctx, &time.Time{}, &time.Time{})
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING

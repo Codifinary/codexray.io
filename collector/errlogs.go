@@ -217,7 +217,7 @@ func (c *Collector) ErrLog(w http.ResponseWriter, r *http.Request) {
 	}
 	dp := DataPointErr{
 		UniqueId:    payload.UniqueId,
-		Timestamp:   time.Unix(0, payload.Timestamp),
+		Timestamp:   time.Unix(0, payload.Timestamp*int64(time.Millisecond)),
 		ServiceName: payload.Service,
 		PagePath:    payload.PagePath,
 		Category:    payload.Category,
