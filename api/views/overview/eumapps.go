@@ -1,11 +1,9 @@
-package eumapps
+package overview
 
 import (
 	"context"
 	"fmt"
-	"net/url"
 	"sort"
-	"time"
 
 	"codexray/clickhouse"
 	"codexray/model"
@@ -13,17 +11,11 @@ import (
 	"k8s.io/klog"
 )
 
-const defaultLimit = 100
-
-type View struct {
+type EumView struct {
 	Status    model.Status      `json:"status"`
 	Message   string            `json:"message"`
 	Overviews []ServiceOverview `json:"overviews"`
 	Limit     int               `json:"limit"`
-}
-
-type Query struct {
-	Limit int `json:"limit"`
 }
 
 type ServiceOverview struct {
@@ -33,25 +25,29 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
+	Browser            string  `json:"browser"`
+	Requests           uint64  `json:"requests"`
 }
 
-func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, to *time.Time) *View {
-	v := &View{}
+func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *EumView {
+	v := &EumView{}
 
+	from := w.Ctx.From.ToStandard()
+	to := w.Ctx.To.ToStandard()
 	// Default time range
-	if from == nil || to == nil {
-		now := time.Now()
-		if from == nil {
-			defaultFrom := now.Add(-24 * time.Hour)
-			from = &defaultFrom
-		}
-		if to == nil {
-			defaultTo := now
-			to = &defaultTo
-		}
-	}
+	// if from == nil || to == nil {
+	// 	now := time.Now()
+	// 	if from == nil {
+	// 		defaultFrom := now.Add(-24 * time.Hour)
+	// 		from = &defaultFrom
+	// 	}
+	// 	if to == nil {
+	// 		defaultTo := now
+	// 		to = &defaultTo
+	// 	}
+	// }
 
-	rows, err := ch.GetServiceOverviews(ctx, from, to)
+	rows, err := ch.GetServiceOverviews(ctx, &from, &to)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -68,6 +64,8 @@ func Render(ctx context.Context, ch *clickhouse.Client, query url.Values, from, 
 			JsErrorPercentage:  row.JsErrorPercentage,
 			ApiErrorPercentage: row.ApiErrorPercentage,
 			ImpactedUsers:      row.ImpactedUsers,
+			Requests:           row.Requests,
+			Browser:            row.Browser,
 		})
 	}
 

@@ -12,6 +12,8 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
+	Browser            string
+	Requests           uint64
 }
 
 func (c *Client) GetServiceOverviews(ctx context.Context, from, to *time.Time) ([]ServiceOverview, error) {
@@ -22,7 +24,9 @@ SELECT
     avg(p.LoadPageTime) AS avgLoadPageTime,
     round(countIf(e.Category = 'js') * 100.0 / count(), 2) AS jsErrorPercentage,
     round(countIf(e.Category = 'api') * 100.0 / count(), 2) AS apiErrorPercentage,
-    countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers
+    countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers,
+    count(p.ServiceName) AS requests,
+    p.Browser
 FROM 
     perf_data p
 LEFT JOIN 
@@ -33,7 +37,7 @@ WHERE
     (? IS NULL OR p.Timestamp >= parseDateTimeBestEffort(?)) 
     AND (? IS NULL OR p.Timestamp <= parseDateTimeBestEffort(?))
 GROUP BY 
-    p.ServiceName
+    p.ServiceName, p.Browser
 ORDER BY 
     pages DESC
 `
@@ -61,7 +65,7 @@ ORDER BY
 	var results []ServiceOverview
 	for rows.Next() {
 		var row ServiceOverview
-		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
+		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests, &row.Browser); err != nil {
 			return nil, err
 		}
 		results = append(results, row)

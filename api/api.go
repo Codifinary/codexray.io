@@ -11,7 +11,7 @@ import (
 
 	"codexray/api/forms"
 	"codexray/api/views"
-	"codexray/api/views/eumapps"
+	"codexray/api/views/errlogs"
 	"codexray/api/views/perf"
 	"codexray/auditor"
 	"codexray/cache"
@@ -1118,86 +1118,91 @@ func (api *Api) Node(w http.ResponseWriter, r *http.Request, u *db.User) {
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, auditor.AuditNode(world, node)))
 }
 
-func (api *Api) PerfView(w http.ResponseWriter, r *http.Request, u *db.User) {
+func (api *Api) Perf(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
-	projectId := vars["project"]
-	ctx := r.Context()
+	//projectId := vars["project"]
+	serviceName := vars["serviceName"]
+	pageName := vars["pageName"]
 
-	project, err := api.db.GetProject(db.ProjectId(projectId))
-	// for local purpose
-	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
-	// 	Name: "default",
-	// 	Prometheus: db.IntegrationsPrometheus{
-	// 		Url: "http://prometheus:9090",
-	// 	},
-	// 	Settings: db.ProjectSettings{
-	// 		Integrations: db.Integrations{
-	// 			Clickhouse: &db.IntegrationClickhouse{
-	// 				Database: "default",
-	// 				Addr:     "localhost:9000",
-	// 				Protocol: "http",
-	// 			},
-	// 		},
-	// 	},
-	// }
+	// Load World and Project
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
 	if err != nil {
 		klog.Errorln(err)
-		http.Error(w, "Project not found", http.StatusNotFound)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
 		return
 	}
 
 	ch, err := api.getClickhouseClient(project)
 	if err != nil {
 		klog.Warningln(err)
-		http.Error(w, "ClickHouse client error", http.StatusInternalServerError)
-		return
 	}
-	from, to := utils.ParseTimeRange(r.URL.Query())
 
-	view := perf.Render(ctx, ch, r.URL.Query(), from, to)
-	utils.WriteJson(w, view)
+	report := auditor.AuditPerf(world, serviceName, pageName, ch)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
-func (api *Api) EumApps(w http.ResponseWriter, r *http.Request, u *db.User) {
+func (api *Api) EumPerf(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
-	projectId := vars["project"]
+	//projectId := vars["project"]
+	serviceName := vars["serviceName"]
 	ctx := r.Context()
 
-	project, err := api.db.GetProject(db.ProjectId(projectId))
-	// for local purpose
-	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
-	// 	Name: "default",
-	// 	Prometheus: db.IntegrationsPrometheus{
-	// 		Url: "http://prometheus:9090",
-	// 	},
-	// 	Settings: db.ProjectSettings{
-	// 		Integrations: db.Integrations{
-	// 			Clickhouse: &db.IntegrationClickhouse{
-	// 				Database: "default",
-	// 				Addr:     "localhost:9000",
-	// 				Protocol: "http",
-	// 			},
-	// 		},
-	// 	},
-	// }
+	// Load World and Project
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
 	if err != nil {
 		klog.Errorln(err)
-		http.Error(w, "Project not found", http.StatusNotFound)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
 		return
 	}
 
 	ch, err := api.getClickhouseClient(project)
 	if err != nil {
 		klog.Warningln(err)
-		http.Error(w, "ClickHouse client error", http.StatusInternalServerError)
+	}
+
+	report := perf.Render(world, ctx, ch, r.URL.Query(), serviceName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+}
+
+func (api *Api) EumErrLog(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	//projectId := vars["project"]
+	serviceName := vars["serviceName"]
+	ctx := r.Context()
+
+	// Load World and Project
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	from, to := utils.ParseTimeRange(r.URL.Query())
-	view := eumapps.Render(ctx, ch, r.URL.Query(), from, to)
-	utils.WriteJson(w, view)
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := errlogs.RenderErrors(world, ctx, ch, r.URL.Query(), serviceName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
 func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to timeseries.Time) (*model.World, *cache.Status, error) {
@@ -1244,6 +1249,25 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 		}
 		return nil, nil, nil, err
 	}
+
+	// for local purpose
+	// project := &db.Project{
+	// 	Id:   "ywajvh3s",
+	// 	Name: "default",
+	// 	Prometheus: db.IntegrationsPrometheus{
+	// 		Url: "http://prometheus:9090",
+	// 	},
+	// 	Settings: db.ProjectSettings{
+	// 		Integrations: db.Integrations{
+	// 			Clickhouse: &db.IntegrationClickhouse{
+	// 				Database: "default",
+	// 				Addr:     "34.47.154.246:31137",
+	// 				Protocol: "http",
+	// 			},
+	// 		},
+	// 	},
+	// }
+	// projectId := project.Id
 
 	now := timeseries.Now()
 	q := r.URL.Query()

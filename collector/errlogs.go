@@ -26,6 +26,10 @@ type ErrLogPayload struct {
 	Stack          string `json:"stack"`
 	Timestamp      int64  `json:"timestamp"`
 	UserId         string `json:"userId"`
+	ErrorName      string `json:"errorName"`
+	Device         string `json:"device"`
+	OS             string `json:"os"`
+	Browser        string `json:"browser"`
 	// Include other fields as necessary
 }
 
@@ -42,6 +46,10 @@ type DataPointErr struct {
 	Message     string
 	Stack       string
 	UserId      string
+	ErrorName   string
+	Device      string
+	OS          string
+	Browser     string
 }
 
 // ErrLogBatch handles batching of error logs for insertion into ClickHouse.
@@ -64,6 +72,10 @@ type ErrLogBatch struct {
 	Message     *chproto.ColStr
 	Stack       *chproto.ColStr
 	UserId      *chproto.ColStr
+	ErrorName   *chproto.ColStr
+	Device      *chproto.ColStr
+	OS          *chproto.ColStr
+	Browser     *chproto.ColStr
 	RawData     *chproto.ColStr
 }
 
@@ -84,6 +96,10 @@ func NewErrLogBatch(limit int, timeout time.Duration, exec func(query ch.Query) 
 		Message:     new(chproto.ColStr),
 		Stack:       new(chproto.ColStr),
 		UserId:      new(chproto.ColStr),
+		ErrorName:   new(chproto.ColStr),
+		Device:      new(chproto.ColStr),
+		OS:          new(chproto.ColStr),
+		Browser:     new(chproto.ColStr),
 		RawData:     new(chproto.ColStr),
 	}
 	go func() {
@@ -125,6 +141,10 @@ func (b *ErrLogBatch) Add(dataPoint DataPointErr, raw string) {
 	b.Message.Append(dataPoint.Message)
 	b.Stack.Append(dataPoint.Stack)
 	b.UserId.Append(dataPoint.UserId)
+	b.ErrorName.Append(dataPoint.ErrorName)
+	b.Device.Append(dataPoint.Device)
+	b.OS.Append(dataPoint.OS)
+	b.Browser.Append(dataPoint.Browser)
 	b.RawData.Append(raw)
 	if b.Timestamp.Rows() >= b.limit {
 		b.save()
@@ -148,6 +168,10 @@ func (b *ErrLogBatch) save() {
 		{Name: "Message", Data: b.Message},
 		{Name: "Stack", Data: b.Stack},
 		{Name: "UserId", Data: b.UserId},
+		{Name: "ErrorName", Data: b.ErrorName},
+		{Name: "Device", Data: b.Device},
+		{Name: "OS", Data: b.OS},
+		{Name: "Browser", Data: b.Browser},
 		{Name: "RawData", Data: b.RawData},
 	}
 	err := b.exec(ch.Query{Body: input.Into("err_log_data"), Input: input})
@@ -193,7 +217,7 @@ func (c *Collector) ErrLog(w http.ResponseWriter, r *http.Request) {
 	}
 	dp := DataPointErr{
 		UniqueId:    payload.UniqueId,
-		Timestamp:   time.Unix(0, payload.Timestamp),
+		Timestamp:   time.Unix(0, payload.Timestamp*int64(time.Millisecond)),
 		ServiceName: payload.Service,
 		PagePath:    payload.PagePath,
 		Category:    payload.Category,
@@ -204,6 +228,10 @@ func (c *Collector) ErrLog(w http.ResponseWriter, r *http.Request) {
 		Message:     payload.Message,
 		Stack:       payload.Stack,
 		UserId:      payload.UserId,
+		ErrorName:   payload.ErrorName,
+		Device:      payload.Device,
+		OS:          payload.OS,
+		Browser:     payload.Browser,
 	}
 	c.getErrLogBatch(project).Add(dp, string(data))
 	w.Header().Set("Content-Type", "application/json")
