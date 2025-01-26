@@ -2,15 +2,11 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <router-link :to="{ name: 'overview', params: { view: 'EUM', id: id, report: report } }">{{ id }}</router-link>
+                <router-link :to="{ name: 'overview', params: { view: 'EUM', id: id } }">{{ id }}</router-link>
             </li>
             <li class="breadcrumb-item" v-if="error">
                 <router-link
-                    :to="{
-                        name: 'overview',
-                        params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                        query: { ...$utils.contextQuery(), error: encodeURIComponent(error) },
-                    }"
+                    :to="{ name: 'overview', params: { view: 'EUM', id: id }, query: { ...$utils.contextQuery(), error: encodeURIComponent(error) } }"
                     >{{ error }}</router-link
                 >
             </li>
@@ -76,9 +72,6 @@ export default {
     font-weight: 600 !important;
 }
 .router-link-active {
-    color: var(--status-ok) !important;
-}
-a {
     color: var(--status-ok) !important;
 }
 .breadcrumb-item + .breadcrumb-item::before {

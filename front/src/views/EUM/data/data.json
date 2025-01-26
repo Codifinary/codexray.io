@@ -21,7 +21,7 @@
             "usersImpacted": 30
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "HealthTrack",
             "noOfPages": 15,
             "loadRequestsPerSecond": 20,
@@ -41,7 +41,7 @@
             "usersImpacted": 65
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "ShopEase",
             "noOfPages": 30,
             "loadRequestsPerSecond": 60,
@@ -61,7 +61,7 @@
             "usersImpacted": 40
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "FitnessPro",
             "noOfPages": 35,
             "loadRequestsPerSecond": 70,
@@ -81,7 +81,7 @@
             "usersImpacted": 55
         },
         {
-            "applicationType": "mobile",
+            "applicationType": "mobileapp",
             "applicationName": "NewsFlash",
             "noOfPages": 10,
             "loadRequestsPerSecond": 25,

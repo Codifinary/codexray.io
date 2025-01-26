@@ -3,7 +3,9 @@ package utils
 import (
 	"fmt"
 	"math"
+	"net/url"
 	"strings"
+	"time"
 
 	"codexray/timeseries"
 
@@ -117,4 +119,19 @@ func FormatLinkStats(requests, latency, bytesSent, bytesReceived float32, issue 
 		res = append(res, line)
 	}
 	return res
+}
+
+func ParseTimeRange(query url.Values) (*time.Time, *time.Time) {
+	var from, to *time.Time
+	if f := query.Get("from"); f != "" {
+		if t, err := time.Parse(time.RFC3339, f); err == nil {
+			from = &t
+		}
+	}
+	if t := query.Get("to"); t != "" {
+		if tParsed, err := time.Parse(time.RFC3339, t); err == nil {
+			to = &tParsed
+		}
+	}
+	return from, to
 }

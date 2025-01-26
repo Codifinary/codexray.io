@@ -72,7 +72,6 @@ export default {
             reports: [{ name: 'page-performance' }, { name: 'errors' }, { name: 'logs' }, { name: 'traces' }],
         };
     },
-
     watch: {
         id: {
             immediate: true,
@@ -87,14 +86,9 @@ export default {
             },
         },
         activeTab: {
+            immediate: true,
             handler(newTab) {
                 this.updateUrl(newTab);
-            },
-        },
-        '$route.params.report': {
-            immediate: true,
-            handler(newReport) {
-                this.setActiveTab(newReport);
             },
         },
         '$route.query.eventId': {
@@ -104,33 +98,16 @@ export default {
             },
         },
     },
-
     created() {
-        const report = this.$route.params.report || this.report;
-        if (!report) {
-            this.$router
-                .replace({
-                    name: 'overview',
-                    params: { view: 'EUM', id: this.id, report: this.reports[0].name },
-                    query: this.$utils.contextQuery(),
-                })
-                .catch((err) => {
-                    if (err.name !== 'NavigationDuplicated') {
-                        console.error(err);
-                    }
-                });
-        } else {
-            this.setActiveTab(report);
-        }
-        if (this.$route.query.eventId) {
-            this.eventId = this.$route.query.eventId;
-        }
+        this.updateUrl(this.activeTab);
     },
     methods: {
         fetchApplicationData(id) {
             const data = getApplicationData(id);
             this.pagePerformance = data.pagePerformance;
             this.errors = data.errors;
+            // const appData = getAppOverview(id);
+            // this.pagePerformance = appData.overviews;
         },
         updateUrl(tabIndex) {
             if (tabIndex < 0 || tabIndex >= this.reports.length) {
@@ -139,13 +116,9 @@ export default {
             }
             const report = this.reports[tabIndex].name;
             const currentRoute = this.$route;
-            const targetRoute = {
-                name: 'overview',
-                params: { view: 'EUM', id: this.id, report },
-                query: { ...this.$utils.contextQuery(), error: this.selectedError || undefined },
-            };
+            const targetRoute = { name: 'overview', params: { view: 'EUM', id: this.id, report }, query: this.$utils.contextQuery() };
 
-            if (currentRoute.params.report !== report || currentRoute.query.error !== this.selectedError) {
+            if (currentRoute.name !== targetRoute.name || currentRoute.params.report !== targetRoute.params.report) {
                 this.$router.push(targetRoute).catch((err) => {
                     if (err.name !== 'NavigationDuplicated') {
                         console.error(err);
@@ -169,22 +142,10 @@ export default {
                 }
             } else {
                 console.error(`Invalid report: ${report}`);
-                this.activeTab = 0; // Default to the first tab if the report is invalid
             }
         },
         handleErrorClicked(error) {
             this.selectedError = error;
-            this.$router
-                .push({
-                    name: 'overview',
-                    params: { view: 'EUM', id: this.id, report: `errors/${error}` },
-                    query: { ...this.$utils.contextQuery() },
-                })
-                .catch((err) => {
-                    if (err.name !== 'NavigationDuplicated') {
-                        console.error(err);
-                    }
-                });
         },
         handleEventClicked(eventId) {
             this.$router.push({
@@ -223,5 +184,6 @@ export default {
     padding-bottom: 70px;
     margin-left: 20px !important;
     margin-right: 20px !important;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
 }
 </style>

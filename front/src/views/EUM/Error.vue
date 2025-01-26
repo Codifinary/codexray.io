@@ -9,11 +9,10 @@
                     <router-link
                         :to="{
                             name: 'overview',
-                            params: { view: 'EUM', id: $route.params.id, report: 'errors' },
+                            params: { view: 'EUM', id: id },
                             query: { ...$utils.contextQuery(), error: encodeURIComponent(error), eventId: item.eventId },
                         }"
                         class="clickable"
-                        @click.native.prevent="handleEventClick(item.eventId)"
                     >
                         {{ item.eventId }}
                     </router-link>
@@ -70,6 +69,14 @@ export default {
                 this.selectedEventId = newEventId;
             },
         },
+        '$route.query.error': {
+            immediate: true,
+            handler(newError) {
+                if (newError !== this.error) {
+                    this.$emit('update:error', newError);
+                }
+            },
+        },
     },
     methods: {
         fetchSpecificErrors(error) {
@@ -79,13 +86,6 @@ export default {
             } else {
                 console.error('No specific errors found');
             }
-        },
-        handleEventClick(eventId) {
-            this.$router.push({
-                name: 'overview',
-                params: { view: 'EUM', id: this.id },
-                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(this.error), eventId },
-            });
         },
     },
     created() {
