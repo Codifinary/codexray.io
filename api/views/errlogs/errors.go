@@ -6,35 +6,31 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"net/url"
-	"sort"
 	"time"
 
 	"k8s.io/klog"
 )
 
-const defaultLimit = 100
-
-type View struct {
+type ErrorsView struct {
 	Status  model.Status `json:"status"`
 	Message string       `json:"message"`
-	Errors  []ErrorLogs  `json:"errors"`
+	Errors  []Error      `json:"errors"`
 	Limit   int          `json:"limit"`
 }
 
-type Query struct {
-	Limit int `json:"limit"`
-}
-type ErrorLogs struct {
-	ErrorName    string    `json:"error_name"`
-	EventCount   uint64    `json:"event_count"`
-	UserImpacted uint64    `json:"user_impacted"`
+type Error struct {
+	EventID      string    `json:"event_id"`
+	UserID       string    `json:"user_id"`
+	Device       string    `json:"device"`
+	OS           string    `json:"os"`
+	Browser      string    `json:"browser"`
 	LastReported time.Time `json:"last_reported"`
-	Category     string    `json:"category"`
 }
 
-func RenderErrors(w *model.World, ctx context.Context, ch *clickhouse.Client, query url.Values, serviceName string) *View {
-	v := &View{}
+func Errors(w *model.World, ctx context.Context, ch *clickhouse.Client, query url.Values, serviceName string, errorName string) *ErrorsView {
+	v := &ErrorsView{}
 
 	var q Query
 	if s := query.Get("query"); s != "" {
@@ -42,6 +38,7 @@ func RenderErrors(w *model.World, ctx context.Context, ch *clickhouse.Client, qu
 			klog.Warningln(err)
 		}
 	}
+
 	if q.Limit <= 0 {
 		q.Limit = defaultLimit
 	}
@@ -56,7 +53,7 @@ func RenderErrors(w *model.World, ctx context.Context, ch *clickhouse.Client, qu
 	from := w.Ctx.From.ToStandard()
 	to := w.Ctx.To.ToStandard()
 
-	rows, err := ch.GetErrorLogs(ctx, &from, &to, serviceName)
+	rows, err := ch.GetErrors(ctx, &from, &to, serviceName, errorName)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -64,25 +61,22 @@ func RenderErrors(w *model.World, ctx context.Context, ch *clickhouse.Client, qu
 		return v
 	}
 
-	var errors []ErrorLogs
+	var errors []Error
 	for _, row := range rows {
-		errors = append(errors, ErrorLogs{
-			ErrorName:    row.ErrorName,
-			EventCount:   row.EventCount,
-			UserImpacted: row.UserImpacted,
+		errors = append(errors, Error{
+			EventID:      row.EventID,
+			UserID:       row.UserID,
+			Device:       row.Device,
+			OS:           row.OS,
+			Browser:      row.Browser,
 			LastReported: row.LastReported,
-			Category:     row.Category,
 		})
 	}
-
-	// Sort by error count
-	sort.Slice(errors, func(i, j int) bool {
-		return errors[i].EventCount > errors[j].EventCount
-	})
 
 	v.Status = model.OK
 	v.Errors = errors
 	v.Limit = q.Limit
 
 	return v
+
 }

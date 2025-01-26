@@ -2,7 +2,6 @@ package clickhouse
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -18,9 +17,6 @@ type ErrorRow struct {
 }
 
 func (c *Client) GetErrorLogs(ctx context.Context, from, to *time.Time, serviceName string) ([]ErrorRow, error) {
-	fmt.Println("from:", from)
-	fmt.Println("to:", to)
-	fmt.Println("serviceName:", serviceName)
 
 	query := `
 SELECT 
@@ -58,10 +54,6 @@ GROUP BY
 	ORDER BY
 		eventCount DESC
 	`
-
-	fmt.Println("query:", query)
-	fmt.Println("args:", args)
-
 	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -76,8 +68,6 @@ GROUP BY
 		}
 		result = append(result, row)
 	}
-
-	fmt.Println("result:", result)
 
 	return result, nil
 }
