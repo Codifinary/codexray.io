@@ -1205,6 +1205,91 @@ func (api *Api) EumErrLog(w http.ResponseWriter, r *http.Request, u *db.User) {
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
+func (api *Api) EumErrors(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	serviceName := vars["serviceName"]
+	errorName := vars["errorName"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := errlogs.Errors(world, ctx, ch, r.URL.Query(), serviceName, errorName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+}
+
+func (api *Api) EumErrorDetails(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	eventID := vars["eventID"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := errlogs.ErrorDetails(world, ctx, ch, r.URL.Query(), eventID)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+
+}
+
+func (api *Api) EumErrorDetailBreadCrumb(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	eventID := vars["eventID"]
+	breadcrumbtype := vars["breadcrumbType"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := errlogs.ErrorDetailBreadcrumb(world, ctx, ch, r.URL.Query(), eventID, breadcrumbtype)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+
+}
+
 func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to timeseries.Time) (*model.World, *cache.Status, error) {
 	cacheClient := api.cache.GetCacheClient(project.Id)
 
