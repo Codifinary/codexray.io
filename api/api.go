@@ -13,6 +13,7 @@ import (
 	"codexray/api/views"
 	"codexray/api/views/errlogs"
 	"codexray/api/views/perf"
+	"codexray/api/views/tracing"
 	"codexray/auditor"
 	"codexray/cache"
 	"codexray/clickhouse"
@@ -331,21 +332,21 @@ func (api *Api) Status(w http.ResponseWriter, r *http.Request, u *db.User) {
 
 func (api *Api) Overview(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
-	projectId := vars["project"]
+	// projectId := vars["project"]
 	view := vars["view"]
 
-	switch view {
-	case "traces":
-		if !api.IsAllowed(u, rbac.Actions.Project(projectId).Traces().View()) {
-			http.Error(w, "You are not allowed to view traces.", http.StatusForbidden)
-			return
-		}
-	case "costs":
-		if !api.IsAllowed(u, rbac.Actions.Project(projectId).Costs().View()) {
-			http.Error(w, "You are not allowed to view costs.", http.StatusForbidden)
-			return
-		}
-	}
+	// switch view {
+	// case "traces":
+	// 	if !api.IsAllowed(u, rbac.Actions.Project(projectId).Traces().View()) {
+	// 		http.Error(w, "You are not allowed to view traces.", http.StatusForbidden)
+	// 		return
+	// 	}
+	// case "costs":
+	// 	if !api.IsAllowed(u, rbac.Actions.Project(projectId).Costs().View()) {
+	// 		http.Error(w, "You are not allowed to view costs.", http.StatusForbidden)
+	// 		return
+	// 	}
+	// }
 
 	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
 	if err != nil {
@@ -1290,6 +1291,33 @@ func (api *Api) EumErrorDetailBreadCrumb(w http.ResponseWriter, r *http.Request,
 
 }
 
+func (api *Api) EumTraces(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	serviceName := vars["serviceName"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := tracing.EumTraces(world, ch, ctx, r.URL.Query(), serviceName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+}
+
 func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to timeseries.Time) (*model.World, *cache.Status, error) {
 	cacheClient := api.cache.GetCacheClient(project.Id)
 
@@ -1325,34 +1353,34 @@ func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to tim
 }
 
 func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, *cache.Status, error) {
-	projectId := db.ProjectId(mux.Vars(r)["project"])
-	project, err := api.db.GetProject(projectId)
-	if err != nil {
-		if errors.Is(err, db.ErrNotFound) {
-			klog.Warningln("project not found:", projectId)
-			return nil, nil, nil, nil
-		}
-		return nil, nil, nil, err
-	}
+	// projectId := db.ProjectId(mux.Vars(r)["project"])
+	// project, err := api.db.GetProject(projectId)
+	// if err != nil {
+	// 	if errors.Is(err, db.ErrNotFound) {
+	// 		klog.Warningln("project not found:", projectId)
+	// 		return nil, nil, nil, nil
+	// 	}
+	// 	return nil, nil, nil, err
+	// }
 
 	// for local purpose
-	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
-	// 	Name: "default",
-	// 	Prometheus: db.IntegrationsPrometheus{
-	// 		Url: "http://prometheus:9090",
-	// 	},
-	// 	Settings: db.ProjectSettings{
-	// 		Integrations: db.Integrations{
-	// 			Clickhouse: &db.IntegrationClickhouse{
-	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
-	// 				Protocol: "http",
-	// 			},
-	// 		},
-	// 	},
-	// }
-	// projectId := project.Id
+	project := &db.Project{
+		Id:   "ywajvh3s",
+		Name: "default",
+		Prometheus: db.IntegrationsPrometheus{
+			Url: "http://prometheus:9090",
+		},
+		Settings: db.ProjectSettings{
+			Integrations: db.Integrations{
+				Clickhouse: &db.IntegrationClickhouse{
+					Database: "default",
+					Addr:     "34.47.154.246:31137",
+					Protocol: "http",
+				},
+			},
+		},
+	}
+	projectId := project.Id
 
 	now := timeseries.Now()
 	q := r.URL.Query()

@@ -259,6 +259,8 @@ func main() {
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}/{breadcrumbType}", a.Auth(a.EumErrorDetailBreadCrumb)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
 
+	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
+
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
 	}).Methods(http.MethodPost)
