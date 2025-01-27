@@ -123,6 +123,16 @@ export default {
     },
     mounted() {
         this.fetchData();
+        this.$events.watch(this, this.fetchData, 'refresh');
+    },
+
+    watch: {
+        '$route.query'(curr, prev) {
+            this.getQuery();
+            if (curr.query !== prev.query) {
+                this.get();
+            }
+        },
     },
     methods: {
         async fetchData() {

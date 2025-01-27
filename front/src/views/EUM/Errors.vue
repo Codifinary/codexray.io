@@ -1,12 +1,12 @@
 <template>
     <div class="my-10 mx-5">
-        <CustomTable :headers="headers" :items="data.errors" item-key="error" class="elevation-1">
+        <CustomTable :headers="headers" :items="data" item-key="error" class="elevation-1">
             <template v-slot:[`item.error`]="{ item }">
                 <router-link
                     class="clickable"
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: $route.params.id },
+                        params: { view: 'EUM', id: $route.params.id, report: 'errors' },
                         query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error) },
                     }"
                     @click.native.prevent="handleErrorClick(item.error)"
@@ -28,7 +28,7 @@ export default {
     name: 'Errors',
     props: {
         data: {
-            type: Object,
+            type: Array,
             required: true,
         },
     },
@@ -50,20 +50,20 @@ export default {
                 this.$emit('update:error', newError);
             },
         },
-        '$route.query.eventId': {
-            immediate: true,
-            handler(newEventId) {
-                this.$emit('update:eventId', newEventId);
-            },
-        },
     },
     methods: {
         handleErrorClick(error) {
             this.$emit('error-clicked', error);
+            this.$router.push({
+                name: 'overview',
+                params: { view: 'EUM', id: this.$route.params.id },
+                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(error) },
+            });
         },
     },
 };
 </script>
+
 <style scoped>
 .clickable {
     cursor: pointer;

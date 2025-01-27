@@ -268,4 +268,13 @@ export default class Api {
             },
         };
     }
+    getEUMApplications(cb) {
+        this.get(this.projectPath(`overview/eumapps`), {}, cb);
+    }
+    getPagePerformance(serviceName, cb) {
+        this.get(this.projectPath(`eum/perf/${serviceName}`), {}, cb);
+    }
+    getEUMApplicationErrors(serviceName, cb) {
+        this.get(this.projectPath(`eum/errlog/${serviceName}`), {}, cb);
+    }
 }

@@ -31,8 +31,6 @@
 </template>
 
 <script>
-import { getApplicationData } from './api/EUMapi';
-
 import PagePerformance from './PagePerformance.vue';
 import Errors from './Errors.vue';
 import Logs from './Logs.vue';
@@ -63,8 +61,8 @@ export default {
     data() {
         return {
             activeTab: 0,
-            pagePerformance: null,
-            errors: null,
+            pagePerformance: [],
+            errors: [],
             logs: null,
             error: null,
             selectedError: null,
@@ -72,11 +70,12 @@ export default {
             reports: [{ name: 'page-performance' }, { name: 'errors' }, { name: 'logs' }, { name: 'traces' }],
         };
     },
+
     watch: {
         id: {
             immediate: true,
             handler(newId) {
-                this.fetchApplicationData(newId);
+                this.get(newId);
             },
         },
         report: {
@@ -86,9 +85,14 @@ export default {
             },
         },
         activeTab: {
-            immediate: true,
             handler(newTab) {
                 this.updateUrl(newTab);
+            },
+        },
+        '$route.params.report': {
+            immediate: true,
+            handler(newReport) {
+                this.setActiveTab(newReport);
             },
         },
         '$route.query.eventId': {
@@ -98,16 +102,55 @@ export default {
             },
         },
     },
+
     created() {
-        this.updateUrl(this.activeTab);
+        const report = this.$route.params.report || this.report;
+        if (!report) {
+            this.$router
+                .replace({
+                    name: 'overview',
+                    params: { view: 'EUM', id: this.id, report: this.reports[0].name },
+                    query: this.$utils.contextQuery(),
+                })
+                .catch((err) => {
+                    if (err.name !== 'NavigationDuplicated') {
+                        console.error(err);
+                    }
+                });
+        } else {
+            this.setActiveTab(report);
+        }
+        if (this.$route.query.eventId) {
+            this.eventId = this.$route.query.eventId;
+        }
     },
+    mounted() {
+        this.get(this.id);
+        this.$events.watch(this, this.get, 'refresh');
+    },
+
     methods: {
-        fetchApplicationData(id) {
-            const data = getApplicationData(id);
-            this.pagePerformance = data.pagePerformance;
-            this.errors = data.errors;
-            // const appData = getAppOverview(id);
-            // this.pagePerformance = appData.overviews;
+        get(id) {
+            this.loading = true;
+            this.error = '';
+            this.$api.getPagePerformance(id, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.pagePerformance = data.overviews || [];
+            });
+            this.$api.getEUMApplicationErrors(id, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                console.log(data.errors);
+
+                this.errors = data.errors || [];
+            });
         },
         updateUrl(tabIndex) {
             if (tabIndex < 0 || tabIndex >= this.reports.length) {
@@ -116,9 +159,13 @@ export default {
             }
             const report = this.reports[tabIndex].name;
             const currentRoute = this.$route;
-            const targetRoute = { name: 'overview', params: { view: 'EUM', id: this.id, report }, query: this.$utils.contextQuery() };
+            const targetRoute = {
+                name: 'overview',
+                params: { view: 'EUM', id: this.id, report },
+                query: { ...this.$utils.contextQuery(), error: this.selectedError || undefined },
+            };
 
-            if (currentRoute.name !== targetRoute.name || currentRoute.params.report !== targetRoute.params.report) {
+            if (currentRoute.params.report !== report || currentRoute.query.error !== this.selectedError) {
                 this.$router.push(targetRoute).catch((err) => {
                     if (err.name !== 'NavigationDuplicated') {
                         console.error(err);
@@ -142,10 +189,22 @@ export default {
                 }
             } else {
                 console.error(`Invalid report: ${report}`);
+                this.activeTab = 0; // Default to the first tab if the report is invalid
             }
         },
         handleErrorClicked(error) {
             this.selectedError = error;
+            this.$router
+                .push({
+                    name: 'overview',
+                    params: { view: 'EUM', id: this.id, report: `errors/${error}` },
+                    query: { ...this.$utils.contextQuery() },
+                })
+                .catch((err) => {
+                    if (err.name !== 'NavigationDuplicated') {
+                        console.error(err);
+                    }
+                });
         },
         handleEventClicked(eventId) {
             this.$router.push({
@@ -184,6 +243,5 @@ export default {
     padding-bottom: 70px;
     margin-left: 20px !important;
     margin-right: 20px !important;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
 }
 </style>
