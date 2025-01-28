@@ -40,6 +40,16 @@ type View struct {
 	Limit      int               `json:"limit"`
 }
 
+type SingleServiceLogsView struct {
+	Status     string       `json:"status"`
+	Message    string       `json:"message"`
+	Service    string       `json:"service"`
+	Severities []string     `json:"severities"`
+	Entries    []Entry      `json:"entries"`
+	Chart      *model.Chart `json:"chart"`
+	Limit      int          `json:"limit"`
+}
+
 type Pattern struct {
 	Severity string       `json:"severity"`
 	Sample   string       `json:"sample"`
@@ -64,6 +74,7 @@ type Query struct {
 	Limit    int             `json:"limit"`
 }
 
+// Render is the main entry to render log views for a given app, using query parameters.
 func Render(ctx context.Context, ch *clickhouse.Client, app *model.Application, query url.Values, w *model.World) *View {
 	v := &View{}
 
@@ -171,6 +182,7 @@ func renderEntries(ctx context.Context, v *View, ch *clickhouse.Client, app *mod
 
 	var histogram map[string]*timeseries.TimeSeries
 	var entries []*model.LogEntry
+
 	switch v.Source {
 	case model.LogSourceOtel:
 		v.Message = fmt.Sprintf("Using OpenTelemetry logs of <i>%s</i>", otelService)
@@ -299,4 +311,107 @@ func getSimilarHashes(app *model.Application, hash string) []string {
 		}
 	}
 	return res.Items()
+}
+
+// GetSingleOtelServiceLogView returns logs view for a single OTel service based on query.
+func GetSingleOtelServiceLogView(
+	w *model.World,
+	ctx context.Context,
+	ch *clickhouse.Client,
+	serviceName string,
+	from, to timeseries.Time,
+	query url.Values,
+	step timeseries.Duration,
+) (*SingleServiceLogsView, error) {
+
+	v := &SingleServiceLogsView{
+		Service: serviceName,
+		Limit:   defaultLimit,
+	}
+
+	var q Query
+	if s := query.Get("query"); s != "" {
+		if err := json.Unmarshal([]byte(s), &q); err != nil {
+			klog.Warningln(err)
+		}
+	}
+	// fmt.Println("Parsed Query:", q)
+	if q.Limit <= 0 {
+		q.Limit = defaultLimit
+		v.Limit = q.Limit
+	} else {
+		v.Limit = q.Limit
+	}
+
+	if ch == nil {
+		v.Status = "UNKNOWN"
+		v.Message = "ClickHouse is not configured"
+		return v, fmt.Errorf("ClickHouse is not configured")
+	}
+
+	v.Severities = q.Severity
+	if len(v.Severities) == 0 {
+		// Attempt to get severities from ClickHouse
+		svcs, err := ch.GetServicesFromLogs(ctx)
+		if err == nil {
+			v.Severities = svcs[serviceName]
+			fmt.Println("Severities fetched:", svcs[serviceName])
+		} else {
+			klog.Errorln("Error fetching severities:", err)
+			v.Status = "WARNING"
+			v.Message = fmt.Sprintf("Failed to get severities: %s", err)
+			return v, err
+		}
+	}
+
+	histogram, err := ch.GetServiceLogsHistogram(ctx, from, to, step, serviceName, v.Severities, q.Search)
+	if err != nil {
+		v.Status = "WARNING"
+		v.Message = fmt.Sprintf("Failed to get logs histogram: %s", err)
+		return v, err
+	}
+
+	entries, err := ch.GetServiceLogs(ctx, from, to, serviceName, v.Severities, q.Search, v.Limit)
+	if err != nil {
+		v.Status = "WARNING"
+		v.Message = fmt.Sprintf("Failed to get logs: %s", err)
+		return v, err
+	}
+
+	v.Status = "OK"
+	v.Message = "Fetched logs successfully"
+
+	// Build chart
+	if len(histogram) > 0 {
+		v.Chart = model.NewChart(w.Ctx, "").Column()
+		for severity, ts := range histogram {
+			v.Chart.AddSeries(severity, ts)
+		}
+	}
+
+	// Build entries
+	for _, e := range entries {
+		entry := Entry{
+			Timestamp:  e.Timestamp.UnixMilli(),
+			Severity:   e.Severity,
+			Message:    e.Body,
+			Attributes: map[string]string{},
+		}
+		for name, value := range e.LogAttributes {
+			if name != "" && value != "" {
+				entry.Attributes[name] = value
+			}
+		}
+		for name, value := range e.ResourceAttributes {
+			if name != "" && value != "" {
+				entry.Attributes[name] = value
+			}
+		}
+		if e.TraceId != "" {
+			entry.Attributes["trace.id"] = e.TraceId
+		}
+		v.Entries = append(v.Entries, entry)
+	}
+
+	return v, nil
 }

@@ -12,6 +12,7 @@ import (
 	"codexray/api/forms"
 	"codexray/api/views"
 	"codexray/api/views/errlogs"
+	"codexray/api/views/logs"
 	"codexray/api/views/perf"
 	"codexray/api/views/tracing"
 	"codexray/auditor"
@@ -1314,6 +1315,44 @@ func (api *Api) EumTraces(w http.ResponseWriter, r *http.Request, u *db.User) {
 	}
 
 	report := tracing.EumTraces(world, ch, ctx, r.URL.Query(), serviceName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+}
+
+func (api *Api) EumLogs(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	serviceName := vars["serviceName"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	from := world.Ctx.From
+	to := world.Ctx.To
+	step := world.Ctx.Step
+
+	fmt.Println("step ", step)
+
+	report, err := logs.GetSingleOtelServiceLogView(world, ctx, ch, serviceName, from, to, r.URL.Query(), step)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
