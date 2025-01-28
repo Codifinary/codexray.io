@@ -26,7 +26,7 @@ SELECT
     round(countIf(e.Category = 'api') * 100.0 / count(), 2) AS apiErrorPercentage,
     countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers,
     count(p.ServiceName) AS requests,
-    p.Browser
+    p.AppType
 FROM 
     perf_data p
 LEFT JOIN 
@@ -37,7 +37,7 @@ WHERE
     (? IS NULL OR p.Timestamp >= parseDateTimeBestEffort(?)) 
     AND (? IS NULL OR p.Timestamp <= parseDateTimeBestEffort(?))
 GROUP BY 
-    p.ServiceName, p.Browser
+    p.ServiceName, p.AppType
 ORDER BY 
     pages DESC
 `
