@@ -2,69 +2,66 @@ package auditor
 
 import (
 	"context"
-	"time"
+	"fmt"
 
 	"codexray/clickhouse"
 	"codexray/model"
-	"codexray/timeseries"
 )
 
-func AuditPerf(w *model.World, serviceName, pageName string, ch *clickhouse.Client) *model.AuditReport {
-	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
+type PerformanceReport struct {
+	Status             string            `json:"status"`
+	LoadTimeChart      *model.Chart      `json:"load_time_chart"`
+	ResponseTimeChart  *model.Chart      `json:"response_time_chart"`
+	UsersImpactedChart *model.Chart      `json:"users_impacted_chart"`
+	ErrorChartGroup    *model.ChartGroup `json:"error_chart_group"`
+}
+
+func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch *clickhouse.Client) *PerformanceReport {
+	report := &PerformanceReport{
+		Status: "unknown",
+	}
 
 	if ch == nil {
-		report.Status = model.UNKNOWN
-		report.GetOrCreateTable("Error").AddRow(
-			model.NewTableCell("Clickhouse integration is not configured."),
-		)
+		report.Status = "unknown"
 		return report
 	}
 
-	from := w.Ctx.From.ToStandard()
-	to := w.Ctx.To.ToStandard()
-	stepSeconds := int64(w.Ctx.Step) / int64(time.Second)
+	from := w.Ctx.From
+	to := w.Ctx.To
+	step := w.Ctx.Step
 
-	chartData, err := ch.GetChartData(context.Background(), serviceName, pageName, &from, &to, stepSeconds)
+	// Fetch performance metrics directly from ClickHouse
+	metrics, err := ch.GetPerformanceTimeSeries(context.Background(), serviceName, pageName, from, to, step)
 	if err != nil {
-		report.Status = model.WARNING
-		report.GetOrCreateTable("Error").AddRow(
-			model.NewTableCell("Failed to fetch performance data").SetUnit(err.Error()),
-		)
+		fmt.Println("Error fetching performance metrics:", err)
+		report.Status = "warning"
 		return report
 	}
 
-	// If no data
-	if len(chartData) == 0 {
-		report.Status = model.WARNING
-		report.GetOrCreateTable("Error").AddRow(
-			model.NewTableCell("No performance data available for the given service and page."),
-		)
-		return report
-	}
+	// Create separate charts for load time, response time, and users impacted
+	loadTimeChart := model.NewChart(w.Ctx, "Page Load Time")
+	responseTimeChart := model.NewChart(w.Ctx, "Response Time")
+	usersImpactedChart := model.NewChart(w.Ctx, "Users Impacted")
 
-	perfChart := report.GetOrCreateChart("Performance Metrics", nil)
+	// Create a chart group for JS and API errors
+	errorChartGroup := model.NewChartGroup(w.Ctx, "Errors")
 
-	loadTimeSeries := timeseries.New(w.Ctx.From, len(chartData), w.Ctx.Step)
-	responseTimeSeries := timeseries.New(w.Ctx.From, len(chartData), w.Ctx.Step)
-	jsErrorsSeries := timeseries.New(w.Ctx.From, len(chartData), w.Ctx.Step)
-	apiErrorsSeries := timeseries.New(w.Ctx.From, len(chartData), w.Ctx.Step)
-	usersImpactedSeries := timeseries.New(w.Ctx.From, len(chartData), w.Ctx.Step)
+	// Add series to charts
+	loadTimeChart.AddSeries("Page Load Time", metrics["loadTime"])
+	responseTimeChart.AddSeries("Response Time", metrics["responseTime"])
+	usersImpactedChart.AddSeries("Users Impacted", metrics["usersImpacted"])
 
-	for _, row := range chartData {
-		ts := timeseries.Time(row.Timestamp / 1000)
-		loadTimeSeries.Set(ts, float32(row.LoadTime))
-		responseTimeSeries.Set(ts, float32(row.ResponseTime))
-		jsErrorsSeries.Set(ts, float32(row.JsErrors))
-		apiErrorsSeries.Set(ts, float32(row.ApiErrors))
-		usersImpactedSeries.Set(ts, float32(row.UsersImpacted))
-	}
+	// Add JS and API errors to the error chart group
+	errorChartGroup.GetOrCreateChart("JS Errors").AddSeries("JS Errors", metrics["jsErrors"])
+	errorChartGroup.GetOrCreateChart("API Errors").AddSeries("API Errors", metrics["apiErrors"])
 
-	perfChart.AddSeries("Page Load Time", loadTimeSeries)
-	perfChart.AddSeries("Response Time", responseTimeSeries)
-	perfChart.AddSeries("JS Errors", jsErrorsSeries)
-	perfChart.AddSeries("API Errors", apiErrorsSeries)
-	perfChart.AddSeries("Users Impacted", usersImpactedSeries)
+	report.LoadTimeChart = loadTimeChart
+	report.ResponseTimeChart = responseTimeChart
+	report.UsersImpactedChart = usersImpactedChart
+	report.ErrorChartGroup = errorChartGroup
+	report.Status = "ok"
 
-	report.Status = model.OK
+	fmt.Println("Generated performance report:", report)
+
 	return report
 }

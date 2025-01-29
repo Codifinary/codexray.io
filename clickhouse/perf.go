@@ -1,6 +1,7 @@
 package clickhouse
 
 import (
+	"codexray/timeseries"
 	"context"
 	"fmt"
 	"strings"
@@ -16,14 +17,6 @@ type PerfRow struct {
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
 	Requests           uint64
-}
-type ChartRow struct {
-	Timestamp     uint64
-	LoadTime      float64
-	ResponseTime  float64
-	JsErrors      uint64
-	ApiErrors     uint64
-	UsersImpacted uint64
 }
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
@@ -86,64 +79,71 @@ GROUP BY
 	return results, nil
 }
 
-func (c *Client) GetChartData(ctx context.Context, serviceName, pageName string, from, to *time.Time, step int64) ([]ChartRow, error) {
+func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, pageName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+    SELECT
+        toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+        avg(p.LoadPageTime) AS loadTime,
+        avg(p.ResTime) AS responseTime,
+        sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
+        sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
+        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted
+    FROM
+        perf_data p
+    LEFT JOIN
+        err_log_data e
+    ON
+        p.PageName = e.PagePath
+        AND p.ServiceName = e.ServiceName
+    WHERE
+        p.ServiceName = @serviceName
+        AND p.PageName = @pageName
+        AND p.Timestamp BETWEEN @from AND @to
+    GROUP BY
+        ts
+    ORDER BY
+        ts ASC;
+    `, step)
 
-	query := `
-SELECT
-    toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL 60 SECOND)) * 1000 AS ts,
-    avg(p.LoadPageTime) AS loadTime,
-    avg(p.ResTime) AS responseTime,
-    sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
-    sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
-    countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted
-FROM
-    perf_data p
-LEFT JOIN
-    err_log_data e
-ON
-    p.PageName = e.PagePath
-    AND p.ServiceName = e.ServiceName
-WHERE
-    p.ServiceName = 'health-care'
-    AND p.PageName = 'home'
-    AND p.Timestamp BETWEEN toDateTime64('2025-01-20 00:00:00', 6) AND toDateTime64('2025-01-25 01:00:00', 6)
-GROUP BY
-    ts
-ORDER BY
-    ts ASC;
-	`
-	// Fallback to default time range if `from` or `to` is nil
-	defaultFrom := time.Now().Add(-24 * time.Hour)
-	defaultTo := time.Now()
-
-	formattedFrom := formatTimeForClickHouse(defaultFrom)
-	formattedTo := formatTimeForClickHouse(defaultTo)
-
-	if from != nil {
-		formattedFrom = formatTimeForClickHouse(*from)
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.Named("pageName", pageName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	}
-	if to != nil {
-		formattedTo = formatTimeForClickHouse(*to)
-	}
-	fmt.Println("perf details ", serviceName, pageName, formattedFrom, formattedTo)
 
-	rows, err := c.Query(ctx, query, step, serviceName, pageName, formattedFrom, formattedTo)
+	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var chartRows []ChartRow
+	loadTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	responseTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
 	for rows.Next() {
-		var row ChartRow
-		if err := rows.Scan(&row.Timestamp, &row.LoadTime, &row.ResponseTime, &row.JsErrors, &row.ApiErrors, &row.UsersImpacted); err != nil {
+		var timestamp uint64
+		var loadTime, responseTime float64
+		var jsErrors, apiErrors, usersImpacted uint64
+		if err := rows.Scan(&timestamp, &loadTime, &responseTime, &jsErrors, &apiErrors, &usersImpacted); err != nil {
 			return nil, err
 		}
-		chartRows = append(chartRows, row)
+		ts := timeseries.Time(timestamp / 1000)
+		loadTimeSeries.Set(ts, float32(loadTime))
+		responseTimeSeries.Set(ts, float32(responseTime))
+		jsErrorsSeries.Set(ts, float32(jsErrors))
+		apiErrorsSeries.Set(ts, float32(apiErrors))
+		usersImpactedSeries.Set(ts, float32(usersImpacted))
 	}
 
-	return chartRows, nil
-}
-func formatTimeForClickHouse(t time.Time) string {
-	return t.Format("2006-01-02 15:04:05.000")
+	return map[string]*timeseries.TimeSeries{
+		"loadTime":      loadTimeSeries,
+		"responseTime":  responseTimeSeries,
+		"jsErrors":      jsErrorsSeries,
+		"apiErrors":     apiErrorsSeries,
+		"usersImpacted": usersImpactedSeries,
+	}, nil
 }
