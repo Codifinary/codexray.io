@@ -56,7 +56,6 @@
 </template>
 
 <script>
-import { getHeatmapData, getApplicationTraces } from './api/EUMapi';
 import Heatmap from '@/components/Heatmap.vue';
 import TracingTrace from '@/components/TracingTrace.vue';
 
@@ -64,6 +63,12 @@ export default {
     components: {
         Heatmap,
         TracingTrace,
+    },
+    props: {
+        id: {
+            type: String,
+            required: true,
+        },
     },
     data() {
         return {
@@ -78,22 +83,18 @@ export default {
         };
     },
     methods: {
-        async fetchData() {
+        get(id) {
             this.loading = true;
-            try {
-                // Fetch heatmap data
-                const heatmap = await getHeatmapData();
-                this.view.heatmap = heatmap;
-
-                // Fetch traces data
-                const traces = await getApplicationTraces();
-                this.view.traces = traces || [];
-                this.view.limit = traces?.length || 0;
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
+            this.error = '';
+            this.$api.getEUMTraces(id, (data, error) => {
                 this.loading = false;
-            }
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.view.traces = data.traces || [];
+                this.view.heatmap = data.heatmap || [];
+            });
         },
         selectTrace(trace) {
             this.selectedTrace = [trace];
@@ -109,7 +110,7 @@ export default {
         },
     },
     mounted() {
-        this.fetchData();
+        this.get(this.id);
     },
 };
 </script>

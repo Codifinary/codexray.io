@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import { getEventLogs, getFilteredEventLogs } from './api/EUMapi';
+import { getFilteredEventLogs } from './api/EUMapi';
 import Chart from '@/components/Chart.vue';
 import { palette } from '@/utils/colors';
 
@@ -100,9 +100,15 @@ export default {
     components: {
         Chart,
     },
+    props: {
+        id: {
+            type: String,
+            required: true,
+        },
+    },
     data() {
         return {
-            entries: null,
+            entries: [],
             chart: null,
             loading: false,
             loadingError: null,
@@ -117,36 +123,40 @@ export default {
                     name: 'warning',
                     color: palette.get('orange-lighten1'),
                 },
+                {
+                    name: '',
+                    color: 'grey',
+                },
             ],
             selectedEntry: null,
         };
     },
     mounted() {
-        this.fetchData();
-        this.$events.watch(this, this.fetchData, 'refresh');
+        this.get(this.id);
+        this.$events.watch(this, this.get(this.id), 'refresh');
     },
 
     watch: {
         '$route.query'(curr, prev) {
             this.getQuery();
             if (curr.query !== prev.query) {
-                this.get();
+                this.get(this.id);
             }
         },
     },
     methods: {
-        async fetchData() {
+        get(id) {
             this.loading = true;
-            try {
-                const { entries, chart } = getEventLogs();
-                this.entries = entries;
-                this.chart = chart;
-            } catch (error) {
-                console.error('Error fetching logs:', error);
-                this.loadingError = 'Failed to load logs data.';
-            } finally {
+            this.error = '';
+            this.$api.getEUMLogs(id, (data, error) => {
                 this.loading = false;
-            }
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.entries = data.entries || [];
+                this.chart = data.chart || [];
+            });
         },
         async runQuery() {
             this.loading = true;

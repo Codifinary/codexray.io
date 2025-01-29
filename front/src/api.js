@@ -286,4 +286,10 @@ export default class Api {
     getErrorDetailsBreadcrumbs(eventID, cb) {
         this.get(this.projectPath(`eum/errdetail/${eventID}/all`), {}, cb);
     }
+    getEUMLogs(serviceName, cb) {
+        this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
+    }
+    getEUMTraces(serviceName, cb) {
+        this.get(this.projectPath(`eum/traces/${serviceName}`), {}, cb);
+    }
 }

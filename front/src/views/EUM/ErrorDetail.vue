@@ -165,6 +165,7 @@ export default {
                 } else {
                     const breadcrumbs = data?.breadcrumbs || [];
                     console.log('filter', selectedFilter);
+                    console.log('type', data.breadcrumbs.type);
 
                     if (selectedFilter === 'all') {
                         this.tableData = breadcrumbs;

@@ -21,10 +21,10 @@
                 </div>
             </v-tab-item>
             <v-tab-item>
-                <Logs v-if="activeTab === 2" />
+                <Logs :id="id" v-if="activeTab === 2" />
             </v-tab-item>
             <v-tab-item>
-                <EUMTraces v-if="activeTab === 3" />
+                <EUMTraces :id="id" v-if="activeTab === 3" />
             </v-tab-item>
         </v-tabs-items>
     </div>
