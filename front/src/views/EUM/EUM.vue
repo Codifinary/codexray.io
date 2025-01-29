@@ -14,6 +14,7 @@
                         :to="{
                             name: 'overview',
                             params: { view: 'EUM', id: item.serviceName },
+                            query: $route.query,
                         }"
                     >
                         {{ item.serviceName }}

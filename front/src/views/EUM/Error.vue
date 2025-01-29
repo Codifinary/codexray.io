@@ -5,18 +5,22 @@
         </div>
         <div v-else>
             <CustomTable :headers="headers" :items="specificErrors" class="mt-10">
-                <template v-slot:[`item.eventId`]="{ item }">
+                <template v-slot:[`item.event_id`]="{ item }">
                     <router-link
                         :to="{
                             name: 'overview',
                             params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                            query: { ...$utils.contextQuery(), error: encodeURIComponent(error), eventId: item.eventId },
+                            query: { ...$utils.contextQuery(), error: encodeURIComponent(error), eventId: item.event_id },
                         }"
                         class="clickable"
-                        @click.native.prevent="handleEventClick(item.eventId)"
+                        @click.native.prevent="handleEventClick(item.event_id)"
                     >
-                        {{ item.eventId }}
+                        {{ item.event_id }}
                     </router-link>
+                </template>
+                <template #item.last_reported="{ item }">
+                    {{ $format.date(item.last_reported, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
+                    ({{ $format.timeSinceNow(new Date(item.last_reported).getTime()) }} ago)
                 </template>
             </CustomTable>
         </div>
@@ -26,7 +30,6 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import ErrorDetail from './ErrorDetail.vue';
-import { getSpecificErrors } from './api/EUMapi';
 
 export default {
     components: {
@@ -48,20 +51,22 @@ export default {
             specificErrors: [],
             selectedEventId: null,
             headers: [
-                { text: 'Event ID', value: 'eventId' },
-                { text: 'User ID', value: 'userId' },
+                { text: 'Event ID', value: 'event_id' },
+                { text: 'User ID', value: 'user_id' },
                 { text: 'Device', value: 'device' },
                 { text: 'OS', value: 'os' },
-                { text: 'Browser', value: 'browserAndVersion' },
-                { text: 'Last reported time', value: 'lastReportedTime' },
+                { text: 'Browser', value: 'browser' },
+                { text: 'Last reported time', value: 'last_reported' },
             ],
+            localError: this.error,
         };
     },
     watch: {
         error: {
             immediate: true,
             handler(newError) {
-                this.fetchSpecificErrors(newError);
+                this.localError = newError;
+                this.get(this.id, newError);
             },
         },
         '$route.query.eventId': {
@@ -72,13 +77,15 @@ export default {
         },
     },
     methods: {
-        fetchSpecificErrors(error) {
-            const allErrors = getSpecificErrors(this.id, error);
-            if (allErrors) {
-                this.specificErrors = allErrors;
-            } else {
-                console.error('No specific errors found');
-            }
+        get(id, error) {
+            this.$api.getSpecificErrors(id, error, (data, Error) => {
+                this.loading = false;
+                if (Error) {
+                    this.localError = Error;
+                    return;
+                }
+                this.specificErrors = data.errors || [];
+            });
         },
         handleEventClick(eventId) {
             this.$router.push({
@@ -88,8 +95,8 @@ export default {
             });
         },
     },
-    created() {
-        this.fetchSpecificErrors(this.error);
+    mounted() {
+        this.$events.watch(this, this.get(this.id, this.error), 'refresh');
     },
 };
 </script>

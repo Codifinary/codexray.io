@@ -1,17 +1,17 @@
 import data from '../data/data.json';
 
-export const getApplications = () => {
-    return data.applications;
-};
+// export const getApplications = () => {
+//     return data.applications;
+// };
 
-export const getApplicationData = () => {
-    const { pagePerformance, errorTab } = data;
-    const appData = {
-        pagePerformance: pagePerformance || null,
-        errors: errorTab || null,
-    };
-    return appData;
-};
+// export const getApplicationData = () => {
+//     const { pagePerformance, errorTab } = data;
+//     const appData = {
+//         pagePerformance: pagePerformance || null,
+//         errors: errorTab || null,
+//     };
+//     return appData;
+// };
 
 export const getErrorDetails = () => {
     return data.errorDetails || null;

@@ -277,4 +277,13 @@ export default class Api {
     getEUMApplicationErrors(serviceName, cb) {
         this.get(this.projectPath(`eum/errlog/${serviceName}`), {}, cb);
     }
+    getSpecificErrors(serviceName, error, cb) {
+        this.get(this.projectPath(`eum/errlog/${serviceName}/${error}`), {}, cb);
+    }
+    getErrorDetails(eventID, cb) {
+        this.get(this.projectPath(`eum/errdetail/${eventID}`), {}, cb);
+    }
+    getErrorDetailsBreadcrumbs(eventID, cb) {
+        this.get(this.projectPath(`eum/errdetail/${eventID}/all`), {}, cb);
+    }
 }

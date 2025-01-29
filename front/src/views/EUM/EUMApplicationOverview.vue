@@ -84,21 +84,16 @@ export default {
                 this.setActiveTab(newReport);
             },
         },
-        activeTab: {
-            handler(newTab) {
-                this.updateUrl(newTab);
-            },
-        },
         '$route.params.report': {
             immediate: true,
             handler(newReport) {
                 this.setActiveTab(newReport);
             },
         },
-        '$route.query.eventId': {
+        '$route.query': {
             immediate: true,
-            handler(newEventId) {
-                this.eventId = newEventId;
+            handler() {
+                this.get(this.id);
             },
         },
     },
@@ -125,8 +120,7 @@ export default {
         }
     },
     mounted() {
-        this.get(this.id);
-        this.$events.watch(this, this.get, 'refresh');
+        this.$events.watch(this, this.get(this.id), 'refresh');
     },
 
     methods: {
@@ -139,6 +133,8 @@ export default {
                     this.error = error;
                     return;
                 }
+                console.log('page perf:', data.overviews);
+
                 this.pagePerformance = data.overviews || [];
             });
             this.$api.getEUMApplicationErrors(id, (data, error) => {

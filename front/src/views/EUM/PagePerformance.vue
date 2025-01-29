@@ -13,6 +13,9 @@
                     {{ item.pagePath }}
                 </router-link>
             </template>
+            <template v-slot:item.avgLoadPageTime="{ item }">
+                {{ format(item.avgLoadPageTime, 'ms') }}
+            </template>
         </CustomTable>
     </div>
 </template>
@@ -46,6 +49,11 @@ export default {
                 { text: 'Users Impacted', value: 'impactedUsers' },
             ],
         };
+    },
+    methods: {
+        format(duration, unit) {
+            return `${duration.toFixed(2)} ${unit}`;
+        },
     },
 };
 </script>

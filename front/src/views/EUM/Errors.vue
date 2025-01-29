@@ -1,18 +1,22 @@
 <template>
     <div class="my-10 mx-5">
-        <CustomTable :headers="headers" :items="data" item-key="error" class="elevation-1">
-            <template v-slot:[`item.error`]="{ item }">
+        <CustomTable :headers="headers" :items="data" item-key="error_name" class="elevation-1">
+            <template v-slot:[`item.error_name`]="{ item }">
                 <router-link
                     class="clickable"
                     :to="{
                         name: 'overview',
                         params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                        query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error) },
+                        query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error_name) },
                     }"
                     @click.native.prevent="handleErrorClick(item.error)"
                 >
-                    <span>{{ item.error }}</span>
+                    <span>{{ item.error_name }}</span>
                 </router-link>
+            </template>
+            <template #item.last_reported="{ item }">
+                {{ $format.date(item.last_reported, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
+                ({{ $format.timeSinceNow(new Date(item.last_reported).getTime()) }} ago)
             </template>
         </CustomTable>
     </div>
@@ -25,6 +29,7 @@ export default {
     components: {
         CustomTable,
     },
+
     name: 'Errors',
     props: {
         data: {
@@ -35,10 +40,10 @@ export default {
     data() {
         return {
             headers: [
-                { text: 'Error', value: 'error' },
-                { text: 'Number of Events', value: 'numberOfEvents' },
-                { text: 'Users Impacted', value: 'usersImpacted' },
-                { text: 'Last Reported Time', value: 'lastReportedTime' },
+                { text: 'Error', value: 'error_name' },
+                { text: 'Number of Events', value: 'event_count' },
+                { text: 'Users Impacted', value: 'user_impacted' },
+                { text: 'Last Reported Time', value: 'last_reported' },
                 { text: 'Category', value: 'category' },
             ],
         };
