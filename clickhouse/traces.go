@@ -864,3 +864,62 @@ func addChildrenSpans(node *model.FlameGraphNode, byParent map[string][]*model.T
 		node.Self -= ch.Total
 	}
 }
+
+func (c *Client) GetTracesByServiceName(ctx context.Context, serviceName string, from, to time.Time, limit int) ([]*model.Trace, error) {
+	filters := []string{
+		fmt.Sprintf("ServiceName = '%s'", serviceName),
+		"Timestamp BETWEEN @from AND @to",
+	}
+	filterArgs := []any{
+		clickhouse.DateNamed("from", from, clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to, clickhouse.NanoSeconds),
+	}
+
+	query := fmt.Sprintf(`
+WITH t AS (
+    SELECT TraceId, Timestamp as start, timestampAdd(Timestamp, INTERVAL Duration NANOSECOND) as end 
+    FROM @@table_otel_traces@@ 
+    WHERE %s 
+    ORDER BY Timestamp 
+    LIMIT %d
+)
+SELECT Timestamp, TraceId, SpanId, ParentSpanId, SpanName, ServiceName, Duration, StatusCode, StatusMessage, ResourceAttributes, SpanAttributes, Events.Timestamp, Events.Name, Events.Attributes
+FROM @@table_otel_traces@@
+WHERE 
+    Timestamp BETWEEN (SELECT min(start) FROM t) AND (SELECT max(end) FROM t) AND 
+    TraceId GLOBAL IN (SELECT TraceId FROM t)`, strings.Join(filters, " AND "), limit)
+	rows, err := c.Query(ctx, query, filterArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := map[string]*model.Trace{}
+	var eventsTimestamp []time.Time
+	var eventsName []string
+	var eventsAttributes []map[string]string
+	for rows.Next() {
+		var s model.TraceSpan
+		err = rows.Scan(
+			&s.Timestamp, &s.TraceId, &s.SpanId, &s.ParentSpanId, &s.Name, &s.ServiceName, &s.Duration,
+			&s.StatusCode, &s.StatusMessage, &s.ResourceAttributes, &s.SpanAttributes,
+			&eventsTimestamp, &eventsName, &eventsAttributes)
+		if err != nil {
+			return nil, err
+		}
+		if res[s.TraceId] == nil {
+			res[s.TraceId] = &model.Trace{}
+		}
+
+		if l := len(eventsTimestamp); l > 0 && l == len(eventsName) && l == len(eventsAttributes) {
+			s.Events = make([]model.TraceSpanEvent, l)
+			for i := range eventsTimestamp {
+				s.Events[i].Timestamp = eventsTimestamp[i]
+				s.Events[i].Name = eventsName[i]
+				s.Events[i].Attributes = eventsAttributes[i]
+			}
+		}
+		res[s.TraceId].Spans = append(res[s.TraceId].Spans, &s)
+	}
+	return maps.Values(res), nil
+}

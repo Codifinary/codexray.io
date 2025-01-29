@@ -97,6 +97,24 @@ type LogsBatch struct {
 	Body               *chproto.ColStr
 }
 
+func getSeverityText(severityNumber int32) string {
+	if severityNumber >= 1 && severityNumber <= 4 {
+		return "Trace"
+	} else if severityNumber >= 5 && severityNumber <= 8 {
+		return "Debug"
+	} else if severityNumber >= 9 && severityNumber <= 11 {
+		return "Information"
+	} else if severityNumber >= 12 && severityNumber <= 16 {
+		return "Warning"
+	} else if severityNumber >= 17 && severityNumber <= 20 {
+		return "Error"
+	} else if severityNumber >= 21 && severityNumber <= 24 {
+		return "Fatal"
+	} else {
+		return "Unknown"
+	}
+}
+
 func NewLogsBatch(limit int, timeout time.Duration, exec func(query ch.Query) error) *LogsBatch {
 	b := &LogsBatch{
 		limit: limit,
@@ -166,11 +184,16 @@ func (b *LogsBatch) Add(req *v1.ExportLogsServiceRequest) {
 				if int64(lr.GetTimeUnixNano()) < 0 {
 					continue
 				}
+
+				severityText := lr.GetSeverityText()
+				if severityText == "" && lr.GetSeverityNumber() != 0 {
+					severityText = getSeverityText(int32(lr.GetSeverityNumber()))
+				}
+				b.SeverityText.Append(severityText)
 				b.Timestamp.Append(time.Unix(0, int64(lr.GetTimeUnixNano())))
 				b.TraceId.Append(hex.EncodeToString(lr.GetTraceId()))
 				b.SpanId.Append(hex.EncodeToString(lr.GetSpanId()))
 				b.TraceFlags.Append(lr.GetFlags())
-				b.SeverityText.Append(lr.GetSeverityText())
 				b.SeverityNumber.Append(int32(lr.GetSeverityNumber()))
 				b.ServiceName.Append(serviceName)
 				b.ResourceAttributes.Append(resourceAttributes)

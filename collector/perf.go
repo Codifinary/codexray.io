@@ -32,7 +32,6 @@ type PerfPayload struct {
 	Service         string `json:"service"`
 	Os              string `json:"os"`
 	Device          string `json:"device"`
-	Browser         string `json:"browser"`
 	CountryCode     string `json:"countryCode"`
 	SyntheticUser   bool   `json:"syntheticUser"`
 }
@@ -46,7 +45,7 @@ type DataPoint struct {
 	TransTime         int64
 	LoadPageTime      int64
 	ResTime           int64
-	Browser           string
+	AppType           string
 }
 
 type PerfRequestType struct {
@@ -68,7 +67,7 @@ type PerfBatch struct {
 	TransTime    *chproto.ColInt64
 	LoadPageTime *chproto.ColInt64
 	ResTime      *chproto.ColInt64
-	Browser      *chproto.ColStr
+	AppType      *chproto.ColStr
 	RawData      *chproto.ColStr
 }
 
@@ -85,7 +84,7 @@ func NewPerfBatch(limit int, timeout time.Duration, exec func(query ch.Query) er
 		TransTime:    new(chproto.ColInt64),
 		LoadPageTime: new(chproto.ColInt64),
 		ResTime:      new(chproto.ColInt64),
-		Browser:      new(chproto.ColStr),
+		AppType:      new(chproto.ColStr),
 		RawData:      new(chproto.ColStr),
 	}
 	go func() {
@@ -124,7 +123,7 @@ func (b *PerfBatch) Add(perfData *PerfRequestType, raw string) {
 		b.TransTime.Append(dataPoint.TransTime)
 		b.LoadPageTime.Append(dataPoint.LoadPageTime)
 		b.ResTime.Append(dataPoint.ResTime)
-		b.Browser.Append(dataPoint.Browser)
+		b.AppType.Append("Browser")
 		b.RawData.Append(raw)
 	}
 	if b.Timestamp.Rows() >= b.limit {
@@ -145,7 +144,7 @@ func (b *PerfBatch) save() {
 		{Name: "TransTime", Data: b.TransTime},
 		{Name: "LoadPageTime", Data: b.LoadPageTime},
 		{Name: "ResTime", Data: b.ResTime},
-		{Name: "Browser", Data: b.Browser},
+		{Name: "AppType", Data: b.AppType},
 		{Name: "RawData", Data: b.RawData},
 	}
 	err := b.exec(ch.Query{Body: input.Into("perf_data"), Input: input})
@@ -199,7 +198,7 @@ func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 		TransTime:         payload.TransTime,
 		LoadPageTime:      payload.LoadPageTime,
 		ResTime:           payload.ResTime,
-		Browser:           payload.Browser,
+		AppType:           "Browser",
 	}
 	perfReq := &PerfRequestType{DataPoints: []DataPoint{dp}}
 	c.getPerfBatch(project).Add(perfReq, string(data))
