@@ -257,7 +257,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}/{errorName}", a.Auth(a.EumErrors)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}", a.Auth(a.EumErrorDetails)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}/{breadcrumbType}", a.Auth(a.EumErrorDetailBreadCrumb)).Methods(http.MethodGet)
-	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/charts", a.Auth(a.Perf)).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)

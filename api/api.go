@@ -1124,7 +1124,7 @@ func (api *Api) Perf(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
 	//projectId := vars["project"]
 	serviceName := vars["serviceName"]
-	pageName := vars["pageName"]
+	pageName := r.URL.Query().Get("pageName")
 
 	// Load World and Project
 	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
@@ -1144,7 +1144,7 @@ func (api *Api) Perf(w http.ResponseWriter, r *http.Request, u *db.User) {
 		klog.Warningln(err)
 	}
 
-	report := auditor.AuditPerf(world, serviceName, pageName, ch)
+	report := auditor.GeneratePerformanceReport(world, serviceName, pageName, ch)
 
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
@@ -1344,8 +1344,6 @@ func (api *Api) EumLogs(w http.ResponseWriter, r *http.Request, u *db.User) {
 	from := world.Ctx.From
 	to := world.Ctx.To
 	step := world.Ctx.Step
-
-	fmt.Println("step ", step)
 
 	report, err := logs.GetSingleOtelServiceLogView(world, ctx, ch, serviceName, from, to, r.URL.Query(), step)
 	if err != nil {

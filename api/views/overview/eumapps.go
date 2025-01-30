@@ -25,7 +25,7 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64 `json:"jsErrorPercentage"`
 	ApiErrorPercentage float64 `json:"apiErrorPercentage"`
 	ImpactedUsers      uint64  `json:"impactedUsers"`
-	Browser            string  `json:"browser"`
+	AppType            string  `json:"appType"`
 	Requests           uint64  `json:"requests"`
 }
 
@@ -65,7 +65,7 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 			ApiErrorPercentage: row.ApiErrorPercentage,
 			ImpactedUsers:      row.ImpactedUsers,
 			Requests:           row.Requests,
-			Browser:            row.Browser,
+			AppType:            row.AppType,
 		})
 	}
 
