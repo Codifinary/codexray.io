@@ -87,7 +87,20 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
         avg(p.ResTime) AS responseTime,
         sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
         sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
-        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted
+        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted,
+        avg(p.DnsTime) AS dnsTime,
+        avg(p.TcpTime) AS tcpTime,
+        avg(p.SslTime) AS sslTime,
+        avg(p.DomAnalysisTime) AS domAnalysisTime,
+        avg(p.DomReadyTime) AS domReadyTime,
+        avg(p.FirstPackTime) AS firstPackTime,
+        avg(p.FmpTime) AS fmpTime,
+        avg(p.FptTime) AS fptTime,
+        avg(p.RedirectTime) AS redirectTime,
+        avg(p.TtfbTime) AS ttfbTime,
+        avg(p.TtlTime) AS ttlTime,
+        avg(p.TransTime) AS transTime,
+		count(p.PageName) AS requests
     FROM
         perf_data p
     LEFT JOIN
@@ -123,12 +136,26 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	dnsTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	tcpTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	sslTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	domAnalysisTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	domReadyTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	firstPackTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	fmpTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	fptTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	redirectTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	ttfbTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	ttlTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	transTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	requestsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	for rows.Next() {
 		var timestamp uint64
 		var loadTime, responseTime float64
-		var jsErrors, apiErrors, usersImpacted uint64
-		if err := rows.Scan(&timestamp, &loadTime, &responseTime, &jsErrors, &apiErrors, &usersImpacted); err != nil {
+		var jsErrors, apiErrors, usersImpacted, requests uint64
+		var dnsTime, tcpTime, sslTime, domAnalysisTime, domReadyTime, firstPackTime, fmpTime, fptTime, redirectTime, ttfbTime, ttlTime, transTime float64
+		if err := rows.Scan(&timestamp, &loadTime, &responseTime, &jsErrors, &apiErrors, &usersImpacted, &dnsTime, &tcpTime, &sslTime, &domAnalysisTime, &domReadyTime, &firstPackTime, &fmpTime, &fptTime, &redirectTime, &ttfbTime, &ttlTime, &transTime, &requests); err != nil {
 			return nil, err
 		}
 		ts := timeseries.Time(timestamp / 1000)
@@ -137,13 +164,39 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		jsErrorsSeries.Set(ts, float32(jsErrors))
 		apiErrorsSeries.Set(ts, float32(apiErrors))
 		usersImpactedSeries.Set(ts, float32(usersImpacted))
+		dnsTimeSeries.Set(ts, float32(dnsTime))
+		tcpTimeSeries.Set(ts, float32(tcpTime))
+		sslTimeSeries.Set(ts, float32(sslTime))
+		domAnalysisTimeSeries.Set(ts, float32(domAnalysisTime))
+		domReadyTimeSeries.Set(ts, float32(domReadyTime))
+		firstPackTimeSeries.Set(ts, float32(firstPackTime))
+		fmpTimeSeries.Set(ts, float32(fmpTime))
+		fptTimeSeries.Set(ts, float32(fptTime))
+		redirectTimeSeries.Set(ts, float32(redirectTime))
+		ttfbTimeSeries.Set(ts, float32(ttfbTime))
+		ttlTimeSeries.Set(ts, float32(ttlTime))
+		transTimeSeries.Set(ts, float32(transTime))
+		requestsSeries.Set(ts, float32(requests))
 	}
 
 	return map[string]*timeseries.TimeSeries{
-		"loadTime":      loadTimeSeries,
-		"responseTime":  responseTimeSeries,
-		"jsErrors":      jsErrorsSeries,
-		"apiErrors":     apiErrorsSeries,
-		"usersImpacted": usersImpactedSeries,
+		"loadTime":        loadTimeSeries,
+		"responseTime":    responseTimeSeries,
+		"jsErrors":        jsErrorsSeries,
+		"apiErrors":       apiErrorsSeries,
+		"usersImpacted":   usersImpactedSeries,
+		"dnsTime":         dnsTimeSeries,
+		"tcpTime":         tcpTimeSeries,
+		"sslTime":         sslTimeSeries,
+		"domAnalysisTime": domAnalysisTimeSeries,
+		"domReadyTime":    domReadyTimeSeries,
+		"firstPackTime":   firstPackTimeSeries,
+		"fmpTime":         fmpTimeSeries,
+		"fptTime":         fptTimeSeries,
+		"redirectTime":    redirectTimeSeries,
+		"ttfbTime":        ttfbTimeSeries,
+		"ttlTime":         ttlTimeSeries,
+		"transTime":       transTimeSeries,
+		"requests":        requestsSeries,
 	}, nil
 }

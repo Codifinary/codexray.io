@@ -37,7 +37,7 @@ var version = "unknown"
 var static embed.FS
 
 func main() {
-	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8082").String()
+	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
 	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
@@ -257,7 +257,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}/{errorName}", a.Auth(a.EumErrors)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}", a.Auth(a.EumErrorDetails)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}/{breadcrumbType}", a.Auth(a.EumErrorDetailBreadCrumb)).Methods(http.MethodGet)
-	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/charts", a.Auth(a.Perf)).Methods(http.MethodGet)
 
 	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)
