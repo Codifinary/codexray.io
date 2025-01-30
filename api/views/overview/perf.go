@@ -1,29 +1,32 @@
-package perf
+package overview
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"net/url"
 	"sort"
 
 	"codexray/clickhouse"
 	"codexray/model"
+	"codexray/timeseries"
 
 	"k8s.io/klog"
 )
 
 const defaultLimit = 100
 
-type View struct {
+type PerfView struct {
 	Status    model.Status   `json:"status"`
 	Message   string         `json:"message"`
 	Overviews []PerfOverview `json:"overviews"`
+	Charts    []*model.Chart `json:"charts,omitempty"`
 	Limit     int            `json:"limit"`
 }
 
-type Query struct {
-	Limit int `json:"limit"`
+type PerfQuery struct {
+	From  *timeseries.Time `json:"from"`
+	To    *timeseries.Time `json:"to"`
+	Step  int64            `json:"step"`
+	Limit int              `json:"limit"`
 }
 
 type PerfOverview struct {
@@ -35,20 +38,15 @@ type PerfOverview struct {
 	Requests           uint64  `json:"requests"`
 }
 
-func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query url.Values, serviceName string) *View {
-	v := &View{}
+func renderPerfs(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, serviceName string) *PerfView {
+	v := &PerfView{}
 
-	var q Query
-	if s := query.Get("query"); s != "" {
-		if err := json.Unmarshal([]byte(s), &q); err != nil {
-			klog.Warningln(err)
-		}
-	}
+	var q PerfQuery
+
 	if q.Limit <= 0 {
 		q.Limit = defaultLimit
 	}
 
-	// Check Clickhouse client
 	if ch == nil {
 		v.Status = model.UNKNOWN
 		v.Message = "Clickhouse integration is not configured"

@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS perf_data @on_cluster (
      LoadPageTime     Int64 CODEC(ZSTD(1)),
      ResTime          Int64 CODEC(ZSTD(1)),
      RawData          String CODEC(ZSTD(1)),
-	 Browser		  String CODEC(ZSTD(1)),
+	 AppType		  String CODEC(ZSTD(1)),
 
      INDEX idx_service_name ServiceName TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_page_name PageName TYPE bloom_filter(0.001) GRANULARITY 1,
@@ -267,6 +267,10 @@ CREATE TABLE IF NOT EXISTS err_log_data (
     Stack         String CODEC(ZSTD(1)),
     UserId        String CODEC(ZSTD(1)),
     RawData       String CODEC(ZSTD(1)),
+	ErrorName     String CODEC(ZSTD(1)),
+	Device 	 	  String CODEC(ZSTD(1)),
+	OS 	  		  String CODEC(ZSTD(1)),
+	Browser	      String CODEC(ZSTD(1)),
 
     INDEX idx_unique_id    UniqueId      TYPE bloom_filter(0.001) GRANULARITY 1,
     INDEX idx_service_name ServiceName   TYPE bloom_filter(0.001) GRANULARITY 1,

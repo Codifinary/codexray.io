@@ -95,9 +95,11 @@ spec:
     - name: clickhouse
       port: 9000
       targetPort: 9000
+      nodePort: 31137
     - name: clickhouse-playground
       port: 8123
-      targetPort: 8123   
+      targetPort: 8123  
+      nodePort: 30338 
 
   type: NodePort
 

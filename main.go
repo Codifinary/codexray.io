@@ -234,6 +234,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}", a.Auth(a.Project)).Methods(http.MethodGet, http.MethodPost, http.MethodDelete)
 	r.HandleFunc("/api/project/{project}/status", a.Auth(a.Status)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/api_keys", a.Auth(a.ApiKeys)).Methods(http.MethodGet, http.MethodPost)
+	// eum, perf overviews goes in below route as view
 	r.HandleFunc("/api/project/{project}/overview/{view}", a.Auth(a.Overview)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/incident/{incident}", a.Auth(a.Incident)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/inspections", a.Auth(a.Inspections)).Methods(http.MethodGet)
@@ -250,8 +251,16 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
-	r.HandleFunc("/api/project/{project}/perfview", a.Auth(a.PerfView)).Methods(http.MethodGet)
-	r.HandleFunc("/api/project/{project}/eumapps", a.Auth(a.EumApps)).Methods(http.MethodGet)
+
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}", a.Auth(a.EumPerf)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}", a.Auth(a.EumErrLog)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}/{errorName}", a.Auth(a.EumErrors)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}", a.Auth(a.EumErrorDetails)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}/{breadcrumbType}", a.Auth(a.EumErrorDetailBreadCrumb)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/{pageName}", a.Auth(a.Perf)).Methods(http.MethodGet)
+
+	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
