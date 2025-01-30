@@ -278,7 +278,7 @@ spec:
       hostPID: true
       containers:
         - name: node-agent
-          image: ghcr.io/coroot/coroot-node-agent
+          image: gcr.io/analog-button-445616-k0/codexray-node-agent:latest
           args:
             - '--collector-endpoint=http://codexray.codexray.svc.cluster.local:8080'
             - '--cgroupfs-root=/host/sys/fs/cgroup'
@@ -337,7 +337,7 @@ spec:
     spec:
       containers:
         - name: cluster-agent
-          image: ghcr.io/coroot/coroot-cluster-agent
+          image: gcr.io/analog-button-445616-k0/codexray-cluster-agent:latest
           args:
             - '--coroot-url=http://codexray:8080'
             - '--metrics-scrape-interval=15s'
