@@ -12,7 +12,7 @@ type ServiceOverview struct {
 	JsErrorPercentage  float64
 	ApiErrorPercentage float64
 	ImpactedUsers      uint64
-	Browser            string
+	AppType            string
 	Requests           uint64
 }
 
@@ -65,7 +65,7 @@ ORDER BY
 	var results []ServiceOverview
 	for rows.Next() {
 		var row ServiceOverview
-		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests, &row.Browser); err != nil {
+		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests, &row.AppType); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
