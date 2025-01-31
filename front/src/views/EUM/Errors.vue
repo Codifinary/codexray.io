@@ -1,15 +1,15 @@
 <template>
-    <div class="my-10 mx-5">
-        <CustomTable :headers="headers" :items="data" item-key="error_name" class="elevation-1">
+    <div v-if="!selectedError" class="my-10 mx-5">
+        <CustomTable :headers="headers" :items="errors" item-key="error_name" class="elevation-1">
             <template v-slot:[`item.error_name`]="{ item }">
                 <router-link
                     class="clickable"
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                        query: { ...$utils.contextQuery(), error: encodeURIComponent(item.error_name) },
+                        params: { view: 'EUM', id: id, report: `errors/${encodeURIComponent(item.error_name)}` },
+                        query: { ...$utils.contextQuery() },
                     }"
-                    @click.native.prevent="handleErrorClick(item.error)"
+                    @click.native.prevent="handleErrorClicked(item.error_name)"
                 >
                     <span>{{ item.error_name }}</span>
                 </router-link>
@@ -20,23 +20,19 @@
             </template>
         </CustomTable>
     </div>
+    <div v-else>
+        <Error :error="selectedError" :id="id" :report="'errors'" @event-clicked="handleEventClicked" />
+    </div>
 </template>
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+import Error from './Error.vue';
 
 export default {
-    components: {
-        CustomTable,
-    },
-
+    components: { CustomTable, Error },
     name: 'Errors',
-    props: {
-        data: {
-            type: Array,
-            required: true,
-        },
-    },
+    props: { id: { type: String, required: true } },
     data() {
         return {
             headers: [
@@ -46,25 +42,50 @@ export default {
                 { text: 'Last Reported Time', value: 'last_reported' },
                 { text: 'Category', value: 'category' },
             ],
+            errors: [],
+            selectedError: null,
         };
     },
     watch: {
         '$route.query.error': {
             immediate: true,
             handler(newError) {
-                this.$emit('update:error', newError);
+                this.selectedError = newError;
             },
         },
     },
     methods: {
-        handleErrorClick(error) {
-            this.$emit('error-clicked', error);
-            this.$router.push({
-                name: 'overview',
-                params: { view: 'EUM', id: this.$route.params.id },
-                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(error) },
+        get() {
+            this.$api.getEUMApplicationErrors(this.id, (data, error) => {
+                if (error) {
+                    console.error('Error fetching errors:', error);
+                    return;
+                }
+                this.errors = data.errors || [];
             });
         },
+        handleErrorClicked(error) {
+            this.selectedError = error;
+            this.$router
+                .push({
+                    name: 'overview',
+                    params: { view: 'EUM', id: this.id, report: `errors` },
+                    query: { ...this.$utils.contextQuery(), error: this.selectedError },
+                })
+                .catch((err) => {
+                    if (err.name !== 'NavigationDuplicated') console.error(err);
+                });
+        },
+        handleEventClicked(eventId) {
+            this.$router.push({
+                name: 'overview',
+                params: { view: 'EUM', id: this.id, report: `errors` },
+                query: { ...this.$utils.contextQuery(), error: this.selectedError, eventId },
+            });
+        },
+    },
+    mounted() {
+        this.get();
     },
 };
 </script>

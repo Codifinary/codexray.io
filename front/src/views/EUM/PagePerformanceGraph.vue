@@ -26,62 +26,62 @@ export default {
     components: { Navigation, Chart },
     data() {
         return {
-            errorChartConfig: {
-                title: 'Errors', //area chart
-                ctx: { from: 0, to: 50, step: 1 },
-                series: [
-                    { name: 'JS Errors', data: this.generateSineWaveData(10, 0.1, 0, 50), color: 'red', fill: true },
-                    { name: 'AJAX Errors', data: this.generateSineWaveData(8, 0.1, Math.PI / 2, 50), color: 'blue', fill: true },
-                ],
-            },
-            userImpactedChartConfig: {
-                title: 'User Impacted', // Bar Chart
-                ctx: { from: 0, to: 50, step: 1 },
-                series: [
-                    {
-                        name: 'Users Impacted',
-                        data: this.generateRandomData(50, 100, 50),
-                        color: 'green',
-                    },
-                ],
-            },
-            loadChartConfig: {
-                title: 'Page Load Time', // Line Chart
-                ctx: { from: 0, to: 50, step: 1 },
-                series: [
-                    {
-                        name: 'Load Time (ms)',
-                        data: this.generateRandomData(20, 500, 100),
-                        color: 'orange',
-                    },
-                ],
-            },
-            responseChartConfig: {
-                title: 'Response Time ', //Stacked Bar Chart
-                ctx: { from: 0, to: 50, step: 1 },
-                series: [
-                    {
-                        name: 'Response Time (ms)',
-                        data: this.generateRandomData(15, 200, 50),
-                        color: 'purple',
-                        bars: true,
-                        stacked: true,
-                    },
-                ],
-            },
-            firstUserPaintChartConfig: {
-                title: 'First Meaningful Paint ', //Scatter Plot
-                ctx: { from: 0, to: 50, step: 1 },
-                series: [
-                    {
-                        name: 'First Meaningful Paint(ms)',
-                        data: this.generateRandomData(30, 300, 100),
-                        color: 'teal',
-                        points: { show: true },
-                        width: 0,
-                    },
-                ],
-            },
+            // errorChartConfig: {
+            //     title: 'Errors', //area chart
+            //     ctx: { from: 0, to: 50, step: 1 },
+            //     series: [
+            //         { name: 'JS Errors', data: this.generateSineWaveData(10, 0.1, 0, 50), color: 'red', fill: true },
+            //         { name: 'AJAX Errors', data: this.generateSineWaveData(8, 0.1, Math.PI / 2, 50), color: 'blue', fill: true },
+            //     ],
+            // },
+            // userImpactedChartConfig: {
+            //     title: 'User Impacted', // Bar Chart
+            //     ctx: { from: 0, to: 50, step: 1 },
+            //     series: [
+            //         {
+            //             name: 'Users Impacted',
+            //             data: this.generateRandomData(50, 100, 50),
+            //             color: 'green',
+            //         },
+            //     ],
+            // },
+            // loadChartConfig: {
+            //     title: 'Page Load Time', // Line Chart
+            //     ctx: { from: 0, to: 50, step: 1 },
+            //     series: [
+            //         {
+            //             name: 'Load Time (ms)',
+            //             data: this.generateRandomData(20, 500, 100),
+            //             color: 'orange',
+            //         },
+            //     ],
+            // },
+            // responseChartConfig: {
+            //     title: 'Response Time ', //Stacked Bar Chart
+            //     ctx: { from: 0, to: 50, step: 1 },
+            //     series: [
+            //         {
+            //             name: 'Response Time (ms)',
+            //             data: this.generateRandomData(15, 200, 50),
+            //             color: 'purple',
+            //             bars: true,
+            //             stacked: true,
+            //         },
+            //     ],
+            // },
+            // firstUserPaintChartConfig: {
+            //     title: 'First Meaningful Paint ', //Scatter Plot
+            //     ctx: { from: 0, to: 50, step: 1 },
+            //     series: [
+            //         {
+            //             name: 'First Meaningful Paint(ms)',
+            //             data: this.generateRandomData(30, 300, 100),
+            //             color: 'teal',
+            //             points: { show: true },
+            //             width: 0,
+            //         },
+            //     ],
+            // },
         };
     },
     methods: {

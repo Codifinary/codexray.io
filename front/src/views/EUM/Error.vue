@@ -18,10 +18,6 @@
                         {{ item.event_id }}
                     </router-link>
                 </template>
-                <template #item.last_reported="{ item }">
-                    {{ $format.date(item.last_reported, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
-                    ({{ $format.timeSinceNow(new Date(item.last_reported).getTime()) }} ago)
-                </template>
             </CustomTable>
         </div>
     </div>
@@ -32,19 +28,10 @@ import CustomTable from '@/components/CustomTable.vue';
 import ErrorDetail from './ErrorDetail.vue';
 
 export default {
-    components: {
-        CustomTable,
-        ErrorDetail,
-    },
+    components: { CustomTable, ErrorDetail },
     props: {
-        error: {
-            type: String,
-            required: true,
-        },
-        id: {
-            type: String,
-            required: true,
-        },
+        id: { type: String, required: true },
+        error: { type: String, required: true },
     },
     data() {
         return {
@@ -56,17 +43,18 @@ export default {
                 { text: 'Device', value: 'device' },
                 { text: 'OS', value: 'os' },
                 { text: 'Browser', value: 'browser' },
-                { text: 'Last reported time', value: 'last_reported' },
+                { text: 'Last Reported Time', value: 'last_reported' },
             ],
-            localError: this.error,
         };
+    },
+    created() {
+        this.get(this.error);
     },
     watch: {
         error: {
             immediate: true,
             handler(newError) {
-                this.localError = newError;
-                this.get(this.id, newError);
+                this.get(newError);
             },
         },
         '$route.query.eventId': {
@@ -77,11 +65,10 @@ export default {
         },
     },
     methods: {
-        get(id, error) {
-            this.$api.getSpecificErrors(id, error, (data, Error) => {
-                this.loading = false;
+        get(error) {
+            this.$api.getSpecificErrors(this.id, error, (data, Error) => {
                 if (Error) {
-                    this.localError = Error;
+                    console.error(Error);
                     return;
                 }
                 this.specificErrors = data.errors || [];
@@ -90,13 +77,10 @@ export default {
         handleEventClick(eventId) {
             this.$router.push({
                 name: 'overview',
-                params: { view: 'EUM', id: this.id },
-                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(this.error), eventId },
+                params: { view: 'EUM', id: this.id, report: 'errors' },
+                query: { ...this.$utils.contextQuery(), error: this.error, eventId },
             });
         },
-    },
-    mounted() {
-        this.$events.watch(this, this.get(this.id, this.error), 'refresh');
     },
 };
 </script>

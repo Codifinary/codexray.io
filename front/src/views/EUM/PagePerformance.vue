@@ -1,6 +1,6 @@
 <template>
     <div>
-        <CustomTable :headers="headers" :items="data" item-key="pagePath" class="elevation-1 mt-10">
+        <CustomTable :headers="headers" :items="pagePerformance" item-key="pagePath" class="elevation-1 mt-10">
             <template v-slot:[`item.pagePath`]="{ item }">
                 <router-link
                     :to="{
@@ -29,10 +29,6 @@ export default {
         CustomTable,
     },
     props: {
-        data: {
-            type: Array,
-            required: true,
-        },
         id: {
             type: String,
             required: true,
@@ -40,6 +36,7 @@ export default {
     },
     data() {
         return {
+            pagePerformance: [],
             headers: [
                 { text: 'Page', value: 'pagePath' },
                 { text: 'Load (Total Requests)', value: 'requests' },
@@ -51,9 +48,24 @@ export default {
         };
     },
     methods: {
+        get(id) {
+            this.loading = true;
+            this.error = '';
+            this.$api.getPagePerformance(id, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.pagePerformance = data.overviews || [];
+            });
+        },
         format(duration, unit) {
             return `${duration.toFixed(2)} ${unit}`;
         },
+    },
+    created() {
+        this.get(this.id);
     },
 };
 </script>

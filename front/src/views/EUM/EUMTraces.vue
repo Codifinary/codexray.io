@@ -83,10 +83,10 @@ export default {
         };
     },
     methods: {
-        get(id) {
+        get() {
             this.loading = true;
             this.error = '';
-            this.$api.getEUMTraces(id, (data, error) => {
+            this.$api.getEUMTraces(this.id, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
@@ -110,7 +110,7 @@ export default {
         },
     },
     mounted() {
-        this.get(this.id);
+        this.get();
     },
 };
 </script>

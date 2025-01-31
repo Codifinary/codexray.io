@@ -26,6 +26,10 @@ export default {
             type: String,
             required: true,
         },
+        report: {
+            type: String,
+            required: false,
+        },
         error: {
             type: String,
             required: false,
@@ -35,10 +39,6 @@ export default {
             required: false,
         },
         pagePath: {
-            type: String,
-            required: false,
-        },
-        report: {
             type: String,
             required: false,
         },

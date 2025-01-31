@@ -55,7 +55,7 @@
                 label="Filter by Type"
                 class="filterByType"
                 dense
-                @change="fetchBreadcrumbsData"
+                @change="fetchFilteredData"
                 outlined
                 :menu-props="{ offsetY: true }"
             >
@@ -156,6 +156,9 @@ export default {
 
             this.fetchBreadcrumbsData(eventId, selectedFilter);
         },
+        fetchFilteredData() {
+            this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
+        },
         fetchBreadcrumbsData(eventId, selectedFilter) {
             this.$api.getErrorDetailsBreadcrumbs(eventId, (data, error) => {
                 this.loading = false;
@@ -164,8 +167,6 @@ export default {
                     return;
                 } else {
                     const breadcrumbs = data?.breadcrumbs || [];
-                    console.log('filter', selectedFilter);
-                    console.log('type', data.breadcrumbs.type);
 
                     if (selectedFilter === 'all') {
                         this.tableData = breadcrumbs;
