@@ -160,19 +160,13 @@ export default {
             this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
         fetchBreadcrumbsData(eventId, selectedFilter) {
-            this.$api.getErrorDetailsBreadcrumbs(eventId, (data, error) => {
+            this.$api.getErrorDetailsBreadcrumbs(eventId, selectedFilter, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
                     return;
                 } else {
-                    const breadcrumbs = data?.breadcrumbs || [];
-
-                    if (selectedFilter === 'all') {
-                        this.tableData = breadcrumbs;
-                    } else {
-                        this.tableData = breadcrumbs.filter((breadcrumb) => breadcrumb.type === selectedFilter);
-                    }
+                    this.tableData = data.breadcrumbs || [];
                 }
             });
         },

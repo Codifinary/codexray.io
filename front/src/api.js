@@ -283,13 +283,13 @@ export default class Api {
     getErrorDetails(eventID, cb) {
         this.get(this.projectPath(`eum/errdetail/${eventID}`), {}, cb);
     }
-    getErrorDetailsBreadcrumbs(eventID, cb) {
-        this.get(this.projectPath(`eum/errdetail/${eventID}/all`), {}, cb);
+    getErrorDetailsBreadcrumbs(eventID, type, cb) {
+        this.get(this.projectPath(`eum/errdetail/${eventID}/${type}`), {}, cb);
     }
     getEUMLogs(serviceName, cb) {
         this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
     }
-    getEUMTraces(serviceName, cb) {
-        this.get(this.projectPath(`eum/traces/${serviceName}`), {}, cb);
+    getPagePerformanceGraphs(serviceName, pageName, cb) {
+        this.get(this.projectPath(`eum/perf/${serviceName}/charts?from=now-7d`), { pageName }, cb);
     }
 }

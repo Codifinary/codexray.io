@@ -9,7 +9,7 @@
                     :to="{
                         name: 'overview',
                         params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                        query: { ...$utils.contextQuery(), error: encodeURIComponent(error) },
+                        query: { ...$utils.contextQuery(), error: error },
                     }"
                     >{{ error }}</router-link
                 >

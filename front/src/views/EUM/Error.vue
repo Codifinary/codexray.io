@@ -10,7 +10,7 @@
                         :to="{
                             name: 'overview',
                             params: { view: 'EUM', id: $route.params.id, report: 'errors' },
-                            query: { ...$utils.contextQuery(), error: encodeURIComponent(error), eventId: item.event_id },
+                            query: { ...$utils.contextQuery(), error: error, eventId: item.event_id },
                         }"
                         class="clickable"
                         @click.native.prevent="handleEventClick(item.event_id)"

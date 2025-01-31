@@ -6,7 +6,7 @@
                     class="clickable"
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: id, report: `errors/${encodeURIComponent(item.error_name)}` },
+                        params: { view: 'EUM', id: id, report: `errors/${item.error_name}` },
                         query: { ...$utils.contextQuery() },
                     }"
                     @click.native.prevent="handleErrorClicked(item.error_name)"

@@ -5,7 +5,7 @@
                 <div class="name d-flex">
                     <div class="mr-3">
                         <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/${item.applicationType}.svg`"
+                            :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
                             style="width: 16px; height: 16px"
                             alt="App Icon"
                         />
@@ -56,6 +56,14 @@ export default {
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get();
+            },
+        },
+    },
     methods: {
         get() {
             this.loading = true;
@@ -67,9 +75,6 @@ export default {
                     return;
                 }
                 this.tableItems = data.eumapps.overviews || [];
-                this.tableItems.forEach((item) => {
-                    item.applicationType = item.browser === '' ? 'mobileapp' : 'webapp';
-                });
             });
         },
         format(duration, unit) {

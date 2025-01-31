@@ -2,14 +2,15 @@
     <div class="eum-application-overview my-10 mx-5">
         <Navigation :id="id" :pagePath="pagePath" />
         <div class="d-flex mt-10 justify-space-between">
-            <Chart :chart="loadChartConfig" />
-            <Chart :chart="responseChartConfig" />
-            <Chart :chart="errorChartConfig" />
+            <Chart v-if="graphs.request_chart" :chart="graphs.request_chart" />
+            <!-- <Chart v-if="graphs.response_time_chart" :chart="graphs.response_time_chart" />
+            <Chart v-if="graphs.error_chart_group" :chart="graphs.error_chart_group" />-->
+            {{ graphs.request_chart }}
         </div>
         <div class="d-flex">
-            <Chart :chart="firstUserPaintChartConfig" />
+            <!-- <Chart v-if="graphs.user_centric_chart" :chart="graphs.user_centric_chart" />
             <div class="ml-10"></div>
-            <Chart :chart="userImpactedChartConfig" :selection="{}" @select="zoomChart" />
+            <Chart v-if="graphs.users_impacted_chart" :chart="graphs.users_impacted_chart" :selection="{}" /> -->
         </div>
     </div>
 </template>
@@ -26,78 +27,44 @@ export default {
     components: { Navigation, Chart },
     data() {
         return {
-            // errorChartConfig: {
-            //     title: 'Errors', //area chart
-            //     ctx: { from: 0, to: 50, step: 1 },
-            //     series: [
-            //         { name: 'JS Errors', data: this.generateSineWaveData(10, 0.1, 0, 50), color: 'red', fill: true },
-            //         { name: 'AJAX Errors', data: this.generateSineWaveData(8, 0.1, Math.PI / 2, 50), color: 'blue', fill: true },
-            //     ],
-            // },
-            // userImpactedChartConfig: {
-            //     title: 'User Impacted', // Bar Chart
-            //     ctx: { from: 0, to: 50, step: 1 },
-            //     series: [
-            //         {
-            //             name: 'Users Impacted',
-            //             data: this.generateRandomData(50, 100, 50),
-            //             color: 'green',
-            //         },
-            //     ],
-            // },
-            // loadChartConfig: {
-            //     title: 'Page Load Time', // Line Chart
-            //     ctx: { from: 0, to: 50, step: 1 },
-            //     series: [
-            //         {
-            //             name: 'Load Time (ms)',
-            //             data: this.generateRandomData(20, 500, 100),
-            //             color: 'orange',
-            //         },
-            //     ],
-            // },
-            // responseChartConfig: {
-            //     title: 'Response Time ', //Stacked Bar Chart
-            //     ctx: { from: 0, to: 50, step: 1 },
-            //     series: [
-            //         {
-            //             name: 'Response Time (ms)',
-            //             data: this.generateRandomData(15, 200, 50),
-            //             color: 'purple',
-            //             bars: true,
-            //             stacked: true,
-            //         },
-            //     ],
-            // },
-            // firstUserPaintChartConfig: {
-            //     title: 'First Meaningful Paint ', //Scatter Plot
-            //     ctx: { from: 0, to: 50, step: 1 },
-            //     series: [
-            //         {
-            //             name: 'First Meaningful Paint(ms)',
-            //             data: this.generateRandomData(30, 300, 100),
-            //             color: 'teal',
-            //             points: { show: true },
-            //             width: 0,
-            //         },
-            //     ],
-            // },
+            graphs: {
+                request_chart: {},
+                // response_time_chart: {},
+                // error_chart_group: {},
+                // user_centric_chart: {},
+                // users_impacted_chart: {},
+            },
+            loading: false,
+            error: '',
         };
     },
-    methods: {
-        generateSineWaveData(amplitude, frequency, phase, length) {
-            const data = [];
-            for (let i = 0; i < length; i++) {
-                data.push(amplitude * Math.sin(frequency * i + phase));
-            }
-            return data;
+    created() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
+    },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get();
+            },
         },
-        generateRandomData(length, max, min) {
-            const data = [];
-            for (let i = 0; i < length; i++) {
-                data.push(Math.random() * (max - min) + min);
-            }
-            return data;
+    },
+
+    methods: {
+        get() {
+            this.loading = true;
+            this.error = '';
+            this.$api.getPagePerformanceGraphs(this.id, this.pagePath, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.graphs = data || {};
+                console.log(this.graphs.request_chart);
+                console.log('CTX', this.graphs.request_chart.ctx.to);
+            });
         },
     },
 };
