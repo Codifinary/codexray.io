@@ -4,7 +4,7 @@ import { v4 } from 'uuid';
 
 const defaultErrorMessage = 'Something went wrong, please try again later.';
 const timeoutErrorMessage = 'Request timed out.';
-
+// import { chart } from '@/views/EUM/graphData.js';
 export default class Api {
     axios = null;
     router = null;
@@ -289,7 +289,8 @@ export default class Api {
     getEUMLogs(serviceName, cb) {
         this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
     }
-    getPagePerformanceGraphs(serviceName, pageName, cb) {
-        this.get(this.projectPath(`eum/perf/${serviceName}/charts?from=now-7d`), { pageName }, cb);
+
+    getPagePerformanceGraphs(serviceName, pagePath, cb) {
+        this.get(this.projectPath(`eum/perf/${serviceName}/charts`), { pagePath }, cb);
     }
 }

@@ -6,7 +6,7 @@
                     :to="{
                         name: 'overview',
                         params: { view: 'EUM', id: id, report: 'page-performance' },
-                        query: { pagePath: item.pagePath },
+                        query: { ...$route.query, pagePath: item.pagePath },
                     }"
                     class="clickable"
                 >
