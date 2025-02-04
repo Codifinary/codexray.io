@@ -140,6 +140,14 @@ export default {
             ],
         };
     },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get(this.eventID, this.selectedFilter);
+            },
+        },
+    },
     methods: {
         get(eventId, selectedFilter) {
             this.loading = true;

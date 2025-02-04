@@ -63,6 +63,12 @@ export default {
                 this.selectedEventId = newEventId;
             },
         },
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get(this.error);
+            },
+        },
     },
     methods: {
         get(error) {

@@ -24,8 +24,7 @@ func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch 
 
 	// 1) Load Chart
 
-	loadChart := report.GetOrCreateChart("Load, requests", nil).
-		Stacked()
+	loadChart := report.GetOrCreateChart("Load requests", nil)
 	loadChart.AddSeries("Page Loaded", metrics["requests"], "light-blue")
 
 	// 2) Response Time Chart

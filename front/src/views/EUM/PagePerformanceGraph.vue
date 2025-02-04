@@ -26,6 +26,14 @@ export default {
             performanceData: {},
         };
     },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.created();
+            },
+        },
+    },
     async created() {
         try {
             this.$api.getPagePerformanceGraphs(this.id, this.pagePath, (data, error) => {

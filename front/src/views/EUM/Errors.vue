@@ -53,6 +53,12 @@ export default {
                 this.selectedError = newError;
             },
         },
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get();
+            },
+        },
     },
     methods: {
         get() {

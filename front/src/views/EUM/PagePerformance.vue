@@ -47,6 +47,15 @@ export default {
             ],
         };
     },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get(this.id);
+            },
+        },
+    },
+
     methods: {
         get(id) {
             this.loading = true;

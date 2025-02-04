@@ -1,6 +1,7 @@
 <template>
     <div class="my-10 mx-5">
         <v-form>
+            <v-progress-linear v-if="loading" indeterminate height="4" style="bottom: 0; left: 0" />
             <div class="subtitle-1 mt-3">Filter:</div>
             <div class="d-flex flex-wrap flex-md-nowrap align-center" style="gap: 8px">
                 <v-checkbox
@@ -34,7 +35,7 @@
                 {{ loadingError }}
             </div>
 
-            <Chart v-if="chart" :chart="chart" @select="zoomChart" class="my-3" />
+            <Chart v-if="chart" :chart="chart" :selection="{}" @select="zoomChart" class="my-3" />
 
             <v-simple-table v-if="filteredEntries.length" dense>
                 <thead>
@@ -91,7 +92,7 @@
 import Chart from '@/components/Chart.vue';
 import { palette } from '@/utils/colors';
 const severity = (s) => {
-    s = s.toLowerCase();
+    s = (s || 'unknown').toLowerCase();
     if (s.startsWith('crit')) return { num: 5, color: 'black' };
     if (s.startsWith('err')) return { num: 4, color: 'red-darken1' };
     if (s.startsWith('warn')) return { num: 3, color: 'orange-lighten1' };
@@ -119,7 +120,7 @@ export default {
         severities() {
             return this.severitiesData
                 .map((s) => ({
-                    name: s,
+                    name: s || 'unknown',
                     ...severity(s),
                     color: palette.get(severity(s).color),
                 }))
@@ -132,16 +133,40 @@ export default {
                 return matchesSeverity && matchesSearch;
             });
         },
+        charts() {
+            if (!this.chart || !this.chart.series) {
+                return null;
+            }
+
+            return {
+                ...this.chart,
+                series: this.chart.series.map((s) => {
+                    const sev = severity(s.severity || s.name || 'unknown');
+                    return {
+                        ...s,
+                        num: sev.num,
+                        color: palette.get(sev.color) || sev.color || palette.get('grey-lighten1'),
+                    };
+                }),
+            };
+        },
     },
     watch: {
         query: {
             deep: true,
             handler: 'runQuery',
         },
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get();
+            },
+        },
     },
     mounted() {
         this.get();
     },
+
     methods: {
         get() {
             this.loading = true;
@@ -154,14 +179,13 @@ export default {
                 }
                 this.entries = data.entries.map((e) => ({
                     ...e,
-
-                    color: palette.get(severity(e.severity).color),
-
+                    severity: e.severity || 'unknown',
+                    color: palette.get(severity(e.severity || 'unknown').color),
+                    message: e.message,
+                    attributes: e.attributes,
                     date: new Date(e.timestamp).toLocaleString(),
                 }));
-                console.log(data.severities);
                 this.chart = data.chart;
-                console.log(this.chart);
                 this.severitiesData = data.severities || [];
             });
         },
@@ -175,6 +199,9 @@ export default {
             this.selectedEntry = entry;
         },
         zoomChart(selection) {
+            const { from, to } = selection;
+            const query = { ...this.$route.query, from, to };
+            this.$router.push({ query }).catch((err) => err);
             console.log('Chart zoom triggered:', selection);
         },
     },
