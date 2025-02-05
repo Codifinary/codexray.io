@@ -56,14 +56,7 @@ export default {
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
-    watch: {
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.get();
-            },
-        },
-    },
+
     methods: {
         get() {
             this.loading = true;

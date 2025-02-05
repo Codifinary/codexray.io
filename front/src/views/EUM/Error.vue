@@ -47,8 +47,9 @@ export default {
             ],
         };
     },
-    created() {
+    mounted() {
         this.get(this.error);
+        this.$events.watch(this, this.get(this.error), 'refresh');
     },
     watch: {
         error: {
@@ -61,12 +62,6 @@ export default {
             immediate: true,
             handler(newEventId) {
                 this.selectedEventId = newEventId;
-            },
-        },
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.get(this.error);
             },
         },
     },

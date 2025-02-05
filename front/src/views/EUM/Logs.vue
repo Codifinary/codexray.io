@@ -156,15 +156,10 @@ export default {
             deep: true,
             handler: 'runQuery',
         },
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.get();
-            },
-        },
     },
     mounted() {
         this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
 
     methods: {

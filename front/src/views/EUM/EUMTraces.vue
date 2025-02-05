@@ -111,6 +111,7 @@ export default {
     },
     mounted() {
         this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
 };
 </script>

@@ -47,20 +47,12 @@ export default {
             ],
         };
     },
-    watch: {
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.get(this.id);
-            },
-        },
-    },
 
     methods: {
-        get(id) {
+        get() {
             this.loading = true;
             this.error = '';
-            this.$api.getPagePerformance(id, (data, error) => {
+            this.$api.getPagePerformance(this.id, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
@@ -73,8 +65,9 @@ export default {
             return `${duration.toFixed(2)} ${unit}`;
         },
     },
-    created() {
-        this.get(this.id);
+    mounted() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
 };
 </script>

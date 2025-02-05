@@ -185,8 +185,9 @@ export default {
             this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
     },
-    created() {
+    mounted() {
         this.get(this.eventId, this.selectedFilter);
+        this.$events.watch(this, this.get(this.eventId, this.selectedFilter), 'refresh');
     },
 };
 </script>

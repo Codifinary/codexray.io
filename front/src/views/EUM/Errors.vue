@@ -53,12 +53,6 @@ export default {
                 this.selectedError = newError;
             },
         },
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.get();
-            },
-        },
     },
     methods: {
         get() {
@@ -92,6 +86,7 @@ export default {
     },
     mounted() {
         this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
 };
 </script>

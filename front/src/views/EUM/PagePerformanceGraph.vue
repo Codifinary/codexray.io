@@ -26,28 +26,26 @@ export default {
             performanceData: {},
         };
     },
-    watch: {
-        '$route.query': {
-            immediate: true,
-            handler() {
-                this.created();
-            },
-        },
+    mounted() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
-    async created() {
-        try {
-            this.loading = true;
-            this.$api.getPagePerformanceGraphs(this.id, this.pagePath, (data, error) => {
-                this.loading = false;
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.performanceData = data || [];
-            });
-        } catch (error) {
-            console.error('Error fetching performance data:', error);
-        }
+    methods: {
+        get() {
+            try {
+                this.loading = true;
+                this.$api.getPagePerformanceGraphs(this.id, this.pagePath, (data, error) => {
+                    this.loading = false;
+                    if (error) {
+                        this.error = error;
+                        return;
+                    }
+                    this.performanceData = data || [];
+                });
+            } catch (error) {
+                console.error('Error fetching performance data:', error);
+            }
+        },
     },
 };
 </script>
