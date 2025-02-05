@@ -162,3 +162,20 @@ type TraceSpanStats struct {
 	Failed            float32   `json:"failed"`
 	DurationQuantiles []float32 `json:"duration_quantiles"`
 }
+
+type TracesSummary struct {
+	Services         uint64  `json:"services"`
+	RequestCount     uint64  `json:"request_count"`
+	RequestPerSecond float32 `json:"request_per_second"`
+	ErrorRate        float32 `json:"error_rate"`
+	AvgLatency       float64 `json:"avg_latency"`
+}
+
+type TraceView struct {
+	ServiceName       string    `json:"service_name"`
+	ErrorLogs         int32     `json:"error_logs"`
+	Total             float32   `json:"total"`
+	Failed            float32   `json:"failed"`
+	Latency           float64   `json:"latency"`
+	DurationQuantiles []float64 `json:"duration_quantiles"`
+}
