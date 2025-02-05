@@ -5,16 +5,17 @@
         </div>
         <div v-else>
             <CustomTable :headers="headers" :items="specificErrors" class="mt-10">
-                <template v-slot:[`item.eventId`]="{ item }">
+                <template v-slot:[`item.event_id`]="{ item }">
                     <router-link
                         :to="{
                             name: 'overview',
-                            params: { view: 'EUM', id: id },
-                            query: { ...$utils.contextQuery(), error: encodeURIComponent(error), eventId: item.eventId },
+                            params: { view: 'EUM', id: $route.params.id, report: 'errors' },
+                            query: { ...$utils.contextQuery(), error: error, eventId: item.event_id },
                         }"
                         class="clickable"
+                        @click.native.prevent="handleEventClick(item.event_id)"
                     >
-                        {{ item.eventId }}
+                        {{ item.event_id }}
                     </router-link>
                 </template>
             </CustomTable>
@@ -25,42 +26,36 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import ErrorDetail from './ErrorDetail.vue';
-import { getSpecificErrors } from './api/EUMapi';
 
 export default {
-    components: {
-        CustomTable,
-        ErrorDetail,
-    },
+    components: { CustomTable, ErrorDetail },
     props: {
-        error: {
-            type: String,
-            required: true,
-        },
-        id: {
-            type: String,
-            required: true,
-        },
+        id: { type: String, required: true },
+        error: { type: String, required: true },
     },
     data() {
         return {
             specificErrors: [],
             selectedEventId: null,
             headers: [
-                { text: 'Event ID', value: 'eventId' },
-                { text: 'User ID', value: 'userId' },
+                { text: 'Event ID', value: 'event_id' },
+                { text: 'User ID', value: 'user_id' },
                 { text: 'Device', value: 'device' },
                 { text: 'OS', value: 'os' },
-                { text: 'Browser', value: 'browserAndVersion' },
-                { text: 'Last reported time', value: 'lastReportedTime' },
+                { text: 'Browser', value: 'browser' },
+                { text: 'Last Reported Time', value: 'last_reported' },
             ],
         };
+    },
+    mounted() {
+        this.get(this.error);
+        this.$events.watch(this, this.get(this.error), 'refresh');
     },
     watch: {
         error: {
             immediate: true,
             handler(newError) {
-                this.fetchSpecificErrors(newError);
+                this.get(newError);
             },
         },
         '$route.query.eventId': {
@@ -69,27 +64,24 @@ export default {
                 this.selectedEventId = newEventId;
             },
         },
-        '$route.query.error': {
-            immediate: true,
-            handler(newError) {
-                if (newError !== this.error) {
-                    this.$emit('update:error', newError);
-                }
-            },
-        },
     },
     methods: {
-        fetchSpecificErrors(error) {
-            const allErrors = getSpecificErrors(this.id, error);
-            if (allErrors) {
-                this.specificErrors = allErrors;
-            } else {
-                console.error('No specific errors found');
-            }
+        get(error) {
+            this.$api.getSpecificErrors(this.id, error, (data, Error) => {
+                if (Error) {
+                    console.error(Error);
+                    return;
+                }
+                this.specificErrors = data.errors || [];
+            });
         },
-    },
-    created() {
-        this.fetchSpecificErrors(this.error);
+        handleEventClick(eventId) {
+            this.$router.push({
+                name: 'overview',
+                params: { view: 'EUM', id: this.id, report: 'errors' },
+                query: { ...this.$utils.contextQuery(), error: this.error, eventId },
+            });
+        },
     },
 };
 </script>

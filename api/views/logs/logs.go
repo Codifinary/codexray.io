@@ -355,7 +355,6 @@ func GetSingleOtelServiceLogView(
 		svcs, err := ch.GetServicesFromLogs(ctx)
 		if err == nil {
 			v.Severities = svcs[serviceName]
-			fmt.Println("Severities fetched:", svcs[serviceName])
 		} else {
 			klog.Errorln("Error fetching severities:", err)
 			v.Status = "WARNING"

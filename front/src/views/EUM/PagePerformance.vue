@@ -1,17 +1,20 @@
 <template>
     <div>
-        <CustomTable :headers="headers" :items="data.pages" item-key="pagePath" class="elevation-1 mt-10">
+        <CustomTable :headers="headers" :items="pagePerformance" item-key="pagePath" class="elevation-1 mt-10">
             <template v-slot:[`item.pagePath`]="{ item }">
                 <router-link
                     :to="{
                         name: 'overview',
                         params: { view: 'EUM', id: id, report: 'page-performance' },
-                        query: { pagePath: item.pagePath },
+                        query: { ...$route.query, pagePath: item.pagePath },
                     }"
                     class="clickable"
                 >
                     {{ item.pagePath }}
                 </router-link>
+            </template>
+            <template v-slot:item.avgLoadPageTime="{ item }">
+                {{ format(item.avgLoadPageTime, 'ms') }}
             </template>
         </CustomTable>
     </div>
@@ -26,10 +29,6 @@ export default {
         CustomTable,
     },
     props: {
-        data: {
-            type: Object,
-            required: true,
-        },
         id: {
             type: String,
             required: true,
@@ -37,15 +36,38 @@ export default {
     },
     data() {
         return {
+            pagePerformance: [],
             headers: [
                 { text: 'Page', value: 'pagePath' },
-                { text: 'Load Requests/Second', value: 'loadRequestsPerSecond' },
-                { text: 'Response Time (ms)', value: 'responseTimeMs' },
+                { text: 'Load (Total Requests)', value: 'requests' },
+                { text: 'Response time', value: 'avgLoadPageTime' },
                 { text: 'JS Error%', value: 'jsErrorPercentage' },
                 { text: 'API Error%', value: 'apiErrorPercentage' },
-                { text: 'Users Impacted', value: 'usersImpacted' },
+                { text: 'Users Impacted', value: 'impactedUsers' },
             ],
         };
+    },
+
+    methods: {
+        get() {
+            this.loading = true;
+            this.error = '';
+            this.$api.getPagePerformance(this.id, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.pagePerformance = data.overviews || [];
+            });
+        },
+        format(duration, unit) {
+            return `${duration.toFixed(2)} ${unit}`;
+        },
+    },
+    mounted() {
+        this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
 };
 </script>
