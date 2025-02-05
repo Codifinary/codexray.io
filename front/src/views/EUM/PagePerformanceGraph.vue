@@ -36,8 +36,9 @@ export default {
     },
     async created() {
         try {
+            this.loading = true;
             this.$api.getPagePerformanceGraphs(this.id, this.pagePath, (data, error) => {
-                // this.loading = false
+                this.loading = false;
                 if (error) {
                     this.error = error;
                     return;

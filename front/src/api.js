@@ -290,6 +290,9 @@ export default class Api {
         this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
     }
 
+    getEUMTraces(serviceName, cb) {
+        this.get(this.projectPath(`eum/traces/${serviceName}`), {}, cb);
+    }
     getPagePerformanceGraphs(serviceName, pagePath, cb) {
         this.get(this.projectPath(`eum/perf/${serviceName}/charts`), { pagePath }, cb);
     }
