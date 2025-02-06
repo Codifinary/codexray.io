@@ -13,6 +13,7 @@ import (
 	"codexray/api/views"
 	"codexray/api/views/errlogs"
 	"codexray/api/views/logs"
+	"codexray/api/views/overview"
 	"codexray/api/views/perf"
 	"codexray/api/views/tracing"
 	"codexray/auditor"
@@ -1036,6 +1037,34 @@ func (api *Api) Tracing(w http.ResponseWriter, r *http.Request, u *db.User) {
 	}
 	auditor.Audit(world, project, nil, project.ClickHouseConfig(api.globalClickHouse) != nil)
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, views.Tracing(r.Context(), ch, app, q, world)))
+}
+
+func (api *Api) Traces(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	serviceName := vars["serviceName"]
+	ctx := r.Context()
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	report := overview.RenderTraces(ctx, ch, world, r.URL.Query().Get("query"), serviceName)
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+
 }
 
 func (api *Api) Logs(w http.ResponseWriter, r *http.Request, u *db.User) {

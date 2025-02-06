@@ -278,6 +278,50 @@ func (c *Client) GetServiceSpecificTraceViews(ctx context.Context, w *model.Worl
 	return traceViews, nil
 }
 
+func (c *Client) GetTraceOverview(ctx context.Context, q SpanQuery) (uint64, float64, error) {
+	query := `
+        SELECT
+            COUNT(*) AS requests,
+            AVG(Duration) AS avg_latency
+        FROM otel_traces
+        WHERE Timestamp BETWEEN @from AND @to
+        AND ServiceName = @service_name
+    `
+
+	var serviceName string
+	for _, filter := range q.Filters {
+		if filter.Field == "ServiceName" {
+			serviceName = filter.Value
+			break
+		}
+	}
+
+	if serviceName == "" {
+		return 0, 0, fmt.Errorf("service name is required")
+	}
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", q.TsFrom.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", q.TsTo.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service_name", serviceName),
+	)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var requests uint64
+	var avgLatency float64
+
+	if rows.Next() {
+		if err := rows.Scan(&requests, &avgLatency); err != nil {
+			return 0, 0, fmt.Errorf("failed to scan result: %w", err)
+		}
+	}
+
+	return requests, avgLatency / 1000000, nil
+}
+
 func (c *Client) getSpansHistogram(ctx context.Context, q SpanQuery, filters []string, filterArgs []any) ([]model.HistogramBucket, error) {
 	step := q.Ctx.Step
 	from := q.Ctx.From
@@ -783,7 +827,8 @@ type SpanQuery struct {
 	Filters          []SpanFilter
 	ExcludePeerAddrs []string
 
-	Diff bool
+	Diff        bool
+	ServiceName string
 }
 
 func (q SpanQuery) IsSelectionDefined() bool {
@@ -823,10 +868,16 @@ func (q SpanQuery) RootSpansFilter() ([]string, []any) {
 		"ParentSpanId = ''",
 		"NOT startsWith(ServiceName, '/')",
 	}
+	if q.ServiceName != "" {
+		filter = append(filter, "ServiceName = @serviceName")
+	}
 	for _, f := range q.Filters {
 		filter = append(filter, f.String())
 	}
 	var args []any
+	if q.ServiceName != "" {
+		args = append(args, clickhouse.Named("serviceName", q.ServiceName))
+	}
 	if len(q.ExcludePeerAddrs) > 0 {
 		filter = append(filter, "NetSockPeerAddr NOT IN (@addrs)")
 		args = append(args, clickhouse.Named("addrs", q.ExcludePeerAddrs))
@@ -838,10 +889,16 @@ func (q SpanQuery) SpansByServiceNameFilter() ([]string, []any) {
 	filter := []string{
 		"SpanKind = 'SPAN_KIND_SERVER'",
 	}
+	if q.ServiceName != "" {
+		filter = append(filter, "ServiceName = @serviceName")
+	}
 	for _, f := range q.Filters {
 		filter = append(filter, f.String())
 	}
 	var args []any
+	if q.ServiceName != "" {
+		args = append(args, clickhouse.Named("serviceName", q.ServiceName))
+	}
 	if len(q.ExcludePeerAddrs) > 0 {
 		filter = append(filter, "NetSockPeerAddr NOT IN (@addrs)")
 		args = append(args, clickhouse.Named("addrs", q.ExcludePeerAddrs))

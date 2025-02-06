@@ -248,6 +248,8 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/instrumentation/{type}", a.Auth(a.Instrumentation)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/profiling", a.Auth(a.Profiling)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/tracing", a.Auth(a.Tracing)).Methods(http.MethodGet, http.MethodPost)
+	r.HandleFunc("/api/project/{project}/app/traces/{serviceName}", a.Auth(a.Traces)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/app/traces/{serviceName}/logs", a.Auth(a.EumLogs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))

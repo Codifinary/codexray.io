@@ -23,16 +23,25 @@ const (
 )
 
 type Traces struct {
-	Message   string                     `json:"message"`
-	Error     string                     `json:"error"`
-	Heatmap   *model.Heatmap             `json:"heatmap"`
-	Traces    []Span                     `json:"traces"`
-	Limit     int                        `json:"limit"`
-	Trace     []Span                     `json:"trace"`
-	Summary   *model.TraceSpanSummary    `json:"summary"`
-	AttrStats []model.TraceSpanAttrStats `json:"attr_stats"`
-	Errors    []model.TraceErrorsStat    `json:"errors"`
-	Latency   *model.Profile             `json:"latency"`
+	Message        string                     `json:"message"`
+	Error          string                     `json:"error"`
+	Heatmap        *model.Heatmap             `json:"heatmap"`
+	Traces         []Span                     `json:"traces"`
+	Limit          int                        `json:"limit"`
+	Trace          []Span                     `json:"trace"`
+	Summary        *model.TraceSpanSummary    `json:"summary"`
+	AttrStats      []model.TraceSpanAttrStats `json:"attr_stats"`
+	Errors         []model.TraceErrorsStat    `json:"errors"`
+	Latency        *model.Profile             `json:"latency"`
+	Widgets        []model.Widget             `json:"widgets"`
+	TracesOverview TracesOverview             `json:"traces_overview"`
+}
+type TracesOverview struct {
+	TotalEndpoints   int     `json:"total_endpoints"`
+	Requests         uint64  `json:"requests"`
+	RequestPerSecond float32 `json:"request_per_second"`
+	ErrorRate        float32 `json:"error_rate"`
+	AvgLatency       float64 `json:"avg_latency"`
 }
 
 type Span struct {
@@ -78,7 +87,7 @@ type Filter struct {
 	Value string `json:"value"`
 }
 
-func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *Traces {
+func RenderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, serviceName string) *Traces {
 	res := &Traces{}
 
 	if ch == nil {
@@ -86,9 +95,18 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 		return res
 	}
 
+	if err := validateServiceName(ctx, ch, serviceName); err != nil {
+		klog.Errorln(err)
+		res.Message = err.Error()
+		return res
+	}
+
 	q := parseQuery(query, w.Ctx)
 
-	sq := clickhouse.SpanQuery{Ctx: w.Ctx}
+	sq := clickhouse.SpanQuery{
+		Ctx:         w.Ctx,
+		ServiceName: serviceName,
+	}
 
 	for _, f := range q.Filters {
 		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter(f.Field, f.Op, f.Value))
@@ -96,7 +114,7 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 
 	if !q.IncludeAux {
 		sq.ExcludePeerAddrs = getMonitoringAndControlPlanePodIps(w)
-		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter("SpanName", "!~", "GET /(health[z]*|metrics|debug/.+|actuator/.+)"))
+		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter("SpanName", "!~", "GET /(health[z]*|metrics|debug/.+)"))
 	}
 
 	histogram, err := ch.GetRootSpansHistogram(ctx, sq)
@@ -205,6 +223,21 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 		}
 	}
 
+	req, latency, err := ch.GetTraceOverview(ctx, sq)
+	if err != nil {
+		klog.Errorln(err)
+		res.Error = fmt.Sprintf("Clickhouse error: %s", err)
+		return res
+	}
+
+	res.TracesOverview = TracesOverview{
+		TotalEndpoints:   len(res.Summary.Stats),
+		Requests:         req,
+		RequestPerSecond: res.Summary.Overall.Total,
+		ErrorRate:        res.Summary.Overall.Failed,
+		AvgLatency:       latency,
+	}
+
 	return res
 }
 
@@ -235,4 +268,22 @@ func parseQuery(query string, ctx timeseries.Context) Query {
 	res.durTo = utils.ParseHeatmapDuration(res.DurTo)
 	res.errors = res.DurFrom == "inf" || res.DurTo == "err"
 	return res
+}
+
+func validateServiceName(ctx context.Context, ch *clickhouse.Client, serviceName string) error {
+	services, err := ch.GetServicesFromTraces(ctx)
+	if err != nil {
+		return fmt.Errorf("clickhouse error: %s", err)
+	}
+
+	serviceMap := make(map[string]bool)
+	for _, s := range services {
+		serviceMap[s] = true
+	}
+
+	if !serviceMap[serviceName] {
+		return fmt.Errorf("invalid service name: %s", serviceName)
+	}
+
+	return nil
 }
