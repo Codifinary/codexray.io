@@ -4,7 +4,6 @@ import { v4 } from 'uuid';
 
 const defaultErrorMessage = 'Something went wrong, please try again later.';
 const timeoutErrorMessage = 'Request timed out.';
-// import { chart } from '@/views/EUM/graphData.js';
 export default class Api {
     axios = null;
     router = null;
