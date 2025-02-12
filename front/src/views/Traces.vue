@@ -344,7 +344,7 @@
                 />
             </div>
             <div v-else-if="query.view === 'logs'">
-                <Logs :id="id" />
+                <TracesLogs :id="this.id" />
             </div>
         </template>
     </div>
@@ -355,12 +355,12 @@ import { palette } from '../utils/colors';
 import Heatmap from '../components/Heatmap.vue';
 import TracingTrace from '../components/TracingTrace.vue';
 import FlameGraph from '../components/FlameGraph.vue';
+import TracesLogs from '@/views/TracesLogs.vue';
 import TracesSummary from '@/views/TracesSummary.vue';
 import CustomTable from '@/components/CustomTable.vue';
-import Logs from './EUM/Logs.vue';
 
 export default {
-    components: { FlameGraph, TracingTrace, Heatmap, CustomTable, TracesSummary, Logs },
+    components: { FlameGraph, TracingTrace, Heatmap, CustomTable, TracesSummary, TracesLogs },
 
     data() {
         return {

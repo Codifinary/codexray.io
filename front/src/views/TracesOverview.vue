@@ -22,11 +22,8 @@
                 <span class="caption grey--text">/s</span>
             </template>
             <template #item.failed="{ item }">
-                <!-- <router-link v-if="item.failed" :to="filterTraces(item.service_name, item.span_name, true)"> -->
                 <span>{{ format(item.failed, '%') }}</span>
                 <span class="caption grey--text">%</span>
-                <!-- </router-link> -->
-                <!-- <span v-else>—</span> -->
             </template>
             <template #item.latency="{ item }">
                 <span>{{ format(item.latency, 'ms') }}</span>
@@ -113,8 +110,8 @@ export default {
                         icon: 'rps',
                     },
                     error_rate: {
-                        name: 'Error Rate',
-                        value: data.traces_view.summary.error_rate,
+                        name: 'Error/Sec',
+                        value: data.traces_view.summary.error_rate.toFixed(2),
                         background: 'purple lighten-4',
                         icon: 'errors',
                     },

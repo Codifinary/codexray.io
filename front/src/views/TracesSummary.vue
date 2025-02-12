@@ -61,7 +61,7 @@ export default {
                             icon: 'rps',
                         },
                         error_rate: {
-                            name: 'Error Rate',
+                            name: 'Error/Sec',
                             value: data.traces_overview.error_rate,
                             background: 'purple lighten-4',
                             icon: 'errors',
