@@ -2,163 +2,112 @@
     <div class="eum-container my-10 mx-5">
         <Navigation class="my-3" :id="id" :error="selectedError" :eventId="eventId" @update:error="updateError" @update:eventId="updateEventId" />
 
-        <v-tabs height="40" slider-color="success" show-arrows slider-size="2" v-model="activeTab" @change="updateUrl">
-            <v-tab>Page Performance</v-tab>
-            <v-tab>Errors</v-tab>
-            <v-tab>Logs</v-tab>
-            <v-tab>Traces</v-tab>
+        <v-tabs v-model="activeTab" height="40" slider-color="success" show-arrows slider-size="2" @change="updateUrl">
+            <v-tab v-for="(report, index) in reports" :key="index">{{ report.label }}</v-tab>
         </v-tabs>
+
         <v-tabs-items v-model="activeTab">
-            <v-tab-item>
-                <PagePerformance v-if="activeTab === 0" :data="pagePerformance" :id="id" />
-            </v-tab-item>
-            <v-tab-item>
-                <div v-if="!selectedError">
-                    <Errors v-if="errors" :data="errors" @error-clicked="handleErrorClicked" />
-                </div>
-                <div v-else>
-                    <Error :error="selectedError" :id="id" @event-clicked="handleEventClicked" />
-                </div>
-            </v-tab-item>
-            <v-tab-item>
-                <Logs v-if="activeTab === 2" />
-            </v-tab-item>
-            <v-tab-item>
-                <EUMTraces v-if="activeTab === 3" />
+            <v-tab-item v-for="(report, index) in reports" :key="index">
+                <component
+                    :is="report.component"
+                    v-if="activeTab === index"
+                    :id="id"
+                    :error="selectedError"
+                    :eventId="eventId"
+                    :report="reports[index].name"
+                    @update:error="updateError"
+                    @update:eventId="updateEventId"
+                />
             </v-tab-item>
         </v-tabs-items>
     </div>
 </template>
 
 <script>
-import { getApplicationData } from './api/EUMapi';
-
 import PagePerformance from './PagePerformance.vue';
 import Errors from './Errors.vue';
 import Logs from './Logs.vue';
-import Error from './Error.vue';
 import Navigation from './Navigation.vue';
 import EUMTraces from './EUMTraces.vue';
 
 export default {
     name: 'EUMApplicationOverview',
-    components: {
-        PagePerformance,
-        Errors,
-        Logs,
-        Error,
-        EUMTraces,
-        Navigation,
-    },
+    components: { PagePerformance, Errors, Logs, EUMTraces, Navigation },
     props: {
-        id: {
-            type: String,
-            required: true,
-        },
-        report: {
-            type: String,
-            required: false,
-        },
+        id: { type: String, required: true },
+        report: { type: String, required: false, default: '' },
     },
     data() {
         return {
             activeTab: 0,
-            pagePerformance: null,
-            errors: null,
-            logs: null,
-            error: null,
             selectedError: null,
             eventId: null,
-            reports: [{ name: 'page-performance' }, { name: 'errors' }, { name: 'logs' }, { name: 'traces' }],
+            reports: [
+                { name: 'page-performance', label: 'Page Performance', component: 'PagePerformance' },
+                { name: 'errors', label: 'Errors', component: 'Errors' },
+                { name: 'logs', label: 'Logs', component: 'Logs' },
+                { name: 'traces', label: 'Traces', component: 'EUMTraces' },
+            ],
         };
     },
     watch: {
-        id: {
-            immediate: true,
-            handler(newId) {
-                this.fetchApplicationData(newId);
-            },
-        },
-        report: {
-            immediate: true,
-            handler(newReport) {
-                this.setActiveTab(newReport);
-            },
-        },
-        activeTab: {
-            immediate: true,
-            handler(newTab) {
-                this.updateUrl(newTab);
-            },
-        },
-        '$route.query.eventId': {
-            immediate: true,
-            handler(newEventId) {
-                this.eventId = newEventId;
-            },
-        },
+        report: { immediate: true, handler: 'setActiveTab' },
+        '$route.params.report': { immediate: true, handler: 'setActiveTab' },
     },
     created() {
-        this.updateUrl(this.activeTab);
+        const report = this.$route.params.report || this.report;
+        if (!report) {
+            this.$router
+                .replace({
+                    name: 'overview',
+                    params: { view: 'EUM', id: this.id, report: this.reports[0].name },
+                    query: this.$utils.contextQuery(),
+                })
+                .catch(this.handleNavigationError);
+        } else {
+            this.setActiveTab(report);
+        }
+        this.eventId = this.$route.query.eventId || null;
     },
     methods: {
-        fetchApplicationData(id) {
-            const data = getApplicationData(id);
-            this.pagePerformance = data.pagePerformance;
-            this.errors = data.errors;
-            // const appData = getAppOverview(id);
-            // this.pagePerformance = appData.overviews;
-        },
         updateUrl(tabIndex) {
-            if (tabIndex < 0 || tabIndex >= this.reports.length) {
-                console.error(`Invalid tab index: ${tabIndex}`);
-                return;
-            }
+            if (tabIndex < 0 || tabIndex >= this.reports.length) return;
             const report = this.reports[tabIndex].name;
-            const currentRoute = this.$route;
-            const targetRoute = { name: 'overview', params: { view: 'EUM', id: this.id, report }, query: this.$utils.contextQuery() };
-
-            if (currentRoute.name !== targetRoute.name || currentRoute.params.report !== targetRoute.params.report) {
-                this.$router.push(targetRoute).catch((err) => {
-                    if (err.name !== 'NavigationDuplicated') {
-                        console.error(err);
-                    }
-                });
+            if (this.$route.params.report !== report) {
+                this.$router
+                    .push({
+                        name: 'overview',
+                        params: { view: 'EUM', id: this.id, report },
+                        query: { ...this.$utils.contextQuery(), error: this.selectedError || undefined },
+                    })
+                    .catch(this.handleNavigationError);
             }
         },
         setActiveTab(report) {
-            if (!report) {
-                console.error('Report is undefined');
-                return;
-            }
+            if (!report) return;
+
             const decodedReport = decodeURIComponent(report);
             const tabIndex = this.reports.findIndex((r) => decodedReport.startsWith(r.name));
+
             if (tabIndex !== -1) {
                 this.activeTab = tabIndex;
                 if (decodedReport.startsWith('errors/')) {
-                    this.selectedError = decodedReport.split('/')[1];
+                    this.selectedError = decodedReport.split('/')[1] || null;
                 } else {
                     this.selectedError = null;
                 }
             } else {
-                console.error(`Invalid report: ${report}`);
+                this.activeTab = 0; // Fallback to first tab if not found
             }
-        },
-        handleErrorClicked(error) {
-            this.selectedError = error;
-        },
-        handleEventClicked(eventId) {
-            this.$router.push({
-                name: 'overview',
-                params: { view: 'EUM', id: this.id },
-                query: { ...this.$utils.contextQuery(), error: encodeURIComponent(this.selectedError), eventId },
-            });
         },
         updateError(newError) {
             this.selectedError = newError;
         },
         updateEventId(newEventId) {
             this.eventId = newEventId;
+        },
+        handleNavigationError(err) {
+            if (err.name !== 'NavigationDuplicated') console.error(err);
         },
     },
 };
@@ -184,6 +133,5 @@ export default {
     padding-bottom: 70px;
     margin-left: 20px !important;
     margin-right: 20px !important;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
 }
 </style>

@@ -4,7 +4,6 @@ import { v4 } from 'uuid';
 
 const defaultErrorMessage = 'Something went wrong, please try again later.';
 const timeoutErrorMessage = 'Request timed out.';
-
 export default class Api {
     axios = null;
     router = null;
@@ -267,5 +266,33 @@ export default class Api {
                 apiPrefix: this.basePath + 'api/' + this.projectPath('prom') + '/api/v1',
             },
         };
+    }
+    getEUMApplications(cb) {
+        this.get(this.projectPath(`overview/eumapps`), {}, cb);
+    }
+    getPagePerformance(serviceName, cb) {
+        this.get(this.projectPath(`eum/perf/${serviceName}`), {}, cb);
+    }
+    getEUMApplicationErrors(serviceName, cb) {
+        this.get(this.projectPath(`eum/errlog/${serviceName}`), {}, cb);
+    }
+    getSpecificErrors(serviceName, error, cb) {
+        this.get(this.projectPath(`eum/errlog/${serviceName}/${error}`), {}, cb);
+    }
+    getErrorDetails(eventID, cb) {
+        this.get(this.projectPath(`eum/errdetail/${eventID}`), {}, cb);
+    }
+    getErrorDetailsBreadcrumbs(eventID, type, cb) {
+        this.get(this.projectPath(`eum/errdetail/${eventID}/${type}`), {}, cb);
+    }
+    getEUMLogs(serviceName, cb) {
+        this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
+    }
+
+    getEUMTraces(serviceName, cb) {
+        this.get(this.projectPath(`eum/traces/${serviceName}`), {}, cb);
+    }
+    getPagePerformanceGraphs(serviceName, pageName, cb) {
+        this.get(this.projectPath(`eum/perf/${serviceName}/charts`), { pageName }, cb);
     }
 }

@@ -4,15 +4,15 @@
             <div class="mr-10">
                 <div>
                     <h5>Error message</h5>
-                    <p class="error-message">{{ errorDetails.errorMessage }}</p>
+                    <p class="error-message">{{ errorDetails.message }}</p>
                 </div>
                 <div>
                     <h5>Error Details</h5>
-                    <p>{{ errorDetails.errorDetails }}</p>
+                    <p>{{ errorDetails.detail }}</p>
                 </div>
                 <div>
                     <h5>Error URL</h5>
-                    <p>{{ errorDetails.errorUrl }}</p>
+                    <p>{{ errorDetails.url }}</p>
                 </div>
                 <div class="error-details__meta">
                     <div>
@@ -25,7 +25,7 @@
                     </div>
                     <div>
                         <h5>Version</h5>
-                        <p>{{ errorDetails.version }}</p>
+                        <p>{{ errorDetails.app_version }}</p>
                     </div>
                 </div>
                 <div class="error-details__meta">
@@ -36,14 +36,14 @@
                     <div class="pl-4">
                         <h5>Level of Severity</h5>
                         <p>
-                            {{ errorDetails.levelOfSeverity }}
+                            {{ errorDetails.level }}
                         </p>
                     </div>
                 </div>
             </div>
             <div>
                 <h5>Stack Trace</h5>
-                <pre>{{ errorDetails.stackTrace }}</pre>
+                <pre>{{ errorDetails.stack }}</pre>
             </div>
         </div>
 
@@ -55,7 +55,7 @@
                 label="Filter by Type"
                 class="filterByType"
                 dense
-                @change="fetchData"
+                @change="fetchFilteredData"
                 outlined
                 :menu-props="{ offsetY: true }"
             >
@@ -83,7 +83,7 @@
                         <p
                             :style="{
                                 color:
-                                    item.level === 'info' ? '#42A5F5' : item.level === 'warning' ? 'var(--status-warning)' : 'var(--status-critical)',
+                                    item.level === 'Info' ? '#42A5F5' : item.level === 'Warning' ? 'var(--status-warning)' : 'var(--status-critical)',
                             }"
                         >
                             {{ item.level }}
@@ -97,7 +97,6 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import { getErrorDetails, getBreadcrumbsByType } from './api/EUMapi';
 import { VSelect, VIcon } from 'vuetify/lib';
 
 export default {
@@ -114,22 +113,22 @@ export default {
     },
     data() {
         return {
-            errorDetails: null,
+            errorDetails: [],
             tableData: [],
             selectedFilter: 'all',
             filterOptions: [
                 { text: 'All', value: 'all', color: 'green', icon: 'mdi-select-all', selected: true },
-                { text: 'Debug', value: 'debug', color: 'red', icon: 'mdi-bug', selected: false },
-                { text: 'Navigation', value: 'navigation', color: 'purple', icon: 'mdi-compass', selected: false },
-                { text: 'User Action', value: 'userAction', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
-                { text: 'Error', value: 'error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
+                { text: 'Debug', value: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
+                { text: 'Navigation', value: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
+                { text: 'User Action', value: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
+                { text: 'Error', value: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
                 { text: 'HTTP', value: 'http', icon: 'mdi-web', color: 'blue', selected: false },
             ],
             types: {
-                debug: { text: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
-                navigation: { text: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
-                userAction: { text: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
-                error: { text: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
+                Debug: { text: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
+                Navigation: { text: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
+                'User Action': { text: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
+                Error: { text: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
                 http: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
             },
             headers: [
@@ -137,31 +136,58 @@ export default {
                 { text: 'Category', value: 'category' },
                 { text: 'Description', value: 'description' },
                 { text: 'Level', value: 'level' },
-                { text: 'Time', value: 'time' },
+                { text: 'Time', value: 'timestamp' },
             ],
         };
     },
+    watch: {
+        '$route.query': {
+            immediate: true,
+            handler() {
+                this.get(this.eventID, this.selectedFilter);
+            },
+        },
+    },
     methods: {
-        fetchErrorDetails(eventId) {
-            console.log(eventId);
-            this.errorDetails = getErrorDetails();
+        get(eventId, selectedFilter) {
+            this.loading = true;
+            this.error = '';
+            this.$api.getErrorDetails(eventId, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+
+                this.errorDetails = data.detail || [];
+            });
+
+            this.fetchBreadcrumbsData(eventId, selectedFilter);
         },
-        fetchData() {
-            if (this.selectedFilter === 'all') {
-                this.tableData = getErrorDetails().breadcrumb;
-            } else {
-                this.tableData = getBreadcrumbsByType(this.selectedFilter);
-            }
+        fetchFilteredData() {
+            this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
+        fetchBreadcrumbsData(eventId, selectedFilter) {
+            this.$api.getErrorDetailsBreadcrumbs(eventId, selectedFilter, (data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                } else {
+                    this.tableData = data.breadcrumbs || [];
+                }
+            });
+        },
+
         toggleSelection(filterItem) {
             filterItem.selected = !filterItem.selected;
             this.selectedFilter = filterItem.selected ? filterItem.value : 'all';
-            this.fetchData();
+            this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
     },
-    created() {
-        this.fetchErrorDetails(this.eventId);
-        this.fetchData();
+    mounted() {
+        this.get(this.eventId, this.selectedFilter);
+        this.$events.watch(this, this.get(this.eventId, this.selectedFilter), 'refresh');
     },
 };
 </script>
