@@ -1,29 +1,19 @@
 <template>
     <div class="traces">
-        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text dissmissible>
             {{ error }}
         </v-alert>
 
         <v-alert v-else-if="view.message" color="info" outlined text class="message">
-            <template v-if="view.message === 'not_found'">
-                This page only shows traces from OpenTelemetry integrations, not from eBPF.
-                <div class="mt-2">
-                    <OpenTelemetryIntegration color="primary">Integrate OpenTelemetry</OpenTelemetryIntegration>
-                </div></template
-            >
             <template v-if="view.message === 'no_clickhouse'"> Clickhouse integration is not configured. </template>
         </v-alert>
 
         <template v-else>
-            <div class="mt-4 d-flex">
-                <v-spacer />
-                <OpenTelemetryIntegration small color="success">Integrate OpenTelemetry</OpenTelemetryIntegration>
+            <div class="mt-4 mb-3 d-flex">
+                <div class="serviceName">{{ id }}</div>
             </div>
 
-            <v-alert v-if="view.error" color="error" icon="mdi-alert-octagon-outline" outlined text>
-                {{ view.error }}
-            </v-alert>
-
+            <TracesSummary :id="id" />
             <Heatmap v-if="view.heatmap" :heatmap="view.heatmap" :selection="selection" @select="setSelection" :loading="loading" />
 
             <v-tabs height="32" show-arrows hide-slider>
@@ -148,13 +138,8 @@
 
             <div v-else-if="query.view === 'overview'" class="mt-5" style="min-height: 50vh">
                 <CustomTable :items="view.summary ? view.summary.stats : []" class="table" :headers="headers">
-                    <template #item.service_name="{ item }">
-                        <router-link :to="filterTraces(item.service_name)">
-                            {{ item.service_name }}
-                        </router-link>
-                    </template>
                     <template #item.span_name="{ item }">
-                        <router-link :to="filterTraces(item.service_name, item.span_name)">
+                        <router-link :to="filterTraces(serviceName, item.span_name)">
                             {{ item.span_name }}
                         </router-link>
                     </template>
@@ -163,7 +148,7 @@
                         <span class="caption grey--text">/s</span>
                     </template>
                     <template #item.failed="{ item }">
-                        <router-link v-if="item.failed" :to="filterTraces(item.service_name, item.span_name, true)">
+                        <router-link v-if="item.failed" :to="filterTraces(serviceName, item.span_name, true)">
                             <span>{{ format(item.failed, '%') }}</span>
                             <span class="caption grey--text">%</span>
                         </router-link>
@@ -186,13 +171,12 @@
                         <tfoot>
                             <tr v-for="item in view.summary ? [view.summary.overall] : []">
                                 <td class="font-weight-medium">OVERALL</td>
-                                <td></td>
                                 <td class="text-right font-weight-medium">
                                     <span>{{ format(item.total) }}</span>
                                     <span class="caption grey--text">/s</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <router-link v-if="item.failed" :to="filterTraces(query.service_name, query.span_name, true)">
+                                    <router-link v-if="item.failed" :to="filterTraces(serviceName, query.span_name, true)">
                                         <span>{{ format(item.failed, '%') }}</span>
                                         <span class="caption grey--text">%</span>
                                     </router-link>
@@ -308,18 +292,12 @@
                     :items="view.errors || []"
                     class="table errors"
                     :headers="[
-                        { value: 'service_name', text: 'Service Name', width: '15%' },
                         { value: 'span_name', text: 'Span', width: '25%' },
                         { value: 'sample_error', text: 'Error', width: '40%' },
                         { value: 'sample_trace_id', text: 'Sample Trace', sortable: false, width: '16ch' },
                         { value: 'count', text: 'Percentage', width: '16ch' },
                     ]"
                 >
-                    <template #item.service_name="{ item }">
-                        <span :title="item.service_name" class="service nowrap" :style="{ borderColor: color(item.service_name) }">
-                            {{ item.service_name }}
-                        </span>
-                    </template>
                     <template #item.span_name="{ item }">
                         <div class="nowrap" :title="item.span_name">{{ item.span_name }}</div>
                         <div v-for="(v, k) in item.labels" :title="`${k}: ${v}`" class="caption nowrap" style="line-height: 1rem">
@@ -365,6 +343,9 @@
                     class="pt-2"
                 />
             </div>
+            <div v-else-if="query.view === 'logs'">
+                <Logs :id="id" />
+            </div>
         </template>
     </div>
 </template>
@@ -374,11 +355,12 @@ import { palette } from '../utils/colors';
 import Heatmap from '../components/Heatmap.vue';
 import TracingTrace from '../components/TracingTrace.vue';
 import FlameGraph from '../components/FlameGraph.vue';
-import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
+import TracesSummary from '@/views/TracesSummary.vue';
 import CustomTable from '@/components/CustomTable.vue';
+import Logs from './EUM/Logs.vue';
 
 export default {
-    components: { OpenTelemetryIntegration, FlameGraph, TracingTrace, Heatmap, CustomTable },
+    components: { FlameGraph, TracingTrace, Heatmap, CustomTable, TracesSummary, Logs },
 
     data() {
         return {
@@ -390,9 +372,10 @@ export default {
             },
             loading: false,
             error: '',
+            serviceName: '',
+            summary: {},
             headers: [
-                { value: 'service_name', text: 'Root Service Name', align: 'start' },
-                { value: 'span_name', text: 'Root Span Name', align: 'start' },
+                { value: 'span_name', text: 'Endpoint', align: 'start' },
                 { value: 'total', text: 'Requests', align: 'end' },
                 { value: 'failed', text: 'Errors', align: 'end' },
                 { value: 'duration_quantiles[0]', text: 'p50', align: 'end' },
@@ -426,6 +409,10 @@ export default {
     },
 
     computed: {
+        id() {
+            return this.$route.params.id;
+        },
+
         views() {
             return [
                 { name: 'overview', title: 'overview', icon: 'mdi-format-list-checkbox' },
@@ -433,6 +420,7 @@ export default {
                 { name: 'errors', title: 'error causes', icon: 'mdi-target' },
                 { name: 'latency', title: 'latency explorer', icon: 'mdi-clock-fast' },
                 { name: 'attributes', title: 'compare attributes', icon: 'mdi-select-compare' },
+                { name: 'logs', title: 'logs', icon: 'mdi-resistor' },
             ];
         },
         query() {
@@ -450,8 +438,7 @@ export default {
         filterable() {
             return {
                 fields: {
-                    ServiceName: 'Root Service Name',
-                    SpanName: 'Root Span Name',
+                    SpanName: 'Endpoint',
                     TraceId: 'Trace ID',
                 },
                 ops: ['=', '!=', '~', '!~'],
@@ -480,13 +467,13 @@ export default {
             const query = this.$route.query.query || '';
             this.loading = true;
             this.error = '';
-            this.$api.getOverview('traces', query, (data, error) => {
+            this.$api.getTraces(this.id, query, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
                     return;
                 }
-                this.view = data.traces || {};
+                this.view = data || {};
             });
         },
         push(to) {
@@ -826,6 +813,16 @@ export default {
     position: relative;
     padding-left: 8px;
 }
+.serviceName {
+    display: flex !important;
+    color: var(--status-ok) !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
 .service::before {
     content: '';
     position: absolute;
@@ -835,5 +832,10 @@ export default {
     border-left-width: 4px;
     border-left-style: solid;
     border-left-color: inherit;
+}
+.cards {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0 20px 0;
 }
 </style>

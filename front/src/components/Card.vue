@@ -4,8 +4,7 @@
             <div class="card-name">{{ name }}</div>
             <v-card-text class="card-count">{{ count }}</v-card-text>
         </v-card-title>
-
-        <BaseIcon name="alert" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <BaseIcon :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
     </v-card>
 </template>
 
@@ -21,6 +20,7 @@ export default {
         count: Number,
         background: String,
         icon: String,
+        iconName: String,
     },
 };
 </script>
@@ -64,13 +64,13 @@ export default {
     }
 
     .card-name {
-        font-size: 14px;
+        font-size: 12px;
         line-height: 18px;
     }
 
     .card-count {
         font-weight: 800;
-        font-size: 40px;
+        font-size: 36px;
         line-height: 38px;
     }
 

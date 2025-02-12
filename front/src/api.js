@@ -295,4 +295,16 @@ export default class Api {
     getPagePerformanceGraphs(serviceName, pageName, cb) {
         this.get(this.projectPath(`eum/perf/${serviceName}/charts`), { pageName }, cb);
     }
+    getTracesOverview(cb) {
+        this.get(this.projectPath(`overview/traces`), {}, cb);
+    }
+    getTraces(serviceName, query, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}`), { query }, cb);
+    }
+    getTracesLogs(serviceName, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}/logs`), {}, cb);
+    }
+    getTracesSummaryCharts(serviceName, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}/summary`), {}, cb);
+    }
 }
