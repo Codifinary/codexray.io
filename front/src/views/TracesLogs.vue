@@ -6,15 +6,16 @@
                 <div class="subtitle-1 mt-3">Filter:</div>
                 <div class="d-flex flex-wrap flex-md-nowrap align-center" style="gap: 8px">
                     <v-checkbox
-                        v-for="s in severities"
-                        :key="s.name"
-                        :value="s.name"
+                        v-for="s in all_severity"
+                        :key="s"
+                        :value="s"
                         v-model="query.severity"
-                        :label="s.name"
-                        :color="s.color"
+                        :label="s || 'Unknown'"
+                        :color="getColor(s)"
                         class="ma-0 text-no-wrap text-capitalize checkbox"
                         dense
                         hide-details
+                        @change="runQuery"
                     />
                     <div class="d-flex flex-grow-1" style="gap: 4px">
                         <v-text-field
@@ -33,7 +34,7 @@
                 </div>
 
                 <div class="d-flex flex-wrap align-center mt-6" style="gap: 12px">
-                    <v-btn-toggle v-model="order" @change="setQuery" dense>
+                    <v-btn-toggle v-model="order" @change="runQuery" dense>
                         <v-btn value="desc" height="40"><v-icon small>mdi-arrow-up-thick</v-icon>Newest first</v-btn>
                         <v-btn value="asc" height="40"><v-icon small>mdi-arrow-down-thick</v-icon>Oldest first</v-btn>
                     </v-btn-toggle>
@@ -42,7 +43,7 @@
                         <v-select
                             :items="limits"
                             v-model="query.limit"
-                            @change="setQuery"
+                            @change="runQuery"
                             outlined
                             hide-details
                             dense
@@ -70,7 +71,7 @@
                             </tr>
                         </thead>
                         <tbody class="mono">
-                            <tr v-for="e in entries" @click="entry = e" style="cursor: pointer">
+                            <tr v-for="e in entries" :key="e.timestamp" @click="entry = e" style="cursor: pointer">
                                 <td class="text-no-wrap" style="padding-left: 1px">
                                     <div class="d-flex" style="gap: 4px">
                                         <div class="marker" :style="{ backgroundColor: e.color }" />
@@ -102,7 +103,7 @@
                             <div class="font-weight-medium mt-4 mb-2">Attributes</div>
                             <v-simple-table dense>
                                 <tbody>
-                                    <tr v-for="(v, k) in entry.attributes">
+                                    <tr v-for="(v, k) in entry.attributes" :key="k">
                                         <td>{{ k }}</td>
                                         <td>
                                             <router-link
@@ -118,37 +119,6 @@
                         </v-card>
                     </v-dialog>
                 </div>
-
-                <div v-if="query.view === 'patterns'">
-                    <div v-if="patterns" class="patterns">
-                        <div v-for="p in patterns" class="pattern" @click="pattern = p">
-                            <div class="sample">{{ p.sample }}</div>
-                            <div class="line">
-                                <v-sparkline v-if="p.messages" :value="p.messages" smooth height="30" fill :color="p.color" padding="4" />
-                            </div>
-                            <div class="percent">{{ p.percent }}</div>
-                        </div>
-                    </div>
-                    <div v-else-if="!loading" class="pa-3 text-center grey--text">No patterns found</div>
-                    <v-dialog v-if="pattern" v-model="pattern" width="80%">
-                        <v-card tile class="pa-5">
-                            <div class="d-flex align-center">
-                                <div class="d-flex">
-                                    <v-chip label dark small :color="pattern.color" class="text-uppercase mr-2">{{ pattern.severity }}</v-chip>
-                                    {{ pattern.sum }} events
-                                </div>
-                                <v-spacer />
-                                <v-btn icon @click="pattern = null"><v-icon>mdi-close</v-icon></v-btn>
-                            </div>
-                            <Chart v-if="pattern.chart" :chart="pattern.chart" />
-                            <div class="font-weight-medium my-3">Sample</div>
-                            <div class="message" :class="{ multiline: pattern.multiline }">
-                                {{ pattern.sample }}
-                            </div>
-                            <v-btn v-if="configured" color="primary" @click="filterByPattern(pattern.hash)" class="mt-4"> Show messages </v-btn>
-                        </v-card>
-                    </v-dialog>
-                </div>
             </template>
         </div>
     </div>
@@ -158,7 +128,7 @@
 import Chart from '@/components/Chart.vue';
 import { palette } from '@/utils/colors';
 
-const severity = (s) => {
+const getSeverity = (s) => {
     s = s.toLowerCase();
     if (s.startsWith('crit')) return { num: 5, color: 'black' };
     if (s.startsWith('err')) return { num: 4, color: 'red-darken1' };
@@ -181,24 +151,17 @@ export default {
             data: {},
             order: '',
             entry: null,
+            query: {
+                severity: [],
+                search: '',
+                limit: 100,
+            },
         };
     },
 
     computed: {
-        severities() {
-            if (!this.data.severities) {
-                return [];
-            }
-            const res = this.data.severities.map((s) => {
-                const sev = severity(s);
-                return {
-                    name: s,
-                    num: sev.num,
-                    color: palette.get(sev.color),
-                };
-            });
-            res.sort((s1, s2) => s1.num - s2.num);
-            return res;
+        all_severity() {
+            return this.data.all_severity || [];
         },
         chart() {
             const ch = this.data.chart;
@@ -209,7 +172,7 @@ export default {
                 return ch;
             }
             ch.series.forEach((s) => {
-                const sev = severity(s.name);
+                const sev = getSeverity(s.name);
                 s.num = sev.num;
                 s.color = sev.color;
             });
@@ -226,7 +189,7 @@ export default {
                 return {
                     severity: e.severity,
                     timestamp: e.timestamp,
-                    color: palette.get(severity(e.severity).color),
+                    color: palette.get(getSeverity(e.severity).color),
                     date: this.$format.date(e.timestamp, '{MMM} {DD} {HH}:{mm}:{ss}'),
                     message: e.message,
                     attributes: e.attributes,
@@ -259,6 +222,12 @@ export default {
                 this.get();
             }
         },
+        'query.severity': {
+            handler() {
+                this.setQuery();
+            },
+            deep: true,
+        },
     },
 
     methods: {
@@ -268,11 +237,12 @@ export default {
             try {
                 q = JSON.parse(decodeURIComponent(query.query || '{}'));
             } catch {
-                //
+                console.log('Failed to parse query');
             }
             let severity = q.severity || [];
+
             if (!severity.length) {
-                severity = this.data.severities || [];
+                severity = this.all_severity;
             }
             this.query = {
                 view: query.view || 'logs',
@@ -285,25 +255,24 @@ export default {
             this.order = query.order || 'desc';
         },
         setQuery() {
-            this.query.severity = this.data.severities || [];
             const query = {
                 query: JSON.stringify(this.query),
-
                 order: this.order,
             };
             this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => err);
         },
         runQuery() {
-            const q = this.$route.query.query;
             this.setQuery();
-            if (this.$route.query.query === q) {
-                this.get();
-            }
+            this.get();
         },
         zoom(s) {
             const { from, to } = s.selection;
             const query = { ...this.$route.query, from, to };
             this.$router.push({ query }).catch((err) => err);
+        },
+        getColor(severity) {
+            const sev = getSeverity(severity);
+            return palette.get(sev.color);
         },
         get() {
             this.loading = true;
@@ -320,6 +289,10 @@ export default {
                     return;
                 }
                 this.data = data;
+
+                if (!this.query.severity.length) {
+                    this.query.severity = this.data.all_severity;
+                }
             });
         },
     },

@@ -27,10 +27,9 @@
                         :to="{
                             name: 'overview',
                             params: { view: 'traces', id: item.service_name },
-
                             query: {
                                 ...$route.query,
-                                query: JSON.stringify({ view: 'logs', severity: 'errors' }),
+                                query: JSON.stringify({ view: 'logs', severity: ['Error'] }),
                             },
                         }"
                     >

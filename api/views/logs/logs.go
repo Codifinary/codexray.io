@@ -45,6 +45,7 @@ type SingleServiceLogsView struct {
 	Message    string       `json:"message"`
 	Service    string       `json:"service"`
 	Severities []string     `json:"severities"`
+	Severity   []string     `json:"all_severity"`
 	Entries    []Entry      `json:"entries"`
 	Chart      *model.Chart `json:"chart"`
 	Limit      int          `json:"limit"`
@@ -353,8 +354,21 @@ func GetSingleOtelServiceLogView(
 	if len(v.Severities) == 0 {
 		// Attempt to get severities from ClickHouse
 		svcs, err := ch.GetServicesFromLogs(ctx)
+
 		if err == nil {
 			v.Severities = svcs[serviceName]
+			v.Severity = v.Severities
+		} else {
+			klog.Errorln("Error fetching severities:", err)
+			v.Status = "WARNING"
+			v.Message = fmt.Sprintf("Failed to get severities: %s", err)
+			return v, err
+		}
+	} else {
+		svcs, err := ch.GetServicesFromLogs(ctx)
+
+		if err == nil {
+			v.Severity = svcs[serviceName]
 		} else {
 			klog.Errorln("Error fetching severities:", err)
 			v.Status = "WARNING"
