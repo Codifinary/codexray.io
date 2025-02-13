@@ -285,8 +285,8 @@ export default class Api {
     getErrorDetailsBreadcrumbs(eventID, type, cb) {
         this.get(this.projectPath(`eum/errdetail/${eventID}/${type}`), {}, cb);
     }
-    getEUMLogs(serviceName, cb) {
-        this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
+    getEUMLogs(serviceName, query, cb) {
+        this.get(this.projectPath(`eum/logs/${serviceName}`), { query }, cb);
     }
 
     getEUMTraces(serviceName, cb) {
@@ -301,8 +301,8 @@ export default class Api {
     getTraces(serviceName, query, cb) {
         this.get(this.projectPath(`app/traces/${serviceName}`), { query }, cb);
     }
-    getTracesLogs(serviceName, cb) {
-        this.get(this.projectPath(`app/traces/${serviceName}/logs`), {}, cb);
+    getTracesLogs(serviceName, query, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}/logs`), { query }, cb);
     }
     getTracesSummaryCharts(serviceName, cb) {
         this.get(this.projectPath(`app/traces/${serviceName}/summary`), {}, cb);

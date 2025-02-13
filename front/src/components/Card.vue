@@ -2,7 +2,9 @@
     <v-card class="card-body">
         <v-card-title>
             <div class="card-name">{{ name }}</div>
-            <v-card-text class="card-count">{{ count }}<span v-if="name == 'Avg. Latency'">ms</span></v-card-text>
+            <v-card-text class="card-count"
+                >{{ count }}<span v-if="unit">{{ unit }}</span></v-card-text
+            >
         </v-card-title>
         <BaseIcon :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
     </v-card>
@@ -21,6 +23,7 @@ export default {
         background: String,
         icon: String,
         iconName: String,
+        unit: String,
     },
 };
 </script>
