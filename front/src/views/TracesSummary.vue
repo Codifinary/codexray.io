@@ -1,16 +1,18 @@
 <template>
     <div class="traces-container">
         <div class="cards">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" />
+            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
         </div>
         <div class="mt-5">
             <Dashboard :name="'Application Performance'" :widgets="chartData.widgets" />
         </div>
     </div>
 </template>
+
 <script>
 import Card from '@/components/Card.vue';
 import Dashboard from '@/components/Dashboard.vue';
+
 export default {
     components: {
         Card,
@@ -23,6 +25,8 @@ export default {
         return {
             summary: {},
             chartData: {},
+            loading: false,
+            error: '',
         };
     },
     mounted() {
@@ -30,6 +34,17 @@ export default {
         this.$events.watch(this, this.get, 'refresh');
     },
     methods: {
+        convertLatency(latency) {
+            if (latency < 1000) {
+                return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
+            } else if (latency < 1000000) {
+                return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
+            } else if (latency < 1000000000) {
+                return { value: parseFloat((latency / 1000000).toFixed(1)), unit: 'ms' };
+            } else {
+                return { value: parseFloat((latency / 1000000000).toFixed(1)), unit: 's' };
+            }
+        },
         get() {
             this.loading = true;
             this.error = '';
@@ -40,44 +55,46 @@ export default {
                     return;
                 }
                 this.chartData = data.audit_report || {};
-                this.summary =
-                    {
-                        endpoints: {
-                            name: 'Total EndPoints',
-                            value: data.traces_overview.total_endpoints,
-                            background: 'red lighten-4',
-                            icon: 'endpoints',
-                        },
-                        request_count: {
-                            name: 'Total Requests',
-                            value: data.traces_overview.requests,
-                            background: 'blue lighten-4',
-                            icon: 'requests',
-                        },
-                        request_per_second: {
-                            name: 'Request/Sec',
-                            value: parseFloat(data.traces_overview.request_per_second).toFixed(2),
-                            background: 'orange lighten-4',
-                            icon: 'rps',
-                        },
-                        error_rate: {
-                            name: 'Error/Sec',
-                            value: data.traces_overview.error_rate,
-                            background: 'purple lighten-4',
-                            icon: 'errors',
-                        },
-                        avg_latency: {
-                            name: 'Avg. Latency',
-                            value: parseFloat(data.traces_overview.avg_latency).toFixed(1),
-                            background: 'green lighten-4',
-                            icon: 'latency',
-                        },
-                    } || {};
+                const avgLatency = this.convertLatency(parseFloat(data.traces_overview.avg_latency));
+                this.summary = {
+                    endpoints: {
+                        name: 'Total EndPoints',
+                        value: data.traces_overview.total_endpoints,
+                        background: 'red lighten-4',
+                        icon: 'endpoints',
+                    },
+                    request_count: {
+                        name: 'Total Requests',
+                        value: data.traces_overview.requests,
+                        background: 'blue lighten-4',
+                        icon: 'requests',
+                    },
+                    request_per_second: {
+                        name: 'Request/Sec',
+                        value: parseFloat(data.traces_overview.request_per_second).toFixed(2),
+                        background: 'orange lighten-4',
+                        icon: 'rps',
+                    },
+                    error_rate: {
+                        name: 'Error/Sec',
+                        value: data.traces_overview.error_rate,
+                        background: 'purple lighten-4',
+                        icon: 'errors',
+                    },
+                    avg_latency: {
+                        name: 'Avg. Latency',
+                        value: avgLatency.value,
+                        unit: avgLatency.unit,
+                        background: 'green lighten-4',
+                        icon: 'latency',
+                    },
+                };
             });
         },
     },
 };
 </script>
+
 <style scoped>
 .traces-container {
     padding-bottom: 70px;

@@ -1,7 +1,7 @@
 <template>
     <div class="my-10 mx-5 traces-container">
         <div class="cards">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" />
+            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
         </div>
         <CustomTable :headers="headers" :items="tableItems" item-key="service_name" class="elevation-1">
             <template v-slot:item.service_name="{ item }">
@@ -21,10 +21,28 @@
                 <span>{{ format(item.total) }}</span>
                 <span class="caption grey--text">/s</span>
             </template>
+            <template #item.error_logs="{ item }">
+                <div class="name d-flex">
+                    <router-link
+                        :to="{
+                            name: 'overview',
+                            params: { view: 'traces', id: item.service_name },
+
+                            query: {
+                                ...$route.query,
+                                query: JSON.stringify({ view: 'logs', severity: 'errors' }),
+                            },
+                        }"
+                    >
+                        {{ item.error_logs }}
+                    </router-link>
+                </div>
+            </template>
             <template #item.failed="{ item }">
                 <span>{{ format(item.failed, '%') }}</span>
                 <span class="caption grey--text">%</span>
             </template>
+
             <template #item.latency="{ item }">
                 <span>{{ format(item.latency, 'ms') }}</span>
                 <span class="caption grey--text"> ms</span>
@@ -89,7 +107,7 @@ export default {
                     return;
                 }
                 this.tableItems = data.traces_view.traces || [];
-
+                const avgLatency = this.convertLatency(parseFloat(data.traces_view.summary.avg_latency));
                 this.summary = {
                     services: {
                         name: 'Total Services',
@@ -117,7 +135,8 @@ export default {
                     },
                     avg_latency: {
                         name: 'Avg. Latency',
-                        value: parseFloat(data.traces_view.summary.avg_latency).toFixed(1),
+                        value: avgLatency.value,
+                        unit: avgLatency.unit,
                         background: 'green lighten-4',
                         icon: 'latency',
                     },
@@ -172,6 +191,17 @@ export default {
                 m = 'G';
             }
             return v.toFixed(1) + m;
+        },
+        convertLatency(latency) {
+            if (latency < 1000) {
+                return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
+            } else if (latency < 1000000) {
+                return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
+            } else if (latency < 1000000000) {
+                return { value: parseFloat((latency / 1000000).toFixed(1)), unit: 'ms' };
+            } else {
+                return { value: parseFloat((latency / 1000000000).toFixed(1)), unit: 's' };
+            }
         },
     },
 };

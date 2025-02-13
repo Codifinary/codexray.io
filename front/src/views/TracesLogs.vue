@@ -247,6 +247,7 @@ export default {
 
     mounted() {
         this.getQuery();
+        this.runQuery();
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
@@ -265,7 +266,7 @@ export default {
             const query = this.$route.query;
             let q = {};
             try {
-                q = JSON.parse(query.query || '{}');
+                q = JSON.parse(decodeURIComponent(query.query || '{}'));
             } catch {
                 //
             }
@@ -274,6 +275,7 @@ export default {
                 severity = this.data.severities || [];
             }
             this.query = {
+                view: query.view || 'logs',
                 source: q.source || '',
                 search: q.search || '',
                 hash: q.hash || '',
@@ -283,9 +285,10 @@ export default {
             this.order = query.order || 'desc';
         },
         setQuery() {
+            this.query.severity = this.data.severities || [];
             const query = {
                 query: JSON.stringify(this.query),
-                view: this.view,
+
                 order: this.order,
             };
             this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => err);
@@ -307,7 +310,7 @@ export default {
             this.loadingError = '';
             this.data.chart = null;
             this.data.entries = null;
-            this.$api.getTracesLogs(this.id, (data, error) => {
+            this.$api.getTracesLogs(this.id, this.$route.query.query, (data, error) => {
                 this.loading = false;
                 const errMsg = 'Failed to load logs';
                 if (error || data.status === 'warning') {
