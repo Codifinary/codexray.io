@@ -22,7 +22,7 @@
                 </v-tab>
             </v-tabs>
 
-            <v-card outlined class="query px-4 py-2 my-4">
+            <v-card outlined class="query px-4 py-2 my-4" v-if="query.view != 'logs'">
                 <div class="mt-2 d-flex align-center" style="gap: 4px">
                     <div>Filters:</div>
                     <div class="d-flex flex-wrap align-center filters">
