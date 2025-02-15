@@ -18,7 +18,7 @@ services:
     volumes:
       - codexray_data:/data
     ports:
-      - 8080:8080
+      - 8021:8080
     command:
       - "--data-dir=/data"
       - "--bootstrap-prometheus-url=http://prometheus:9090"
@@ -80,6 +80,7 @@ services:
       - clickhouse_logs:/var/log/clickhouse-server
     ports:
       - "127.0.0.1:9000:9000"
+      - "127.0.0.1:8123:8123"
     ulimits:
       nofile:
         soft: 262144
