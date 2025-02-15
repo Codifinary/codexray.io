@@ -28,7 +28,7 @@ services:
 
   node-agent:
     restart: always
-    image: ghcr.io/codifinary/codexray-node-agent-dev:latest
+    image: ghcr.io/codifinary/codexray-node-agent:latest
     pull_policy: always
     privileged: true
     pid: "host"
@@ -44,7 +44,7 @@ services:
 
   cluster-agent:
     restart: always
-    image: ghcr.io/codifinary/codexray-cluster-agent-dev:latest
+    image: ghcr.io/codifinary/codexray-cluster-agent:latest
     pull_policy: always
     volumes:
       - cluster_agent_data:/data
