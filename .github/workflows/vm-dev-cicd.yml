@@ -15,7 +15,7 @@ env:
   GHCR_IMAGE: ghcr.io/codifinary/codexray:latest
   VM_INSTANCE: ${{ secrets.VM_INSTANCE_IP }}
   VM_USER: 'codexray'
-  VM_SSH_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
+  VM_SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY_DEV }}
 
 permissions:
   packages: write  # Required for pushing to GHCR
@@ -93,7 +93,7 @@ jobs:
 
       - name: Set up SSH Key
         run: |
-          echo "${{ secrets.VM_SSH_PRIVATE_KEY }}" > private_key.pem
+          echo "${{ secrets.SSH_PRIVATE_KEY_DEV }}" > private_key.pem
           chmod 600 private_key.pem
 
       - name: Copy Docker Compose Files to VM
