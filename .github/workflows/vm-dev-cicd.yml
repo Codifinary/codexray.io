@@ -12,7 +12,7 @@ on:
 # Define Environment Variables
 # -------------------------------------
 env:
-  GHCR_IMAGE: ghcr.io/codifinary/codexray:latest
+  GHCR_IMAGE: ghcr.io/codifinary/codexray-dev:latest
   VM_INSTANCE: ${{ secrets.VM_INSTANCE_IP }}
   VM_USER: 'codexray'
   VM_SSH_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
