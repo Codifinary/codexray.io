@@ -350,31 +350,30 @@ func GetSingleOtelServiceLogView(
 		return v, fmt.Errorf("ClickHouse is not configured")
 	}
 
+	svcs, err := ch.GetServicesFromLogs(ctx)
+	if err != nil {
+		klog.Errorln("Error fetching services:", err)
+		v.Status = "WARNING"
+		v.Message = fmt.Sprintf("Failed to get services: %s", err)
+		return v, err
+	}
+
+	if _, exists := svcs[serviceName]; !exists {
+		v.Status = "OK"
+		v.Message = "No Messages Found"
+		v.Entries = []Entry{}
+		v.Chart = model.NewChart(w.Ctx, "").Column()
+		v.Severities = []string{}
+		v.Severity = []string{}
+		return v, nil
+	}
+
 	v.Severities = q.Severity
 	if len(v.Severities) == 0 {
-		// Attempt to get severities from ClickHouse
-		svcs, err := ch.GetServicesFromLogs(ctx)
-
-		if err == nil {
-			v.Severities = svcs[serviceName]
-			v.Severity = v.Severities
-		} else {
-			klog.Errorln("Error fetching severities:", err)
-			v.Status = "WARNING"
-			v.Message = fmt.Sprintf("Failed to get severities: %s", err)
-			return v, err
-		}
+		v.Severities = svcs[serviceName]
+		v.Severity = v.Severities
 	} else {
-		svcs, err := ch.GetServicesFromLogs(ctx)
-
-		if err == nil {
-			v.Severity = svcs[serviceName]
-		} else {
-			klog.Errorln("Error fetching severities:", err)
-			v.Status = "WARNING"
-			v.Message = fmt.Sprintf("Failed to get severities: %s", err)
-			return v, err
-		}
+		v.Severity = svcs[serviceName]
 	}
 
 	histogram, err := ch.GetServiceLogsHistogram(ctx, from, to, step, serviceName, v.Severities, q.Search)
