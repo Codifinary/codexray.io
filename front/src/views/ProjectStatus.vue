@@ -6,7 +6,7 @@
         </v-alert>
         <div class="status-container" v-if="status">
             <div class="text-truncate">
-                <Led class="led-icon" :status="status.prometheus.status"/>
+                <Led class="led-icon" :status="status.prometheus.status" />
                 <span class="font-weight-light">prometheus</span>:
                 <span v-if="status.prometheus.error">
                     {{ status.prometheus.error }}
@@ -43,7 +43,7 @@
                     <template v-if="loading">checking...</template>
                     <template v-else>no kube-state-metrics installed</template>
                 </template>
-                (<a href="https://codexray.com/docs/metric-exporters/kube-state-metrics" target="_blank">docs</a>)
+                (<a href="https://codexray.io/docs/metric-exporters/kube-state-metrics" target="_blank">docs</a>)
             </div>
         </div>
     </div>
@@ -58,7 +58,7 @@ export default {
         projectId: String,
     },
 
-    components: { Led, },
+    components: { Led },
 
     data() {
         return {
@@ -106,23 +106,21 @@ export default {
 </script>
 
 <style scoped>
-.container{
+.container {
     padding-top: 0;
-    margin-left:15px;
-    width:auto;
+    margin-left: 15px;
+    width: auto;
 }
 .muted {
     color: grey;
 }
-.status-container{
-    color:var(--primary-green) !important;
+.status-container {
+    color: var(--primary-green) !important;
 
     font-size: 14px;
-    gap:10px;
+    gap: 10px;
 }
 .led-icon {
-  margin-right: 10px;
+    margin-right: 10px;
 }
-
-
 </style>

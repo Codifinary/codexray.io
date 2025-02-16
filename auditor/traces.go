@@ -20,25 +20,38 @@ func GenerateTracesReportByService(w *model.World, serviceName string, ch *click
 		return report
 	}
 
-	//
 	// Create & populate charts
-	//
-
-	loadChart := report.GetOrCreateChart("Requests Trend", nil)
+	loadChart := model.NewChart(w.Ctx, "Requests Trend")
 	loadChart.AddSeries("Requests Trend", traces["requestsTrend"], "light-blue")
 
-	// 2) error Trend Chart
-	responseTimeChart := report.GetOrCreateChart("Error Trend", nil)
-	responseTimeChart.AddSeries("Error Trend", traces["errorTrend"], "red")
+	errorTrendChart := model.NewChart(w.Ctx, "Error Trend")
+	errorTrendChart.AddSeries("Error Trend", traces["errorTrend"], "red")
 
-	// 3) latency Chart
+	latencyTrendChart := model.NewChart(w.Ctx, "Latency Trend")
+	latencyTrendChart.AddSeries("p25", traces["p25Latency"], "cyan")
+	latencyTrendChart.AddSeries("p50", traces["p50Latency"], "magenta")
+	latencyTrendChart.AddSeries("p75", traces["p75Latency"], "yellow")
+	latencyTrendChart.AddSeries("p95", traces["p95Latency"], "pink")
+	latencyTrendChart.AddSeries("p99", traces["p99Latency"], "lime")
 
-	quantile := report.GetOrCreateChart("Latency Trend", nil)
-	quantile.AddSeries("p25", traces["p25Latency"], "cyan")
-	quantile.AddSeries("p50", traces["p50Latency"], "magenta")
-	quantile.AddSeries("p75", traces["p75Latency"], "yellow")
-	quantile.AddSeries("p95", traces["p95Latency"], "pink")
-	quantile.AddSeries("p99", traces["p99Latency"], "lime")
+	// Create widgets and add each chart to a separate widget
+	requestsWidget := &model.Widget{
+		Chart: loadChart,
+		Width: "33%",
+	}
+	errorWidget := &model.Widget{
+		Chart: errorTrendChart,
+		Width: "33%",
+	}
+	latencyWidget := &model.Widget{
+		Chart: latencyTrendChart,
+		Width: "33%",
+	}
+
+	// Add the widgets to the report
+	report.AddWidget(requestsWidget)
+	report.AddWidget(errorWidget)
+	report.AddWidget(latencyWidget)
 
 	return report
 }

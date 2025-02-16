@@ -194,12 +194,10 @@ export default {
         convertLatency(latency) {
             if (latency < 1000) {
                 return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
-            } else if (latency < 1000000) {
+            } else if (latency < 60000) {
                 return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
-            } else if (latency < 1000000000) {
-                return { value: parseFloat((latency / 1000000).toFixed(1)), unit: 'ms' };
             } else {
-                return { value: parseFloat((latency / 1000000000).toFixed(1)), unit: 's' };
+                return { value: parseFloat((latency / 60000).toFixed(1)), unit: 'min' };
             }
         },
     },

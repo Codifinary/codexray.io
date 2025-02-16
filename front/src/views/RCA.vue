@@ -8,7 +8,7 @@
 
         <v-alert v-if="rca === 'not implemented'" color="info" outlined text class="mt-5">
             AI-powered Root Cause Analysis is available only in codexray Enterprise (from $1 per CPU core/month).
-            <a href="https://codexray.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
+            <a href="https://codexray.io/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
         </v-alert>
 
         <div v-else-if="rca">
