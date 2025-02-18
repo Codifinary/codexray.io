@@ -216,12 +216,12 @@ func (c *Collector) send() {
 		klog.Errorln("failed to encode stats:", err)
 		return
 	}
-	res, err := c.client.Post(collectUrl, "application/json", buf)
-	if err != nil {
-		klog.Errorln("failed to send stats:", err)
-		return
-	}
-	_ = res.Body.Close()
+	// res, err := c.client.Post(collectUrl, "application/json", buf)
+	// if err != nil {
+	// 	klog.Errorln("failed to send stats:", err)
+	// 	return
+	// }
+	// _ = res.Body.Close()
 }
 
 func (c *Collector) collect() Stats {
