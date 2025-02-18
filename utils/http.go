@@ -46,7 +46,7 @@ func EnableCORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-		if r.Method == "OPTIONS" {
+		if r.Method == "OPTIONS" || r.Method == "HEAD" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
