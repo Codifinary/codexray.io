@@ -12,6 +12,8 @@ services:
   codexray:
     restart: always
     image: ghcr.io/codifinary/codexray-dev:latest
+    environment:
+      - ALLOWED_ORIGIN="http://localhost:3000"
     pull_policy: always
     volumes:
       - codexray_data:/data
