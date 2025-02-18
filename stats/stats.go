@@ -27,7 +27,7 @@ import (
 )
 
 const (
-	collectUrl      = "https://codexray.com/ce/usage-statistics"
+	// collectUrl      = "https://codexray.com/ce/usage-statistics"
 	collectInterval = time.Hour
 	sendTimeout     = time.Minute
 	worldWindow     = timeseries.Hour
