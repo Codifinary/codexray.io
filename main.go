@@ -205,7 +205,7 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	// router.Use(utils.EnableCORS)
+	router.Use(utils.EnableCORS)
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {}).Methods(http.MethodGet)
 
@@ -213,8 +213,8 @@ func main() {
 	router.HandleFunc("/v1/traces", coll.Traces)
 	router.HandleFunc("/v1/logs", coll.Logs)
 	router.HandleFunc("/v1/profiles", coll.Profiles)
-	router.Handle("/v1/perf",utils.EnableCORS(http.HandlerFunc(coll.Perf)))
-	router.Handle("/v1/errlog", utils.EnableCORS(http.HandlerFunc(coll.ErrLog)))
+	router.HandleFunc("/v1/perf", coll.Perf)
+	router.HandleFunc("/v1/errlog", coll.ErrLog)
 	router.HandleFunc("/v1/config", coll.Config)
 
 	r := router
