@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"io/fs"
 	"net/http"
 	"os"
@@ -42,6 +43,7 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf(r.Method)
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
