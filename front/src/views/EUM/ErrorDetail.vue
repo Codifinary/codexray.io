@@ -48,7 +48,7 @@
         </div>
 
         <!-- Move filter above the table -->
-        <div class="filter-container mt-5">
+        <div class="filter-container mt-7">
             <v-select
                 :items="filterOptions"
                 v-model="selectedFilter"
@@ -71,7 +71,7 @@
         </div>
 
         <!-- Table -->
-        <div class="mt-5">
+        <div class="mt-2">
             <CustomTable :headers="headers" :items="tableData">
                 <template #item.type="{ item }">
                     <div v-if="item.type" class="d-flex align-center">
@@ -195,6 +195,7 @@ export default {
 <style scoped>
 .error-details {
     display: flex;
+    justify-content: space-between;
 }
 .filter-container {
     width: 100%;

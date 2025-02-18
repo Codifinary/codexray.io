@@ -202,7 +202,7 @@ create_service_file() {
     $SUDO tee ${FILE_SERVICE} >/dev/null << EOF
 [Unit]
 Description=${SYSTEM_DESCRIPTION}
-Documentation=https://codexray.com
+Documentation=https://codexray.io
 Wants=network-online.target
 After=network-online.target
 

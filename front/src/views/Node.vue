@@ -7,7 +7,7 @@
         <template v-if="node">
             <div v-if="node.status === 'unknown'" class="text-center">
                 This node is present in the Kubernetes cluster, but it seems that codexray-node-agent is not installed (<a
-                    href="https://codexray.com/docs/metric-exporters/node-agent/installation"
+                    href="https://codexray.io/docs/metric-exporters/node-agent/installation"
                     target="_blank"
                     >docs</a
                 >).

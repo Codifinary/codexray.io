@@ -2,7 +2,9 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <router-link :to="{ name: 'overview', params: { view: 'EUM', id: id, report: report } }">{{ id }}</router-link>
+                <router-link :to="{ name: 'overview', params: { view: 'EUM', id: id, report: report }, query: { ...$utils.contextQuery() } }"
+                    >{{ id }}
+                </router-link>
             </li>
             <li class="breadcrumb-item" v-if="error">
                 <router-link
