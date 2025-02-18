@@ -44,9 +44,10 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf(r.Method)
+		fmt.Printf("\n\n\n\n\n\n\n")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if r.Method == "OPTIONS" || r.Method == "HEAD" {
 			w.WriteHeader(http.StatusOK)
