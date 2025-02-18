@@ -43,6 +43,8 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Printf(r.Host)
+		fmt.Printf(r.RequestURI)
 		fmt.Printf(r.Method)
 		fmt.Printf("\n\n\n\n\n\n\n")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
