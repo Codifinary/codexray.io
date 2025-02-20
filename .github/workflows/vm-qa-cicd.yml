@@ -110,6 +110,6 @@ jobs:
 
       - name: Verify Running Containers
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7002 $VM_USER@$VM_INSTANCE << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7000 $VM_USER@$VM_INSTANCE << 'EOF'
             docker ps
           EOF
