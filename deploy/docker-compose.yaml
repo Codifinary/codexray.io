@@ -12,8 +12,6 @@ services:
   codexray:
     restart: always
     image: ghcr.io/codifinary/codexray-dev:latest
-    environment:
-      - ALLOWED_ORIGIN="http://localhost:3000"
     pull_policy: always
     volumes:
       - codexray_data:/data
@@ -83,7 +81,8 @@ services:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
     ports:
-      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:8023:9000"
+      - "127.0.0.1:8024:8123"
     ulimits:
       nofile:
         soft: 262144
