@@ -34,15 +34,6 @@ export default {
         this.$events.watch(this, this.get, 'refresh');
     },
     methods: {
-        convertLatency(latency) {
-            if (latency < 1000) {
-                return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
-            } else if (latency < 60000) {
-                return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
-            } else {
-                return { value: parseFloat((latency / 60000).toFixed(1)), unit: 'min' };
-            }
-        },
         get() {
             this.loading = true;
             this.error = '';
@@ -53,7 +44,7 @@ export default {
                     return;
                 }
                 this.chartData = data.audit_report || {};
-                const avgLatency = this.convertLatency(parseFloat(data.traces_overview.avg_latency));
+                const avgLatency = this.$format.convertLatency(parseFloat(data.traces_overview.avg_latency));
                 this.summary = {
                     endpoints: {
                         name: 'Total EndPoints',

@@ -22,7 +22,7 @@
                 </div>
             </template>
             <template #item.total="{ item }">
-                <span>{{ format(item.total) }}</span>
+                <span>{{ $format.formatUnits(item.total) }}</span>
                 <span class="caption grey--text">/s</span>
             </template>
             <template #item.error_logs="{ item }">
@@ -42,24 +42,24 @@
                 </div>
             </template>
             <template #item.failed="{ item }">
-                <span>{{ format(item.failed, '%') }}</span>
+                <span>{{ $format.formatUnits(item.failed, '%') }}</span>
                 <span class="caption grey--text">%</span>
             </template>
 
             <template #item.latency="{ item }">
-                <span>{{ format(item.latency, 'ms') }}</span>
+                <span>{{ $format.formatUnits(item.latency, 'ms') }}</span>
                 <span class="caption grey--text"> ms</span>
             </template>
             <template #item.duration_quantiles[0]="{ item }">
-                <span>{{ format(item.duration_quantiles[0], 'ms') }}</span>
+                <span>{{ $format.formatUnits(item.duration_quantiles[0], 'ms') }}</span>
                 <span class="caption grey--text"> ms</span>
             </template>
             <template #item.duration_quantiles[1]="{ item }">
-                <span>{{ format(item.duration_quantiles[1], 'ms') }}</span>
+                <span>{{ $format.formatUnits(item.duration_quantiles[1], 'ms') }}</span>
                 <span class="caption grey--text"> ms</span>
             </template>
             <template #item.duration_quantiles[2]="{ item }">
-                <span>{{ format(item.duration_quantiles[2], 'ms') }}</span>
+                <span>{{ $format.formatUnits(item.duration_quantiles[2], 'ms') }}</span>
                 <span class="caption grey--text"> ms</span>
             </template>
         </CustomTable>
@@ -70,6 +70,7 @@
 import CustomTable from '@/components/CustomTable.vue';
 import Card from '../components/Card.vue';
 import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
+
 export default {
     name: 'traces',
     components: {
@@ -112,7 +113,7 @@ export default {
                     return;
                 }
                 this.tableItems = data.traces_view.traces || [];
-                const avgLatency = this.convertLatency(parseFloat(data.traces_view.summary.avg_latency));
+                const avgLatency = this.$format.convertLatency(parseFloat(data.traces_view.summary.avg_latency));
                 this.summary = {
                     services: {
                         name: 'Total Services',
@@ -147,64 +148,6 @@ export default {
                     },
                 };
             });
-        },
-        format(v, unit) {
-            if (unit === 'ts') {
-                return this.$format.date(v, '{MMM} {DD}, {HH}:{mm}');
-            }
-            if (unit === 'dur') {
-                if (!v) {
-                    return '0';
-                }
-                if (v === 'inf' || v === 'err') {
-                    return 'Inf';
-                }
-                if (v >= 1) {
-                    return v + 's';
-                }
-                return v * 1000 + 'ms';
-            }
-            if (unit === '%') {
-                v *= 100;
-                if (v < 1) {
-                    return '<1';
-                }
-                let d = 1;
-                if (v >= 10) {
-                    d = 0;
-                }
-                return v.toFixed(d);
-            }
-            if (unit === 'ms') {
-                let d = 0;
-                if (v < 10) {
-                    d = 1;
-                }
-                return v.toFixed(d);
-            }
-            let m = '';
-            if (v > 1e3) {
-                v /= 1000;
-                m = 'K';
-            }
-            if (v > 1e6) {
-                v /= 1000;
-                m = 'M';
-            }
-            if (v > 1e9) {
-                v /= 1000;
-                m = 'G';
-            }
-            return v.toFixed(1) + m;
-        },
-        convertLatency(latency) {
-            if (latency < 1000) {
-                return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
-            } else if (latency < 60000) {
-                return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
-            } else {
-                return { value: parseFloat((latency / 60000).toFixed(1)), unit: 'min' };
-            }
         },
     },
 };
