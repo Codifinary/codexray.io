@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"codexray/auditor"
 	"codexray/clickhouse"
 	"codexray/model"
 	"codexray/timeseries"
@@ -33,6 +34,19 @@ type Traces struct {
 	AttrStats []model.TraceSpanAttrStats `json:"attr_stats"`
 	Errors    []model.TraceErrorsStat    `json:"errors"`
 	Latency   *model.Profile             `json:"latency"`
+}
+type TracesSummary struct {
+	Message        string             `json:"message"`
+	Error          string             `json:"error"`
+	TracesOverview TracesOverview     `json:"traces_overview"`
+	Report         *model.AuditReport `json:"audit_report"`
+}
+type TracesOverview struct {
+	TotalEndpoints   int     `json:"total_endpoints"`
+	Requests         uint64  `json:"requests"`
+	RequestPerSecond float32 `json:"request_per_second"`
+	ErrorRate        float32 `json:"error_rate"`
+	AvgLatency       float64 `json:"avg_latency"`
 }
 
 type Span struct {
@@ -78,7 +92,7 @@ type Filter struct {
 	Value string `json:"value"`
 }
 
-func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *Traces {
+func RenderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, serviceName string) *Traces {
 	res := &Traces{}
 
 	if ch == nil {
@@ -86,9 +100,17 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 		return res
 	}
 
+	if err := validateServiceName(ctx, ch, serviceName); err != nil {
+		klog.Errorln(err)
+		res.Message = err.Error()
+		return res
+	}
 	q := parseQuery(query, w.Ctx)
 
-	sq := clickhouse.SpanQuery{Ctx: w.Ctx}
+	sq := clickhouse.SpanQuery{
+		Ctx:         w.Ctx,
+		ServiceName: serviceName,
+	}
 
 	for _, f := range q.Filters {
 		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter(f.Field, f.Op, f.Value))
@@ -96,7 +118,7 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 
 	if !q.IncludeAux {
 		sq.ExcludePeerAddrs = getMonitoringAndControlPlanePodIps(w)
-		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter("SpanName", "!~", "GET /(health[z]*|metrics|debug/.+|actuator/.+)"))
+		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter("SpanName", "!~", "GET /(health[z]*|metrics|debug/.+)"))
 	}
 
 	histogram, err := ch.GetRootSpansHistogram(ctx, sq)
@@ -207,6 +229,72 @@ func renderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 
 	return res
 }
+func RenderTracesSummary(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, serviceName string) *TracesSummary {
+	res := &TracesSummary{}
+
+	if ch == nil {
+		res.Message = "no_clickhouse"
+		return res
+	}
+
+	if err := validateServiceName(ctx, ch, serviceName); err != nil {
+		klog.Errorln(err)
+		res.Message = err.Error()
+		return res
+	}
+	q := parseQuery(query, w.Ctx)
+
+	sq := clickhouse.SpanQuery{
+		Ctx:         w.Ctx,
+		ServiceName: serviceName,
+	}
+
+	for _, f := range q.Filters {
+		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter(f.Field, f.Op, f.Value))
+	}
+
+	if !q.IncludeAux {
+		sq.ExcludePeerAddrs = getMonitoringAndControlPlanePodIps(w)
+		sq.Filters = append(sq.Filters, clickhouse.NewSpanFilter("SpanName", "!~", "GET /(health[z]*|metrics|debug/.+)"))
+	}
+	sq.TsFrom = q.TsFrom
+	if sq.TsFrom == 0 {
+		sq.TsFrom = sq.Ctx.From
+	}
+	sq.TsTo = q.TsTo
+	if sq.TsTo == 0 {
+		sq.TsTo = sq.Ctx.To
+	}
+	sq.DurFrom = q.durFrom
+	sq.DurTo = q.durTo
+	sq.Errors = q.errors
+	sq.Limit = spansLimit
+	sq.Diff = q.Diff
+
+	summary, err := ch.GetRootSpansSummary(ctx, sq)
+
+	if err != nil {
+		klog.Errorln(err)
+		res.Error = fmt.Sprintf("Clickhouse error: %s", err)
+		return res
+	}
+	req, latency, err := ch.GetTraceOverview(ctx, sq, serviceName)
+	if err != nil {
+		klog.Errorln(err)
+		res.Error = fmt.Sprintf("Clickhouse error: %s", err)
+		return res
+	}
+
+	res.TracesOverview = TracesOverview{
+		TotalEndpoints:   len(summary.Stats),
+		Requests:         req,
+		RequestPerSecond: summary.Overall.Total,
+		ErrorRate:        summary.Overall.Failed,
+		AvgLatency:       latency,
+	}
+	res.Report = auditor.GenerateTracesReportByService(w, serviceName, ch)
+	return res
+}
 
 func getMonitoringAndControlPlanePodIps(w *model.World) []string {
 	res := map[string]bool{}
@@ -235,4 +323,22 @@ func parseQuery(query string, ctx timeseries.Context) Query {
 	res.durTo = utils.ParseHeatmapDuration(res.DurTo)
 	res.errors = res.DurFrom == "inf" || res.DurTo == "err"
 	return res
+}
+
+func validateServiceName(ctx context.Context, ch *clickhouse.Client, serviceName string) error {
+	services, err := ch.GetServicesFromTraces(ctx)
+	if err != nil {
+		return fmt.Errorf("clickhouse error: %s", err)
+	}
+
+	serviceMap := make(map[string]bool)
+	for _, s := range services {
+		serviceMap[s] = true
+	}
+
+	if !serviceMap[serviceName] {
+		return fmt.Errorf("invalid service name: %s", serviceName)
+	}
+
+	return nil
 }

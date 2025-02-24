@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const FRONTE_END_BRUM = "http://34.47.146.55:3000"
+const FRONTE_END_BRUM = "http://labs.codexray.io:8022"
 
 type StaticFSWrapper struct {
 	http.FileSystem
@@ -45,11 +45,11 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 func EnableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", FRONTE_END_BRUM)
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-credentials", "true")
 
-		if r.Method == "OPTIONS" {
+		if r.Method == "OPTIONS" || r.Method == "HEAD" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}

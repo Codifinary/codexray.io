@@ -26,7 +26,8 @@
         </template>
 
         <template v-if="view === 'traces'">
-            <Traces />
+            <Traces v-if="view === 'traces' && id" :id="id" :key="id" />
+            <TracesOverview v-else />
         </template>
 
         <template v-if="view === 'anomalies'">
@@ -42,6 +43,7 @@ import Application from '@/views/Application.vue';
 import Incidents from '@/views/Incidents.vue';
 import Incident from '@/views/Incident.vue';
 import ServiceMap from '@/views/ServiceMap.vue';
+import TracesOverview from '@/views/TracesOverview.vue';
 import Traces from '@/views/Traces.vue';
 import Nodes from '@/views/Nodes.vue';
 import Node from '@/views/Node.vue';
@@ -58,6 +60,7 @@ export default {
         Incidents,
         Incident,
         ServiceMap,
+        TracesOverview,
         Traces,
         Nodes,
         Node,

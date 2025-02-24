@@ -24,25 +24,25 @@ func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch 
 
 	// 1) Load Chart
 
-	loadChart := report.GetOrCreateChart("Load requests", nil)
+	loadChart := report.GetOrCreateChart("Load requests", nil).Stacked()
 	loadChart.AddSeries("Page Loaded", metrics["requests"], "light-blue")
 
 	// 2) Response Time Chart
-	responseTimeChart := report.GetOrCreateChart("Response Time, ms", nil)
+	responseTimeChart := report.GetOrCreateChart("Response Time, ms", nil).Stacked()
 	responseTimeChart.AddSeries("Response Time", metrics["loadTime"], "green")
 
 	// 3) Users Impacted Chart
-	usersImpactedChart := report.GetOrCreateChart("Users Impacted", nil)
+	usersImpactedChart := report.GetOrCreateChart("Users Impacted", nil).Stacked()
 	usersImpactedChart.AddSeries("Users Impacted", metrics["usersImpacted"], "red")
 
 	// 4) Chart Group for JS and API Errors
 	errorChartGroup := report.GetOrCreateChartGroup("Errors <selector>", nil)
-	errorChartGroup.	GetOrCreateChart("Errors").Stacked().
+	errorChartGroup.GetOrCreateChart("Errors").Stacked().
 		AddSeries("JS Errors", metrics["jsErrors"], "orange").
 		AddSeries("API Errors", metrics["apiErrors"], "purple")
 
 	// 5) User-Centric Metrics Chart
-	userCentric := report.GetOrCreateChart("User-Centric Metrics", nil)
+	userCentric := report.GetOrCreateChart("User-Centric Metrics", nil).Stacked()
 	userCentric.AddSeries("DNS Time", metrics["dnsTime"], "cyan")
 	userCentric.AddSeries("TCP Time", metrics["tcpTime"], "magenta")
 	userCentric.AddSeries("SSL Time", metrics["sslTime"], "yellow")

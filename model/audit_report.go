@@ -31,6 +31,7 @@ const (
 	AuditReportProfiling   AuditReportName = "Profiling"
 	AuditReportTracing     AuditReportName = "Tracing"
 	AuditReportPerformance AuditReportName = "Performance"
+	AuditReportTraces      AuditReportName = "Traces"
 )
 
 type ConfigurationHint struct {

@@ -1,15 +1,18 @@
 <template>
     <div class="mt-10">
+        <Navigation :id="id" />
         <Dashboard :name="'performance'" :widgets="performanceData.widgets" />
     </div>
 </template>
 
 <script>
 import Dashboard from '@/components/Dashboard.vue';
+import Navigation from './Navigation.vue';
 
 export default {
     components: {
         Dashboard,
+        Navigation,
     },
     props: {
         id: {
