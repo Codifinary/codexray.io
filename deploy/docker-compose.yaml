@@ -1,5 +1,7 @@
 version: "3.8"
 
+name: codexray
+
 volumes:
   prometheus_data: {}
   clickhouse_data: {}
@@ -11,12 +13,12 @@ volumes:
 services:
   codexray:
     restart: always
-    image: ghcr.io/codifinary/codexray-dev:latest
+    image: ghcr.io/codexray/codexray
     pull_policy: always
     volumes:
       - codexray_data:/data
     ports:
-      - 8021:8080
+      - 8080:8080
     command:
       - "--data-dir=/data"
       - "--bootstrap-prometheus-url=http://prometheus:9090"
@@ -28,7 +30,7 @@ services:
 
   node-agent:
     restart: always
-    image: ghcr.io/codifinary/codexray-node-agent:latest
+    image: ghcr.io/codexray/codexray-node-agent
     pull_policy: always
     privileged: true
     pid: "host"
@@ -44,7 +46,7 @@ services:
 
   cluster-agent:
     restart: always
-    image: ghcr.io/codifinary/codexray-cluster-agent:latest
+    image: ghcr.io/codexray/codexray-cluster-agent
     pull_policy: always
     volumes:
       - cluster_agent_data:/data
@@ -73,16 +75,11 @@ services:
   clickhouse:
     restart: always
     image: clickhouse/clickhouse-server:24.3
-    environment:
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=vizares
-      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
     volumes:
       - clickhouse_data:/var/lib/clickhouse
       - clickhouse_logs:/var/log/clickhouse-server
     ports:
-      -  8023:9000
-      -  8024:8123
+      - "127.0.0.1:9000:9000"
     ulimits:
       nofile:
         soft: 262144
