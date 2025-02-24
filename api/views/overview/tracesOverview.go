@@ -17,7 +17,7 @@ func renderTraceOverview(ctx context.Context, ch *clickhouse.Client, w *model.Wo
 	v := &TracesView{}
 
 	if ch == nil {
-		v.Message = "no_clickhouse"
+		v.Message = "clickhouse not available"
 		return v
 	}
 
