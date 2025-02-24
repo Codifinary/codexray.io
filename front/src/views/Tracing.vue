@@ -113,7 +113,7 @@
 
                 <div class="grey--text my-4">
                     To configure an application to send traces follow the
-                    <a href="https://codexray.com/docs/codexray/tracing" target="_blank">documentation</a>.
+                    <a href="https://codexray.io/docs/codexray/tracing" target="_blank">documentation</a>.
                 </div>
 
                 <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text class="my-3">
