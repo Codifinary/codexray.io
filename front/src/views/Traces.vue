@@ -5,7 +5,7 @@
         </v-alert>
 
         <v-alert v-else-if="view.message" color="info" outlined text class="message">
-            <template v-if="view.message === 'no_clickhouse'"> Clickhouse integration is not configured. </template>
+            <template v-if="view.message === 'clickhouse not available'"> Clickhouse integration is not configured. </template>
         </v-alert>
 
         <template v-else>
