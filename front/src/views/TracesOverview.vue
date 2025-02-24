@@ -1,5 +1,9 @@
 <template>
     <div class="my-10 mx-5 traces-container">
+        <div class="mt-4 d-flex">
+            <v-spacer />
+            <OpenTelemetryIntegration small color="success">Integrate OpenTelemetry</OpenTelemetryIntegration>
+        </div>
         <div class="cards">
             <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
         </div>
@@ -65,11 +69,13 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import Card from '../components/Card.vue';
+import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
 export default {
     name: 'traces',
     components: {
         CustomTable,
         Card,
+        OpenTelemetryIntegration,
     },
     data() {
         return {
