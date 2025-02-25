@@ -72,7 +72,7 @@
 
         <!-- Table -->
         <div class="mt-2">
-            <CustomTable :headers="headers" :items="tableData">
+            <CustomTable :headers="headers" :items="tableData" defaultSortBy="timestamp">
                 <template #item.type="{ item }">
                     <div v-if="item.type" class="d-flex align-center">
                         <v-icon :color="types[item.type]?.color">{{ types[item.type]?.icon }}</v-icon>
@@ -88,6 +88,11 @@
                         >
                             {{ item.level }}
                         </p>
+                    </div>
+                </template>
+                <template #item.description="{ item }">
+                    <div>
+                        {{ item.description }}
                     </div>
                 </template>
             </CustomTable>
@@ -144,7 +149,7 @@ export default {
         '$route.query': {
             immediate: true,
             handler() {
-                this.get(this.eventID, this.selectedFilter);
+                this.get(this.eventId, this.selectedFilter);
             },
         },
     },
