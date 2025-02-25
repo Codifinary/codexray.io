@@ -31,7 +31,7 @@
                 <div class="error-details__meta">
                     <div>
                         <h5>Timestamp</h5>
-                        <p>{{ errorDetails.timestamp }}</p>
+                        {{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
                     </div>
                     <div class="pl-4">
                         <h5>Level of Severity</h5>
@@ -93,6 +93,11 @@
                 <template #item.description="{ item }">
                     <div>
                         {{ item.description }}
+                    </div>
+                </template>
+                <template #item.timestamp="{ item }">
+                    <div>
+                        {{ $format.date(item.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
                     </div>
                 </template>
             </CustomTable>
