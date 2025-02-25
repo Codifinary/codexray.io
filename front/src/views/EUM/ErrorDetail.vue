@@ -127,14 +127,14 @@ export default {
                 { text: 'Navigation', value: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
                 { text: 'User Action', value: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
                 { text: 'Error', value: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
-                { text: 'HTTP', value: 'http', icon: 'mdi-web', color: 'blue', selected: false },
+                { text: 'HTTP', value: 'HTTP', icon: 'mdi-web', color: 'blue', selected: false },
             ],
             types: {
                 Debug: { text: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
                 Navigation: { text: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
                 'User Action': { text: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
                 Error: { text: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
-                http: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
+                HTTP: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
             },
             headers: [
                 { text: 'Type', value: 'type' },
@@ -200,7 +200,6 @@ export default {
 <style scoped>
 .error-details {
     display: flex;
-    justify-content: space-between;
 }
 .filter-container {
     width: 100%;

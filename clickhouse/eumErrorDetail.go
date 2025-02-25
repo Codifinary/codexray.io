@@ -50,8 +50,8 @@ type Breadcrumb struct {
 }
 
 type KeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
 }
 
 func (c *Client) GetErrorDetail(ctx context.Context, uniqueId string) (ErrorDetail, error) {
@@ -150,7 +150,13 @@ func (c *Client) GetBreadcrumb(ctx context.Context, uniqueId, breadcrumbType str
 		if (breadcrumb.Type == "Navigation" || breadcrumb.Type == "HTTP") && breadcrumb.Description == "" {
 			var dataDescription []string
 			for _, kv := range breadcrumb.Data {
-				dataDescription = append(dataDescription, fmt.Sprintf("%s: %s", kv.Key, kv.Value))
+				// Convert numeric values to strings properly
+				switch v := kv.Value.(type) {
+				case float64:
+					dataDescription = append(dataDescription, fmt.Sprintf("%s: %d", kv.Key, int(v)))
+				default:
+					dataDescription = append(dataDescription, fmt.Sprintf("%s: %v", kv.Key, kv.Value))
+				}
 			}
 			filteredBreadcrumbs[i].Description = strings.Join(dataDescription, ", ")
 		}
