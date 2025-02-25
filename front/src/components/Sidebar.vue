@@ -8,10 +8,7 @@
                         :key="id"
                         :class="{ 'selected-view': selectedView === id }"
                         @click="setSelectedView(id)"
-                        :to="{
-                            name: 'overview',
-                            params: { view: id, app: undefined },
-                        }"
+                        :to="getNavigationLink(id)"
                     >
                         <BaseIcon
                             :name="icons[id].name"
@@ -71,7 +68,7 @@ export default {
     },
 
     mounted() {
-        this.selectedView = localStorage.getItem('selectedView') || this.$route.params.view || 'applications';
+        this.selectedView = this.$route.params.view || 'applications';
     },
 
     methods: {
@@ -81,7 +78,20 @@ export default {
         },
         setSelectedView(view) {
             this.selectedView = view;
-            localStorage.setItem('selectedView', view);
+        },
+        getNavigationLink(view) {
+            const query = { ...this.$route.query };
+            if (this.$route.query.from) {
+                query.from = this.$route.query.from;
+            }
+            if (this.$route.query.to) {
+                query.to = this.$route.query.to;
+            }
+            return {
+                name: 'overview',
+                params: { view, app: undefined },
+                query,
+            };
         },
     },
 };
@@ -102,13 +112,13 @@ export default {
 .sidebar.collapsed .sidebar-menu {
     rotate: 180deg;
 }
-.health-icon {
+.applications-icon {
     fill: none;
     stroke: #013912;
     stroke-linecap: round;
     stroke-linejoin: round;
 }
-.health-icon-selected {
+.applications-icon-selected {
     fill: none;
     stroke: #1dbf73;
     stroke-linecap: round;
