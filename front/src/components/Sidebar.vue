@@ -80,7 +80,7 @@ export default {
             this.selectedView = view;
         },
         getNavigationLink(view) {
-            const query = { ...this.$route.query };
+            const query = {};
             if (this.$route.query.from) {
                 query.from = this.$route.query.from;
             }
