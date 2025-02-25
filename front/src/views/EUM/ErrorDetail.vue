@@ -31,7 +31,7 @@
                 <div class="error-details__meta">
                     <div>
                         <h5>Timestamp</h5>
-                        <p>{{ errorDetails.timestamp }}</p>
+                        {{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
                     </div>
                     <div class="pl-4">
                         <h5>Level of Severity</h5>
@@ -72,7 +72,7 @@
 
         <!-- Table -->
         <div class="mt-2">
-            <CustomTable :headers="headers" :items="tableData">
+            <CustomTable :headers="headers" :items="tableData" defaultSortBy="timestamp">
                 <template #item.type="{ item }">
                     <div v-if="item.type" class="d-flex align-center">
                         <v-icon :color="types[item.type]?.color">{{ types[item.type]?.icon }}</v-icon>
@@ -88,6 +88,16 @@
                         >
                             {{ item.level }}
                         </p>
+                    </div>
+                </template>
+                <template #item.description="{ item }">
+                    <div>
+                        {{ item.description }}
+                    </div>
+                </template>
+                <template #item.timestamp="{ item }">
+                    <div>
+                        {{ $format.date(item.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
                     </div>
                 </template>
             </CustomTable>
@@ -122,14 +132,14 @@ export default {
                 { text: 'Navigation', value: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
                 { text: 'User Action', value: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
                 { text: 'Error', value: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
-                { text: 'HTTP', value: 'http', icon: 'mdi-web', color: 'blue', selected: false },
+                { text: 'HTTP', value: 'HTTP', icon: 'mdi-web', color: 'blue', selected: false },
             ],
             types: {
                 Debug: { text: 'Debug', color: 'red', icon: 'mdi-bug', selected: false },
                 Navigation: { text: 'Navigation', color: 'purple', icon: 'mdi-compass', selected: false },
                 'User Action': { text: 'User Action', color: '#42A5F5', icon: 'mdi-account-arrow-right', selected: false },
                 Error: { text: 'Error', icon: 'mdi-alert-circle', color: 'var(--status-warning)', selected: false },
-                http: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
+                HTTP: { text: 'HTTP', icon: 'mdi-web', color: '#42A5F5', selected: false },
             },
             headers: [
                 { text: 'Type', value: 'type' },
@@ -144,7 +154,7 @@ export default {
         '$route.query': {
             immediate: true,
             handler() {
-                this.get(this.eventID, this.selectedFilter);
+                this.get(this.eventId, this.selectedFilter);
             },
         },
     },
@@ -195,7 +205,6 @@ export default {
 <style scoped>
 .error-details {
     display: flex;
-    justify-content: space-between;
 }
 .filter-container {
     width: 100%;

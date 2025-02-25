@@ -21,6 +21,7 @@
         </ol>
     </nav>
 </template>
+
 <script>
 export default {
     props: {
@@ -80,6 +81,10 @@ export default {
     color: var(--status-ok) !important;
     font-size: 14px !important;
     font-weight: 600 !important;
+    max-width: 200px; /* Set a maximum width */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .router-link-active {
     color: var(--status-ok) !important;
@@ -89,7 +94,6 @@ a {
 }
 .breadcrumb-item + .breadcrumb-item::before {
     color: var(--status-ok) !important;
-
     content: '>';
     padding: 0 8px;
 }
