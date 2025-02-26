@@ -98,7 +98,7 @@ jobs:
 
       - name: Copy Docker Compose Files to VM
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7000 deploy/qa/docker-compose.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
+          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7000 deploy/docker-compose-qa.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
 
       - name: Pull Latest Image and Restart Containers
         run: |
