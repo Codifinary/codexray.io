@@ -1,6 +1,6 @@
 <template>
     <div class="mt-10">
-        <Navigation :id="id" />
+        <Navigation :id="id" :pagePath="pagePath" />
         <Dashboard :name="'performance'" :widgets="performanceData.widgets" />
     </div>
 </template>

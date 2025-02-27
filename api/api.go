@@ -1267,7 +1267,6 @@ func (api *Api) EumErrLog(w http.ResponseWriter, r *http.Request, u *db.User) {
 func (api *Api) EumErrors(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
 	serviceName := vars["serviceName"]
-	errorName := vars["errorName"]
 	ctx := r.Context()
 
 	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
@@ -1287,6 +1286,7 @@ func (api *Api) EumErrors(w http.ResponseWriter, r *http.Request, u *db.User) {
 		klog.Warningln(err)
 	}
 
+	errorName := r.URL.Query().Get("errorName")
 	report := errlogs.Errors(world, ctx, ch, r.URL.Query(), serviceName, errorName)
 
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
