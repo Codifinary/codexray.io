@@ -1,39 +1,44 @@
 <template>
     <div class="my-10 mx-5">
-        <CustomTable :headers="headers" :items="tableItems" item-key="serviceName" class="elevation-1">
-            <template v-slot:item.serviceName="{ item }">
-                <div class="name d-flex">
-                    <div class="mr-3">
-                        <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
-                            style="width: 16px; height: 16px"
-                            alt="App Icon"
-                        />
+        <EUMSummary />
+        <div class="my-10 mx-5">
+            <CustomTable :headers="headers" :items="tableItems" item-key="serviceName" class="elevation-1">
+                <template v-slot:item.serviceName="{ item }">
+                    <div class="name d-flex">
+                        <div class="mr-3">
+                            <img
+                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
+                                style="width: 16px; height: 16px"
+                                alt="App Icon"
+                            />
+                        </div>
+                        <router-link
+                            :to="{
+                                name: 'overview',
+                                params: { view: 'EUM', id: item.serviceName },
+                                query: $route.query,
+                            }"
+                        >
+                            {{ item.serviceName }}
+                        </router-link>
                     </div>
-                    <router-link
-                        :to="{
-                            name: 'overview',
-                            params: { view: 'EUM', id: item.serviceName },
-                            query: $route.query,
-                        }"
-                    >
-                        {{ item.serviceName }}
-                    </router-link>
-                </div>
-            </template>
-            <template v-slot:item.avgLoadPageTime="{ item }">
-                {{ format(item.avgLoadPageTime, 'ms') }}
-            </template>
-        </CustomTable>
+                </template>
+                <template v-slot:item.avgLoadPageTime="{ item }">
+                    {{ format(item.avgLoadPageTime, 'ms') }}
+                </template>
+            </CustomTable>
+        </div>
     </div>
 </template>
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+import EUMSummary from './EUMSummary.vue';
 export default {
     name: 'EUM',
     components: {
         CustomTable,
+        EUMSummary,
     },
     data() {
         return {
