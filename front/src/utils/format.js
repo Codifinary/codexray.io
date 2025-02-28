@@ -140,12 +140,25 @@ export function formatUnits(v, unit) {
     }
     return v.toFixed(1) + m;
 }
+
 export function convertLatency(latency) {
     if (latency < 1000) {
-        return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
+        return { value: parseFloat(latency), unit: 'ms' };
     } else if (latency < 60000) {
-        return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
+        return { value: parseFloat(latency / 1000), unit: 's' };
     } else {
-        return { value: parseFloat((latency / 60000).toFixed(1)), unit: 'min' };
+        return { value: parseFloat(latency / 60000), unit: 'min' };
+    }
+}
+
+export function shortenNumber(value) {
+    if (value >= 1e9) {
+        return { value: parseFloat(value / 1e9), unit: 'G' };
+    } else if (value >= 1e6) {
+        return { value: parseFloat(value / 1e6), unit: 'M' };
+    } else if (value >= 1e3) {
+        return { value: parseFloat(value / 1e3), unit: 'K' };
+    } else {
+        return { value: parseFloat(value), unit: '' };
     }
 }

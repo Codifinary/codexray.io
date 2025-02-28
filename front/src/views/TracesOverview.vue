@@ -113,29 +113,33 @@ export default {
                     return;
                 }
                 this.tableItems = data.traces_view.traces || [];
-                const avgLatency = this.$format.convertLatency(parseFloat(data.traces_view.summary.avg_latency));
+                const avgLatency = this.$format.convertLatency(data.traces_view.summary.avg_latency);
+                const totalRequest = this.$format.shortenNumber(data.traces_view.summary.request_count);
+                const services = this.$format.shortenNumber(data.traces_view.summary.services);
                 this.summary = {
                     services: {
                         name: 'Total Services',
-                        value: data.traces_view.summary.services,
+                        value: services.value,
+                        unit: services.unit,
                         background: 'red lighten-4',
                         icon: 'services',
                     },
                     request_count: {
                         name: 'Total Requests',
-                        value: data.traces_view.summary.request_count,
+                        value: totalRequest.value,
+                        unit: totalRequest.unit,
                         background: 'blue lighten-4',
                         icon: 'requests',
                     },
                     request_per_second: {
                         name: 'Request/Sec',
-                        value: parseFloat(data.traces_view.summary.request_per_second).toFixed(2),
+                        value: data.traces_view.summary.request_per_second,
                         background: 'orange lighten-4',
                         icon: 'rps',
                     },
                     error_rate: {
                         name: 'Error/Sec',
-                        value: data.traces_view.summary.error_rate.toFixed(2),
+                        value: data.traces_view.summary.error_rate,
                         background: 'purple lighten-4',
                         icon: 'errors',
                     },
