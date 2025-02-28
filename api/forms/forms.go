@@ -616,3 +616,52 @@ func testDeploymentNotification() model.ApplicationDeploymentStatus {
 		},
 	}
 }
+
+type TrustDomainsForm struct {
+	Domains []string `json:"trust_domain"`
+}
+
+func (f *TrustDomainsForm) Valid() bool {
+	if len(f.Domains) == 0 {
+		return false
+	}
+	for _, domain := range f.Domains {
+		if domain == "" || !isValidDomain(domain) {
+			return false
+		}
+	}
+	return true
+}
+
+func (f *TrustDomainsForm) Get(project *db.Project, masked bool) {
+	f.Domains = project.Settings.TrustDomains
+	if masked {
+		f.Domains = []string{"<hidden>"}
+	}
+}
+
+func (f *TrustDomainsForm) Update(ctx context.Context, project *db.Project, clear bool) error {
+	if clear {
+		updatedDomains := []string{}
+		for _, existing := range project.Settings.TrustDomains {
+			keep := true
+			for _, toDelete := range f.Domains {
+				if existing == toDelete {
+					keep = false
+					break
+				}
+			}
+			if keep {
+				updatedDomains = append(updatedDomains, existing)
+			}
+		}
+		project.Settings.TrustDomains = updatedDomains
+	} else {
+		project.Settings.TrustDomains = f.Domains
+	}
+	return nil
+}
+
+func isValidDomain(domain string) bool {
+	return strings.Contains(domain, ".") && !strings.Contains(domain, " ")
+}
