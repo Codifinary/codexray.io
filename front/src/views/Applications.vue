@@ -9,7 +9,7 @@
         <ApplicationFilter :applications="applications" @filter="setFilter" class="my-4" />
 
         <div class="cards">
-            <Card v-for="s in statuses" :key="s.name" :count="s.count" :background="s.background" :icon="s.color" />
+            <Card v-for="s in statuses" :key="s.name" :name="s.name" :count="s.count" :background="s.background" :icon="s.color" />
         </div>
 
         <CustomTable :items="items" :headers="headers" class="table">
