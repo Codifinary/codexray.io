@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const FRONTE_END_BRUM = "http://labs.codexray.io:8022"
+const FRONTE_END_BRUM = "http://labs.codexray.io:8001"
 
 type StaticFSWrapper struct {
 	http.FileSystem
