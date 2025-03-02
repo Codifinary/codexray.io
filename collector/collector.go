@@ -55,6 +55,9 @@ type Collector struct {
 	profileBatches     map[db.ProjectId]*ProfilesBatch
 	profileBatchesLock sync.Mutex
 
+	mobilePerfBatches     map[db.ProjectId]*MobilePerfBatch
+	mobilePerfBatchesLock sync.Mutex
+
 	perfBatches     map[db.ProjectId]*PerfBatch
 	perfBatchesLock sync.Mutex
 
@@ -71,6 +74,7 @@ func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationCl
 		clickhouseClients: map[db.ProjectId]*chClient{},
 		traceBatches:      map[db.ProjectId]*TracesBatch{},
 		profileBatches:    map[db.ProjectId]*ProfilesBatch{},
+		mobilePerfBatches: map[db.ProjectId]*MobilePerfBatch{},
 		logBatches:        map[db.ProjectId]*LogsBatch{},
 		perfBatches:       map[db.ProjectId]*PerfBatch{},
 		errLogBatches:     map[db.ProjectId]*ErrLogBatch{},
@@ -367,4 +371,18 @@ func (c *Collector) IsClickhouseDistributed(project *db.Project) (bool, error) {
 		return false, err
 	}
 	return client.cluster != "", nil
+}
+
+func (c *Collector) getMobilePerfBatch(project *db.Project) *MobilePerfBatch {
+	c.mobilePerfBatchesLock.Lock()
+	defer c.mobilePerfBatchesLock.Unlock()
+	b := c.mobilePerfBatches[project.Id]
+	if b == nil {
+		b = NewMobilePerfBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobilePerfBatches[project.Id] = b
+	}
+
+	return b
 }
