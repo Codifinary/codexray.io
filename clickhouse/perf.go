@@ -4,6 +4,7 @@ import (
 	"codexray/timeseries"
 	"context"
 	"fmt"
+
 	"strings"
 	"time"
 
@@ -34,7 +35,8 @@ FROM
 LEFT JOIN 
     err_log_data e 
 ON 
-    p.PageName = e.PagePath`
+    p.PageName = e.PagePath
+    AND p.ServiceName = e.ServiceName`
 
 	// Conditionally add time range and service name filtering
 	var filters []string
@@ -199,4 +201,44 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		"transTime":       transTimeSeries,
 		"requests":        requestsSeries,
 	}, nil
+}
+
+func (c *Client) GetTotalRequests(ctx context.Context, from, to *time.Time, serviceName string) (uint64, error) {
+	query := `
+SELECT
+    count(*) AS totalRequests
+FROM
+    perf_data p
+LEFT JOIN
+    err_log_data e
+ON
+    p.PageName = e.PagePath
+    AND p.ServiceName = e.ServiceName`
+
+	var filters []string
+	var args []any
+	if from != nil {
+		filters = append(filters, "p.Timestamp >= @from OR e.Timestamp >= @from")
+		args = append(args, clickhouse.Named("from", *from))
+	}
+	if to != nil {
+		filters = append(filters, "p.Timestamp <= @to OR e.Timestamp <= @to")
+		args = append(args, clickhouse.Named("to", *to))
+	}
+	if serviceName != "" {
+		filters = append(filters, "p.ServiceName = @serviceName OR e.ServiceName = @serviceName")
+		args = append(args, clickhouse.Named("serviceName", serviceName))
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	row := c.conn.QueryRow(ctx, query, args...)
+	var totalRequests uint64
+	if err := row.Scan(&totalRequests); err != nil {
+		return 0, err
+	}
+
+	return totalRequests, nil
 }
