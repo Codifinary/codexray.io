@@ -23,7 +23,7 @@ export default {
     },
     data() {
         return {
-            summary: {},
+            summary: [],
             chartData: {},
             loading: false,
             error: '',
@@ -47,41 +47,47 @@ export default {
                 const avgLatency = this.$format.convertLatency(data.traces_overview.avg_latency);
                 const totalRequest = this.$format.shortenNumber(data.traces_overview.requests);
                 const totalEndPoints = this.$format.shortenNumber(data.traces_overview.total_endpoints);
-                this.summary = {
-                    endpoints: {
+
+                this.summary = [];
+
+                if (this.$route.params.view === 'traces') {
+                    this.summary.push({
                         name: 'Total EndPoints',
                         value: totalEndPoints.value,
                         unit: totalEndPoints.unit,
                         background: 'red lighten-4',
                         icon: 'endpoints',
-                    },
-                    request_count: {
+                    });
+                }
+
+                this.summary.push(
+                    {
                         name: 'Total Requests',
                         value: totalRequest.value,
                         unit: totalRequest.unit,
                         background: 'blue lighten-4',
                         icon: 'requests',
                     },
-                    request_per_second: {
+                    {
                         name: 'Request/Sec',
                         value: data.traces_overview.request_per_second,
                         background: 'orange lighten-4',
                         icon: 'rps',
                     },
-                    error_rate: {
+                    {
                         name: 'Error/Sec',
                         value: data.traces_overview.error_rate,
                         background: 'purple lighten-4',
                         icon: 'errors',
                     },
-                    avg_latency: {
+                    {
                         name: 'Avg. Latency',
                         value: avgLatency.value,
                         unit: avgLatency.unit,
                         background: 'green lighten-4',
                         icon: 'latency',
                     },
-                };
+                );
             });
         },
     },
@@ -96,7 +102,6 @@ export default {
 }
 .cards {
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    gap: 20px;
 }
 </style>

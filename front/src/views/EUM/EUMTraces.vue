@@ -1,6 +1,7 @@
 <template>
     <div class="my-10 mx-5">
         <!-- Heatmap -->
+        <TracesSummary :id="id" />
         <Heatmap v-if="view.heatmap" :heatmap="view.heatmap" :selection="selection" @select="setSelection" :loading="loading" />
         <div v-else-if="loading" class="text-center">Loading heatmap...</div>
         <div v-else class="text-center text-grey">No heatmap data available.</div>
@@ -58,11 +59,13 @@
 <script>
 import Heatmap from '@/components/Heatmap.vue';
 import TracingTrace from '@/components/TracingTrace.vue';
+import TracesSummary from '../TracesSummary.vue';
 
 export default {
     components: {
         Heatmap,
         TracingTrace,
+        TracesSummary,
     },
     props: {
         id: {
