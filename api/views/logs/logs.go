@@ -44,11 +44,18 @@ type SingleServiceLogsView struct {
 	Status     string       `json:"status"`
 	Message    string       `json:"message"`
 	Service    string       `json:"service"`
+	Summary    Summary      `json:"summary"`
 	Severities []string     `json:"severities"`
 	Severity   []string     `json:"all_severity"`
 	Entries    []Entry      `json:"entries"`
 	Chart      *model.Chart `json:"chart"`
 	Limit      int          `json:"limit"`
+}
+
+type Summary struct {
+	TotalLogs uint64 `json:"total_logs"`
+	TotalErrs uint64 `json:"total_errs"`
+	TotalWarn uint64 `json:"total_warn"`
 }
 
 type Pattern struct {
@@ -361,6 +368,7 @@ func GetSingleOtelServiceLogView(
 	if _, exists := svcs[serviceName]; !exists {
 		v.Status = "OK"
 		v.Message = "No Messages Found"
+		v.Summary = Summary{}
 		v.Entries = []Entry{}
 		v.Chart = model.NewChart(w.Ctx, "").Column()
 		v.Severities = []string{}
@@ -401,7 +409,8 @@ func GetSingleOtelServiceLogView(
 		}
 	}
 
-	// Build entries
+	// Build entries and calculate summary
+	var totalLogs, totalErrs, totalWarn uint64
 	for _, e := range entries {
 		entry := Entry{
 			Timestamp:  e.Timestamp.UnixMilli(),
@@ -423,6 +432,20 @@ func GetSingleOtelServiceLogView(
 			entry.Attributes["trace.id"] = e.TraceId
 		}
 		v.Entries = append(v.Entries, entry)
+
+		// Update summary counts
+		totalLogs++
+		if e.Severity == "Error" {
+			totalErrs++
+		} else if e.Severity == "Warning" {
+			totalWarn++
+		}
+	}
+
+	v.Summary = Summary{
+		TotalLogs: totalLogs,
+		TotalErrs: totalErrs,
+		TotalWarn: totalWarn,
 	}
 
 	return v, nil
