@@ -74,6 +74,7 @@ func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationCl
 		clickhouseClients: map[db.ProjectId]*chClient{},
 		traceBatches:      map[db.ProjectId]*TracesBatch{},
 		profileBatches:    map[db.ProjectId]*ProfilesBatch{},
+		mobilePerfBatches: map[db.ProjectId]*MobilePerfBatch{},
 		logBatches:        map[db.ProjectId]*LogsBatch{},
 		perfBatches:       map[db.ProjectId]*PerfBatch{},
 		errLogBatches:     map[db.ProjectId]*ErrLogBatch{},
