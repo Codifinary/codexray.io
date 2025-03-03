@@ -19,6 +19,10 @@ type PerfRow struct {
 	ImpactedUsers      uint64
 	Requests           uint64
 }
+type Totals struct {
+	TotalRequests uint64 `json:"totalRequests"`
+	TotalErrors   uint64 `json:"totalErrors"`
+}
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
 	// Build the base query
@@ -203,37 +207,46 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 	}, nil
 }
 
-func (c *Client) GetTotalRequests(ctx context.Context, from, to *time.Time, serviceName string) (uint64, error) {
+func (c *Client) GetTotalRequests(ctx context.Context, from, to *time.Time, serviceName, pagePath string) (uint64, error) {
 	query := `
-SELECT
-    count(*) AS totalRequests
-FROM
-    perf_data p
-LEFT JOIN
-    err_log_data e
-ON
-    p.PageName = e.PagePath
-    AND p.ServiceName = e.ServiceName`
+		SELECT
+			count(*) AS totalRequests
+		FROM
+			perf_data p
+		LEFT JOIN
+			err_log_data e
+		ON
+			p.PageName = e.PagePath
+			AND p.ServiceName = e.ServiceName`
 
 	var filters []string
 	var args []any
+
+	// Add time range filters
 	if from != nil {
-		filters = append(filters, "p.Timestamp >= @from OR e.Timestamp >= @from")
+		filters = append(filters, "p.Timestamp >= @from")
 		args = append(args, clickhouse.Named("from", *from))
 	}
 	if to != nil {
-		filters = append(filters, "p.Timestamp <= @to OR e.Timestamp <= @to")
+		filters = append(filters, "p.Timestamp <= @to")
 		args = append(args, clickhouse.Named("to", *to))
 	}
+
+	// Add service name and page path filters
 	if serviceName != "" {
-		filters = append(filters, "p.ServiceName = @serviceName OR e.ServiceName = @serviceName")
+		filters = append(filters, "p.ServiceName = @serviceName")
 		args = append(args, clickhouse.Named("serviceName", serviceName))
+	}
+	if pagePath != "" {
+		filters = append(filters, "p.PageName = @pagePath OR e.PagePath = @pagePath")
+		args = append(args, clickhouse.Named("pagePath", pagePath))
 	}
 
 	if len(filters) > 0 {
 		query += " WHERE " + strings.Join(filters, " AND ")
 	}
 
+	// Execute the query for total requests
 	row := c.conn.QueryRow(ctx, query, args...)
 	var totalRequests uint64
 	if err := row.Scan(&totalRequests); err != nil {
@@ -241,4 +254,47 @@ ON
 	}
 
 	return totalRequests, nil
+}
+
+func (c *Client) GetTotalErrors(ctx context.Context, from, to *time.Time, serviceName, pagePath string) (uint64, error) {
+	query := `
+		SELECT
+			count(*) AS totalErrors
+		FROM
+			err_log_data e`
+	var filters []string
+	var args []any
+
+	// Add time range filters
+	if from != nil {
+		filters = append(filters, "e.Timestamp >= @from")
+		args = append(args, clickhouse.Named("from", *from))
+	}
+	if to != nil {
+		filters = append(filters, "e.Timestamp <= @to")
+		args = append(args, clickhouse.Named("to", *to))
+	}
+
+	// Add service name and page path filters
+	if serviceName != "" {
+		filters = append(filters, "e.ServiceName = @serviceName")
+		args = append(args, clickhouse.Named("serviceName", serviceName))
+	}
+	if pagePath != "" {
+		filters = append(filters, "e.PagePath = @pagePath")
+		args = append(args, clickhouse.Named("pagePath", pagePath))
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	// Execute the query for total errors
+	row := c.conn.QueryRow(ctx, query, args...)
+	var totalErrors uint64
+	if err := row.Scan(&totalErrors); err != nil {
+		return 0, err
+	}
+
+	return totalErrors, nil
 }

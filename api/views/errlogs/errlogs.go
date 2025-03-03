@@ -91,7 +91,7 @@ func RenderErrors(w *model.World, ctx context.Context, ch *clickhouse.Client, qu
 		return errors[i].EventCount > errors[j].EventCount
 	})
 
-	totalRequests, err := ch.GetTotalRequests(ctx, &from, &to, serviceName)
+	totalRequests, err := ch.GetTotalRequests(ctx, &from, &to, serviceName, "")
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
