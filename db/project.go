@@ -31,6 +31,7 @@ type ProjectSettings struct {
 	Integrations                Integrations                                              `json:"integrations"`
 	CustomApplications          map[string]model.CustomApplication                        `json:"custom_applications"`
 	ApiKeys                     []ApiKey                                                  `json:"api_keys"`
+	TrustDomains                map[string]struct{}                                       `json:"trust_domain"`
 }
 
 type ApplicationCategorySettings struct {

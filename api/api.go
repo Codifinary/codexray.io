@@ -1412,6 +1412,17 @@ func (api *Api) EumLogs(w http.ResponseWriter, r *http.Request, u *db.User) {
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
+func mapsEqual(a, b map[string]struct{}) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for key := range a {
+		if _, exists := b[key]; !exists {
+			return false
+		}
+	}
+	return true
+}
 func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to timeseries.Time) (*model.World, *cache.Status, error) {
 	cacheClient := api.cache.GetCacheClient(project.Id)
 
@@ -1444,6 +1455,100 @@ func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to tim
 	ctr := constructor.New(api.db, project, cacheClient, api.pricing)
 	world, err := ctr.LoadWorld(ctx, from, to, step, nil)
 	return world, cacheStatus, err
+}
+
+func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *db.User) {
+	projectId := db.ProjectId(mux.Vars(r)["project"])
+	project, err := api.db.GetProject(projectId)
+	if err != nil {
+		klog.Errorln("GetProject failed:", err)
+		http.Error(w, "Project not found", http.StatusNotFound)
+		return
+	}
+
+	var form forms.TrustDomainsForm
+
+	isAllowed := api.IsAllowed(u, rbac.Actions.Project(string(projectId)).Integrations().Edit())
+	klog.Infof("User %s (ID: %d, Roles: %v) allowed to edit: %v", u.Email, u.Id, u.Roles, isAllowed)
+
+	switch r.Method {
+	case http.MethodPost:
+		if !isAllowed {
+			klog.Warningf("User %s denied POST access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if !mapsEqual(project.Settings.TrustDomains, form.Domains) {
+			for key, val := range form.Domains {
+				project.Settings.TrustDomains[key] = val
+			}
+			if err := api.db.SaveProjectSettings(project); err != nil {
+				klog.Errorln("Failed to save Trust domains:", err)
+				http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
+				return
+			}
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+	case http.MethodGet:
+		form.Get(project, !isAllowed)
+		fmt.Println("First")
+		w.WriteHeader(http.StatusOK)
+
+	case http.MethodDelete:
+		if !isAllowed {
+			klog.Warningf("User %s denied DELETE access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if err := form.Update(r.Context(), project, true); err != nil {
+			klog.Errorln("Failed to update Trust domains:", err)
+			http.Error(w, "Failed to update Trust domains", http.StatusBadRequest)
+			return
+		}
+		if err := api.db.SaveProjectSettings(project); err != nil {
+			klog.Errorln("Failed to update database:", err)
+			http.Error(w, "Failed to update database", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+	case http.MethodPut:
+		if !isAllowed {
+			klog.Warningf("User %s denied PUT access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if err := form.Update(r.Context(), project, false); err != nil {
+			klog.Errorln("Failed to update Trust domains:", err)
+			http.Error(w, "Failed to update Trust domains", http.StatusBadRequest)
+			return
+		}
+		if err := api.db.SaveProjectSettings(project); err != nil {
+			klog.Errorln("Failed to save Trust domains:", err)
+			http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, *cache.Status, error) {

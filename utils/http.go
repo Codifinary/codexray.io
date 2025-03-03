@@ -4,6 +4,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -42,14 +43,22 @@ func (f *StaticFileInfoWrapper) ModTime() time.Time {
 	return f.modTime
 }
 
-func EnableCORS(next http.Handler) http.Handler {
+func EnableCORS(next http.Handler, trustDomains map[string]struct{}) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", FRONTE_END_BRUM)
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, HEAD")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-credentials", "true")
+		origin := r.Header.Get("Origin")
+		if origin != "" {
+			originHost := strings.TrimPrefix(origin, "http://")
+			originHost = strings.TrimPrefix(originHost, "https://")
 
-		if r.Method == "OPTIONS" || r.Method == "HEAD" {
+			if _, allowed := trustDomains[originHost]; allowed {
+				w.Header().Set("Access-Control-Allow-Origin", origin)
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+				w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+				w.Header().Set("Access-Control-Allow-Credentials", "true")
+			}
+		}
+
+		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 			return
 		}
