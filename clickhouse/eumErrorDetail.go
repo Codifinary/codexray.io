@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -45,6 +46,12 @@ type Breadcrumb struct {
 	Level       string     `json:"level"`
 	Description string     `json:"message"`
 	Timestamp   CustomTime `json:"timestamp"`
+	Data        []KeyValue `json:"data"`
+}
+
+type KeyValue struct {
+	Key   string      `json:"key"`
+	Value interface{} `json:"value"`
 }
 
 func (c *Client) GetErrorDetail(ctx context.Context, uniqueId string) (ErrorDetail, error) {
@@ -138,7 +145,22 @@ func (c *Client) GetBreadcrumb(ctx context.Context, uniqueId, breadcrumbType str
 		filteredBreadcrumbs = filterBreadcrumbsByType(errorDetail.Breadcrumbs, breadcrumbType)
 	}
 
-	// Filter breadcrumbs based on type
+	// Handle navigation and HTTP breadcrumbs
+	for i, breadcrumb := range filteredBreadcrumbs {
+		if (breadcrumb.Type == "Navigation" || breadcrumb.Type == "HTTP") && breadcrumb.Description == "" {
+			var dataDescription []string
+			for _, kv := range breadcrumb.Data {
+				// Convert numeric values to strings properly
+				switch v := kv.Value.(type) {
+				case float64:
+					dataDescription = append(dataDescription, fmt.Sprintf("%s: %d", kv.Key, int(v)))
+				default:
+					dataDescription = append(dataDescription, fmt.Sprintf("%s: %v", kv.Key, kv.Value))
+				}
+			}
+			filteredBreadcrumbs[i].Description = strings.Join(dataDescription, ", ")
+		}
+	}
 
 	return filteredBreadcrumbs, nil
 }

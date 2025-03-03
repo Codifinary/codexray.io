@@ -6,13 +6,13 @@ name: CI/CD Pipeline for Codexray (VM Deployment using GHCR)
 on:
   push:
     branches:
-      - develop
+      - demo
 
 # -------------------------------------
 # Define Environment Variables
 # -------------------------------------
 env:
-  GHCR_IMAGE: ghcr.io/codifinary/codexray-dev:latest
+  GHCR_IMAGE: ghcr.io/codifinary/codexray:latest
   VM_INSTANCE: ${{ secrets.VM_INSTANCE_IP }}
   VM_USER: 'codexray'
   VM_SSH_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
@@ -98,11 +98,11 @@ jobs:
 
       - name: Copy Docker Compose Files to VM
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7002 deploy/docker-compose-dev.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
+          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7004 deploy/docker-compose.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
 
       - name: Pull Latest Image and Restart Containers
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7002 $VM_USER@$VM_INSTANCE << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7004 $VM_USER@$VM_INSTANCE << 'EOF'
             docker login ghcr.io -u ${{ github.actor }} --password ${{ secrets.GHCR_PAT }}
             docker-compose -f /home/${{ env.VM_USER }}/docker-compose.yaml down
             docker-compose -f /home/${{ env.VM_USER }}/docker-compose.yaml up -d
@@ -110,6 +110,6 @@ jobs:
 
       - name: Verify Running Containers
         run: |
-          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7002 $VM_USER@$VM_INSTANCE << 'EOF'
+          ssh -o StrictHostKeyChecking=no -i private_key.pem -p 7004 $VM_USER@$VM_INSTANCE << 'EOF'
             docker ps
           EOF

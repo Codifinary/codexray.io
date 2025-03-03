@@ -34,15 +34,6 @@ export default {
         this.$events.watch(this, this.get, 'refresh');
     },
     methods: {
-        convertLatency(latency) {
-            if (latency < 1000) {
-                return { value: parseFloat(latency.toFixed(1)), unit: 'ms' };
-            } else if (latency < 60000) {
-                return { value: parseFloat((latency / 1000).toFixed(1)), unit: 's' };
-            } else {
-                return { value: parseFloat((latency / 60000).toFixed(1)), unit: 'min' };
-            }
-        },
         get() {
             this.loading = true;
             this.error = '';
@@ -53,23 +44,27 @@ export default {
                     return;
                 }
                 this.chartData = data.audit_report || {};
-                const avgLatency = this.convertLatency(parseFloat(data.traces_overview.avg_latency));
+                const avgLatency = this.$format.convertLatency(data.traces_overview.avg_latency);
+                const totalRequest = this.$format.shortenNumber(data.traces_overview.requests);
+                const totalEndPoints = this.$format.shortenNumber(data.traces_overview.total_endpoints);
                 this.summary = {
                     endpoints: {
                         name: 'Total EndPoints',
-                        value: data.traces_overview.total_endpoints,
+                        value: totalEndPoints.value,
+                        unit: totalEndPoints.unit,
                         background: 'red lighten-4',
                         icon: 'endpoints',
                     },
                     request_count: {
                         name: 'Total Requests',
-                        value: data.traces_overview.requests,
+                        value: totalRequest.value,
+                        unit: totalRequest.unit,
                         background: 'blue lighten-4',
                         icon: 'requests',
                     },
                     request_per_second: {
                         name: 'Request/Sec',
-                        value: parseFloat(data.traces_overview.request_per_second).toFixed(2),
+                        value: data.traces_overview.request_per_second,
                         background: 'orange lighten-4',
                         icon: 'rps',
                     },
@@ -95,7 +90,7 @@ export default {
 
 <style scoped>
 .traces-container {
-    padding-bottom: 70px;
+    padding-bottom: 20px;
     margin-left: 20px !important;
     margin-right: 20px !important;
 }

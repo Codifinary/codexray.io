@@ -74,6 +74,14 @@ export default {
     props: {
         items: Array,
         headers: Array,
+        defaultSortBy: {
+            type: String,
+            default: '',
+        },
+        defaultSortDesc: {
+            type: Boolean,
+            default: false,
+        },
     },
     data() {
         return {
@@ -82,8 +90,8 @@ export default {
             options: {
                 page: 1,
                 itemsPerPage: 50,
-                sortBy: this.headers.length > 0 ? this.headers[0].value : null,
-                sortDesc: false,
+                sortBy: this.defaultSortBy,
+                sortDesc: this.defaultSortDesc,
             },
             itemsPerPageOptions: [2, 10, 20, 30, 40, 50],
         };

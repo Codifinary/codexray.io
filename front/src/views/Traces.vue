@@ -5,7 +5,7 @@
         </v-alert>
 
         <v-alert v-else-if="view.message" color="info" outlined text class="message">
-            <template v-if="view.message === 'no_clickhouse'"> Clickhouse integration is not configured. </template>
+            <template v-if="view.message === 'clickhouse not available'"> Clickhouse integration is not configured. </template>
         </v-alert>
 
         <template v-else>
@@ -73,13 +73,15 @@
                         Selection:
                         <template v-if="selectionDefined">
                             <template v-if="query.ts_from && query.ts_to">
-                                time <var> {{ format(query.ts_from, 'ts') }}</var> — <var> {{ format(query.ts_to, 'ts') }}</var>
+                                time <var> {{ $format.formatUnits(query.ts_from, 'ts') }}</var> —
+                                <var> {{ $format.formatUnits(query.ts_to, 'ts') }}</var>
                             </template>
                             <template v-if="query.dur_from !== 'inf' || query.dur_to === 'err'">
                                 where (
                                 <template v-if="query.dur_from !== 'inf'">
                                     trace duration
-                                    <var> {{ format(query.dur_from, 'dur') }}</var> — <var> {{ format(query.dur_to, 'dur') }}</var>
+                                    <var> {{ $format.formatUnits(query.dur_from, 'dur') }}</var> —
+                                    <var> {{ $format.formatUnits(query.dur_to, 'dur') }}</var>
                                     <template v-if="query.dur_to === 'err'"> or </template>
                                 </template>
                                 <template v-if="query.dur_to === 'err'"> trace status is <var> Error</var></template>
@@ -144,26 +146,26 @@
                         </router-link>
                     </template>
                     <template #item.total="{ item }">
-                        <span>{{ format(item.total) }}</span>
+                        <span>{{ $format.formatUnits(item.total) }}</span>
                         <span class="caption grey--text">/s</span>
                     </template>
                     <template #item.failed="{ item }">
                         <router-link v-if="item.failed" :to="filterTraces(serviceName, item.span_name, true)">
-                            <span>{{ format(item.failed, '%') }}</span>
+                            <span>{{ $format.formatUnits(item.failed, '%') }}</span>
                             <span class="caption grey--text">%</span>
                         </router-link>
                         <span v-else>—</span>
                     </template>
                     <template #item.duration_quantiles[0]="{ item }">
-                        <span>{{ format(item.duration_quantiles[0], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[0], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
                     <template #item.duration_quantiles[1]="{ item }">
-                        <span>{{ format(item.duration_quantiles[1], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[1], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
                     <template #item.duration_quantiles[2]="{ item }">
-                        <span>{{ format(item.duration_quantiles[2], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[2], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
 
@@ -172,26 +174,26 @@
                             <tr v-for="item in view.summary ? [view.summary.overall] : []">
                                 <td class="font-weight-medium">OVERALL</td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.total) }}</span>
+                                    <span>{{ $format.formatUnits(item.total) }}</span>
                                     <span class="caption grey--text">/s</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
                                     <router-link v-if="item.failed" :to="filterTraces(serviceName, query.span_name, true)">
-                                        <span>{{ format(item.failed, '%') }}</span>
+                                        <span>{{ $format.formatUnits(item.failed, '%') }}</span>
                                         <span class="caption grey--text">%</span>
                                     </router-link>
                                     <span v-else>—</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[0], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[0], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[1], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[1], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[2], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[2], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                             </tr>
@@ -227,7 +229,7 @@
                                 {{ s.status.message }}
                             </td>
                             <td class="text-no-wrap">
-                                {{ format(s.duration, 'ms') }}
+                                {{ $format.formatUnits(s.duration, 'ms') }}
                                 <span class="caption grey--text"> ms</span>
                             </td>
                         </tr>
@@ -266,11 +268,11 @@
                                 <div class="font-weight-medium mb-1">{{ v.name }}</div>
                                 <div class="baseline">
                                     <span class="marker" />
-                                    Baseline: {{ v.baseline ? format(v.baseline, '%') + '%' : '—' }}
+                                    Baseline: {{ v.baseline ? $format.formatUnits(v.baseline, '%') + '%' : '—' }}
                                 </div>
                                 <div class="selection">
                                     <span class="marker" />
-                                    Selection: {{ v.selection ? format(v.selection, '%') + '%' : '—' }}
+                                    Selection: {{ v.selection ? $format.formatUnits(v.selection, '%') + '%' : '—' }}
                                 </div>
                                 <div class="d-flex grey--text mt-2">
                                     <v-icon x-small class="mr-1">mdi-information-outline</v-icon>
@@ -319,7 +321,7 @@
                     <template #item.count="{ item }">
                         <div class="d-flex align-center" style="gap: 4px">
                             <div style="text-align: right; width: 4ch">
-                                <span>{{ format(item.count, '%') }}</span>
+                                <span>{{ $format.formatUnits(item.count, '%') }}</span>
                                 <span class="caption grey--text">%</span>
                             </div>
                             <div class="flex-grow-1">
@@ -584,55 +586,6 @@ export default {
         },
         color(s) {
             return palette.hash2(s);
-        },
-        format(v, unit) {
-            if (unit === 'ts') {
-                return this.$format.date(v, '{MMM} {DD}, {HH}:{mm}');
-            }
-            if (unit === 'dur') {
-                if (!v) {
-                    return '0';
-                }
-                if (v === 'inf' || v === 'err') {
-                    return 'Inf';
-                }
-                if (v >= 1) {
-                    return v + 's';
-                }
-                return v * 1000 + 'ms';
-            }
-            if (unit === '%') {
-                v *= 100;
-                if (v < 1) {
-                    return '<1';
-                }
-                let d = 1;
-                if (v >= 10) {
-                    d = 0;
-                }
-                return v.toFixed(d);
-            }
-            if (unit === 'ms') {
-                let d = 0;
-                if (v < 10) {
-                    d = 1;
-                }
-                return v.toFixed(d);
-            }
-            let m = '';
-            if (v > 1e3) {
-                v /= 1000;
-                m = 'K';
-            }
-            if (v > 1e6) {
-                v /= 1000;
-                m = 'M';
-            }
-            if (v > 1e9) {
-                v /= 1000;
-                m = 'G';
-            }
-            return v.toFixed(1) + m;
         },
     },
 };

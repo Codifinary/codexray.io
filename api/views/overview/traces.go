@@ -96,7 +96,7 @@ func RenderTraces(ctx context.Context, ch *clickhouse.Client, w *model.World, qu
 	res := &Traces{}
 
 	if ch == nil {
-		res.Message = "no_clickhouse"
+		res.Message = "clickhouse not available"
 		return res
 	}
 
@@ -233,7 +233,7 @@ func RenderTracesSummary(ctx context.Context, ch *clickhouse.Client, w *model.Wo
 	res := &TracesSummary{}
 
 	if ch == nil {
-		res.Message = "no_clickhouse"
+		res.Message = "clickhouse not available"
 		return res
 	}
 

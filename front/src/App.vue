@@ -199,7 +199,7 @@ export default {
         },
         views() {
             return {
-                health: 'Application',
+                applications: 'Applications',
                 map: 'Topology',
                 traces: 'Traces',
                 nodes: 'Nodes',
@@ -210,7 +210,7 @@ export default {
         },
         icons() {
             return {
-                health: { name: 'health', class: 'health-icon' },
+                applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
                 traces: { name: 'traces', class: 'traces-icon' },
                 nodes: { name: 'nodes', class: 'nodes-icon' },
