@@ -1412,12 +1412,12 @@ func (api *Api) EumLogs(w http.ResponseWriter, r *http.Request, u *db.User) {
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
-func mapsEqual(a, b map[string]struct{}) bool {
+func mapsEqual(a map[string]struct{}, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
-	for key := range a {
-		if _, exists := b[key]; !exists {
+	for _, value := range b {
+		if _, exists := a[value]; !exists {
 			return false
 		}
 	}
@@ -1484,22 +1484,22 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 			return
 		}
 		if !mapsEqual(project.Settings.TrustDomains, form.Domains) {
-			for key, val := range form.Domains {
-				project.Settings.TrustDomains[key] = val
+			for _, val := range form.Domains {
+				project.Settings.TrustDomains[val] = struct{}{}
 			}
 			if err := api.db.SaveProjectSettings(project); err != nil {
 				klog.Errorln("Failed to save Trust domains:", err)
 				http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
 				return
 			}
+		} else {
+			http.Error(w, "Failed to update database", http.StatusConflict)
+			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 
 	case http.MethodGet:
 		form.Get(project, !isAllowed)
-		fmt.Println("First")
-		w.WriteHeader(http.StatusOK)
+		utils.WriteJson(w, form)
 
 	case http.MethodDelete:
 		if !isAllowed {
@@ -1522,8 +1522,6 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 			http.Error(w, "Failed to update database", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 
 	case http.MethodPut:
 		if !isAllowed {
@@ -1546,8 +1544,6 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 			http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
 	}
 }
 
