@@ -307,4 +307,20 @@ export default class Api {
     getTracesSummaryCharts(serviceName, cb) {
         this.get(this.projectPath(`app/traces/${serviceName}/summary`), {}, cb);
     }
+
+    getWhitelistDomains(cb){
+        this.get(this.projectPath(`integrations/eum_domains`),{} ,cb);
+    }
+
+    updateWhitelistDomain(oldDomain, newDomain, cb){
+        this.post(this.projectPath(`integrations/eum_domains`),{oldDomain, newDomain} ,cb);
+    }
+
+    deleteWhitelistDomain(domain, cb){
+        this.delete(this.projectPath(`integrations/eum_domains`),{domain} ,cb);
+    }
+
+    saveWhitelistDomain(domain, cb){
+        this.post(this.projectPath(`integrations/eum_domains`),{domain} ,cb);
+    }
 }
