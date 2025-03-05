@@ -216,6 +216,7 @@ func main() {
 	router.HandleFunc("/v1/perf", coll.Perf)
 	router.HandleFunc("/v1/errlog", coll.ErrLog)
 	router.HandleFunc("/v1/config", coll.Config)
+	router.HandleFunc("/v1/mobile/performance", coll.MobilePerf)
 
 	r := router
 	cleanUrlBasePath(urlBasePath)
