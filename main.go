@@ -37,7 +37,7 @@ var version = "unknown"
 var static embed.FS
 
 func main() {
-	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8000").String()
+	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
 	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
@@ -69,7 +69,7 @@ func main() {
 	globalPrometheusPassword := kingpin.Flag("global-prometheus-password", "").Envar("GLOBAL_PROMETHEUS_PASSWORD").String()
 	globalPrometheusCustomHeaders := kingpin.Flag("global-prometheus-custom-headers", "").Envar("GLOBAL_PROMETHEUS_CUSTOM_HEADER").StringMap()
 
-	developerMode := kingpin.Flag("developer-mode", "If enabled, codexray will not use embedded static assets").Envar("DEVELOPER_MODE").Default("true").Bool()
+	developerMode := kingpin.Flag("developer-mode", "If enabled, codexray will not use embedded static assets").Envar("DEVELOPER_MODE").Default("false").Bool()
 	authAnonymousRole := kingpin.Flag("auth-anonymous-role", "Disable authentication and assign one of the following roles to the anonymous user: Admin, Editor, or Viewer.").Envar("AUTH_ANONYMOUS_ROLE").String()
 	authBootstrapAdminPassword := kingpin.Flag("auth-bootstrap-admin-password", "Password for the default Admin user").Envar("AUTH_BOOTSTRAP_ADMIN_PASSWORD").Default(db.AdminUserDefaultPassword).String()
 

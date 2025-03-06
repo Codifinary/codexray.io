@@ -618,7 +618,8 @@ func testDeploymentNotification() model.ApplicationDeploymentStatus {
 }
 
 type TrustDomainsForm struct {
-	Domains []string `json:"trust_domain"`
+	Domains    []string `json:"trust_domain"`
+	ReplaceOld *string  `json:"replace_old,omitempty"`
 }
 
 func (f *TrustDomainsForm) Valid() bool {
@@ -663,6 +664,8 @@ func (f *TrustDomainsForm) Update(ctx context.Context, project *db.Project, clea
 		for _, domain := range f.Domains {
 			project.Settings.TrustDomains[domain] = struct{}{}
 		}
+
+		return nil
 	}
 	return nil
 }

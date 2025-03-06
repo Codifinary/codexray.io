@@ -83,12 +83,20 @@ export default class Api {
         this.request({ method: 'put', url, data }, cb);
     }
 
+    putDomain(url, data, cb) {
+        this.request({ method: 'put', url, data }, cb);
+    }
+
     post(url, data, cb) {
         this.request({ method: 'post', url, data }, cb);
     }
 
     del(url, cb) {
         this.request({ method: 'delete', url }, cb);
+    }
+
+    delete(url, data, cb) {
+        this.request({ method: 'delete', url, data }, cb);
     }
 
     user(form, cb) {
@@ -312,15 +320,15 @@ export default class Api {
         this.get(this.projectPath(`integrations/eum_domains`),{} ,cb);
     }
 
-    updateWhitelistDomain(oldDomain, newDomain, cb){
-        this.post(this.projectPath(`integrations/eum_domains`),{oldDomain, newDomain} ,cb);
+    updateWhitelistDomain(trust_domain, cb){
+        this.put(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 
-    deleteWhitelistDomain(domain, cb){
-        this.delete(this.projectPath(`integrations/eum_domains`),{domain} ,cb);
+    deleteWhitelistDomain(trust_domain, cb){
+        this.delete(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 
-    saveWhitelistDomain(domain, cb){
-        this.post(this.projectPath(`integrations/eum_domains`),{domain} ,cb);
+    saveWhitelistDomain(trust_domain, cb){
+        this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 }
