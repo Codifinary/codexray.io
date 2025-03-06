@@ -111,6 +111,12 @@
             </div>
             <RBAC />
         </template>
+        <template v-if="tab === 'whitelist'">
+            <div class="font-weight-bold tab-heading">
+                Add Domain
+            </div>
+            <Whitelist />
+        </template>
     </div>
 </template>
 
@@ -126,6 +132,7 @@ import IntegrationClickhouse from './IntegrationClickhouse.vue';
 import CustomApplications from './CustomApplications.vue';
 import Users from './Users.vue';
 import RBAC from './RBAC.vue';
+import Whitelist from './Whitelist.vue';
 
 export default {
     props: {
@@ -145,6 +152,7 @@ export default {
         Integrations,
         Users,
         RBAC,
+        Whitelist,
     },
 
     mounted() {
@@ -164,6 +172,7 @@ export default {
                 { id: 'applications', name: 'Applications', disabled },
                 { id: 'notifications', name: 'Notifications', disabled },
                 { id: 'organization', name: 'Organization' },
+                {id: 'whitelist', name: 'Whitelist'}
             ];
         },
     },
