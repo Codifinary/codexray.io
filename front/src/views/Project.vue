@@ -172,7 +172,7 @@ export default {
                 { id: 'applications', name: 'Applications', disabled },
                 { id: 'notifications', name: 'Notifications', disabled },
                 { id: 'organization', name: 'Organization' },
-                {id: 'whitelist', name: 'Whitelist'}
+                {id: 'whitelist', name: 'Trusted Domains'}
             ];
         },
     },
