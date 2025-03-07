@@ -91,6 +91,10 @@ export default class Api {
         this.request({ method: 'delete', url }, cb);
     }
 
+    delete(url, data, cb) {
+        this.request({ method: 'delete', url, data }, cb);
+    }
+
     user(form, cb) {
         if (form) {
             this.post(`user`, form, cb);
@@ -306,5 +310,21 @@ export default class Api {
     }
     getTracesSummaryCharts(serviceName, cb) {
         this.get(this.projectPath(`app/traces/${serviceName}/summary`), {}, cb);
+    }
+
+    getWhitelistDomains(cb){
+        this.get(this.projectPath(`integrations/eum_domains`),{} ,cb);
+    }
+
+    updateWhitelistDomain(trust_domain, cb){
+        this.put(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
+    }
+
+    deleteWhitelistDomain(trust_domain, cb){
+        this.delete(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
+    }
+
+    saveWhitelistDomain(trust_domain, cb){
+        this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 }
