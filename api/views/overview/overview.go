@@ -20,6 +20,7 @@ type Overview struct {
 	Costs        *Costs                      `json:"costs"`
 	Categories   []model.ApplicationCategory `json:"categories"`
 	EumApps      *EumView                    `json:"eumapps"`
+	MrumApps     *MrumView                   `json:"mrumapps"`
 }
 
 func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, query string) *Overview {
@@ -55,6 +56,8 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 		v.Costs = renderCosts(w)
 	case "eumapps":
 		v.EumApps = renderEumApps(ctx, ch, w, query)
+	case "mrumapps":
+		v.MrumApps = renderMrumApps(ctx, ch, w, query)
 	}
 	return v
 }
