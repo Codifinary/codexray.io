@@ -110,14 +110,6 @@ export default {
                 this.urls = Array.isArray(data.trust_domain) ? data.trust_domain : [];
                 this.isHidden = this.urls[0] === 'hidden';
             });
-            this.$api.user(null, (data, error) => {
-                this.loading = false;
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.role = data.role;
-            });
         },
         save(domain) {
             if (!domain.trim()) return;
