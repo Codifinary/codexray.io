@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <v-alert v-if="role === 'Viewer'" color="red" icon="mdi-alert-octagon-outline" outlined text>
+        <v-alert v-if="isHidden" color="red" icon="mdi-alert-octagon-outline" outlined text>
             You are not authorized to add domains.
         </v-alert>
         <div v-else>
@@ -21,7 +21,7 @@
                 </tr>
             </thead>
             <tbody>
-                <template v-if="urls.length > 0">
+                <template v-if="urls && urls.length > 0">
                     <tr v-for="u in urls" :key="u">
                         <td>{{ u }}</td>
                         <td class="d-flex ga-12 align-center">
@@ -81,6 +81,7 @@ export default {
                 valid: true
             },
             urls: [],
+            isHidden: false,
             role: '',
             dialog: {
                 active: false,
@@ -106,7 +107,8 @@ export default {
                     console.log(error);
                     return;
                 }
-                this.urls = data.trust_domain;
+                this.urls = Array.isArray(data.trust_domain) ? data.trust_domain : [];
+                this.isHidden = this.urls[0] === 'hidden';
             });
             this.$api.user(null, (data, error) => {
                 this.loading = false;
