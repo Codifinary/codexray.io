@@ -1543,3 +1543,30 @@ func (api *Api) getClickhouseClient(project *db.Project) (*clickhouse.Client, er
 	}
 	return clickhouse.NewClient(config, distributed)
 }
+
+func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	view := vars["view"]
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	switch view {
+	case "perf":
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumPerf(r.Context(), ch, world, r.URL.Query().Get("query"))))
+	}
+}

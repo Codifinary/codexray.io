@@ -1,6 +1,7 @@
 package clickhouse
 
 import (
+	"codexray/timeseries"
 	"context"
 	"time"
 
@@ -19,10 +20,18 @@ type MobilePerfResult struct {
 	UsersImpactedTrend     float64
 }
 
-func (c *Client) GetMobilePerfResults(ctx context.Context, from, to *time.Time) (*MobilePerfResult, error) {
+func (c *Client) GetMobilePerfResults(ctx context.Context, from, to *timeseries.Time) (*MobilePerfResult, error) {
+	// Convert timeseries.Time to standard time.Time for calculations
+	fromTime := from.ToStandard()
+	toTime := to.ToStandard()
+
 	// Calculate the previous time window (1 hour before the query window)
-	prevFrom := from.Add(-24 * time.Hour)
-	prevTo := to.Add(-1 * time.Hour)
+	prevFromTime := fromTime.Add(-24 * time.Hour)
+	prevToTime := toTime.Add(-1 * time.Hour)
+
+	// Convert back to timeseries.Time
+	prevFrom := timeseries.Time(prevFromTime.Unix())
+	prevTo := timeseries.Time(prevToTime.Unix())
 
 	// Build the query with trend calculations
 	query := `
@@ -65,10 +74,10 @@ FROM
 
 	// Execute the query
 	rows, err := c.Query(ctx, query,
-		clickhouse.Named("from", *from),
-		clickhouse.Named("to", *to),
-		clickhouse.Named("prevFrom", prevFrom),
-		clickhouse.Named("prevTo", prevTo),
+		clickhouse.Named("from", fromTime),
+		clickhouse.Named("to", toTime),
+		clickhouse.Named("prevFrom", prevFrom.ToStandard()),
+		clickhouse.Named("prevTo", prevTo.ToStandard()),
 	)
 	if err != nil {
 		return nil, err
@@ -94,4 +103,182 @@ FROM
 	}
 
 	return &result, nil
+}
+
+func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
+	// Use timeseries.Time directly
+	tsFrom := *from
+	tsTo := *to
+
+	// Calculate the interval duration (divide the total time range into 6 equal parts)
+	totalDuration := tsTo.Sub(tsFrom)
+	intervalDuration := totalDuration / 6
+
+	// Create a new TimeSeries with 6 points
+	ts := timeseries.New(tsFrom, 6, intervalDuration)
+
+	// Build the query to get request counts for each interval
+	query := `
+	WITH
+		toUnixTimestamp(@from) as start_time,
+		toUnixTimestamp(@to) as end_time,
+		(end_time - start_time) / 6 as interval_seconds
+	SELECT
+		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		count() as request_count
+	FROM
+		mobile_perf_data
+	WHERE
+		Timestamp BETWEEN @from AND @to
+	GROUP BY
+		interval_start
+	ORDER BY
+		interval_start
+	`
+
+	// Execute the query
+	rows, err := c.Query(ctx, query,
+		clickhouse.Named("from", from.ToStandard()),
+		clickhouse.Named("to", to.ToStandard()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Process results and populate the time series
+	for rows.Next() {
+		var intervalStart int64
+		var requestCount uint64
+
+		if err := rows.Scan(&intervalStart, &requestCount); err != nil {
+			return nil, err
+		}
+
+		// Set the data point in the time series
+		ts.Set(timeseries.Time(intervalStart), float32(requestCount))
+	}
+
+	return ts, nil
+}
+
+func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
+	// Use timeseries.Time directly
+	tsFrom := *from
+	tsTo := *to
+
+	// Calculate the interval duration (divide the total time range into 6 equal parts)
+	totalDuration := tsTo.Sub(tsFrom)
+	intervalDuration := totalDuration / 6
+
+	// Create a new TimeSeries with 6 points
+	ts := timeseries.New(tsFrom, 6, intervalDuration)
+
+	// Build the query to get error counts for each interval
+	// Error is when Status = 0 in mobile_perf_data
+	query := `
+	WITH
+		toUnixTimestamp(@from) as start_time,
+		toUnixTimestamp(@to) as end_time,
+		(end_time - start_time) / 6 as interval_seconds
+	SELECT
+		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		countIf(Status = 0) as error_count,
+		count() as total_count,
+		if(total_count > 0, error_count / total_count * 100, 0) as error_rate
+	FROM
+		mobile_perf_data
+	WHERE
+		Timestamp BETWEEN @from AND @to
+	GROUP BY
+		interval_start
+	ORDER BY
+		interval_start
+	`
+
+	// Execute the query
+	rows, err := c.Query(ctx, query,
+		clickhouse.Named("from", from.ToStandard()),
+		clickhouse.Named("to", to.ToStandard()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Process results and populate the time series
+	for rows.Next() {
+		var intervalStart int64
+		var errorCount uint64
+		var totalCount uint64
+		var errorRate float32
+
+		if err := rows.Scan(&intervalStart, &errorCount, &totalCount, &errorRate); err != nil {
+			return nil, err
+		}
+
+		// Set the data point in the time series (error rate as percentage)
+		ts.Set(timeseries.Time(intervalStart), errorRate)
+	}
+
+	return ts, nil
+}
+
+func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
+	// Use timeseries.Time directly
+	tsFrom := *from
+	tsTo := *to
+
+	// Calculate the interval duration (divide the total time range into 6 equal parts)
+	totalDuration := tsTo.Sub(tsFrom)
+	intervalDuration := totalDuration / 6
+
+	// Create a new TimeSeries with 6 points
+	ts := timeseries.New(tsFrom, 6, intervalDuration)
+
+	// Build the query to get unique users affected by errors for each interval
+	// Error is when Status = 0 in mobile_perf_data
+	query := `
+	WITH
+		toUnixTimestamp(@from) as start_time,
+		toUnixTimestamp(@to) as end_time,
+		(end_time - start_time) / 6 as interval_seconds
+	SELECT
+		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		uniqExact(UserID) as unique_users_with_errors
+	FROM
+		mobile_perf_data
+	WHERE
+		Timestamp BETWEEN @from AND @to
+		AND Status = 0
+	GROUP BY
+		interval_start
+	ORDER BY
+		interval_start
+	`
+
+	// Execute the query
+	rows, err := c.Query(ctx, query,
+		clickhouse.Named("from", from.ToStandard()),
+		clickhouse.Named("to", to.ToStandard()),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Process results and populate the time series
+	for rows.Next() {
+		var intervalStart int64
+		var uniqueUsersWithErrors uint64
+
+		if err := rows.Scan(&intervalStart, &uniqueUsersWithErrors); err != nil {
+			return nil, err
+		}
+
+		// Set the data point in the time series
+		ts.Set(timeseries.Time(intervalStart), float32(uniqueUsersWithErrors))
+	}
+
+	return ts, nil
 }
