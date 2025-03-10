@@ -633,12 +633,9 @@ func (f *TrustDomainsForm) Valid() bool {
 	return true
 }
 
-func (f *TrustDomainsForm) Get(project *db.Project, masked bool) {
+func (f *TrustDomainsForm) Get(project *db.Project) {
 	for key := range project.Settings.TrustDomains {
 		f.Domains = append(f.Domains, key)
-	}
-	if masked {
-		f.Domains = []string{"hidden"}
 	}
 }
 

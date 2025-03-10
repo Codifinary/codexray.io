@@ -1498,7 +1498,12 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 		}
 
 	case http.MethodGet:
-		form.Get(project, !isAllowed)
+		if !isAllowed {
+			klog.Warningf("User %s denied GET access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to view Trust domains.", http.StatusForbidden)
+			return
+		}
+		form.Get(project)
 		utils.WriteJson(w, form)
 
 	case http.MethodDelete:
