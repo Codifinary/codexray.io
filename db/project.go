@@ -77,6 +77,9 @@ func (p *Project) applyDefaults() {
 			cfg.Deployments = cfg.Enabled
 		}
 	}
+	if p.Settings.TrustDomains == nil {
+		p.Settings.TrustDomains = make(map[string]struct{})
+	}
 }
 
 func (p *Project) GetCustomApplicationName(instance string) string {
