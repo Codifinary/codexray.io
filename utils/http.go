@@ -8,8 +8,6 @@ import (
 	"time"
 )
 
-const FRONTE_END_BRUM = "http://labs.codexray.io:8022"
-
 type StaticFSWrapper struct {
 	http.FileSystem
 	modTime time.Time
