@@ -6,6 +6,7 @@ import (
 	"codexray/model"
 	"context"
 	"fmt"
+	"sort"
 
 	"k8s.io/klog"
 )
@@ -61,6 +62,9 @@ func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, 
 		return v
 	}
 
+	sort.Slice(countrywiseOverviews, func(i, j int) bool {
+		return countrywiseOverviews[i].ErrorRatePercentage > countrywiseOverviews[j].ErrorRatePercentage
+	})
 	v.CountrywiseOverviews = countrywiseOverviews
 	v.Status = model.OK
 	return v
