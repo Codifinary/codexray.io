@@ -29,20 +29,17 @@ type MobilePerfCountrywiseOverview struct {
 }
 
 func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time) (*MobilePerfResult, error) {
-	// Convert timeseries.Time to standard time.Time for calculations
+
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
 
-	// Calculate the previous time window (same duration as query window, but shifted back in time)
 	windowDuration := toTime.Sub(fromTime)
-	prevToTime := fromTime                          // Previous window ends where current window starts
-	prevFromTime := prevToTime.Add(-windowDuration) // Previous window has same duration
+	prevToTime := fromTime
+	prevFromTime := prevToTime.Add(-windowDuration)
 
-	// Convert back to timeseries.Time
 	prevFrom := timeseries.Time(prevFromTime.Unix())
 	prevTo := timeseries.Time(prevToTime.Unix())
 
-	// Build the query with trend calculations
 	query := `
 WITH 
     current AS (
@@ -81,7 +78,6 @@ SELECT
 FROM 
     current, previous`
 
-	// Execute the query
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
@@ -93,7 +89,6 @@ FROM
 	}
 	defer rows.Close()
 
-	// Process results
 	var result MobilePerfResult
 	if rows.Next() {
 		if err := rows.Scan(
@@ -117,7 +112,6 @@ FROM
 func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	// Build the query to get request counts for each interval
 	query := fmt.Sprintf(`
 	SELECT
 		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
@@ -132,7 +126,6 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 		interval_start
 	`, step)
 
-	// Execute the query
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
@@ -142,7 +135,6 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 	}
 	defer rows.Close()
 
-	// Process results and populate the time series
 	for rows.Next() {
 		var intervalStart uint64
 		var requestCount uint64
@@ -151,8 +143,6 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 			return nil, err
 		}
 
-		// Set the data point in the time series
-		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
 		ts.Set(timeseries.Time(intervalStart/1000), float32(requestCount))
 	}
 
@@ -162,8 +152,6 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	// Build the query to get error counts for each interval
-	// Error is when Status = 0 in mobile_perf_data
 	query := fmt.Sprintf(`
 	SELECT
 		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
@@ -180,7 +168,6 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 		interval_start
 	`, step)
 
-	// Execute the query
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
@@ -190,7 +177,6 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 	}
 	defer rows.Close()
 
-	// Process results and populate the time series
 	for rows.Next() {
 		var intervalStart uint64
 		var errorCount uint64
@@ -201,8 +187,6 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 			return nil, err
 		}
 
-		// Set the data point in the time series (error rate as percentage)
-		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
 		ts.Set(timeseries.Time(intervalStart/1000), float32(errorRate))
 	}
 
@@ -212,8 +196,6 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	// Build the query to get unique users affected by errors for each interval
-	// Error is when Status = 0 in mobile_perf_data
 	query := fmt.Sprintf(`
 	SELECT
 		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
@@ -229,7 +211,6 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 		interval_start
 	`, step)
 
-	// Execute the query
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
@@ -239,7 +220,6 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 	}
 	defer rows.Close()
 
-	// Process results and populate the time series
 	for rows.Next() {
 		var intervalStart uint64
 		var uniqueUsersWithErrors uint64
@@ -248,8 +228,6 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 			return nil, err
 		}
 
-		// Set the data point in the time series
-		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
 		ts.Set(timeseries.Time(intervalStart/1000), float32(uniqueUsersWithErrors))
 	}
 
@@ -257,7 +235,7 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 }
 
 func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to timeseries.Time) ([]MobilePerfCountrywiseOverview, error) {
-	// Build the query to get country-wise performance metrics
+
 	query := `
 	SELECT
 		Country,
@@ -276,7 +254,6 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 		requests DESC
 	`
 
-	// Execute the query
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
@@ -286,7 +263,6 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 	}
 	defer rows.Close()
 
-	// Process results
 	var results []MobilePerfCountrywiseOverview
 	for rows.Next() {
 		var overview MobilePerfCountrywiseOverview
