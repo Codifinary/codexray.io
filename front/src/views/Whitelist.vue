@@ -1,7 +1,7 @@
 <template>
     <div class="container">
-        <v-alert v-if="isHidden" color="red" icon="mdi-alert-octagon-outline" outlined text>
-            You are not authorized to add domains.
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+            {{ error }}
         </v-alert>
         <div v-else>
         <v-form v-model="form.valid" ref="form">
@@ -81,8 +81,9 @@ export default {
                 valid: true
             },
             urls: [],
-            isHidden: false,
             role: '',
+            error: '',
+            message: '',
             dialog: {
                 active: false,
                 loading: false,
@@ -104,11 +105,10 @@ export default {
         get() {
             this.$api.getWhitelistDomains((data, error) => {
                 if (error) {
-                    console.log(error);
+                    this.error = error;
                     return;
                 }
                 this.urls = Array.isArray(data.trust_domain) ? data.trust_domain : [];
-                this.isHidden = this.urls[0] === 'hidden';
             });
         },
         save(domain) {
