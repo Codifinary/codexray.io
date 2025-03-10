@@ -34,6 +34,11 @@
             <RCA v-if="id" :appId="id" />
             <Anomalies v-else />
         </template>
+
+        <template v-if="view === 'MRUM'">
+            <MRUM :tab="tab" :id="id"/>
+        </template>
+
     </div>
 </template>
 
@@ -52,6 +57,7 @@ import RCA from '@/views/RCA.vue';
 import EUM from '@/views/EUM/EUM.vue';
 import EUMApplicationOverview from '@/views/EUM/EUMApplicationOverview.vue';
 import PagePerformanceGraph from '@/views/EUM/PagePerformanceGraph.vue';
+import MRUM from '@/views/MRUM.vue';
 
 export default {
     components: {
@@ -70,11 +76,13 @@ export default {
         EUM,
         EUMApplicationOverview,
         PagePerformanceGraph,
+        MRUM,
     },
     props: {
         view: String,
         id: String,
         report: String,
+        tab: String,
     },
 
     computed: {
@@ -86,6 +94,7 @@ export default {
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
+                MRUM: 'MRUM',
             };
             if (this.$codexray.edition === 'Enterprise') {
                 res.anomalies = 'Anomalies';
@@ -101,11 +110,15 @@ export default {
         view: {
             handler(v) {
                 if (!this.views[v]) {
-                    this.$router.replace({ params: { view: 'applications' } }).catch((err) => err);
+                    this.$router.replace({ params: { view: 'applications' } }).catch(() => {});
                 }
-            },
-            immediate: true,
+            }
         },
+        '$route.params.tab': {
+            handler(newTab) {
+                console.log('Route tab param changed to:', newTab);
+            }
+        }
     },
 };
 </script>
