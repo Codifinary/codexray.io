@@ -405,3 +405,127 @@ func IncidentsToAnnotations(incidents []*ApplicationIncident, ctx timeseries.Con
 	}
 	return res
 }
+
+type EChart struct {
+	Title       string       `json:"title"`
+	Tooltip     Tooltip      `json:"tooltip"`
+	Legend      Legend       `json:"legend"`
+	Grid        *Grid        `json:"grid,omitempty"`
+	XAxis       *Axis        `json:"xAxis,omitempty"`
+	YAxis       *Axis        `json:"yAxis,omitempty"`
+	Series      EChartSeries `json:"series"`
+	Annotations []Annotation `json:"annotations,omitempty"`
+	Color       []string     `json:"color,omitempty"`
+}
+
+type Tooltip struct {
+	Trigger string `json:"trigger"`
+}
+
+type Legend struct {
+	Top    string `json:"top,omitempty"`
+	Left   string `json:"left,omitempty"`
+	Bottom string `json:"bottom,omitempty"`
+}
+
+type Grid struct {
+	Top    int `json:"top,omitempty"`
+	Bottom int `json:"bottom,omitempty"`
+	Left   int `json:"left,omitempty"`
+	Right  int `json:"right,omitempty"`
+}
+
+type Axis struct {
+	Type      string     `json:"type"`
+	Data      []string   `json:"data,omitempty"`
+	Max       string     `json:"max,omitempty"`
+	Inverse   bool       `json:"inverse,omitempty"`
+	AxisLabel *AxisLabel `json:"axisLabel,omitempty"`
+}
+
+type AxisLabel struct {
+	Show      bool   `json:"show,omitempty"`
+	FontSize  int    `json:"fontSize,omitempty"`
+	Formatter string `json:"formatter,omitempty"`
+	Rich      *Rich  `json:"rich,omitempty"`
+}
+
+type Rich struct {
+	Flag *Flag `json:"flag,omitempty"`
+}
+
+type Flag struct {
+	FontSize int `json:"fontSize,omitempty"`
+	Padding  int `json:"padding,omitempty"`
+}
+
+type EChartSeries struct {
+	Name              string      `json:"name"`
+	Type              string      `json:"type"`
+	Radius            []string    `json:"radius,omitempty"`
+	AvoidLabelOverlap bool        `json:"avoidLabelOverlap,omitempty"`
+	ItemStyle         *ItemStyle  `json:"itemStyle,omitempty"`
+	Label             *Label      `json:"label,omitempty"`
+	Emphasis          *Emphasis   `json:"emphasis,omitempty"`
+	LabelLine         *LabelLine  `json:"labelLine,omitempty"`
+	Data              []DataPoint `json:"data"`
+	Color             string      `json:"color,omitempty"`
+	BarWidth          string      `json:"barWidth,omitempty"`
+}
+
+type ItemStyle struct {
+	BorderRadius int    `json:"borderRadius,omitempty"`
+	BorderColor  string `json:"borderColor,omitempty"`
+	BorderWidth  int    `json:"borderWidth,omitempty"`
+}
+
+type Label struct {
+	Show           bool   `json:"show,omitempty"`
+	Position       string `json:"position,omitempty"`
+	Precision      int    `json:"precision,omitempty"`
+	FontSize       int    `json:"fontSize,omitempty"`
+	FontWeight     string `json:"fontWeight,omitempty"`
+	FontFamily     string `json:"fontFamily,omitempty"`
+	ValueAnimation bool   `json:"valueAnimation,omitempty"`
+}
+
+type Emphasis struct {
+	Label *EmphasisLabel `json:"label,omitempty"`
+}
+
+type EmphasisLabel struct {
+	Show       bool   `json:"show,omitempty"`
+	FontSize   int    `json:"fontSize,omitempty"`
+	FontWeight string `json:"fontWeight,omitempty"`
+}
+
+type LabelLine struct {
+	Show bool `json:"show,omitempty"`
+}
+
+type DataPoint struct {
+	Value int    `json:"value"`
+	Name  string `json:"name"`
+}
+
+func NewEChart(title string) *EChart {
+	return &EChart{Title: title}
+}
+
+func (ec *EChart) SetSeries(name, chartType string, data []DataPoint, color ...string) *EChart {
+	s := EChartSeries{Name: name, Type: chartType, Data: data}
+	if len(color) > 0 {
+		s.Color = color[0]
+	}
+	ec.Series = s
+	return ec
+}
+
+func (ec *EChart) AddAnnotation(annotations ...Annotation) *EChart {
+	ec.Annotations = append(ec.Annotations, annotations...)
+	return ec
+}
+
+func (ec *EChart) IsEmpty() bool {
+	return len(ec.Series.Data) == 0
+}

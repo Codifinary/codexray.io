@@ -6,6 +6,7 @@ type Widget struct {
 	Table         *Table         `json:"table,omitempty"`
 	DependencyMap *DependencyMap `json:"dependency_map,omitempty"`
 	Heatmap       *Heatmap       `json:"heatmap,omitempty"`
+	EChart        *EChart        `json:"echart,omitempty"`
 
 	Logs      *Logs      `json:"logs,omitempty"`
 	Profiling *Profiling `json:"profiling,omitempty"`
@@ -26,6 +27,9 @@ func (w *Widget) AddAnnotation(annotations ...Annotation) {
 	}
 	if w.Heatmap != nil {
 		w.Heatmap.AddAnnotation(annotations...)
+	}
+	if w.EChart != nil {
+		w.EChart.AddAnnotation(annotations...)
 	}
 }
 

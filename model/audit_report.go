@@ -176,3 +176,11 @@ func (r *AuditReport) CreateCheck(cfg CheckConfig) *Check {
 	r.Checks = append(r.Checks, ch)
 	return ch
 }
+
+func (r *AuditReport) AddEChartWidget(echart *EChart, doc *DocLink) {
+	widget := &Widget{
+		EChart:  echart,
+		DocLink: doc,
+	}
+	r.AddWidget(widget)
+}
