@@ -20,6 +20,14 @@ type MobilePerfResult struct {
 	UsersImpactedTrend     float64
 }
 
+type MobilePerfCountrywiseOverview struct {
+	Country             string
+	Requests            uint64
+	Errors              uint64
+	ErrorRatePercentage float64
+	AvgResponseTime     float64
+}
+
 func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time) (*MobilePerfResult, error) {
 	// Convert timeseries.Time to standard time.Time for calculations
 	fromTime := from.ToStandard()
@@ -246,4 +254,53 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 	}
 
 	return ts, nil
+}
+
+func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to timeseries.Time) ([]MobilePerfCountrywiseOverview, error) {
+	// Build the query to get country-wise performance metrics
+	query := `
+	SELECT
+		Country,
+		count() as requests,
+		countIf(Status = 0) as errors,
+		if(count() > 0, countIf(Status = 0) / count() * 100, 0) as error_rate_percentage,
+		avg(ResponseTime) as avg_response_time
+	FROM
+		mobile_perf_data
+	WHERE
+		Timestamp BETWEEN @from AND @to
+		AND Country != ''
+	GROUP BY
+		Country
+	ORDER BY
+		requests DESC
+	`
+
+	// Execute the query
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Process results
+	var results []MobilePerfCountrywiseOverview
+	for rows.Next() {
+		var overview MobilePerfCountrywiseOverview
+		if err := rows.Scan(
+			&overview.Country,
+			&overview.Requests,
+			&overview.Errors,
+			&overview.ErrorRatePercentage,
+			&overview.AvgResponseTime,
+		); err != nil {
+			return nil, err
+		}
+		results = append(results, overview)
+	}
+
+	return results, nil
 }

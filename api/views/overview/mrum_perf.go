@@ -11,10 +11,11 @@ import (
 )
 
 type MrumPerfView struct {
-	Status  model.Status       `json:"status"`
-	Message string             `json:"message"`
-	Summary MrumPerfData       `json:"summary"`
-	Report  *model.AuditReport `json:"report"`
+	Status               model.Status                               `json:"status"`
+	Message              string                                     `json:"message"`
+	Summary              MrumPerfData                               `json:"summary"`
+	Report               *model.AuditReport                         `json:"report"`
+	CountrywiseOverviews []clickhouse.MobilePerfCountrywiseOverview `json:"countrywiseOverviews"`
 }
 
 type MrumPerfData struct {
@@ -52,6 +53,15 @@ func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, 
 	}
 
 	v.Report = auditor.GenerateMrumPerfReport(w, ch, w.Ctx.From, w.Ctx.To)
+	countrywiseOverviews, err := ch.GetMobilePerfCountrywiseOverviews(ctx, w.Ctx.From, w.Ctx.To)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+		return v
+	}
+
+	v.CountrywiseOverviews = countrywiseOverviews
 	v.Status = model.OK
 	return v
 }
