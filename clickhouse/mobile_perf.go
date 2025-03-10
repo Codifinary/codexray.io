@@ -4,7 +4,6 @@ import (
 	"codexray/timeseries"
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -26,9 +25,10 @@ func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.T
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
 
-	// Calculate the previous time window (1 hour before the query window)
-	prevFromTime := fromTime.Add(-24 * time.Hour)
-	prevToTime := toTime.Add(-1 * time.Hour)
+	// Calculate the previous time window (same duration as query window, but shifted back in time)
+	windowDuration := toTime.Sub(fromTime)
+	prevToTime := fromTime                          // Previous window ends where current window starts
+	prevFromTime := prevToTime.Add(-windowDuration) // Previous window has same duration
 
 	// Convert back to timeseries.Time
 	prevFrom := timeseries.Time(prevFromTime.Unix())
@@ -63,22 +63,22 @@ WITH
 SELECT 
     current.totalRequests,
     current.requestsPerSecond,
-    multiIf(previous.totalRequests > 0, (current.totalRequests - previous.totalRequests) / toFloat64(previous.totalRequests) * 100, 0) AS requestsTrend,
+    (current.totalRequests - previous.totalRequests) / greatest(1, toFloat64(previous.totalRequests)) * 100 AS requestsTrend,
     current.totalErrors,
     current.errorsPerSecond,
-    multiIf(previous.totalErrors > 0, (current.totalErrors - previous.totalErrors) / toFloat64(previous.totalErrors) * 100, 0) AS errorsTrend,
+    (current.totalErrors - previous.totalErrors) / greatest(1, toFloat64(previous.totalErrors)) * 100 AS errorsTrend,
     current.usersImpacted,
     current.usersImpactedPerSecond,
-    multiIf(previous.usersImpacted > 0, (current.usersImpacted - previous.usersImpacted) / toFloat64(previous.usersImpacted) * 100, 0) AS usersImpactedTrend
+    (current.usersImpacted - previous.usersImpacted) / greatest(1, toFloat64(previous.usersImpacted)) * 100 AS usersImpactedTrend
 FROM 
     current, previous`
 
 	// Execute the query
 	rows, err := c.Query(ctx, query,
-		clickhouse.Named("from", fromTime),
-		clickhouse.Named("to", toTime),
-		clickhouse.Named("prevFrom", prevFrom.ToStandard()),
-		clickhouse.Named("prevTo", prevTo.ToStandard()),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("prevFrom", prevFrom.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("prevTo", prevTo.ToStandard(), clickhouse.NanoSeconds),
 	)
 	if err != nil {
 		return nil, err
