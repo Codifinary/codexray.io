@@ -4,10 +4,8 @@ import (
 	"codexray/auditor"
 	"codexray/clickhouse"
 	"codexray/model"
-	"codexray/utils"
 	"context"
 	"fmt"
-	"strings"
 
 	"k8s.io/klog"
 )
@@ -33,16 +31,7 @@ type MrumPerfData struct {
 
 func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumPerfView {
 	v := &MrumPerfView{}
-	
-	// Handle empty query case by setting default interval to "now-1hr"
-	if query == "" {
-		query = "now-1hr"
-	}
-	
-	parts := strings.Split(query, "-")
-	fromStdTime := utils.ParseTime(w.Ctx.To, parts[0], w.Ctx.From)
-	toStdTime := utils.ParseTime(w.Ctx.To, parts[1], w.Ctx.To)
-	rows, err := ch.GetMobilePerfResults(ctx, &fromStdTime, &toStdTime)
+	rows, err := ch.GetMobilePerfResults(ctx, w.Ctx.From, w.Ctx.To)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -62,7 +51,7 @@ func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, 
 		UsersImpactedTrend:     rows.UsersImpactedTrend,
 	}
 
-	v.Report = auditor.GenerateMrumPerfReport(w, ch, &fromStdTime, &toStdTime)
+	v.Report = auditor.GenerateMrumPerfReport(w, ch, w.Ctx.From, w.Ctx.To)
 	v.Status = model.OK
 	return v
 }

@@ -3,6 +3,7 @@ package clickhouse
 import (
 	"codexray/timeseries"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
@@ -20,7 +21,7 @@ type MobilePerfResult struct {
 	UsersImpactedTrend     float64
 }
 
-func (c *Client) GetMobilePerfResults(ctx context.Context, from, to *timeseries.Time) (*MobilePerfResult, error) {
+func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time) (*MobilePerfResult, error) {
 	// Convert timeseries.Time to standard time.Time for calculations
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
@@ -105,26 +106,13 @@ FROM
 	return &result, nil
 }
 
-func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
-	// Use timeseries.Time directly
-	tsFrom := *from
-	tsTo := *to
-
-	// Calculate the interval duration (divide the total time range into 6 equal parts)
-	totalDuration := tsTo.Sub(tsFrom)
-	intervalDuration := totalDuration / 6
-
-	// Create a new TimeSeries with 6 points
-	ts := timeseries.New(tsFrom, 6, intervalDuration)
+func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	// Build the query to get request counts for each interval
-	query := `
-	WITH
-		toUnixTimestamp(@from) as start_time,
-		toUnixTimestamp(@to) as end_time,
-		(end_time - start_time) / 6 as interval_seconds
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
 		count() as request_count
 	FROM
 		mobile_perf_data
@@ -134,12 +122,12 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to *time
 		interval_start
 	ORDER BY
 		interval_start
-	`
+	`, step)
 
 	// Execute the query
 	rows, err := c.Query(ctx, query,
-		clickhouse.Named("from", from.ToStandard()),
-		clickhouse.Named("to", to.ToStandard()),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	)
 	if err != nil {
 		return nil, err
@@ -148,7 +136,7 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to *time
 
 	// Process results and populate the time series
 	for rows.Next() {
-		var intervalStart int64
+		var intervalStart uint64
 		var requestCount uint64
 
 		if err := rows.Scan(&intervalStart, &requestCount); err != nil {
@@ -156,33 +144,21 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to *time
 		}
 
 		// Set the data point in the time series
-		ts.Set(timeseries.Time(intervalStart), float32(requestCount))
+		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
+		ts.Set(timeseries.Time(intervalStart/1000), float32(requestCount))
 	}
 
 	return ts, nil
 }
 
-func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
-	// Use timeseries.Time directly
-	tsFrom := *from
-	tsTo := *to
-
-	// Calculate the interval duration (divide the total time range into 6 equal parts)
-	totalDuration := tsTo.Sub(tsFrom)
-	intervalDuration := totalDuration / 6
-
-	// Create a new TimeSeries with 6 points
-	ts := timeseries.New(tsFrom, 6, intervalDuration)
+func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	// Build the query to get error counts for each interval
 	// Error is when Status = 0 in mobile_perf_data
-	query := `
-	WITH
-		toUnixTimestamp(@from) as start_time,
-		toUnixTimestamp(@to) as end_time,
-		(end_time - start_time) / 6 as interval_seconds
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
 		countIf(Status = 0) as error_count,
 		count() as total_count,
 		if(total_count > 0, error_count / total_count * 100, 0) as error_rate
@@ -194,12 +170,12 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to *tim
 		interval_start
 	ORDER BY
 		interval_start
-	`
+	`, step)
 
 	// Execute the query
 	rows, err := c.Query(ctx, query,
-		clickhouse.Named("from", from.ToStandard()),
-		clickhouse.Named("to", to.ToStandard()),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	)
 	if err != nil {
 		return nil, err
@@ -208,43 +184,31 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to *tim
 
 	// Process results and populate the time series
 	for rows.Next() {
-		var intervalStart int64
+		var intervalStart uint64
 		var errorCount uint64
 		var totalCount uint64
-		var errorRate float32
+		var errorRate float64
 
 		if err := rows.Scan(&intervalStart, &errorCount, &totalCount, &errorRate); err != nil {
 			return nil, err
 		}
 
 		// Set the data point in the time series (error rate as percentage)
-		ts.Set(timeseries.Time(intervalStart), errorRate)
+		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
+		ts.Set(timeseries.Time(intervalStart/1000), float32(errorRate))
 	}
 
 	return ts, nil
 }
 
-func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to *timeseries.Time) (*timeseries.TimeSeries, error) {
-	// Use timeseries.Time directly
-	tsFrom := *from
-	tsTo := *to
-
-	// Calculate the interval duration (divide the total time range into 6 equal parts)
-	totalDuration := tsTo.Sub(tsFrom)
-	intervalDuration := totalDuration / 6
-
-	// Create a new TimeSeries with 6 points
-	ts := timeseries.New(tsFrom, 6, intervalDuration)
+func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	// Build the query to get unique users affected by errors for each interval
 	// Error is when Status = 0 in mobile_perf_data
-	query := `
-	WITH
-		toUnixTimestamp(@from) as start_time,
-		toUnixTimestamp(@to) as end_time,
-		(end_time - start_time) / 6 as interval_seconds
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, interval_seconds * number + start_time, 'second')) as interval_start,
+		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
 		uniqExact(UserID) as unique_users_with_errors
 	FROM
 		mobile_perf_data
@@ -255,12 +219,12 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 		interval_start
 	ORDER BY
 		interval_start
-	`
+	`, step)
 
 	// Execute the query
 	rows, err := c.Query(ctx, query,
-		clickhouse.Named("from", from.ToStandard()),
-		clickhouse.Named("to", to.ToStandard()),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	)
 	if err != nil {
 		return nil, err
@@ -269,7 +233,7 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 
 	// Process results and populate the time series
 	for rows.Next() {
-		var intervalStart int64
+		var intervalStart uint64
 		var uniqueUsersWithErrors uint64
 
 		if err := rows.Scan(&intervalStart, &uniqueUsersWithErrors); err != nil {
@@ -277,7 +241,8 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 		}
 
 		// Set the data point in the time series
-		ts.Set(timeseries.Time(intervalStart), float32(uniqueUsersWithErrors))
+		// Convert back from milliseconds to seconds for consistency with GetPerformanceTimeSeries
+		ts.Set(timeseries.Time(intervalStart/1000), float32(uniqueUsersWithErrors))
 	}
 
 	return ts, nil
