@@ -270,6 +270,7 @@ func main() {
 
 	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/echart", a.Auth(a.GenerateAuditReport)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
