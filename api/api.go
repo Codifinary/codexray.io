@@ -44,6 +44,7 @@ type Api struct {
 
 	authSecret        string
 	authAnonymousRole rbac.RoleName
+	Domains           map[string]struct{}
 }
 
 func NewApi(cache *cache.Cache, db *db.DB, collector *collector.Collector, pricing *pricing.Manager, roles rbac.RoleManager,
@@ -1492,6 +1493,7 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 				http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
 				return
 			}
+			api.Domains = project.Settings.TrustDomains
 		} else {
 			http.Error(w, "Failed to update database", http.StatusConflict)
 			return
@@ -1527,6 +1529,8 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 			http.Error(w, "Failed to update database", http.StatusInternalServerError)
 			return
 		}
+		api.Domains = project.Settings.TrustDomains
+		w.WriteHeader(http.StatusOK)
 
 	case http.MethodPut:
 		if !isAllowed {
@@ -1549,6 +1553,8 @@ func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *d
 			http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
 			return
 		}
+		api.Domains = project.Settings.TrustDomains
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
