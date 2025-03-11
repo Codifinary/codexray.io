@@ -665,5 +665,5 @@ func (f *TrustDomainsForm) Update(ctx context.Context, project *db.Project, clea
 }
 
 func isValidDomain(domain string) bool {
-	return strings.Contains(domain, ".") && !strings.Contains(domain, " ")
+	return !strings.Contains(domain, " ")
 }
