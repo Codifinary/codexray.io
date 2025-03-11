@@ -17,6 +17,7 @@ type MrumPerfView struct {
 	Summary              MrumPerfData                               `json:"summary"`
 	Report               *model.AuditReport                         `json:"report"`
 	CountrywiseOverviews []clickhouse.MobilePerfCountrywiseOverview `json:"countrywiseOverviews"`
+	Heatmap              *model.Heatmap                             `json:"heatmap"`
 }
 
 type MrumPerfData struct {
@@ -33,6 +34,33 @@ type MrumPerfData struct {
 
 func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumPerfView {
 	v := &MrumPerfView{}
+
+	if ch == nil {
+		v.Status = model.WARNING
+		v.Message = "clickhouse not available"
+		return v
+	}
+
+	sq := clickhouse.SpanQuery{
+		Ctx: w.Ctx,
+	}
+
+	histogram, err := ch.GetHttpResponsePerfHistogram(ctx, sq)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+		return v
+	}
+
+	if len(histogram) > 1 {
+		v.Heatmap = model.NewHeatmap(w.Ctx, "HTTP Response Latency & Errors heatmap, requests per second")
+		for _, h := range model.HistogramSeries(histogram[1:], 0, 0) {
+			v.Heatmap.AddSeries(h.Name, h.Title, h.Data, h.Threshold, h.Value)
+		}
+		v.Heatmap.AddSeries("errors", "errors", histogram[0].TimeSeries, "", "err")
+	}
+
 	rows, err := ch.GetMobilePerfResults(ctx, w.Ctx.From, w.Ctx.To)
 	if err != nil {
 		klog.Errorln(err)

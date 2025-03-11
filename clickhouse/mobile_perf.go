@@ -1,9 +1,12 @@
 package clickhouse
 
 import (
+	"codexray/model"
 	"codexray/timeseries"
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -279,4 +282,77 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 	}
 
 	return results, nil
+}
+
+func (c *Client) GetHttpResponsePerfHistogram(ctx context.Context, q SpanQuery) ([]model.HistogramBucket, error) {
+	filter, filterArgs := q.RootSpansFilter()
+	return c.getHttpResponsePerfHistogram(ctx, q, filter, filterArgs)
+}
+
+func (c *Client) getHttpResponsePerfHistogram(ctx context.Context, q SpanQuery, filters []string, filterArgs []any) ([]model.HistogramBucket, error) {
+	step := q.Ctx.Step
+	from := q.Ctx.From
+	to := q.Ctx.To.Add(step)
+
+	tsFilter := "Timestamp BETWEEN @from AND @to"
+	filters = append(filters, tsFilter)
+	filterArgs = append(filterArgs,
+		clickhouse.Named("step", step),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+
+	query := "SELECT toStartOfInterval(Timestamp, INTERVAL @step second) as timeInterval, count(1) as requestCount, countIf(Status = 0) as errorCount"
+	query += " FROM mobile_perf_data"
+	query += " WHERE " + strings.Join(filters, " AND ")
+	query += " GROUP BY timeInterval"
+	query += " ORDER BY timeInterval"
+
+	rows, err := c.Query(ctx, query, filterArgs...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var t time.Time
+	var requestCount, errorCount uint64
+	totalRequests := timeseries.New(from, int(to.Sub(from)/step), step)
+	errorRequests := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	var maxRequestCount uint64 = 0
+
+	for rows.Next() {
+		if err = rows.Scan(&t, &requestCount, &errorCount); err != nil {
+			return nil, err
+		}
+
+		ts := timeseries.Time(t.Unix())
+		totalRequests.Set(ts, float32(requestCount))
+		errorRequests.Set(ts, float32(errorCount))
+
+		if requestCount > maxRequestCount {
+			maxRequestCount = requestCount
+		}
+	}
+
+	if maxRequestCount == 0 {
+		return nil, nil
+	}
+
+	numBuckets := 10
+	bucketSize := float32(maxRequestCount) / float32(numBuckets)
+
+	res := []model.HistogramBucket{
+		{TimeSeries: errorRequests},
+	}
+
+	for i := 1; i <= numBuckets; i++ {
+		bucketLimit := bucketSize * float32(i)
+		res = append(res, model.HistogramBucket{
+			Le:         bucketLimit,
+			TimeSeries: totalRequests,
+		})
+	}
+
+	return res, nil
 }
