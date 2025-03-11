@@ -29,6 +29,7 @@ type MobilePerfCountrywiseOverview struct {
 	Errors              uint64
 	ErrorRatePercentage float64
 	AvgResponseTime     float64
+	GeoMapColorCode     string
 }
 
 func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time) (*MobilePerfResult, error) {
@@ -278,6 +279,20 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 		); err != nil {
 			return nil, err
 		}
+
+		switch {
+		case overview.ErrorRatePercentage <= 20:
+			overview.GeoMapColorCode = "#FFEBCD" // Lightest orange (BlanchedAlmond)
+		case overview.ErrorRatePercentage <= 40:
+			overview.GeoMapColorCode = "#FFA07A" // Light orange (LightSalmon)
+		case overview.ErrorRatePercentage <= 60:
+			overview.GeoMapColorCode = "#FF8C00" // Medium orange (DarkOrange)
+		case overview.ErrorRatePercentage <= 80:
+			overview.GeoMapColorCode = "#FF4500" // Dark orange (OrangeRed)
+		default: // > 80%
+			overview.GeoMapColorCode = "#FF0000" // Darkest orange/red (Red)
+		}
+
 		results = append(results, overview)
 	}
 
