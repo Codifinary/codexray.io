@@ -198,6 +198,7 @@ func main() {
 	if err != nil {
 		klog.Exitln(err)
 	}
+	a.Domains = defaultProject.Settings.TrustDomains
 
 	var statsCollector *stats.Collector
 	if !*disableStats {
@@ -206,7 +207,7 @@ func main() {
 
 	router := mux.NewRouter()
 	router.Use(func(next http.Handler) http.Handler {
-		return utils.EnableCORS(next, defaultProject.Settings.TrustDomains)
+		return utils.EnableCORS(next, a.Domains)
 	})
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {}).Methods(http.MethodGet)
@@ -224,7 +225,7 @@ func main() {
 	if *urlBasePath != "/" {
 		r = router.PathPrefix(strings.TrimRight(*urlBasePath, "/")).Subrouter()
 		r.Use(func(next http.Handler) http.Handler {
-			return utils.EnableCORS(next, defaultProject.Settings.TrustDomains)
+			return utils.EnableCORS(next, a.Domains)
 		})
 	}
 	r.HandleFunc("/api/login", a.Login).Methods(http.MethodPost)
