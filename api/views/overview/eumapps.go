@@ -16,8 +16,7 @@ type EumView struct {
 	Status    model.Status      `json:"status"`
 	Message   string            `json:"message"`
 	Overviews []ServiceOverview `json:"overviews"`
-	Totals    Total             `json:"totals"`
-	Trends    Trend             `json:"trends"`
+	BadgeView Badge             `json:"badgeView"`
 	Limit     int               `json:"limit"`
 }
 
@@ -32,18 +31,13 @@ type ServiceOverview struct {
 	Requests           uint64  `json:"requests"`
 }
 
-type Total struct {
-	TotalRequests uint64  `json:"totalRequests"`
-	TotalErrors   uint64  `json:"totalErrors"`
-	RequestPerSec float64 `json:"requestPerSec"`
-	ErrorPerSec   float64 `json:"errorPerSec"`
-}
-
-type Trend struct {
-	RequestUpTrend bool    `json:"requestUpTrend"`
-	RequestTrend   float64 `json:"requestTrend"`
-	ErrorUpTrend   bool    `json:"errorUpTrend"`
-	ErrorTrend     float64 `json:"errorTrend"`
+type Badge struct {
+	TotalApplications uint64  `json:"totalApplications"`
+	TotalPages        uint64  `json:"totalPages"`
+	AvgLatency        float64 `json:"avgLatency"`
+	TotalErrors       uint64  `json:"totalError"`
+	ErrorPerSec       float64 `json:"errorPerSec"`
+	ErrorTrend        float64 `json:"errorTrend"`
 }
 
 func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *EumView {
@@ -52,8 +46,7 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 	from := w.Ctx.From.ToStandard()
 	to := w.Ctx.To.ToStandard()
 
-	// Get service overviews
-	overviews, err := getServiceOverviews(ctx, ch, from, to)
+	overviews, badge, err := getServiceOverviews(ctx, ch, from, to)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -62,30 +55,22 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 	}
 
 	v.Overviews = overviews
-
-	// Calculate totals and trends
-	totals, trends, err := calculateTotalsAndTrends(ctx, ch, from, to)
-	if err != nil {
-		klog.Errorln(err)
-		v.Status = model.WARNING
-		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
-		return v
-	}
-
-	v.Totals = totals
-	v.Trends = trends
+	v.BadgeView = badge
 
 	v.Status = model.OK
 	return v
 }
 
-func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.Time) ([]ServiceOverview, error) {
+func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.Time) ([]ServiceOverview, Badge, error) {
 	rows, err := ch.GetServiceOverviews(ctx, &from, &to)
 	if err != nil {
-		return nil, err
+		return nil, Badge{}, err
 	}
 
 	var overviews []ServiceOverview
+	var totalApplications, totalPages uint64
+	var totalLatency float64
+
 	for _, row := range rows {
 		overviews = append(overviews, ServiceOverview{
 			ServiceName:        row.ServiceName,
@@ -97,53 +82,44 @@ func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to ti
 			Requests:           row.Requests,
 			AppType:            row.AppType,
 		})
+		totalApplications++
+		totalPages += row.Pages
+		totalLatency += row.AvgLoadPageTime
 	}
 
 	sort.Slice(overviews, func(i, j int) bool {
 		return overviews[i].ServiceName < overviews[j].ServiceName
 	})
 
-	return overviews, nil
-}
+	// Calculate average latency
+	avgLatency := totalLatency / float64(totalApplications)
 
-func calculateTotalsAndTrends(ctx context.Context, ch *clickhouse.Client, from, to time.Time) (Total, Trend, error) {
-	requests, err := ch.GetTotalRequests(ctx, &from, &to, "", "")
+	// Get total errors and error trend
+	totalErrors, err := ch.GetTotalErrors(ctx, &from, &to, "", "")
 	if err != nil {
-		return Total{}, Trend{}, err
-	}
-	errors, err := ch.GetTotalErrors(ctx, &from, &to, "", "")
-	if err != nil {
-		return Total{}, Trend{}, err
+		return nil, Badge{}, err
 	}
 
+	var errorTrend float64
 	duration := to.Sub(from)
-	totals := Total{
-		TotalRequests: requests,
-		TotalErrors:   errors,
-		RequestPerSec: float64(requests) / duration.Seconds(),
-		ErrorPerSec:   float64(errors) / duration.Seconds(),
-	}
-
-	var trends Trend
 	if duration == time.Hour {
-		previousHour := from.Add(-1 * time.Hour)
-		previousTotalRequests, err := ch.GetTotalRequests(ctx, &previousHour, &from, "", "")
+		previousFrom := from.Add(-duration)
+		previousTotalErrors, err := ch.GetTotalErrors(ctx, &previousFrom, &from, "", "")
 		if err != nil {
-			return Total{}, Trend{}, err
+			return nil, Badge{}, err
 		}
-
-		previousTotalErrors, err := ch.GetTotalErrors(ctx, &previousHour, &from, "", "")
-		if err != nil {
-			return Total{}, Trend{}, err
-		}
-
-		trends = Trend{
-			RequestUpTrend: requests > previousTotalRequests,
-			RequestTrend:   float64(requests-previousTotalRequests) / float64(previousTotalRequests) * 100,
-			ErrorUpTrend:   errors > previousTotalErrors,
-			ErrorTrend:     float64(errors-previousTotalErrors) / float64(previousTotalErrors) * 100,
-		}
+		errorTrend = float64(totalErrors-previousTotalErrors) / float64(previousTotalErrors) * 100
+	} else {
+		errorTrend = 0
 	}
 
-	return totals, trends, nil
+	badge := Badge{
+		TotalApplications: totalApplications,
+		TotalPages:        totalPages,
+		AvgLatency:        avgLatency,
+		TotalErrors:       totalErrors,
+		ErrorTrend:        errorTrend,
+	}
+
+	return overviews, badge, nil
 }
