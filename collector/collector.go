@@ -58,6 +58,9 @@ type Collector struct {
 	mobilePerfBatches     map[db.ProjectId]*MobilePerfBatch
 	mobilePerfBatchesLock sync.Mutex
 
+	mobileCrashReportBatches     map[db.ProjectId]*MobileCrashReportBatch
+	mobileCrashReportBatchesLock sync.Mutex
+
 	perfBatches     map[db.ProjectId]*PerfBatch
 	perfBatchesLock sync.Mutex
 
@@ -67,17 +70,18 @@ type Collector struct {
 
 func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationClickhouse, globalPrometheus *db.IntegrationsPrometheus) *Collector {
 	c := &Collector{
-		db:                database,
-		cache:             cache,
-		globalClickHouse:  globalClickHouse,
-		globalPrometheus:  globalPrometheus,
-		clickhouseClients: map[db.ProjectId]*chClient{},
-		traceBatches:      map[db.ProjectId]*TracesBatch{},
-		profileBatches:    map[db.ProjectId]*ProfilesBatch{},
-		mobilePerfBatches: map[db.ProjectId]*MobilePerfBatch{},
-		logBatches:        map[db.ProjectId]*LogsBatch{},
-		perfBatches:       map[db.ProjectId]*PerfBatch{},
-		errLogBatches:     map[db.ProjectId]*ErrLogBatch{},
+		db:                       database,
+		cache:                    cache,
+		globalClickHouse:         globalClickHouse,
+		globalPrometheus:         globalPrometheus,
+		clickhouseClients:        map[db.ProjectId]*chClient{},
+		traceBatches:             map[db.ProjectId]*TracesBatch{},
+		profileBatches:           map[db.ProjectId]*ProfilesBatch{},
+		mobilePerfBatches:        map[db.ProjectId]*MobilePerfBatch{},
+		mobileCrashReportBatches: map[db.ProjectId]*MobileCrashReportBatch{},
+		logBatches:               map[db.ProjectId]*LogsBatch{},
+		perfBatches:              map[db.ProjectId]*PerfBatch{},
+		errLogBatches:            map[db.ProjectId]*ErrLogBatch{},
 	}
 
 	c.updateProjects()
@@ -384,5 +388,18 @@ func (c *Collector) getMobilePerfBatch(project *db.Project) *MobilePerfBatch {
 		c.mobilePerfBatches[project.Id] = b
 	}
 
+	return b
+}
+
+func (c *Collector) getMobileCrashReportBatch(project *db.Project) *MobileCrashReportBatch {
+	c.mobileCrashReportBatchesLock.Lock()
+	defer c.mobileCrashReportBatchesLock.Unlock()
+	b := c.mobileCrashReportBatches[project.Id]
+	if b == nil {
+		b = NewMobileCrashReportBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileCrashReportBatches[project.Id] = b
+	}
 	return b
 }
