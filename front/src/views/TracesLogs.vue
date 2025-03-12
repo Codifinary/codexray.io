@@ -63,7 +63,7 @@
                 <Chart v-if="chart" :chart="chart" :selection="{}" @select="zoom" class="my-3" />
 
                 <div>
-                    <v-simple-table v-if="entries" dense class="entries">
+                    <v-simple-table v-if="entries && entries.length" dense class="entries">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -292,6 +292,10 @@ export default {
 
                 if (!this.query.severity.length) {
                     this.query.severity = this.data.all_severity;
+                }
+
+                if (this.data.message === 'No Messages Found') {
+                    this.loadingError = this.data.message;
                 }
             });
         },

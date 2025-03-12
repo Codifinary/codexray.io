@@ -156,6 +156,171 @@ func (c *Client) GetSpansByTraceId(ctx context.Context, traceId string) ([]*mode
 	)
 }
 
+func (c *Client) GetAggregatedTracesSummary(ctx context.Context, w *model.World) (*model.TracesSummary, error) {
+
+	query := `
+        SELECT
+		    COUNT(DISTINCT ServiceName) AS service_count,
+            COUNT(*) AS request_count,
+            AVG(Duration) AS avg_latency,
+            COUNTIf(StatusCode = 'STATUS_CODE_ERROR') / COUNT(*) AS error_rate
+        FROM @@table_otel_traces@@
+        WHERE Timestamp BETWEEN @from AND @to
+        AND NOT startsWith(ServiceName, '/')
+    `
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", w.Ctx.From.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", w.Ctx.To.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var serviceCount uint64
+	var requestCount uint64
+	var avgLatency float64
+	var errorRate float64
+	if rows.Next() {
+		if err := rows.Scan(&serviceCount, &requestCount, &avgLatency, &errorRate); err != nil {
+			return nil, fmt.Errorf("failed to scan result: %w", err)
+		}
+	}
+
+	duration := w.Ctx.To.ToStandard().Sub(w.Ctx.From.ToStandard()).Seconds()
+	requestPerSecond := float32(requestCount) / float32(duration)
+
+	return &model.TracesSummary{
+		Services:         serviceCount,
+		RequestCount:     requestCount,
+		RequestPerSecond: requestPerSecond,
+		ErrorRate:        float32(errorRate),
+		AvgLatency:       avgLatency / 1000000,
+	}, nil
+}
+
+func (c *Client) GetServiceSpecificTraceViews(ctx context.Context, w *model.World) ([]model.TraceView, error) {
+	duration := w.Ctx.To.ToStandard().Sub(w.Ctx.From.ToStandard()).Seconds()
+
+	traceQuery := `
+        SELECT
+            ServiceName,
+            COUNT(*) AS total,
+            COUNTIf(StatusCode = 'STATUS_CODE_ERROR') AS failed,
+            AVG(Duration) AS avg_latency,
+            quantile(0.5)(Duration) AS p50,
+            quantile(0.95)(Duration) AS p95,
+            quantile(0.99)(Duration) AS p99
+        FROM @@table_otel_traces@@
+        WHERE Timestamp BETWEEN @from AND @to
+        AND NOT startsWith(ServiceName, '/')
+        GROUP BY ServiceName
+    `
+
+	traceRows, err := c.Query(ctx, traceQuery,
+		clickhouse.DateNamed("from", w.Ctx.From.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", w.Ctx.To.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute trace query: %w", err)
+	}
+	defer traceRows.Close()
+
+	logQuery := `
+        SELECT
+            ServiceName,
+            COUNT(*) AS error_logs
+        FROM @@table_otel_logs@@
+        WHERE SeverityText = 'Error' AND Timestamp BETWEEN @from AND @to
+        AND NOT startsWith(ServiceName, '/')
+        GROUP BY ServiceName
+    `
+
+	logRows, err := c.Query(ctx, logQuery,
+		clickhouse.DateNamed("from", w.Ctx.From.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", w.Ctx.To.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute log query: %w", err)
+	}
+	defer logRows.Close()
+
+	errorLogsMap := make(map[string]int32)
+	for logRows.Next() {
+		var serviceName string
+		var errorLogs uint64
+		if err := logRows.Scan(&serviceName, &errorLogs); err != nil {
+			return nil, fmt.Errorf("failed to scan log result: %w", err)
+		}
+		errorLogsMap[serviceName] = int32(errorLogs)
+	}
+
+	var traceViews []model.TraceView
+	for traceRows.Next() {
+		var serviceName string
+		var total, failed uint64
+		var avgLatency, p50, p95, p99 float64
+		if err := traceRows.Scan(&serviceName, &total, &failed, &avgLatency, &p50, &p95, &p99); err != nil {
+			return nil, fmt.Errorf("failed to scan trace result: %w", err)
+		}
+
+		traceViews = append(traceViews, model.TraceView{
+			ServiceName:       serviceName,
+			Total:             float32(total) / float32(duration),
+			Failed:            (float32(failed) / float32(total)) * 100,
+			Latency:           avgLatency / 1000000,
+			DurationQuantiles: []float64{p50 / 1000000, p95 / 1000000, p99 / 1000000},
+			ErrorLogs:         errorLogsMap[serviceName],
+		})
+	}
+
+	return traceViews, nil
+}
+
+func (c *Client) GetTraceOverview(ctx context.Context, q SpanQuery, serviceName string) (uint64, float64, error) {
+	query := `
+        SELECT
+            COUNT(*) AS requests,
+            AVG(Duration) AS avg_latency
+        FROM otel_traces
+        WHERE Timestamp BETWEEN @from AND @to
+        AND ServiceName = @serviceName
+    `
+
+	// var serviceName string
+	// for _, filter := range q.Filters {
+	// 	if filter.Field == "ServiceName" {
+	// 		serviceName = filter.Value
+	// 		break
+	// 	}
+	// }
+
+	// if serviceName == "" {
+	// 	return 0, 0, fmt.Errorf("service name is required")
+	// }
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", q.TsFrom.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", q.TsTo.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("serviceName", q.ServiceName),
+	)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var requests uint64
+	var avgLatency float64
+
+	if rows.Next() {
+		if err := rows.Scan(&requests, &avgLatency); err != nil {
+			return 0, 0, fmt.Errorf("failed to scan result: %w", err)
+		}
+	}
+
+	return requests, avgLatency / 1000000, nil
+}
 func (c *Client) getSpansHistogram(ctx context.Context, q SpanQuery, filters []string, filterArgs []any) ([]model.HistogramBucket, error) {
 	step := q.Ctx.Step
 	from := q.Ctx.From
@@ -661,7 +826,8 @@ type SpanQuery struct {
 	Filters          []SpanFilter
 	ExcludePeerAddrs []string
 
-	Diff bool
+	Diff        bool
+	ServiceName string
 }
 
 func (q SpanQuery) IsSelectionDefined() bool {
@@ -698,13 +864,18 @@ func (q SpanQuery) DurationFilter() (string, []any) {
 
 func (q SpanQuery) RootSpansFilter() ([]string, []any) {
 	filter := []string{
-		"ParentSpanId = ''",
 		"NOT startsWith(ServiceName, '/')",
+	}
+	if q.ServiceName != "" {
+		filter = append(filter, "ServiceName = @serviceName")
 	}
 	for _, f := range q.Filters {
 		filter = append(filter, f.String())
 	}
 	var args []any
+	if q.ServiceName != "" {
+		args = append(args, clickhouse.Named("serviceName", q.ServiceName))
+	}
 	if len(q.ExcludePeerAddrs) > 0 {
 		filter = append(filter, "NetSockPeerAddr NOT IN (@addrs)")
 		args = append(args, clickhouse.Named("addrs", q.ExcludePeerAddrs))
@@ -716,10 +887,16 @@ func (q SpanQuery) SpansByServiceNameFilter() ([]string, []any) {
 	filter := []string{
 		"SpanKind = 'SPAN_KIND_SERVER'",
 	}
+	if q.ServiceName != "" {
+		filter = append(filter, "ServiceName = @serviceName")
+	}
 	for _, f := range q.Filters {
 		filter = append(filter, f.String())
 	}
 	var args []any
+	if q.ServiceName != "" {
+		args = append(args, clickhouse.Named("serviceName", q.ServiceName))
+	}
 	if len(q.ExcludePeerAddrs) > 0 {
 		filter = append(filter, "NetSockPeerAddr NOT IN (@addrs)")
 		args = append(args, clickhouse.Named("addrs", q.ExcludePeerAddrs))
@@ -922,4 +1099,76 @@ WHERE
 		res[s.TraceId].Spans = append(res[s.TraceId].Spans, &s)
 	}
 	return maps.Values(res), nil
+}
+
+func (c *Client) GetTracesChartsByServiceName(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+    SELECT
+        toUnixTimestamp(toStartOfInterval(t.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+            COUNT(*) AS requests,
+            COUNTIf(StatusCode = 'STATUS_CODE_ERROR') AS errors,
+            quantile(0.25)(Duration) AS p25,
+            quantile(0.50)(Duration) AS p50,
+            quantile(0.75)(Duration) AS p75,
+            quantile(0.95)(Duration) AS p95,
+            quantile(0.99)(Duration) AS p99
+
+    FROM
+        @@table_otel_traces@@ t
+
+    WHERE
+        t.ServiceName = @serviceName
+        AND t.Timestamp BETWEEN @from AND @to
+    GROUP BY
+        ts
+    ORDER BY
+        ts ASC;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	requestTrendSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	errorTrendSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	p25LatencySeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	p50LatencySeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	p75LatencySeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	p95LatencySeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	p99LatencySeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp, errors, requests uint64
+		var p25, p50, p75, p95, p99 float64
+		if err := rows.Scan(&timestamp, &requests, &errors, &p25, &p50, &p75, &p95, &p99); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		requestTrendSeries.Set(ts, float32(requests))
+		errorTrendSeries.Set(ts, float32(errors))
+		p50LatencySeries.Set(ts, float32(p50/1000000))
+		p25LatencySeries.Set(ts, float32(p25/1000000))
+		p75LatencySeries.Set(ts, float32(p75/1000000))
+		p95LatencySeries.Set(ts, float32(p95/1000000))
+		p99LatencySeries.Set(ts, float32(p99/1000000))
+
+	}
+
+	return map[string]*timeseries.TimeSeries{
+		"requestsTrend": requestTrendSeries,
+		"errorTrend":    errorTrendSeries,
+		"p25Latency":    p25LatencySeries,
+		"p50Latency":    p50LatencySeries,
+		"p75Latency":    p75LatencySeries,
+		"p95Latency":    p95LatencySeries,
+		"p99Latency":    p99LatencySeries,
+	}, nil
 }

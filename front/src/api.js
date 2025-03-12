@@ -91,6 +91,10 @@ export default class Api {
         this.request({ method: 'delete', url }, cb);
     }
 
+    delete(url, data, cb) {
+        this.request({ method: 'delete', url, data }, cb);
+    }
+
     user(form, cb) {
         if (form) {
             this.post(`user`, form, cb);
@@ -276,8 +280,8 @@ export default class Api {
     getEUMApplicationErrors(serviceName, cb) {
         this.get(this.projectPath(`eum/errlog/${serviceName}`), {}, cb);
     }
-    getSpecificErrors(serviceName, error, cb) {
-        this.get(this.projectPath(`eum/errlog/${serviceName}/${error}`), {}, cb);
+    getSpecificErrors(serviceName, errorName, cb) {
+        this.get(this.projectPath(`eum/errlog/${serviceName}/errorname`), { errorName }, cb);
     }
     getErrorDetails(eventID, cb) {
         this.get(this.projectPath(`eum/errdetail/${eventID}`), {}, cb);
@@ -285,8 +289,8 @@ export default class Api {
     getErrorDetailsBreadcrumbs(eventID, type, cb) {
         this.get(this.projectPath(`eum/errdetail/${eventID}/${type}`), {}, cb);
     }
-    getEUMLogs(serviceName, cb) {
-        this.get(this.projectPath(`eum/logs/${serviceName}`), {}, cb);
+    getEUMLogs(serviceName, query, cb) {
+        this.get(this.projectPath(`eum/logs/${serviceName}`), { query }, cb);
     }
 
     getEUMTraces(serviceName, cb) {
@@ -294,5 +298,33 @@ export default class Api {
     }
     getPagePerformanceGraphs(serviceName, pageName, cb) {
         this.get(this.projectPath(`eum/perf/${serviceName}/charts`), { pageName }, cb);
+    }
+    getTracesOverview(cb) {
+        this.get(this.projectPath(`overview/traces`), {}, cb);
+    }
+    getTraces(serviceName, query, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}`), { query }, cb);
+    }
+    getTracesLogs(serviceName, query, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}/logs`), { query }, cb);
+    }
+    getTracesSummaryCharts(serviceName, cb) {
+        this.get(this.projectPath(`app/traces/${serviceName}/summary`), {}, cb);
+    }
+
+    getWhitelistDomains(cb){
+        this.get(this.projectPath(`integrations/eum_domains`),{} ,cb);
+    }
+
+    updateWhitelistDomain(trust_domain, cb){
+        this.put(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
+    }
+
+    deleteWhitelistDomain(trust_domain, cb){
+        this.delete(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
+    }
+
+    saveWhitelistDomain(trust_domain, cb){
+        this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 }

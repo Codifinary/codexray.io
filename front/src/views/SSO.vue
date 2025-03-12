@@ -1,8 +1,8 @@
 <template>
-    <div class="pl-7 pt-5 pb-3 mr-10" >
+    <div class="pl-7 pt-5 pb-3 mr-10">
         <v-alert v-if="disabled" color="info" outlined text>
             Single Sign-On through SAML is available only in codexray Enterprise (from $1 per CPU core/month).
-            <a href="https://codexray.com/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
+            <a href="https://codexray.io/account" target="_blank" class="font-weight-bold">Start</a> your free trial today.
         </v-alert>
         <v-simple-table dense class="params">
             <tbody>
@@ -13,7 +13,7 @@
                             <v-icon v-if="active" color="success" class="mr-1" size="20">mdi-check-circle</v-icon>
                             Enabled
                         </div>
-                        <div style="font-weight: 500 !important;" v-else>Disabled</div>
+                        <div style="font-weight: 500 !important" v-else>Disabled</div>
                     </td>
                 </tr>
                 <tr>
@@ -191,16 +191,14 @@ export default {
 .roles:deep(.v-input__append-inner) {
     margin-top: 4px !important;
 }
-.tab-heading{
-    background-color: #E7F8EF;
-    color:var(--text-light);
-    
+.tab-heading {
+    background-color: #e7f8ef;
+    color: var(--text-light);
 }
-.table:deep(th){
-    height:48px !important;
+.table:deep(th) {
+    height: 48px !important;
 }
-.table:deep(td){
-    height:40px;
+.table:deep(td) {
+    height: 40px;
 }
-
 </style>

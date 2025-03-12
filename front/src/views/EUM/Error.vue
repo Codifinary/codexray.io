@@ -18,6 +18,10 @@
                         {{ item.event_id }}
                     </router-link>
                 </template>
+                <template #item.last_reported="{ item }">
+                    {{ $format.date(item.last_reported, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
+                    ({{ $format.timeSinceNow(new Date(item.last_reported).getTime()) }} ago)
+                </template>
             </CustomTable>
         </div>
     </div>

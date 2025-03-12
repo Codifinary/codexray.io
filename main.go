@@ -198,6 +198,11 @@ func main() {
 	if err != nil {
 		klog.Exitln(err)
 	}
+	if defaultProject == nil {
+		fmt.Println("defaultProject is nil")
+	} else {
+		a.Domains = defaultProject.Settings.TrustDomains
+	}
 
 	var statsCollector *stats.Collector
 	if !*disableStats {
@@ -205,7 +210,9 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.Use(utils.EnableCORS)
+	router.Use(func(next http.Handler) http.Handler {
+		return utils.EnableCORS(next, a.Domains)
+	})
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {}).Methods(http.MethodGet)
 
@@ -221,7 +228,9 @@ func main() {
 	cleanUrlBasePath(urlBasePath)
 	if *urlBasePath != "/" {
 		r = router.PathPrefix(strings.TrimRight(*urlBasePath, "/")).Subrouter()
-		r.Use(utils.EnableCORS)
+		r.Use(func(next http.Handler) http.Handler {
+			return utils.EnableCORS(next, a.Domains)
+		})
 	}
 	r.HandleFunc("/api/login", a.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/logout", a.Logout).Methods(http.MethodPost)
@@ -241,6 +250,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}/categories", a.Auth(a.Categories)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/custom_applications", a.Auth(a.CustomApplications)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/integrations", a.Auth(a.Integrations)).Methods(http.MethodGet, http.MethodPut)
+	r.HandleFunc("/api/project/{project}/integrations/eum_domains", a.Auth(a.TrustDomainsHandler)).Methods(http.MethodPost, http.MethodGet, http.MethodDelete, http.MethodPut)
 	r.HandleFunc("/api/project/{project}/integrations/{type}", a.Auth(a.Integration)).Methods(http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}", a.Auth(a.Application)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/app/{app}/rca", a.Auth(a.RCA)).Methods(http.MethodGet)
@@ -248,13 +258,16 @@ func main() {
 	r.HandleFunc("/api/project/{project}/app/{app}/instrumentation/{type}", a.Auth(a.Instrumentation)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/profiling", a.Auth(a.Profiling)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/tracing", a.Auth(a.Tracing)).Methods(http.MethodGet, http.MethodPost)
+	r.HandleFunc("/api/project/{project}/app/traces/{serviceName}", a.Auth(a.Traces)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/app/traces/{serviceName}/summary", a.Auth(a.TracesSummary)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/app/traces/{serviceName}/logs", a.Auth(a.EumLogs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}/logs", a.Auth(a.Logs)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/node/{node}", a.Auth(a.Node)).Methods(http.MethodGet)
 	r.PathPrefix("/api/project/{project}/prom").HandlerFunc(a.Auth(a.Prom))
 
 	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}", a.Auth(a.EumPerf)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}", a.Auth(a.EumErrLog)).Methods(http.MethodGet)
-	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}/{errorName}", a.Auth(a.EumErrors)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/eum/errlog/{serviceName}/errorname", a.Auth(a.EumErrors)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}", a.Auth(a.EumErrorDetails)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/errdetail/{eventID}/{breadcrumbType}", a.Auth(a.EumErrorDetailBreadCrumb)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/perf/{serviceName}/charts", a.Auth(a.Perf)).Methods(http.MethodGet)

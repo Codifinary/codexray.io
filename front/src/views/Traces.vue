@@ -1,29 +1,19 @@
 <template>
     <div class="traces">
-        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
+        <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text dissmissible>
             {{ error }}
         </v-alert>
 
         <v-alert v-else-if="view.message" color="info" outlined text class="message">
-            <template v-if="view.message === 'not_found'">
-                This page only shows traces from OpenTelemetry integrations, not from eBPF.
-                <div class="mt-2">
-                    <OpenTelemetryIntegration color="primary">Integrate OpenTelemetry</OpenTelemetryIntegration>
-                </div></template
-            >
-            <template v-if="view.message === 'no_clickhouse'"> Clickhouse integration is not configured. </template>
+            <template v-if="view.message === 'clickhouse not available'"> Clickhouse integration is not configured. </template>
         </v-alert>
 
         <template v-else>
-            <div class="mt-4 d-flex">
-                <v-spacer />
-                <OpenTelemetryIntegration small color="success">Integrate OpenTelemetry</OpenTelemetryIntegration>
+            <div class="mt-4 mb-3 d-flex">
+                <div class="serviceName">{{ id }}</div>
             </div>
 
-            <v-alert v-if="view.error" color="error" icon="mdi-alert-octagon-outline" outlined text>
-                {{ view.error }}
-            </v-alert>
-
+            <TracesSummary :id="id" />
             <Heatmap v-if="view.heatmap" :heatmap="view.heatmap" :selection="selection" @select="setSelection" :loading="loading" />
 
             <v-tabs height="32" show-arrows hide-slider>
@@ -32,7 +22,7 @@
                 </v-tab>
             </v-tabs>
 
-            <v-card outlined class="query px-4 py-2 my-4">
+            <v-card outlined class="query px-4 py-2 my-4" v-if="query.view != 'logs'">
                 <div class="mt-2 d-flex align-center" style="gap: 4px">
                     <div>Filters:</div>
                     <div class="d-flex flex-wrap align-center filters">
@@ -83,13 +73,15 @@
                         Selection:
                         <template v-if="selectionDefined">
                             <template v-if="query.ts_from && query.ts_to">
-                                time <var> {{ format(query.ts_from, 'ts') }}</var> — <var> {{ format(query.ts_to, 'ts') }}</var>
+                                time <var> {{ $format.formatUnits(query.ts_from, 'ts') }}</var> —
+                                <var> {{ $format.formatUnits(query.ts_to, 'ts') }}</var>
                             </template>
                             <template v-if="query.dur_from !== 'inf' || query.dur_to === 'err'">
                                 where (
                                 <template v-if="query.dur_from !== 'inf'">
                                     trace duration
-                                    <var> {{ format(query.dur_from, 'dur') }}</var> — <var> {{ format(query.dur_to, 'dur') }}</var>
+                                    <var> {{ $format.formatUnits(query.dur_from, 'dur') }}</var> —
+                                    <var> {{ $format.formatUnits(query.dur_to, 'dur') }}</var>
                                     <template v-if="query.dur_to === 'err'"> or </template>
                                 </template>
                                 <template v-if="query.dur_to === 'err'"> trace status is <var> Error</var></template>
@@ -148,37 +140,32 @@
 
             <div v-else-if="query.view === 'overview'" class="mt-5" style="min-height: 50vh">
                 <CustomTable :items="view.summary ? view.summary.stats : []" class="table" :headers="headers">
-                    <template #item.service_name="{ item }">
-                        <router-link :to="filterTraces(item.service_name)">
-                            {{ item.service_name }}
-                        </router-link>
-                    </template>
                     <template #item.span_name="{ item }">
-                        <router-link :to="filterTraces(item.service_name, item.span_name)">
+                        <router-link :to="filterTraces(serviceName, item.span_name)">
                             {{ item.span_name }}
                         </router-link>
                     </template>
                     <template #item.total="{ item }">
-                        <span>{{ format(item.total) }}</span>
+                        <span>{{ $format.formatUnits(item.total) }}</span>
                         <span class="caption grey--text">/s</span>
                     </template>
                     <template #item.failed="{ item }">
-                        <router-link v-if="item.failed" :to="filterTraces(item.service_name, item.span_name, true)">
-                            <span>{{ format(item.failed, '%') }}</span>
+                        <router-link v-if="item.failed" :to="filterTraces(serviceName, item.span_name, true)">
+                            <span>{{ $format.formatUnits(item.failed, '%') }}</span>
                             <span class="caption grey--text">%</span>
                         </router-link>
                         <span v-else>—</span>
                     </template>
                     <template #item.duration_quantiles[0]="{ item }">
-                        <span>{{ format(item.duration_quantiles[0], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[0], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
                     <template #item.duration_quantiles[1]="{ item }">
-                        <span>{{ format(item.duration_quantiles[1], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[1], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
                     <template #item.duration_quantiles[2]="{ item }">
-                        <span>{{ format(item.duration_quantiles[2], 'ms') }}</span>
+                        <span>{{ $format.formatUnits(item.duration_quantiles[2], 'ms') }}</span>
                         <span class="caption grey--text"> ms</span>
                     </template>
 
@@ -186,28 +173,27 @@
                         <tfoot>
                             <tr v-for="item in view.summary ? [view.summary.overall] : []">
                                 <td class="font-weight-medium">OVERALL</td>
-                                <td></td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.total) }}</span>
+                                    <span>{{ $format.formatUnits(item.total) }}</span>
                                     <span class="caption grey--text">/s</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <router-link v-if="item.failed" :to="filterTraces(query.service_name, query.span_name, true)">
-                                        <span>{{ format(item.failed, '%') }}</span>
+                                    <router-link v-if="item.failed" :to="filterTraces(serviceName, query.span_name, true)">
+                                        <span>{{ $format.formatUnits(item.failed, '%') }}</span>
                                         <span class="caption grey--text">%</span>
                                     </router-link>
                                     <span v-else>—</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[0], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[0], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[1], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[1], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                                 <td class="text-right font-weight-medium">
-                                    <span>{{ format(item.duration_quantiles[2], 'ms') }}</span>
+                                    <span>{{ $format.formatUnits(item.duration_quantiles[2], 'ms') }}</span>
                                     <span class="caption grey--text"> ms</span>
                                 </td>
                             </tr>
@@ -243,7 +229,7 @@
                                 {{ s.status.message }}
                             </td>
                             <td class="text-no-wrap">
-                                {{ format(s.duration, 'ms') }}
+                                {{ $format.formatUnits(s.duration, 'ms') }}
                                 <span class="caption grey--text"> ms</span>
                             </td>
                         </tr>
@@ -282,11 +268,11 @@
                                 <div class="font-weight-medium mb-1">{{ v.name }}</div>
                                 <div class="baseline">
                                     <span class="marker" />
-                                    Baseline: {{ v.baseline ? format(v.baseline, '%') + '%' : '—' }}
+                                    Baseline: {{ v.baseline ? $format.formatUnits(v.baseline, '%') + '%' : '—' }}
                                 </div>
                                 <div class="selection">
                                     <span class="marker" />
-                                    Selection: {{ v.selection ? format(v.selection, '%') + '%' : '—' }}
+                                    Selection: {{ v.selection ? $format.formatUnits(v.selection, '%') + '%' : '—' }}
                                 </div>
                                 <div class="d-flex grey--text mt-2">
                                     <v-icon x-small class="mr-1">mdi-information-outline</v-icon>
@@ -308,18 +294,12 @@
                     :items="view.errors || []"
                     class="table errors"
                     :headers="[
-                        { value: 'service_name', text: 'Service Name', width: '15%' },
                         { value: 'span_name', text: 'Span', width: '25%' },
                         { value: 'sample_error', text: 'Error', width: '40%' },
                         { value: 'sample_trace_id', text: 'Sample Trace', sortable: false, width: '16ch' },
                         { value: 'count', text: 'Percentage', width: '16ch' },
                     ]"
                 >
-                    <template #item.service_name="{ item }">
-                        <span :title="item.service_name" class="service nowrap" :style="{ borderColor: color(item.service_name) }">
-                            {{ item.service_name }}
-                        </span>
-                    </template>
                     <template #item.span_name="{ item }">
                         <div class="nowrap" :title="item.span_name">{{ item.span_name }}</div>
                         <div v-for="(v, k) in item.labels" :title="`${k}: ${v}`" class="caption nowrap" style="line-height: 1rem">
@@ -341,7 +321,7 @@
                     <template #item.count="{ item }">
                         <div class="d-flex align-center" style="gap: 4px">
                             <div style="text-align: right; width: 4ch">
-                                <span>{{ format(item.count, '%') }}</span>
+                                <span>{{ $format.formatUnits(item.count, '%') }}</span>
                                 <span class="caption grey--text">%</span>
                             </div>
                             <div class="flex-grow-1">
@@ -365,6 +345,9 @@
                     class="pt-2"
                 />
             </div>
+            <div v-else-if="query.view === 'logs'">
+                <TracesLogs :id="this.id" />
+            </div>
         </template>
     </div>
 </template>
@@ -374,11 +357,12 @@ import { palette } from '../utils/colors';
 import Heatmap from '../components/Heatmap.vue';
 import TracingTrace from '../components/TracingTrace.vue';
 import FlameGraph from '../components/FlameGraph.vue';
-import OpenTelemetryIntegration from '@/views/OpenTelemetryIntegration.vue';
+import TracesLogs from '@/views/TracesLogs.vue';
+import TracesSummary from '@/views/TracesSummary.vue';
 import CustomTable from '@/components/CustomTable.vue';
 
 export default {
-    components: { OpenTelemetryIntegration, FlameGraph, TracingTrace, Heatmap, CustomTable },
+    components: { FlameGraph, TracingTrace, Heatmap, CustomTable, TracesSummary, TracesLogs },
 
     data() {
         return {
@@ -390,9 +374,10 @@ export default {
             },
             loading: false,
             error: '',
+            serviceName: '',
+            summary: {},
             headers: [
-                { value: 'service_name', text: 'Root Service Name', align: 'start' },
-                { value: 'span_name', text: 'Root Span Name', align: 'start' },
+                { value: 'span_name', text: 'Endpoint', align: 'start' },
                 { value: 'total', text: 'Requests', align: 'end' },
                 { value: 'failed', text: 'Errors', align: 'end' },
                 { value: 'duration_quantiles[0]', text: 'p50', align: 'end' },
@@ -426,6 +411,10 @@ export default {
     },
 
     computed: {
+        id() {
+            return this.$route.params.id;
+        },
+
         views() {
             return [
                 { name: 'overview', title: 'overview', icon: 'mdi-format-list-checkbox' },
@@ -433,6 +422,7 @@ export default {
                 { name: 'errors', title: 'error causes', icon: 'mdi-target' },
                 { name: 'latency', title: 'latency explorer', icon: 'mdi-clock-fast' },
                 { name: 'attributes', title: 'compare attributes', icon: 'mdi-select-compare' },
+                { name: 'logs', title: 'logs', icon: 'mdi-resistor' },
             ];
         },
         query() {
@@ -450,8 +440,7 @@ export default {
         filterable() {
             return {
                 fields: {
-                    ServiceName: 'Root Service Name',
-                    SpanName: 'Root Span Name',
+                    SpanName: 'Endpoint',
                     TraceId: 'Trace ID',
                 },
                 ops: ['=', '!=', '~', '!~'],
@@ -480,13 +469,13 @@ export default {
             const query = this.$route.query.query || '';
             this.loading = true;
             this.error = '';
-            this.$api.getOverview('traces', query, (data, error) => {
+            this.$api.getTraces(this.id, query, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
                     return;
                 }
-                this.view = data.traces || {};
+                this.view = data || {};
             });
         },
         push(to) {
@@ -597,55 +586,6 @@ export default {
         },
         color(s) {
             return palette.hash2(s);
-        },
-        format(v, unit) {
-            if (unit === 'ts') {
-                return this.$format.date(v, '{MMM} {DD}, {HH}:{mm}');
-            }
-            if (unit === 'dur') {
-                if (!v) {
-                    return '0';
-                }
-                if (v === 'inf' || v === 'err') {
-                    return 'Inf';
-                }
-                if (v >= 1) {
-                    return v + 's';
-                }
-                return v * 1000 + 'ms';
-            }
-            if (unit === '%') {
-                v *= 100;
-                if (v < 1) {
-                    return '<1';
-                }
-                let d = 1;
-                if (v >= 10) {
-                    d = 0;
-                }
-                return v.toFixed(d);
-            }
-            if (unit === 'ms') {
-                let d = 0;
-                if (v < 10) {
-                    d = 1;
-                }
-                return v.toFixed(d);
-            }
-            let m = '';
-            if (v > 1e3) {
-                v /= 1000;
-                m = 'K';
-            }
-            if (v > 1e6) {
-                v /= 1000;
-                m = 'M';
-            }
-            if (v > 1e9) {
-                v /= 1000;
-                m = 'G';
-            }
-            return v.toFixed(1) + m;
         },
     },
 };
@@ -826,6 +766,16 @@ export default {
     position: relative;
     padding-left: 8px;
 }
+.serviceName {
+    display: flex !important;
+    color: var(--status-ok) !important;
+    font-size: 16px !important;
+    font-weight: 600 !important;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
 .service::before {
     content: '';
     position: absolute;
@@ -835,5 +785,10 @@ export default {
     border-left-width: 4px;
     border-left-style: solid;
     border-left-color: inherit;
+}
+.cards {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0 20px 0;
 }
 </style>

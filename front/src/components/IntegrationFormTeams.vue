@@ -8,7 +8,7 @@
             <li>Search for <b>Incoming Webhook</b> and press the <b>Configure</b> button</li>
             <li>
                 Provide a name for the webhook (e.g. <i>codexray</i>), customize the image (you can use the
-                <a href="https://codexray.com/static/img/codexray.png" target="_blank">codexray logo</a>), and click
+                <a href="https://codexray.io/static/img/codexray.png" target="_blank">codexray logo</a>), and click
                 <b>Create</b>
             </li>
             <li>Copy the webhook URL and paste it below</li>
