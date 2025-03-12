@@ -325,6 +325,31 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, EndpointName, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_user_registration @on_cluster ( 
+	UserId 				String CODEC(ZSTD(1)), 
+	OS 					LowCardinality(String) CODEC(ZSTD(1)), 
+	Platform 			Int32 CODEC(ZSTD(1)), 
+	ServiceVersion 		LowCardinality(String) CODEC(ZSTD(1)), 
+	Device 				String CODEC(ZSTD(1)), 
+	Service 			String CODEC(ZSTD(1)), 
+	Country 			LowCardinality(String) CODEC(ZSTD(1)), 
+	RegistrationTime 	DateTime64(9) CODEC(Delta, ZSTD(1)), 
+	IpAddress 			String CODEC(ZSTD(1)), 
+	TimeBucket 			Int32 CODEC(ZSTD(1)), 
+	RawData 			String CODEC(ZSTD(1)),
+
+ 	INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1, 
+	INDEX idx_os OS TYPE bloom_filter(0.001) GRANULARITY 1, 
+	INDEX idx_service_version ServiceVersion TYPE bloom_filter(0.001) GRANULARITY 1, 
+	INDEX idx_country Country TYPE bloom_filter(0.001) GRANULARITY 1 
+) ENGINE @merge_tree 
+ TTL toDateTime(RegistrationTime) + toIntervalDay(@ttl_days) 
+ PARTITION BY toDate(RegistrationTime) 
+ ORDER BY (OS, Country, toUnixTimestamp(RegistrationTime)) 
+ SETTINGS index_granularity=8192
+ `,
 	}
 
 	distributedTables = []string{
