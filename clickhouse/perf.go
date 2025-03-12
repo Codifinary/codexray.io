@@ -298,3 +298,46 @@ func (c *Client) GetTotalErrors(ctx context.Context, from, to *time.Time, servic
 
 	return totalErrors, nil
 }
+
+type BrowserDataPoint struct {
+	Value int    `json:"value"`
+	Name  string `json:"name"`
+}
+
+func (c *Client) GetTopBrowser(ctx context.Context, from, to time.Time) ([]BrowserDataPoint, error) {
+	query := `
+        SELECT
+            Browser AS name,
+            count(*) AS value
+        FROM
+            perf_table
+        WHERE
+            Timestamp >= @from AND Timestamp <= @to
+        GROUP BY
+            Browser
+        ORDER BY
+            value DESC
+        LIMIT 5`
+
+	args := []any{
+		clickhouse.Named("from", from),
+		clickhouse.Named("to", to),
+	}
+
+	rows, err := c.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var topBrowsers []BrowserDataPoint
+	for rows.Next() {
+		var dp BrowserDataPoint
+		if err := rows.Scan(&dp.Name, &dp.Value); err != nil {
+			return nil, err
+		}
+		topBrowsers = append(topBrowsers, dp)
+	}
+
+	return topBrowsers, nil
+}
