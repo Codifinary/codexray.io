@@ -40,5 +40,24 @@ func GenerateMrumPerfReport(w *model.World, ch *clickhouse.Client, from, to time
 
 	userImptactedByErrorsByTimeChart := report.GetOrCreateChart("User Impacted by Errors by Time", nil).Stacked()
 	userImptactedByErrorsByTimeChart.AddSeries("User Impacted by Errors by Time", userImptactedByErrorsByTimeChartData, "orange")
+	
+	// Add HTTP Response Latency & Errors heatmap
+	sq := clickhouse.SpanQuery{
+		Ctx: w.Ctx,
+	}
+	histogram, err := ch.GetHttpResponsePerfHistogram(context.Background(), sq)
+	if err == nil && len(histogram) > 1 {
+		heatmapWidget := &model.Widget{
+			Heatmap: model.NewHeatmap(w.Ctx, "HTTP Response Latency & Errors heatmap, requests per second"),
+		}
+		
+		for _, h := range model.HistogramSeries(histogram[1:], 0, 0) {
+			heatmapWidget.Heatmap.AddSeries(h.Name, h.Title, h.Data, h.Threshold, h.Value)
+		}
+		heatmapWidget.Heatmap.AddSeries("errors", "errors", histogram[0].TimeSeries, "", "err")
+		
+		report.Widgets = append(report.Widgets, heatmapWidget)
+	}
+	
 	return report
 }
