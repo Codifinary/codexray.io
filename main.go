@@ -198,7 +198,11 @@ func main() {
 	if err != nil {
 		klog.Exitln(err)
 	}
-	a.Domains = defaultProject.Settings.TrustDomains
+	if defaultProject == nil {
+		fmt.Println("defaultProject is nil")
+	} else {
+		a.Domains = defaultProject.Settings.TrustDomains
+	}
 
 	var statsCollector *stats.Collector
 	if !*disableStats {
