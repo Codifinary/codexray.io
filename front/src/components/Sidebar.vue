@@ -71,6 +71,15 @@ export default {
         this.selectedView = this.$route.params.view || 'applications';
     },
 
+    watch: {
+        '$route.query': {
+            handler() {
+                this.selectedView = this.$route.params.view || this.$route.query.view || 'applications';
+            },
+            immediate: true,
+        },
+    },
+
     methods: {
         toggleSidebar() {
             this.showTitles = !this.showTitles;
