@@ -325,6 +325,35 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, EndpointName, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
+
+		`CREATE TABLE IF NOT EXISTS mobile_crash_reports @on_cluster (
+     Timestamp       DateTime64(9) CODEC(Delta, ZSTD(1)),
+     UniqueId        String CODEC(ZSTD(1)),
+     SessionId       String CODEC(ZSTD(1)),
+     CrashTime       Int64 CODEC(ZSTD(1)),
+     CrashReason     String CODEC(ZSTD(1)),
+     FileName        String CODEC(ZSTD(1)),
+     LineNo          String CODEC(ZSTD(1)),
+     CrashStackTrace String CODEC(ZSTD(1)),
+     MemoryUsage     Int64 CODEC(ZSTD(1)),
+     Os              String CODEC(ZSTD(1)),
+     Platform        String CODEC(ZSTD(1)),
+     ServiceVersion  String CODEC(ZSTD(1)),
+     DeviceInfo      String CODEC(ZSTD(1)),
+     Service         LowCardinality(String) CODEC(ZSTD(1)),
+     Country         String CODEC(ZSTD(1)),
+     RawData         String CODEC(ZSTD(1)),
+
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_unique_id UniqueId TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_crash_reason CrashReason TYPE bloom_filter(0.01) GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (Service, UniqueId, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
 	}
 
 	distributedTables = []string{
