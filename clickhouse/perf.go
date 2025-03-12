@@ -341,3 +341,167 @@ func (c *Client) GetTopBrowser(ctx context.Context, from, to time.Time) ([]Brows
 
 	return topBrowsers, nil
 }
+
+func (c *Client) GetLoadTimeSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+        SELECT
+            toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+            avg(p.LoadPageTime) AS loadTime
+        FROM
+            perf_data p
+        WHERE
+            p.ServiceName = @serviceName
+            AND p.Timestamp BETWEEN @from AND @to
+        GROUP BY
+            ts;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	loadTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp uint64
+		var loadTime float64
+		if err := rows.Scan(&timestamp, &loadTime); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		loadTimeSeries.Set(ts, float32(loadTime))
+	}
+
+	return loadTimeSeries, nil
+}
+
+func (c *Client) GetResponseTimeSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+        SELECT
+            toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+            avg(p.ResTime) AS responseTime
+        FROM
+            perf_data p
+        WHERE
+            p.ServiceName = @serviceName
+            AND p.Timestamp BETWEEN @from AND @to
+        GROUP BY
+            ts;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	responseTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp uint64
+		var responseTime float64
+		if err := rows.Scan(&timestamp, &responseTime); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		responseTimeSeries.Set(ts, float32(responseTime))
+	}
+
+	return responseTimeSeries, nil
+}
+
+func (c *Client) GetErrorTimeSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+        SELECT
+            toUnixTimestamp(toStartOfInterval(e.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+            count(*) AS totalErrors
+        FROM
+            err_log_data e
+        WHERE
+            e.ServiceName = @serviceName
+            AND e.Timestamp BETWEEN @from AND @to
+        GROUP BY
+            ts;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	errorTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp uint64
+		var totalErrors uint64
+		if err := rows.Scan(&timestamp, &totalErrors); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		errorTimeSeries.Set(ts, float32(totalErrors))
+	}
+
+	return errorTimeSeries, nil
+}
+
+func (c *Client) GetUsersImpactedTimeSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+        SELECT
+            toUnixTimestamp(toStartOfInterval(e.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+            countDistinct(e.UserId) AS usersImpacted
+        FROM
+            err_log_data e
+        WHERE
+            e.ServiceName = @serviceName
+            AND e.Timestamp BETWEEN @from AND @to
+        GROUP BY
+            ts;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.conn.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	usersImpactedTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp uint64
+		var usersImpacted uint64
+		if err := rows.Scan(&timestamp, &usersImpacted); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		usersImpactedTimeSeries.Set(ts, float32(usersImpacted))
+	}
+
+	return usersImpactedTimeSeries, nil
+}

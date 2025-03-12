@@ -13,12 +13,13 @@ import (
 )
 
 type EumView struct {
-	Status    model.Status      `json:"status"`
-	Message   string            `json:"message"`
-	Overviews []ServiceOverview `json:"overviews"`
-	BadgeView Badge             `json:"badgeView"`
-	Report    model.AuditReport `json:"report"`
-	Limit     int               `json:"limit"`
+	Status       model.Status      `json:"status"`
+	Message      string            `json:"message"`
+	Overviews    []ServiceOverview `json:"overviews"`
+	BadgeView    Badge             `json:"badgeView"`
+	Report       model.AuditReport `json:"report"`
+	EchartReport model.AuditReport `json:"Echartreport"`
+	Limit        int               `json:"limit"`
 }
 
 type ServiceOverview struct {
@@ -58,28 +59,24 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 	v.Overviews = overviews
 	v.BadgeView = badge
 
-	// Create a new audit report
-	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
-
-	// Create and add the ECharts
-	eCharts, err := createECharts(ctx, ch, from, to, overviews)
+	echartReport, err := createECharts(w, ctx, ch, from, to, overviews)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
-		v.Message = fmt.Sprintf("Failed to create ECharts: %s", err)
+		v.Message = fmt.Sprintf("Failed to create echart: %s", err)
 		return v
 	}
-	for _, eChart := range eCharts {
-		report.AddEChartWidget(eChart, nil)
+	// Create and add the line charts
+	lineChartReport, err := createLineChart(w, ch, overviews)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Failed to create line charts: %s", err)
+		return v
 	}
 
-	// Create and add the line charts
-	// lineChartWidgets := createLineChartWidgets(ctx, from, to)
-	// for _, widget := range lineChartWidgets {
-	// 	report.AddWidget(&widget)
-	// }
-
-	v.Report = *report
+	v.Report = *lineChartReport
+	v.EchartReport = *echartReport
 	v.Status = model.OK
 	return v
 }
@@ -147,16 +144,9 @@ func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to ti
 	return overviews, badge, nil
 }
 
-func extractServiceNames(dataPoints []model.DataPoint) []string {
-	names := make([]string, len(dataPoints))
-	for i, dp := range dataPoints {
-		names[i] = dp.Name
-	}
-	return names
-}
-
-func createECharts(ctx context.Context, ch *clickhouse.Client, from, to time.Time, overviews []ServiceOverview) ([]*model.EChart, error) {
-	var eCharts []*model.EChart
+func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, from, to time.Time, overviews []ServiceOverview) (*model.AuditReport, error) {
+	// Create a new audit report for ECharts
+	echartReport := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
 
 	// Fetch top browsers from perf_table
 	topBrowsers, err := ch.GetTopBrowser(ctx, from, to)
@@ -173,20 +163,19 @@ func createECharts(ctx context.Context, ch *clickhouse.Client, from, to time.Tim
 	}
 
 	// for local testing
-	// topBrowsers := []model.DataPoint{
-	//     {Value: 40, Name: "Chrome"},
-	//     {Value: 30, Name: "Firefox"},
-	//     {Value: 20, Name: "Safari"},
-	//     {Value: 5, Name: "Edge"},
-	//     {Value: 5, Name: "Opera"},
+	// topBrowsersData := []model.DataPoint{
+	// 	{Value: 40, Name: "Chrome"},
+	// 	{Value: 30, Name: "Firefox"},
+	// 	{Value: 20, Name: "Safari"},
+	// 	{Value: 5, Name: "Edge"},
+	// 	{Value: 5, Name: "Opera"},
 	// }
 
 	// Create the donut chart for top 5 browsers
-	donutChart1 := model.NewEChart("Top 5 Browsers")
+	donutChart1 := echartReport.GetOrCreateEChart("Top 5 Browsers", nil)
 	donutChart1.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart1.Legend = model.Legend{Bottom: "0"}
 	donutChart1.SetSeries("Browsers", "pie", topBrowsersData)
-	eCharts = append(eCharts, donutChart1)
 
 	// Create the donut chart for top 5 services by impacted users
 	sort.Slice(overviews, func(i, j int) bool {
@@ -202,15 +191,14 @@ func createECharts(ctx context.Context, ch *clickhouse.Client, from, to time.Tim
 			Name:  overview.ServiceName,
 		})
 	}
-	donutChart2 := model.NewEChart("Top 5 Services by Impacted Users")
+	donutChart2 := echartReport.GetOrCreateEChart("Top 5 Services by Impacted Users", nil)
 	donutChart2.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart2.Legend = model.Legend{Bottom: "0"}
 	donutChart2.SetSeries("Services", "pie", topServicesByUsers)
-	eCharts = append(eCharts, donutChart2)
 
 	// Create the bar chart for top 10 services by load
 	sort.Slice(overviews, func(i, j int) bool {
-		return overviews[i].AvgLoadPageTime > overviews[j].AvgLoadPageTime
+		return overviews[i].Requests > overviews[j].Requests
 	})
 	topServicesByLoad := make([]model.DataPoint, 0, 10)
 	for i, overview := range overviews {
@@ -218,18 +206,76 @@ func createECharts(ctx context.Context, ch *clickhouse.Client, from, to time.Tim
 			break
 		}
 		topServicesByLoad = append(topServicesByLoad, model.DataPoint{
-			Value: int(overview.AvgLoadPageTime),
+			Value: int(overview.Requests),
 			Name:  overview.ServiceName,
 		})
 	}
-	barChart := model.NewEChart("Top 10 Services by Load")
+	barChart := echartReport.GetOrCreateEChart("Top 10 Services by Load", nil)
 	barChart.Tooltip = model.Tooltip{Trigger: "axis"}
 	barChart.Legend = model.Legend{Bottom: "0"}
 	barChart.XAxis = &model.Axis{Type: "value"}
 	barChart.YAxis = &model.Axis{Type: "category", Data: extractServiceNames(topServicesByLoad)}
 	barChart.SetSeries("Load", "bar", topServicesByLoad)
 	barChart.Series.BarWidth = "40%"
-	eCharts = append(eCharts, barChart)
 
-	return eCharts, nil
+	return echartReport, nil
+}
+
+func createLineChart(w *model.World, ch *clickhouse.Client, overviews []ServiceOverview) (*model.AuditReport, error) {
+	sort.Slice(overviews, func(i, j int) bool {
+		return overviews[i].Requests > overviews[j].Requests
+	})
+
+	topServices := overviews
+	if len(overviews) > 5 {
+		topServices = overviews[:5]
+	}
+
+	lineChartReport := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
+	lineChartReport.Status = model.OK
+
+	loadChart := lineChartReport.GetOrCreateChart("Top 5 Services by Load", nil)
+	for _, service := range topServices {
+		loadTimeSeries, err := ch.GetLoadTimeSeries(context.Background(), service.ServiceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get load time series for service %s: %w", service.ServiceName, err)
+		}
+		loadChart.AddSeries(service.ServiceName, loadTimeSeries)
+	}
+
+	responseChart := lineChartReport.GetOrCreateChart("Top 5 Services by Response Time", nil)
+	for _, service := range topServices {
+		responseTimeSeries, err := ch.GetResponseTimeSeries(context.Background(), service.ServiceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get response time series for service %s: %w", service.ServiceName, err)
+		}
+		responseChart.AddSeries(service.ServiceName, responseTimeSeries)
+	}
+
+	errorChart := lineChartReport.GetOrCreateChart("Top 5 Services by Errors", nil)
+	for _, service := range topServices {
+		errorTimeSeries, err := ch.GetErrorTimeSeries(context.Background(), service.ServiceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get error time series for service %s: %w", service.ServiceName, err)
+		}
+		errorChart.AddSeries(service.ServiceName, errorTimeSeries)
+	}
+
+	usersImpactedChart := lineChartReport.GetOrCreateChart("Top 5 Services by Users Impacted", nil)
+	for _, service := range topServices {
+		usersImpactedTimeSeries, err := ch.GetUsersImpactedTimeSeries(context.Background(), service.ServiceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get users impacted time series for service %s: %w", service.ServiceName, err)
+		}
+		usersImpactedChart.AddSeries(service.ServiceName, usersImpactedTimeSeries)
+	}
+
+	return lineChartReport, nil
+}
+func extractServiceNames(dataPoints []model.DataPoint) []string {
+	names := make([]string, len(dataPoints))
+	for i, dp := range dataPoints {
+		names[i] = dp.Name
+	}
+	return names
 }

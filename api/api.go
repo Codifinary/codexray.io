@@ -1571,7 +1571,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 
 	// for local purpose
 	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
+	// 	Id:   "02mn46va",
 	// 	Name: "default",
 	// 	Prometheus: db.IntegrationsPrometheus{
 	// 		Url: "http://prometheus:9090",
@@ -1580,7 +1580,11 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 	// 		Integrations: db.Integrations{
 	// 			Clickhouse: &db.IntegrationClickhouse{
 	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
+	// 				Auth: utils.BasicAuth{
+	// 					User:     "default",
+	// 					Password: "vizares",
+	// 				},
+	// 				Addr:     "labs.codexray.io:8023",
 	// 				Protocol: "http",
 	// 			},
 	// 		},
@@ -1654,67 +1658,4 @@ func (api *Api) getClickhouseClient(project *db.Project) (*clickhouse.Client, er
 		return nil, err
 	}
 	return clickhouse.NewClient(config, distributed)
-}
-
-func (api *Api) GenerateAuditReport(w http.ResponseWriter, r *http.Request, u *db.User) {
-	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
-	if err != nil {
-		klog.Errorln(err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if project == nil || world == nil {
-		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
-		return
-	}
-
-	// Create a new audit report
-	report := model.NewAuditReport(nil, world.Ctx, nil, model.AuditReportPerformance, true)
-
-	// Create and add the pie chart
-	pieChart := model.NewEChart("User Demographics")
-	pieChart.Tooltip = model.Tooltip{Trigger: "item"}
-	pieChart.Legend = model.Legend{Bottom: "0"}
-	pieChart.SetSeries("Users", "pie", []model.DataPoint{
-		{Value: 500, Name: "Male"},
-		{Value: 400, Name: "Female"},
-		{Value: 200, Name: "Others"},
-	}, "#ff6384")
-	report.AddEChartWidget(pieChart, nil)
-
-	// Create and add the doughnut chart
-	doughnutChart := model.NewEChart("User Demographics")
-	doughnutChart.Tooltip = model.Tooltip{Trigger: "item"}
-	doughnutChart.Legend = model.Legend{Bottom: "0"}
-	doughnutChart.SetSeries("Users", "pie", []model.DataPoint{
-		{Value: 500, Name: "Male"},
-		{Value: 400, Name: "Female"},
-		{Value: 200, Name: "Others"},
-	}, "#ff6384")
-	doughnutChart.Series.Radius = []string{"40%", "70%"}
-	doughnutChart.Series.AvoidLabelOverlap = false
-	doughnutChart.Series.ItemStyle = &model.ItemStyle{BorderRadius: 10, BorderColor: "#fff", BorderWidth: 2}
-	doughnutChart.Series.Label = &model.Label{Show: false, Position: "center"}
-	doughnutChart.Series.Emphasis = &model.Emphasis{Label: &model.EmphasisLabel{Show: true, FontSize: 40, FontWeight: "bold"}}
-	doughnutChart.Series.LabelLine = &model.LabelLine{Show: false}
-	report.AddEChartWidget(doughnutChart, nil)
-
-	// Create and add the horizontal bar chart
-	barChart := model.NewEChart("Revenue Report")
-	barChart.Tooltip = model.Tooltip{Trigger: "axis"}
-	barChart.Legend = model.Legend{Bottom: "0"}
-	barChart.XAxis = &model.Axis{Type: "value"}
-	barChart.YAxis = &model.Axis{Type: "category", Data: []string{"Product A", "Product B", "Product C", "Product D"}}
-	barChart.SetSeries("Revenue", "bar", []model.DataPoint{
-		{Value: 320, Name: "Product A"},
-		{Value: 450, Name: "Product B"},
-		{Value: 200, Name: "Product C"},
-		{Value: 370, Name: "Product D"},
-	}, "navy")
-	barChart.Series.BarWidth = "40%"
-	report.AddEChartWidget(barChart, nil)
-
-	// Write the report as JSON response
-	utils.WriteJson(w, report)
 }

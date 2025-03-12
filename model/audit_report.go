@@ -101,6 +101,22 @@ func (r *AuditReport) GetOrCreateChart(title string, doc *DocLink) *Chart {
 	return ch
 }
 
+func (r *AuditReport) GetOrCreateEChart(title string, doc *DocLink) *EChart {
+	if !r.detailed {
+		return nil
+	}
+	for _, w := range r.Widgets {
+		if echart := w.EChart; echart != nil {
+			if echart.Title == title {
+				return echart
+			}
+		}
+	}
+	echart := NewEChart(title)
+	r.Widgets = append(r.Widgets, &Widget{EChart: echart, DocLink: doc})
+	return echart
+}
+
 func (r *AuditReport) GetOrCreateHeatmap(title string) *Heatmap {
 	if !r.detailed {
 		return nil
@@ -175,12 +191,4 @@ func (r *AuditReport) CreateCheck(cfg CheckConfig) *Check {
 	}
 	r.Checks = append(r.Checks, ch)
 	return ch
-}
-
-func (r *AuditReport) AddEChartWidget(echart *EChart, doc *DocLink) {
-	widget := &Widget{
-		EChart:  echart,
-		DocLink: doc,
-	}
-	r.AddWidget(widget)
 }
