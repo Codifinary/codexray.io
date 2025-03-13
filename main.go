@@ -198,6 +198,11 @@ func main() {
 	if err != nil {
 		klog.Exitln(err)
 	}
+	if defaultProject == nil {
+		fmt.Println("defaultProject is nil")
+	} else {
+		a.Domains = defaultProject.Settings.TrustDomains
+	}
 
 	var statsCollector *stats.Collector
 	if !*disableStats {
@@ -205,7 +210,9 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.Use(utils.EnableCORS)
+	router.Use(func(next http.Handler) http.Handler {
+		return utils.EnableCORS(next, a.Domains)
+	})
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {}).Methods(http.MethodGet)
 
@@ -221,7 +228,9 @@ func main() {
 	cleanUrlBasePath(urlBasePath)
 	if *urlBasePath != "/" {
 		r = router.PathPrefix(strings.TrimRight(*urlBasePath, "/")).Subrouter()
-		r.Use(utils.EnableCORS)
+		r.Use(func(next http.Handler) http.Handler {
+			return utils.EnableCORS(next, a.Domains)
+		})
 	}
 	r.HandleFunc("/api/login", a.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/logout", a.Logout).Methods(http.MethodPost)
@@ -241,6 +250,7 @@ func main() {
 	r.HandleFunc("/api/project/{project}/categories", a.Auth(a.Categories)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/custom_applications", a.Auth(a.CustomApplications)).Methods(http.MethodGet, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/integrations", a.Auth(a.Integrations)).Methods(http.MethodGet, http.MethodPut)
+	r.HandleFunc("/api/project/{project}/integrations/eum_domains", a.Auth(a.TrustDomainsHandler)).Methods(http.MethodPost, http.MethodGet, http.MethodDelete, http.MethodPut)
 	r.HandleFunc("/api/project/{project}/integrations/{type}", a.Auth(a.Integration)).Methods(http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPost)
 	r.HandleFunc("/api/project/{project}/app/{app}", a.Auth(a.Application)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/app/{app}/rca", a.Auth(a.RCA)).Methods(http.MethodGet)
