@@ -1,81 +1,150 @@
 <template>
-    <v-card class="card-body">
-        <v-card-title>
-            <div class="card-name">{{ name }}</div>
-            <v-card-text class="card-count">{{ count }}</v-card-text>
-        </v-card-title>
-
-        <BaseIcon name="alert" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
-    </v-card>
+  <div class="card" :style="{ '--bottom-color': cardData.bottomColor || '#059669' }">
+    <div class="metrics-container">
+      <div class="main-metric">
+        <div class="metric-label">{{ cardData.name || 'Total Requests' }}</div>
+        <div class="metric-value">{{ cardData.totalRequests || 0 }}</div>
+      </div>
+      <div class="secondary-metric">
+        <div class="metric-label">{{ cardData.secondaryLabel || 'Req/sec' }}</div>
+        <div class="metric-value">{{ cardData.secondaryValue || 0 }}</div>
+      </div>
+    </div>
+    <div class="percentage-indicator">
+      <div class="percentage" :class="{ 'positive': (cardData.percentageChange || 0) > 0, 'negative': (cardData.percentageChange || 0) < 0 }">
+        {{ (cardData.percentageChange || 0) > 0 ? '+' : '' }}{{ (cardData.percentageChange || 0).toFixed(2) }}%
+      </div>
+      <BaseIcon 
+        :name="cardData.icon || 'up-arrow'" 
+        :iconColor="cardData.iconColor || 'green'" 
+        :class="['card-icon', cardData.background || '']" 
+        style="border-radius: 30%" 
+      />
+    </div>
+    <div class="bottom-border"></div>
+  </div>
 </template>
 
 <script>
 import BaseIcon from './BaseIcon.vue';
 
 export default {
-    components: {
-        BaseIcon,
-    },
-    props: {
-        name: String,
-        count: Number,
-        background: String,
-        icon: String,
-    },
+  components: {
+    BaseIcon,
+  },
+  props: {
+    cardData: {
+      type: Object,
+      default: () => ({
+        name: 'Total Requests',
+        totalRequests: 0,
+        secondaryLabel: 'Req/sec',
+        secondaryValue: 0,
+        percentageChange: 0,
+        icon: 'up-arrow',
+        iconColor: 'green',
+        background: '',
+        bottomColor: '#059669'
+      })
+    }
+  }
 };
 </script>
 
 <style scoped>
-.card-body {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 18%;
-    height: 100px;
+.card {
+  background: #FFFFFF;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  width: 280px;
+  position: relative;
 }
 
-.card-name {
-    font-weight: 400;
-    font-size: 12px;
-    line-height: 16px;
-    margin-bottom: 3px;
-    color: #013912;
+.metrics-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.card-count {
-    font-weight: 700;
-    font-size: 26px;
-    padding: 0;
-    line-height: 33px;
-    color: #013912;
+.main-metric, .secondary-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.card-icon {
-    margin-right: 10px;
-    padding: 8px 10px 6px 10px;
+.metric-label {
+  color: #666666;
+  font-size: 14px;
+  font-weight: 400;
 }
 
-@media (min-width: 1441px) {
-    /* Styles for larger monitor screens */
-    .card-body {
-        width: 19%;
-        height: 150px;
-        padding-left: 20px;
-    }
+.main-metric .metric-value {
+  color: #000000;
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+}
 
-    .card-name {
-        font-size: 14px;
-        line-height: 18px;
-    }
+.secondary-metric .metric-value {
+  color: #000000;
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1;
+}
 
-    .card-count {
-        font-weight: 800;
-        font-size: 40px;
-        line-height: 38px;
-    }
+.percentage-indicator {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
 
-    .v-icon {
-        font-size: 30px;
-    }
+.percentage {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.percentage.positive {
+  color: #34D399;
+}
+
+.percentage.negative {
+  color: #EF4444;
+}
+
+.triangle-icon {
+  width: 16px;
+  height: 16px;
+  filter: invert(72%) sepia(40%) saturate(463%) hue-rotate(95deg) brightness(91%) contrast(91%);
+}
+
+.bottom-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--bottom-color);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+@media (min-width: 1440px) {
+  .card {
+    width: 320px;
+    padding: 28px;
+  }
+
+  .main-metric .metric-value {
+    font-size: 36px;
+  }
+
+  .secondary-metric .metric-value {
+    font-size: 28px;
+  }
 }
 </style>

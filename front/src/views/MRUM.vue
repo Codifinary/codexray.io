@@ -17,7 +17,6 @@
         </template>
 
         <template v-if="tab === 'performance'">
-            <div class="font-weight-bold tab-heading">Performance</div>
             <Performance />
         </template>
 
