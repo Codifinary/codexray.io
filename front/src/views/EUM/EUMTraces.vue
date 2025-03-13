@@ -59,7 +59,7 @@
 <script>
 import Heatmap from '@/components/Heatmap.vue';
 import TracingTrace from '@/components/TracingTrace.vue';
-import TracesSummary from '../TracesSummary.vue';
+import TracesSummary from '@/views/TracesSummary.vue';
 
 export default {
     components: {
