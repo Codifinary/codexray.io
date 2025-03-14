@@ -1,5 +1,8 @@
 <template>
     <div v-if="!selectedError" class="my-10 mx-5">
+        <div class="cards mb-5">
+            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
+        </div>
         <CustomTable :headers="headers" :items="errors" item-key="error_name" class="elevation-1">
             <template v-slot:[`item.error_name`]="{ item }">
                 <router-link
@@ -28,9 +31,10 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import Error from './Error.vue';
+import Card from '@/components/Card.vue';
 
 export default {
-    components: { CustomTable, Error },
+    components: { CustomTable, Error, Card },
     name: 'Errors',
     props: { id: { type: String, required: true } },
     data() {
@@ -43,6 +47,7 @@ export default {
                 { text: 'Category', value: 'category' },
             ],
             errors: [],
+            summary: [],
             selectedError: null,
         };
     },
@@ -62,6 +67,23 @@ export default {
                     return;
                 }
                 this.errors = data.errors || [];
+                this.summary = [
+                    {
+                        name: 'Total Errors',
+                        value: data.summary.total_errors,
+                        unit: '',
+                    },
+                    {
+                        name: 'Error Rate',
+                        value: data.summary.error_rate,
+                        unit: '%',
+                    },
+                    {
+                        name: 'Total Users',
+                        value: data.summary.total_users,
+                        unit: '',
+                    },
+                ];
             });
         },
         handleErrorClicked(error) {
@@ -96,5 +118,10 @@ export default {
     cursor: pointer;
     color: var(--status-ok);
     text-decoration: none !important;
+}
+
+.cards {
+    display: flex;
+    gap: 20px;
 }
 </style>

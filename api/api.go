@@ -1571,7 +1571,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 
 	// for local purpose
 	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
+	// 	Id:   "02mn46va",
 	// 	Name: "default",
 	// 	Prometheus: db.IntegrationsPrometheus{
 	// 		Url: "http://prometheus:9090",
@@ -1580,7 +1580,11 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 	// 		Integrations: db.Integrations{
 	// 			Clickhouse: &db.IntegrationClickhouse{
 	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
+	// 				Auth: utils.BasicAuth{
+	// 					User:     "default",
+	// 					Password: "vizares",
+	// 				},
+	// 				Addr:     "labs.codexray.io:8023",
 	// 				Protocol: "http",
 	// 			},
 	// 		},

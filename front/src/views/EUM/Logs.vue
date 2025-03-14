@@ -1,5 +1,8 @@
 <template>
     <div>
+        <div class="cards mt-5">
+            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" />
+        </div>
         <v-card outlined class="pa-4 mb-2 mt-6">
             <v-form>
                 <v-progress-linear v-if="loading" indeterminate height="4" style="bottom: 0; left: 0" />
@@ -127,6 +130,7 @@
 <script>
 import Chart from '@/components/Chart.vue';
 import { palette } from '@/utils/colors';
+import Card from '@/components/Card.vue';
 
 const getSeverity = (s) => {
     s = s.toLowerCase();
@@ -139,7 +143,7 @@ const getSeverity = (s) => {
 };
 
 export default {
-    components: { Chart },
+    components: { Chart, Card },
     props: {
         id: String,
     },
@@ -156,6 +160,7 @@ export default {
                 search: '',
                 limit: 100,
             },
+            summary: [],
         };
     },
 
@@ -293,6 +298,28 @@ export default {
                 if (!this.query.severity.length) {
                     this.query.severity = this.data.all_severity;
                 }
+
+                // Process summary data
+                this.summary = [
+                    {
+                        name: 'Total Logs',
+                        value: this.data.summary.total_logs,
+                        background: 'blue lighten-4',
+                        icon: '',
+                    },
+                    {
+                        name: 'Total Errors',
+                        value: this.data.summary.total_errs,
+                        background: 'red lighten-4',
+                        icon: '',
+                    },
+                    {
+                        name: 'Total Warnings',
+                        value: this.data.summary.total_warn,
+                        background: 'orange lighten-4',
+                        icon: '',
+                    },
+                ];
             });
         },
     },
@@ -315,5 +342,9 @@ export default {
 
 .entry:deep(tr:hover) {
     background-color: unset !important;
+}
+.cards {
+    display: flex;
+    gap: 20px;
 }
 </style>
