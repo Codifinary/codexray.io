@@ -1,7 +1,17 @@
 <template>
   <div class="map-container">
     <div class="title">{{ title }}</div>
-    <div class="chart" ref="chartContainer" style="width: 100%; height: 600px;"></div>
+    <div class="content">
+      <div class="chart" ref="chartContainer" style="width: 100%; height: 600px;"></div>
+      <div class="color-legend">
+        <ul>
+          <li v-for="(color, country) in colorMapping" :key="country">
+            <span :style="{ backgroundColor: color }" class="color-box"></span>
+            {{ country }}
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -10,16 +20,36 @@ import * as echarts from 'echarts';
 import axios from 'axios';
 
 export default {
+  name: 'GeoMap',
   props: {
-    title: String,
+    title: {
+      type: String,
+      default: 'Geographic Distribution'
+    },
     countrywiseOverviews: {
       type: Array,
-      default: () => []
+      default: () => [],
+      deep: true
     }
   },
-  name: 'WorldMap',
+  data() {
+    return {
+      chart: null // Store chart instance
+    };
+  },
   mounted() {
     this.initChart();
+    
+    // Add resize event listener
+    window.addEventListener('resize', this.handleResize);
+  },
+  beforeUnmount() {
+    // Clean up chart and event listeners when component is destroyed
+    if (this.chart) {
+      this.chart.dispose();
+      this.chart = null;
+    }
+    window.removeEventListener('resize', this.handleResize);
   },
   watch: {
     countrywiseOverviews: {
@@ -29,82 +59,78 @@ export default {
       deep: true
     }
   },
+  computed: {
+    colorMapping() {
+      const mapping = {};
+      this.countrywiseOverviews.forEach(item => {
+        if (item.GeoMapColorCode) {
+          mapping[item.Country] = item.GeoMapColorCode;
+        }
+      });
+      return mapping;
+    }
+  },
   methods: {
+    handleResize() {
+      if (this.chart) {
+        this.chart.resize();
+      }
+    },
     async initChart() {
-      const chart = echarts.init(this.$refs.chartContainer);
-      chart.showLoading();
+      // Dispose of existing chart instance if it exists
+      if (this.chart) {
+        this.chart.dispose();
+      }
+      
+      // Initialize new chart
+      this.chart = echarts.init(this.$refs.chartContainer);
+      this.chart.showLoading();
+      
       try {
-        const worldJson = await axios.get('/static/world.json');
-        echarts.registerMap('world', worldJson.data);
-        chart.hideLoading();
-
-        // Transform the countrywiseOverviews for the chart - only use country name and color code
+        const response = await axios.get('/static/world.json');
+        echarts.registerMap('world', response.data);
+        this.chart.hideLoading();
+        
         const mapData = this.countrywiseOverviews.map(item => ({
           name: item.Country,
           itemStyle: {
             areaColor: item.GeoMapColorCode || '#D6D6D6'
           }
         }));
-
-        // Default data if no countrywiseOverviews is provided
-        const defaultData = [
-          { name: 'China', itemStyle: { areaColor: '#d73027' } },
-          { name: 'India', itemStyle: { areaColor: '#fdae61' } },
-          { name: 'United States', itemStyle: { areaColor: '#74add1' } },
-          { name: 'Indonesia', itemStyle: { areaColor: '#ffffbf' } },
-          { name: 'Brazil', itemStyle: { areaColor: '#ffffbf' } },
-          { name: 'Pakistan', itemStyle: { areaColor: '#74add1' } },
-          { name: 'Nigeria', itemStyle: { areaColor: '#74add1' } },
-          { name: 'Bangladesh', itemStyle: { areaColor: '#313695' } },
-          { name: 'Russia', itemStyle: { areaColor: '#313695' } },
-          { name: 'Mexico', itemStyle: { areaColor: '#313695' } }
-        ];
-
+        
         const option = {
-          tooltip: {
-            trigger: 'item',
-            showDelay: 0,
-            transitionDuration: 0.2,
-            formatter: (params) => {
-              return `${params.name}`;
-            }
-          },
           series: [
             {
               name: 'World Map',
               type: 'map',
               map: 'world',
               itemStyle: {
-                areaColor: '#D6D6D6', // Set default land color
-                borderColor: '#D6D6D6', // Set border color
+                areaColor: '#D6D6D6',
+                borderColor: '#D6D6D6',
                 borderWidth: 0.5
               },
               emphasis: {
-                disabled: false, // Enable hover effect
+                disabled: false,
                 itemStyle: {
-                  areaColor: '#a0a0a0'
+                  areaColor: '#D6D6D6',
+                  borderColor: '#FFFFFF',
+                  textStyle: {
+                    color: '#000000'
+                  }
                 }
               },
-              data: this.countrywiseOverviews.length > 0 ? mapData : defaultData
+              tooltip: {
+                show: true
+              },
+              data: this.countrywiseOverviews.length > 0 ? mapData : []
             }
           ]
         };
 
-        chart.setOption(option);
-
-        // Handle window resize
-        window.addEventListener('resize', () => {
-          chart.resize();
-        });
-
-        // Clean up event listener when component is destroyed
-        this.$once('hook:beforeDestroy', () => {
-          window.removeEventListener('resize', chart.resize);
-          chart.dispose();
-        });
-
+        this.chart.setOption(option);
       } catch (error) {
-        console.error('Error loading world map data:', error);
+        console.error('Error initializing chart:', error);
+        this.chart.hideLoading();
       }
     }
   }
@@ -112,19 +138,50 @@ export default {
 </script>
 
 <style scoped>
-.chart{
-  width: 100%;
+.chart {
+  width: 80%;
   height: 600px;
   padding: 20px;
 }
 
-.map-container{
+.map-container {
   border: 1px solid #d6d6d6;
-  /* padding: 10px; */
 }
 
-.title{
+.title {
   padding: 10px;
   border-bottom: 1px solid #d6d6d6;
+  color: #111618;
+  font-size: 10px;
+}
+
+.content {
+  display: flex;
+  align-items: center;
+}
+
+.color-legend {
+  margin-left: 20px;
+  width: 200px;
+}
+
+.color-legend ul {
+  list-style: none;
+  padding: 0;
+}
+
+.color-legend li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+  font-size: 12px;
+}
+
+.color-box {
+  width: 15px;
+  height: 15px;
+  display: inline-block;
+  margin-right: 8px;
+  border-radius: 50%;
 }
 </style>

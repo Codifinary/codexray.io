@@ -1,27 +1,27 @@
 <template>
-  <div class="card" :style="{ '--bottom-color': cardData.bottomColor || '#059669' }">
+  <div class="card" :style="{ '--bottom-color': '#013912' }">
     <div class="metrics-container">
       <div class="main-metric">
-        <div class="metric-label">{{ cardData.name || 'Total Requests' }}</div>
-        <div class="metric-value">{{ cardData.totalRequests || 0 }}</div>
+        <div class="metric-label" :style="{ color: 'primary' }">{{ cardData.primaryLabel }}</div>
+        <div class="metric-value">{{ cardData.primaryValue}}</div>
       </div>
       <div class="secondary-metric">
-        <div class="metric-label">{{ cardData.secondaryLabel || 'Req/sec' }}</div>
-        <div class="metric-value">{{ cardData.secondaryValue || 0 }}</div>
+        <div class="metric-label">{{ cardData.secondaryLabel}}</div>
+        <div class="metric-value">{{ cardData.secondaryValue }}</div>
       </div>
-    </div>
+  </div>
     <div class="percentage-indicator">
-      <div class="percentage" :class="{ 'positive': (cardData.percentageChange || 0) > 0, 'negative': (cardData.percentageChange || 0) < 0 }">
-        {{ (cardData.percentageChange || 0) > 0 ? '+' : '' }}{{ (cardData.percentageChange || 0).toFixed(2) }}%
+      <div class="percentage" :class="{ 'positive': (cardData.trendColor === '#66BB6A'), 'negative': (cardData.trendColor === '#EF5350') }">
+        {{ (cardData.percentageChange) > 0 ? '+' : '' }}{{ (cardData.percentageChange || 0).toFixed(2) }}%
       </div>
       <BaseIcon 
-        :name="cardData.icon || 'up-arrow'" 
-        :iconColor="cardData.iconColor || 'green'" 
+        :name="cardData.icon" 
+        :iconColor="cardData.iconColor || 'primary'" 
         :class="['card-icon', cardData.background || '']" 
         style="border-radius: 30%" 
       />
     </div>
-    <div class="bottom-border"></div>
+    <div class="bottom-border" :class="$vuetify.theme.dark ? 'theme--dark' : 'theme--light'"></div>
   </div>
 </template>
 
@@ -35,16 +35,16 @@ export default {
   props: {
     cardData: {
       type: Object,
+      required: true,
       default: () => ({
-        name: 'Total Requests',
-        totalRequests: 0,
-        secondaryLabel: 'Req/sec',
+        primaryLabel: '',
+        primaryValue: 0,
+        secondaryLabel: '',
         secondaryValue: 0,
         percentageChange: 0,
-        icon: 'up-arrow',
-        iconColor: 'green',
-        background: '',
-        bottomColor: '#059669'
+        icon: '',
+        iconColor: '',
+        trendColor: '',
       })
     }
   }
@@ -74,20 +74,20 @@ export default {
 }
 
 .metric-label {
-  color: #666666;
+  color: #013912;
   font-size: 14px;
   font-weight: 400;
 }
 
 .main-metric .metric-value {
-  color: #000000;
+  color: #013912;
   font-size: 32px;
   font-weight: 600;
   line-height: 1;
 }
 
 .secondary-metric .metric-value {
-  color: #000000;
+  color: #013912;
   font-size: 24px;
   font-weight: 600;
   line-height: 1;
@@ -100,7 +100,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 50px;
 }
 
 .percentage {

@@ -327,4 +327,8 @@ export default class Api {
     saveWhitelistDomain(trust_domain, cb){
         this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
+
+    getPerformanceData(cb) {
+        this.get(this.projectPath(`mrum/perf`), {}, cb);
+    }
 }
