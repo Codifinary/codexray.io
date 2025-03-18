@@ -64,24 +64,28 @@ type Collector struct {
 	perfBatches     map[db.ProjectId]*PerfBatch
 	perfBatchesLock sync.Mutex
 
+	mobileUserRegistrationBatches     map[db.ProjectId]*MobileUserRegistrationBatch
+	mobileUserRegistrationBatchesLock sync.Mutex
+
 	errLogBatches     map[db.ProjectId]*ErrLogBatch
 	errLogBatchesLock sync.Mutex
 }
 
 func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationClickhouse, globalPrometheus *db.IntegrationsPrometheus) *Collector {
 	c := &Collector{
-		db:                       database,
-		cache:                    cache,
-		globalClickHouse:         globalClickHouse,
-		globalPrometheus:         globalPrometheus,
-		clickhouseClients:        map[db.ProjectId]*chClient{},
-		traceBatches:             map[db.ProjectId]*TracesBatch{},
-		profileBatches:           map[db.ProjectId]*ProfilesBatch{},
-		mobilePerfBatches:        map[db.ProjectId]*MobilePerfBatch{},
-		mobileCrashReportBatches: map[db.ProjectId]*MobileCrashReportBatch{},
-		logBatches:               map[db.ProjectId]*LogsBatch{},
-		perfBatches:              map[db.ProjectId]*PerfBatch{},
-		errLogBatches:            map[db.ProjectId]*ErrLogBatch{},
+		db:                            database,
+		cache:                         cache,
+		globalClickHouse:              globalClickHouse,
+		globalPrometheus:              globalPrometheus,
+		clickhouseClients:             map[db.ProjectId]*chClient{},
+		traceBatches:                  map[db.ProjectId]*TracesBatch{},
+		profileBatches:                map[db.ProjectId]*ProfilesBatch{},
+		mobilePerfBatches:             map[db.ProjectId]*MobilePerfBatch{},
+		logBatches:                    map[db.ProjectId]*LogsBatch{},
+		perfBatches:                   map[db.ProjectId]*PerfBatch{},
+		errLogBatches:                 map[db.ProjectId]*ErrLogBatch{},
+    mobileCrashReportBatches:      map[db.ProjectId]*MobileCrashReportBatch{},
+		mobileUserRegistrationBatches: map[db.ProjectId]*MobileUserRegistrationBatch{},
 	}
 
 	c.updateProjects()
@@ -185,6 +189,7 @@ func (c *Collector) Close() {
 	for _, cl := range c.clickhouseClients {
 		cl.pool.Close()
 	}
+
 }
 
 func (c *Collector) UpdateClickhouseClient(ctx context.Context, projectId db.ProjectId, cfg *db.IntegrationClickhouse) error {
@@ -365,6 +370,19 @@ func (c *Collector) getErrLogBatch(project *db.Project) *ErrLogBatch {
 			return c.clickhouseDo(context.TODO(), project, query)
 		})
 		c.errLogBatches[project.Id] = b
+	}
+	return b
+}
+
+func (c *Collector) getMobileUserRegistrationBatch(project *db.Project) *MobileUserRegistrationBatch {
+	c.mobileUserRegistrationBatchesLock.Lock()
+	defer c.mobileUserRegistrationBatchesLock.Unlock()
+	b := c.mobileUserRegistrationBatches[project.Id]
+	if b == nil {
+		b = NewMobileUserRegistrationBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileUserRegistrationBatches[project.Id] = b
 	}
 	return b
 }
