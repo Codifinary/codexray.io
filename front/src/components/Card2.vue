@@ -133,6 +133,7 @@ export default {
   border-bottom-right-radius: 8px;
 }
 
+
 @media (min-width: 1440px) {
   .card {
     width: 320px;

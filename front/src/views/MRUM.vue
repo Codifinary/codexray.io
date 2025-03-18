@@ -22,6 +22,7 @@
 
         <template v-if="tab === 'crash'">
             <div class="font-weight-bold tab-heading">Crash</div>
+            <Crash/>
         </template>
 
         
@@ -29,6 +30,7 @@
 </template>
 
 <script>
+import Crash from './Crash.vue';
 import Performance from './Performance.vue';
 
 export default {
@@ -39,6 +41,7 @@ export default {
 
     components: {
         Performance,
+        Crash
     },
 
     mounted() {

@@ -33,10 +33,8 @@
                 </tr>
             </tbody>
         </v-simple-table>
-        <div>
 
-            <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"/>
-        </div>
+        <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"/>
     </div>
 </template>
 
@@ -93,17 +91,12 @@ export default {
             loading: true
         };
     },
-    components: {
-        Card2,
-        GeoMap,
-        Dashboard
-    },
     mounted() {
         this.get();
     },
 
     watch: {
-        '$route'(to, from) {
+        '$route'() {
             this.get();
         },
     },

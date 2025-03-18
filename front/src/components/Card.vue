@@ -1,5 +1,5 @@
 <template>
-    <v-card class="card-body">
+    <v-card class="card-body" :style="{ '--bottom-color': bottomColor }">
         <v-card-title>
             <div class="card-name">{{ name }}</div>
             <v-card-text class="card-count">
@@ -7,6 +7,8 @@
             </v-card-text>
         </v-card-title>
         <BaseIcon :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <div class="bottom-border" :class="$vuetify.theme.dark ? 'theme--dark' : 'theme--light'"></div>
+
     </v-card>
 </template>
 
@@ -24,6 +26,7 @@ export default {
         icon: String,
         iconName: String,
         unit: String,
+        bottomColor: String,
     },
     computed: {
         formattedCount() {
@@ -91,5 +94,16 @@ export default {
     .v-icon {
         font-size: 30px;
     }
+}
+
+.bottom-border {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--bottom-color);
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 </style>
