@@ -149,33 +149,42 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	echartReport := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
 
 	// Fetch top browsers from perf_table
-	topBrowsers, err := ch.GetTopBrowser(ctx, from, to)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get top browsers: %w", err)
-	}
+	// topBrowsers, err := ch.GetTopBrowser(ctx, from, to)
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to get top browsers: %w", err)
+	// }
 
-	topBrowsersData := make([]model.DataPoint, len(topBrowsers))
-	for i, browser := range topBrowsers {
-		topBrowsersData[i] = model.DataPoint{
-			Value: browser.Value,
-			Name:  browser.Name,
-		}
-	}
+	// topBrowsersData := make([]model.DataPoint, len(topBrowsers))
+	// for i, browser := range topBrowsers {
+	// 	topBrowsersData[i] = model.DataPoint{
+	// 		Value: browser.Value,
+	// 		Name:  browser.Name,
+	// 	}
+	// }
 
 	// for local testing
-	// topBrowsersData := []model.DataPoint{
-	// 	{Value: 40, Name: "Chrome"},
-	// 	{Value: 30, Name: "Firefox"},
-	// 	{Value: 20, Name: "Safari"},
-	// 	{Value: 5, Name: "Edge"},
-	// 	{Value: 5, Name: "Opera"},
-	// }
+	topBrowsersData := []model.DataPoint{
+		{Value: 40, Name: "Chrome"},
+		{Value: 30, Name: "Firefox"},
+		{Value: 20, Name: "Safari"},
+		{Value: 5, Name: "Edge"},
+		{Value: 5, Name: "Opera"},
+	}
 
 	// Create the donut chart for top 5 browsers
 	donutChart1 := echartReport.GetOrCreateEChart("Top 5 Browsers", nil)
+	donutChart1.Title = model.TextTitle{
+		Text: "Top 5 Browsers",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	donutChart1.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart1.Legend = model.Legend{Bottom: "0"}
 	donutChart1.SetSeries("Browsers", "pie", topBrowsersData)
+	// donutChart1.SetGraphicText(fmt.Sprintf("%d", len(topBrowsers)))
+	donutChart1.SetGraphicText("5")
 
 	// Create the donut chart for top 5 services by impacted users
 	sort.Slice(overviews, func(i, j int) bool {
@@ -192,9 +201,17 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 		})
 	}
 	donutChart2 := echartReport.GetOrCreateEChart("Top 5 Services by Impacted Users", nil)
+	donutChart2.Title = model.TextTitle{
+		Text: "Top 5 Services by Impacted Users",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	donutChart2.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart2.Legend = model.Legend{Bottom: "0"}
 	donutChart2.SetSeries("Services", "pie", topServicesByUsers)
+	donutChart2.SetGraphicText(fmt.Sprintf("%d", len(topServicesByUsers)))
 
 	// Create the bar chart for top 10 services by load
 	sort.Slice(overviews, func(i, j int) bool {
@@ -211,12 +228,28 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 		})
 	}
 	barChart := echartReport.GetOrCreateEChart("Top 10 Services by Load", nil)
+	barChart.Title = model.TextTitle{
+		Text: "Top 10 Services by Load",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	barChart.Tooltip = model.Tooltip{Trigger: "axis"}
 	barChart.Legend = model.Legend{Bottom: "0"}
 	barChart.XAxis = &model.Axis{Type: "value"}
-	barChart.YAxis = &model.Axis{Type: "category", Data: extractServiceNames(topServicesByLoad)}
+	barChart.YAxis = &model.Axis{
+		Type: "category",
+		Data: extractServiceNames(topServicesByLoad),
+		AxisLabel: &model.AxisLabel{
+			Show:     true,
+			FontSize: 12,
+			Formatter: "{value}",
+		},
+	}
 	barChart.SetSeries("Load", "bar", topServicesByLoad)
 	barChart.Series.BarWidth = "40%"
+
 
 	return echartReport, nil
 }

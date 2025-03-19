@@ -1,25 +1,34 @@
 <template>
     <div>
         <v-card class="card-body">
-            <div v-for="(item, index) in data" :key="index" class="card-item">
+            <div class="card-item">
                 <div class="card-content">
                     <div class="card-info">
-                        <div class="card-name">{{ item.name }}</div>
-                        <v-card-text class="card-count">{{ item.count }}</v-card-text>
-                        <div class="card-name">{{ item.subName }}</div>
-                        <v-card-text class="card-sub-count">{{ item.subCount }}</v-card-text>
+                        <div class="card-name">Total Applications</div>
+                        <v-card-text class="card-count">{{ data.totalApplications }}</v-card-text>
+                        <div class="card-name">Total pages</div>
+                        <v-card-text class="card-sub-count">{{ data.totalPages }}</v-card-text>
                     </div>
                     <div class="trend-info">
-                        <span
-                            :style="{ color: item.trend === 'upTrend' ? 'green' : item.trend === 'downTrend' ? 'red' : 'black' }"
-                            class="trend-percentage"
+                        <div class="card-name">Avg latency</div>
+                        <v-card-text class="card-latency-count"
+                            >{{ avgLatency.value }} <span class="card-name"> {{ avgLatency.unit }}</span></v-card-text
                         >
-                            {{ item.trendPercentage }}
-                        </span>
-                        <img :src="`${$codexray.base_path}static/img/tech-icons/${item.trend}.svg`" class="card-icon" alt="Trend Icon" />
                     </div>
                 </div>
-                <hr v-if="index < data.length - 1" class="separator" />
+                <hr class="separator mb-3" />
+                <div class="card-content">
+                    <div class="card-info">
+                        <div class="card-name">Total errors</div>
+                        <v-card-text class="card-count2">{{ data.totalError }}</v-card-text>
+                        <div class="card-name">Errors/sec</div>
+                        <v-card-text class="card-sub-count">{{ data.errorPerSec }}</v-card-text>
+                    </div>
+                    <div class="trend-info">
+                        <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage"> {{ data.errorTrend }}% </span>
+                        <img :src="`${$codexray.base_path}static/img/tech-icons/${trend}.svg`" class="card-icon" alt="Trend Icon" />
+                    </div>
+                </div>
             </div>
         </v-card>
     </div>
@@ -29,8 +38,20 @@
 export default {
     props: {
         data: {
-            type: Array,
+            type: Object,
             required: true,
+        },
+    },
+    computed: {
+        trend() {
+            return this.data.errorTrend > 0 ? 'downTrend' : 'upTrend';
+        },
+        avgLatency() {
+            const count = this.$format.convertLatency(this.data.avgLatency);
+            return {
+                value: Number.isInteger(count.value) ? count.value : parseFloat(count.value).toFixed(2),
+                unit: count.unit,
+            };
         },
     },
 };
@@ -40,15 +61,14 @@ export default {
 .card-body {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    padding: 20px;
+    width: 300px;
+    padding: 12px 20px;
 }
 
 .card-item {
     display: flex;
     flex-direction: column;
     width: 100%;
-    padding: 20px 0;
 }
 
 .card-content {
@@ -78,9 +98,19 @@ export default {
     font-size: 30px;
     color: #013912;
 }
+.card-count2 {
+    font-weight: 600;
+    font-size: 26px;
+    color: #013912;
+}
 .card-sub-count {
     font-weight: 600;
     font-size: 24px;
+    color: #013912;
+}
+.card-latency-count {
+    font-weight: 600;
+    font-size: 20px;
     color: #013912;
 }
 

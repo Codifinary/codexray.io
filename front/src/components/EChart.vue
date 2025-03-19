@@ -37,5 +37,7 @@ export default {
 .chart {
     width: 100%;
     height: 100%;
+    transform: scale(0.85);
+    transform-origin: center;
 }
 </style>
