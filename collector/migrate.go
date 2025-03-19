@@ -293,6 +293,31 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, PagePath, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity = 8192;
 `,
+    
+    `
+CREATE TABLE IF NOT EXISTS mobile_event_data @on_cluster (
+     Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     UserId              String CODEC(ZSTD(1)),
+     Name                String CODEC(ZSTD(1)),
+     StartTime           Int64 CODEC(ZSTD(1)),
+     SessionId           String CODEC(ZSTD(1)),
+     Os                  String CODEC(ZSTD(1)),
+     Platform            String CODEC(ZSTD(1)),
+     ServiceVersion      String CODEC(ZSTD(1)),
+     Device              String CODEC(ZSTD(1)),
+     Service             String CODEC(ZSTD(1)),
+     Country             String CODEC(ZSTD(1)),
+     RawData             String CODEC(ZSTD(1)),
+
+     INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (Service, Name, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
 
 		`
 CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
