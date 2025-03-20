@@ -44,5 +44,27 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 	returningUsersTrendChart := userTrendsGroup.GetOrCreateChart("Returning Users")
 	returningUsersTrendChart.AddSeries("Returning Users", returningUsersTrendData, "#42A5F5")
 
+	userBreakdownGroup := report.GetOrCreateChartGroup("User Breakdown", nil)
+
+	now := timeseries.Now()
+	sevenDaysAgo := now.Add(-7 * 24 * 60 * 60)
+	oneDayStep := timeseries.Duration(24 * 60 * 60)
+
+	fmt.Println(oneDayStep)
+
+	userBreakdownData, err := ch.GetUserBreakdown(context.Background(), sevenDaysAgo, now, oneDayStep)
+	if err != nil {
+		report.Status = model.WARNING
+		fmt.Println(err)
+		return report
+	}
+
+	userBreakdownChart := userBreakdownGroup.GetOrCreateChart("New vs Returning Users (Last 7 Days)")
+	userBreakdownChart.Column()
+
+	userBreakdownChart.AddSeries("New Users", userBreakdownData["newUsers"], "#AB47BC")
+	userBreakdownChart.AddSeries("Returning Users", userBreakdownData["returningUsers"], "#42A5F5")
+
+	fmt.Println(report)
 	return report
 }

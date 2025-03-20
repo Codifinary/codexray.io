@@ -97,6 +97,7 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 	return result, nil
 }
 
+// GetDailyUserBreakdown returns a breakdown of new and returning users for each day in the last 7 days
 func (c *Client) GetUserTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
@@ -245,4 +246,95 @@ func (c *Client) GetReturningUsersTrendByTimeChart(ctx context.Context, from, to
 	}
 
 	return ts, nil
+}
+
+func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+	newUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	returningUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	query := fmt.Sprintf(`
+	WITH
+		active_users AS (
+			SELECT
+				toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %[1]d SECOND)) * 1000 as interval_start,
+				UserId
+			FROM
+				mobile_event_data
+			WHERE
+				Timestamp BETWEEN @from AND @to
+		),
+		active_users_agg AS (
+			SELECT
+				interval_start,
+				count(DISTINCT UserId) as total_users
+			FROM
+				active_users
+			GROUP BY
+				interval_start
+		),
+		new_users AS (
+			SELECT
+				toUnixTimestamp(toStartOfInterval(med.Timestamp, INTERVAL %[1]d SECOND)) * 1000 as interval_start,
+				med.UserId
+			FROM
+				mobile_event_data med
+			INNER JOIN
+				mobile_user_registration mur ON med.UserId = mur.UserId
+			WHERE
+				med.Timestamp BETWEEN @from AND @to
+				AND mur.RegistrationTime BETWEEN @from AND @to
+		),
+		new_users_agg AS (
+			SELECT
+				interval_start,
+				count(DISTINCT UserId) as new_users
+			FROM
+				new_users
+			GROUP BY
+				interval_start
+		)
+	SELECT
+		au.interval_start,
+		COALESCE(nu.new_users, 0) as new_users,
+		(au.total_users - COALESCE(nu.new_users, 0)) as returning_users
+	FROM
+		active_users_agg au
+	LEFT JOIN
+		new_users_agg nu ON au.interval_start = nu.interval_start
+	ORDER BY
+		au.interval_start
+	`, step)
+
+	fmt.Println(step)
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var intervalStart uint64
+		var newUsers uint64
+		var returningUsers int64
+
+		if err := rows.Scan(&intervalStart, &newUsers, &returningUsers); err != nil {
+			return nil, err
+		}
+
+		if returningUsers < 0 {
+			returningUsers = 0
+		}
+
+		newUsersSeries.Set(timeseries.Time(intervalStart/1000), float32(newUsers))
+		returningUsersSeries.Set(timeseries.Time(intervalStart/1000), float32(returningUsers))
+	}
+
+	return map[string]*timeseries.TimeSeries{
+		"newUsers":       newUsersSeries,
+		"returningUsers": returningUsersSeries,
+	}, nil
 }
