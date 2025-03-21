@@ -32,6 +32,7 @@ type MobileUserRegistrationBatch struct {
 	lock sync.Mutex
 	done chan struct{}
 
+	Timestamp        *chproto.ColDateTime64
 	UserId           *chproto.ColStr
 	OS               *chproto.ColLowCardinality[string]
 	Platform         *chproto.ColInt32
@@ -51,6 +52,7 @@ func NewMobileUserRegistrationBatch(limit int, timeout time.Duration, exec func(
 		exec:  exec,
 		done:  make(chan struct{}),
 
+		Timestamp:        new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
 		UserId:           new(chproto.ColStr),
 		OS:               new(chproto.ColStr).LowCardinality(),
 		Platform:         new(chproto.ColInt32),
@@ -93,6 +95,8 @@ func (b *MobileUserRegistrationBatch) Add(registration *MobileUserRegistrationPa
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	registrationTime := time.UnixMilli(registration.RegistrationTime)
+	currentTime := time.Now()
+	b.Timestamp.Append(currentTime)
 	b.UserId.Append(registration.UserId)
 	b.OS.Append(registration.OS)
 	b.Platform.Append(registration.Platform)
@@ -116,6 +120,7 @@ func (b *MobileUserRegistrationBatch) save() {
 	}
 
 	input := chproto.Input{
+		{Name: "Timestamp", Data: b.Timestamp},
 		{Name: "UserId", Data: b.UserId},
 		{Name: "OS", Data: b.OS},
 		{Name: "Platform", Data: b.Platform},
