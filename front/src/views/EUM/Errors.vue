@@ -1,7 +1,15 @@
 <template>
     <div v-if="!selectedError" class="my-10 mx-5">
         <div class="cards mb-5">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
+            <Card
+                v-for="value in summary"
+                :key="value.name"
+                :name="value.name"
+                :iconName="value.icon"
+                :count="value.value"
+                :unit="value.unit"
+                :lineColor="value.color"
+            />
         </div>
         <CustomTable :headers="headers" :items="errors" item-key="error_name" class="elevation-1">
             <template v-slot:[`item.error_name`]="{ item }">
@@ -72,16 +80,24 @@ export default {
                         name: 'Total Errors',
                         value: data.summary.total_errors,
                         unit: '',
+                        icon: 'requests',
+                        color: '#42A5F5',
+                        background: 'blue lighten-4',
                     },
                     {
                         name: 'Error Rate',
                         value: data.summary.error_rate,
                         unit: '%',
+                        icon: 'errors',
+                        color: '#EF5350',
+                        background: 'red lighten-4',
                     },
                     {
                         name: 'Total Users',
                         value: data.summary.total_users,
+                        icon: 'users',
                         unit: '',
+                        color: '#FFA726 ',
                     },
                 ];
             });
@@ -122,6 +138,10 @@ export default {
 
 .cards {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    width: 100%;
+}
+::v-deep(.card-body) {
+    width: 30%;
 }
 </style>

@@ -1,39 +1,65 @@
 <template>
     <div class="my-10 mx-5">
-        <CustomTable :headers="headers" :items="tableItems" item-key="serviceName" class="elevation-1">
-            <template v-slot:item.serviceName="{ item }">
-                <div class="name d-flex">
-                    <div class="mr-3">
-                        <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
-                            style="width: 16px; height: 16px"
-                            alt="App Icon"
-                        />
+        <EUMSummary :cardData="cardData" :chartData="chartData" />
+        <div class="my-10 mx-5">
+            <div class="search">
+                <span class="search-label">Search: </span>
+                <v-text-field
+                    v-model="searchQuery"
+                    label="Search by Service Name"
+                    outlined
+                    dense
+                    class="search-input"
+                    clearable
+                    placeholder="Enter service name"
+                />
+            </div>
+
+            <CustomTable :headers="headers" :items="filteredTableItems" item-key="serviceName" class="mt-1 elevation-1">
+                <template v-slot:item.serviceName="{ item }">
+                    <div class="name d-flex">
+                        <div class="mr-3">
+                            <img
+                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
+                                style="width: 16px; height: 16px"
+                                alt="App Icon"
+                            />
+                        </div>
+                        <router-link
+                            :to="{
+                                name: 'overview',
+                                params: { view: 'EUM', id: item.serviceName },
+                                query: $route.query,
+                            }"
+                        >
+                            {{ item.serviceName }}
+                        </router-link>
                     </div>
-                    <router-link
-                        :to="{
-                            name: 'overview',
-                            params: { view: 'EUM', id: item.serviceName },
-                            query: $route.query,
-                        }"
-                    >
-                        {{ item.serviceName }}
-                    </router-link>
-                </div>
-            </template>
-            <template v-slot:item.avgLoadPageTime="{ item }">
-                {{ format(item.avgLoadPageTime, 'ms') }}
-            </template>
-        </CustomTable>
+                </template>
+                <template v-slot:item.avgLoadPageTime="{ item }">
+                    {{ format(item.avgLoadPageTime, 'ms') }}
+                </template>
+            </CustomTable>
+
+            <div class="my-10 mx-5">
+                <span class="heading mb-5">Top 5 applications</span>
+                <Dashboard :name="'performance'" :widgets="performanceCharts.widgets" />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+import EUMSummary from './EUMSummary.vue';
+import Dashboard from '@/components/Dashboard.vue';
+
 export default {
     name: 'EUM',
     components: {
         CustomTable,
+        EUMSummary,
+        Dashboard,
     },
     data() {
         return {
@@ -47,16 +73,27 @@ export default {
                 { text: 'Users Impacted', value: 'impactedUsers' },
             ],
             tableItems: [],
+            cardData: {},
+            chartData: [],
             selectedApplication: null,
             loading: false,
             error: '',
+            performanceCharts: {},
+            searchQuery: '',
         };
+    },
+    computed: {
+        filteredTableItems() {
+            if (!this.searchQuery) {
+                return this.tableItems;
+            }
+            return this.tableItems.filter((item) => item.serviceName.toLowerCase().includes(this.searchQuery.toLowerCase()));
+        },
     },
     mounted() {
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
-
     methods: {
         get() {
             this.loading = true;
@@ -68,6 +105,9 @@ export default {
                     return;
                 }
                 this.tableItems = data.eumapps.overviews || [];
+                this.cardData = data.eumapps.badgeView || {};
+                this.chartData = data.eumapps.Echartreport.widgets.map((widget) => Object.values(widget.echarts)[0]) || [];
+                this.performanceCharts = data.eumapps.report || {};
             });
         },
         format(duration, unit) {
@@ -76,11 +116,28 @@ export default {
     },
 };
 </script>
+
 <style scoped>
 .eum-container {
     padding-bottom: 70px;
     margin-left: 20px !important;
     margin-right: 20px !important;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
+}
+.heading {
+    color: var(--status-ok) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+.search {
+    display: flex;
+}
+.search-input {
+    max-width: 400px !important;
+    min-height: 20px !important;
+}
+.search-label {
+    font-size: 16px;
+    margin-top: 5px;
+    margin-right: 10px;
 }
 </style>

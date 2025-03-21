@@ -1,7 +1,15 @@
 <template>
     <div>
         <div class="cards mt-5">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" />
+            <Card
+                v-for="value in summary"
+                :key="value.name"
+                :name="value.name"
+                :iconName="value.icon"
+                :count="value.value"
+                :icon="value.color"
+                :lineColor="value.color"
+            />
         </div>
         <v-card outlined class="pa-4 mb-2 mt-6">
             <v-form>
@@ -304,20 +312,24 @@ export default {
                     {
                         name: 'Total Logs',
                         value: this.data.summary.total_logs,
-                        background: 'blue lighten-4',
-                        icon: '',
+                        color: '#42A5F5 ',
+
+                        icon: 'logs',
                     },
                     {
                         name: 'Total Errors',
                         value: this.data.summary.total_errs,
-                        background: 'red lighten-4',
-                        icon: '',
+                        color: '#EF5350 ',
+
+                        icon: 'errors',
                     },
                     {
                         name: 'Total Warnings',
                         value: this.data.summary.total_warn,
-                        background: 'orange lighten-4',
-                        icon: '',
+                        background: '#FFA726 lighten-4',
+
+                        color: '#FFA726 ',
+                        icon: 'warning',
                     },
                 ];
             });
@@ -343,8 +355,13 @@ export default {
 .entry:deep(tr:hover) {
     background-color: unset !important;
 }
+
 .cards {
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    width: 95%;
+}
+::v-deep(.card-body) {
+    width: 30%;
 }
 </style>

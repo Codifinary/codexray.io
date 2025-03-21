@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="39px" height="39px" viewBox="0 0 39 38" version="1.1">
+<defs>
+<filter id="alpha" filterUnits="objectBoundingBox" x="0%" y="0%" width="100%" height="100%">
+  <feColorMatrix type="matrix" in="SourceGraphic" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0"/>
+</filter>
+<mask id="mask0">
+  <g filter="url(#alpha)">
+<rect x="0" y="0" width="39" height="38" style="fill:rgb(0%,0%,0%);fill-opacity:0.2;stroke:none;"/>
+  </g>
+</mask>
+<clipPath id="clip1">
+  <rect x="0" y="0" width="39" height="38"/>
+</clipPath>
+<g id="surface5" clip-path="url(#clip1)">
+<path style=" stroke:none;fill-rule:evenodd;fill:rgb(100%,65.490198%,14.901961%);fill-opacity:1;" d="M 0.464844 19 L 0.464844 27.117188 C 0.464844 32.945312 5.234375 37.671875 11.113281 37.671875 L 27.710938 37.671875 C 33.589844 37.671875 38.359375 32.945312 38.359375 27.117188 L 38.359375 10.882812 C 38.359375 5.054688 33.589844 0.328125 27.710938 0.328125 L 11.113281 0.328125 C 5.234375 0.328125 0.464844 5.054688 0.464844 10.882812 Z M 0.464844 19 "/>
+</g>
+</defs>
+<g id="surface1">
+<use xlink:href="#surface5" mask="url(#mask0)"/>
+<path style="fill:none;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke:rgb(100%,65.490198%,14.901961%);stroke-opacity:1;stroke-miterlimit:4;" d="M 28.634014 26.25 C 31.114583 26.25 33.130409 24.234375 33.130409 21.75 C 33.130409 19.265625 31.114583 17.25 28.634014 17.25 C 26.147636 17.25 24.131811 19.265625 24.131811 21.75 C 24.131811 24.234375 26.147636 26.25 28.634014 26.25 Z M 28.634014 26.25 " transform="matrix(0.672414,0,0,0.666667,0,0)"/>
+<path style="fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:miter;stroke:rgb(100%,65.490198%,14.901961%);stroke-opacity:1;stroke-miterlimit:4;" d="M 37.626803 35.25 C 37.632612 35.0625 37.632612 34.875 37.632612 34.6875 C 37.632612 31.892578 33.600962 29.625 28.634014 29.625 C 23.661258 29.625 19.629607 31.892578 19.629607 34.6875 C 19.629607 37.482422 19.629607 39.75 28.634014 39.75 C 31.14363 39.75 32.950321 39.574219 34.257412 39.257812 " transform="matrix(0.672414,0,0,0.666667,0,0)"/>
+</g>
+</svg>

@@ -106,14 +106,17 @@ func (r *AuditReport) GetOrCreateEChart(title string, doc *DocLink) *EChart {
 		return nil
 	}
 	for _, w := range r.Widgets {
-		if echart := w.EChart; echart != nil {
-			if echart.Title == title {
+		if w.EChart != nil {
+			if echart, exists := w.EChart[title]; exists {
 				return echart
 			}
 		}
 	}
+
+	// If not found, create a new one
 	echart := NewEChart(title)
-	r.Widgets = append(r.Widgets, &Widget{EChart: echart, DocLink: doc})
+	widget := &Widget{EChart: map[string]*EChart{title: echart}, DocLink: doc}
+	r.Widgets = append(r.Widgets, widget)
 	return echart
 }
 
