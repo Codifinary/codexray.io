@@ -355,9 +355,10 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (Service, UniqueId, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
-    
+
 		`
 CREATE TABLE IF NOT EXISTS mobile_user_registration @on_cluster ( 
+	Timestamp 			DateTime64(9) CODEC(Delta, ZSTD(1)),
 	UserId 				String CODEC(ZSTD(1)), 
 	OS 					LowCardinality(String) CODEC(ZSTD(1)), 
 	Platform 			Int32 CODEC(ZSTD(1)), 
