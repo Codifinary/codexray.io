@@ -24,7 +24,7 @@
                         <div class="card-name">Errors/sec</div>
                         <v-card-text class="card-sub-count">{{ data.errorPerSec }}</v-card-text>
                     </div>
-                    <div class="trend-info">
+                    <div class="trend-info" v-if="!isFromNowQuery">
                         <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage"> {{ data.errorTrend }}% </span>
                         <img :src="`${$codexray.base_path}static/img/tech-icons/${trend}.svg`" class="card-icon" alt="Trend Icon" />
                     </div>
@@ -52,6 +52,9 @@ export default {
                 value: Number.isInteger(count.value) ? count.value : parseFloat(count.value).toFixed(2),
                 unit: count.unit,
             };
+        },
+        isFromNowQuery() {
+            return this.$route.query.from && this.$route.query.from.startsWith('now-');
         },
     },
 };

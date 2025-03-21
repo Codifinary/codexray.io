@@ -457,7 +457,7 @@ type AxisLabel struct {
 	FontSize  int    `json:"fontSize,omitempty"`
 	Formatter string `json:"formatter,omitempty"`
 	Rich      *Rich  `json:"rich,omitempty"`
-}
+	Rotate    int    `json:"rotate,omitempty"`}
 
 type Rich struct {
 	Flag *Flag `json:"flag,omitempty"`

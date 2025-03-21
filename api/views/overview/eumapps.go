@@ -245,6 +245,7 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 			Show:     true,
 			FontSize: 12,
 			Formatter: "{value}",
+			Rotate: 90,
 		},
 	}
 	barChart.SetSeries("Load", "bar", topServicesByLoad)
