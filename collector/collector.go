@@ -58,6 +58,9 @@ type Collector struct {
 	mobilePerfBatches     map[db.ProjectId]*MobilePerfBatch
 	mobilePerfBatchesLock sync.Mutex
 
+	mobileCrashReportBatches     map[db.ProjectId]*MobileCrashReportBatch
+	mobileCrashReportBatchesLock sync.Mutex
+
 	perfBatches     map[db.ProjectId]*PerfBatch
 	perfBatchesLock sync.Mutex
 
@@ -85,6 +88,7 @@ func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationCl
 		logBatches:                    map[db.ProjectId]*LogsBatch{},
 		perfBatches:                   map[db.ProjectId]*PerfBatch{},
 		errLogBatches:                 map[db.ProjectId]*ErrLogBatch{},
+    mobileCrashReportBatches:      map[db.ProjectId]*MobileCrashReportBatch{},
 		mobileUserRegistrationBatches: map[db.ProjectId]*MobileUserRegistrationBatch{},
 	}
 
@@ -409,6 +413,22 @@ func (c *Collector) getMobilePerfBatch(project *db.Project) *MobilePerfBatch {
 	return b
 }
 
+
+func (c *Collector) getMobileCrashReportBatch(project *db.Project) *MobileCrashReportBatch {
+	c.mobileCrashReportBatchesLock.Lock()
+	defer c.mobileCrashReportBatchesLock.Unlock()
+	b := c.mobileCrashReportBatches[project.Id]
+	if b == nil {
+		b = NewMobileCrashReportBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileCrashReportBatches[project.Id] = b
+  }
+  
+  return b
+}
+    
+    
 func (c *Collector) getMobileEventBatch(project *db.Project) *MobileEventBatch {
 	c.mobileEventBatchesLock.Lock()
 	defer c.mobileEventBatchesLock.Unlock()

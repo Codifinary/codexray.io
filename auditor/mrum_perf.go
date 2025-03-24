@@ -18,7 +18,7 @@ func GenerateMrumPerfReport(w *model.World, ch *clickhouse.Client, from, to time
 		return report
 	}
 
-	requestByTimeSliceChart := report.GetOrCreateChart("Requests by Time Slice", nil).Stacked()
+	requestByTimeSliceChart := report.GetOrCreateChart("Requests by Time Slice", nil)
 	requestByTimeSliceChart.AddSeries("Requests by Time Slice", requestByTimeSliceChartData, "light-blue")
 
 	errorRateTrendByTimeChartData, err := ch.GetErrorRateTrendByTimeChart(context.Background(), from, to, w.Ctx.Step)
@@ -28,7 +28,7 @@ func GenerateMrumPerfReport(w *model.World, ch *clickhouse.Client, from, to time
 		return report
 	}
 
-	errorRateTrendByTimeChart := report.GetOrCreateChart("Error Rate Trend by Time", nil).Stacked()
+	errorRateTrendByTimeChart := report.GetOrCreateChart("Error Rate Trend by Time", nil)
 	errorRateTrendByTimeChart.AddSeries("Error Rate Trend by Time", errorRateTrendByTimeChartData, "red")
 
 	userImptactedByErrorsByTimeChartData, err := ch.GetUserImptactedByErrorsByTimeChart(context.Background(), from, to, w.Ctx.Step)
@@ -38,7 +38,7 @@ func GenerateMrumPerfReport(w *model.World, ch *clickhouse.Client, from, to time
 		return report
 	}
 
-	userImptactedByErrorsByTimeChart := report.GetOrCreateChart("User Impacted by Errors by Time", nil).Stacked()
+	userImptactedByErrorsByTimeChart := report.GetOrCreateChart("User Impacted by Errors by Time", nil)
 	userImptactedByErrorsByTimeChart.AddSeries("User Impacted by Errors by Time", userImptactedByErrorsByTimeChartData, "orange")
 	
 	// Add HTTP Response Latency & Errors heatmap
