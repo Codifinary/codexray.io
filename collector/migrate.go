@@ -293,11 +293,12 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, PagePath, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity = 8192;
 `,
-    
-    `
+
+		`
 CREATE TABLE IF NOT EXISTS mobile_event_data @on_cluster (
      Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
      UserId              String CODEC(ZSTD(1)),
+     ProjectId           String CODEC(ZSTD(1)),
      Name                String CODEC(ZSTD(1)),
      StartTime           Int64 CODEC(ZSTD(1)),
      SessionId           String CODEC(ZSTD(1)),
@@ -322,15 +323,17 @@ SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 		`
 CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
      Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     ProjectId           String CODEC(ZSTD(1)),
      Platform            String CODEC(ZSTD(1)),
      RequestPayloadSize  Int64 CODEC(ZSTD(1)),
      EndpointName        String CODEC(ZSTD(1)),
      RequestTime         Int64 CODEC(ZSTD(1)),
-     ServiceName         LowCardinality(String) CODEC(ZSTD(1)),
+     Service         LowCardinality(String) CODEC(ZSTD(1)),
      Status              Bool CODEC(ZSTD(1)),
      ResponseTime        Int64 CODEC(ZSTD(1)),
      ResponsePayloadSize Int64 CODEC(ZSTD(1)),
      UserID              String CODEC(ZSTD(1)),
+     SessionId           String CODEC(ZSTD(1)),
      Host                String CODEC(ZSTD(1)),
      Device              String CODEC(ZSTD(1)),
      StatusCode          Int64 CODEC(ZSTD(1)),
@@ -340,20 +343,22 @@ CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
      AppType             String CODEC(ZSTD(1)),
      RawData             String CODEC(ZSTD(1)),
 
-     INDEX idx_service_name ServiceName TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_endpoint_name EndpointName TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_user_id UserID TYPE bloom_filter(0.01) GRANULARITY 1,
      INDEX idx_status_code StatusCode TYPE minmax GRANULARITY 1
 ) ENGINE @merge_tree
 TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
 PARTITION BY toDate(Timestamp)
-ORDER BY (ServiceName, EndpointName, toUnixTimestamp(Timestamp))
+ORDER BY (Service, EndpointName, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
 
 		`
 CREATE TABLE IF NOT EXISTS mobile_crash_reports @on_cluster (
      Timestamp       DateTime64(9) CODEC(Delta, ZSTD(1)),
+     ProjectId       String CODEC(ZSTD(1)),
      UniqueId        String CODEC(ZSTD(1)),
      SessionId       String CODEC(ZSTD(1)),
      CrashTime       Int64 CODEC(ZSTD(1)),
@@ -386,14 +391,15 @@ CREATE TABLE IF NOT EXISTS mobile_user_registration @on_cluster (
 	Timestamp 			DateTime64(9) CODEC(Delta, ZSTD(1)),
 	UserId 				String CODEC(ZSTD(1)), 
 	OS 					LowCardinality(String) CODEC(ZSTD(1)), 
-	Platform 			Int32 CODEC(ZSTD(1)), 
+	Platform 			String CODEC(ZSTD(1)), 
 	ServiceVersion 		LowCardinality(String) CODEC(ZSTD(1)), 
 	Device 				String CODEC(ZSTD(1)), 
 	Service 			String CODEC(ZSTD(1)), 
 	Country 			LowCardinality(String) CODEC(ZSTD(1)), 
 	RegistrationTime 	DateTime64(9) CODEC(Delta, ZSTD(1)), 
 	IpAddress 			String CODEC(ZSTD(1)), 
-	TimeBucket 			Int32 CODEC(ZSTD(1)), 
+	TimeBucket 			Int32 CODEC(ZSTD(1)),
+	ProjectId 			String CODEC(ZSTD(1)), 
 	RawData 			String CODEC(ZSTD(1)),
 
  	INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1, 

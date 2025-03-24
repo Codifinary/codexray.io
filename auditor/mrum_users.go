@@ -50,8 +50,6 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 	sevenDaysAgo := now.Add(-7 * 24 * 60 * 60)
 	oneDayStep := timeseries.Duration(24 * 60 * 60)
 
-	fmt.Println(oneDayStep)
-
 	userBreakdownData, err := ch.GetUserBreakdown(context.Background(), sevenDaysAgo, now, oneDayStep)
 	if err != nil {
 		report.Status = model.WARNING

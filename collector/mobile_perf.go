@@ -13,15 +13,17 @@ import (
 )
 
 type MobilePerfPayload struct {
+	ProjectId           string `json:"projectId"`
 	Platform            string `json:"platform"`
 	RequestPayloadSize  int    `json:"requestPayloadSize"`
 	EndpointName        string `json:"endpointName"`
 	RequestTime         int64  `json:"requestTime"`
-	ServiceName         string `json:"serviceName"`
+	Service             string `json:"service"`
 	Status              bool   `json:"status"`
 	ResponseTime        int    `json:"responseTime"`
 	ResponsePayloadSize int    `json:"responsePayloadSize"`
 	UserID              string `json:"userId"`
+	SessionId           string `json:"sessionId"`
 	Host                string `json:"host"`
 	Device              string `json:"device"`
 	StatusCode          int    `json:"statusCode"`
@@ -31,16 +33,18 @@ type MobilePerfPayload struct {
 }
 
 type MobilePerfDataPoint struct {
+	ProjectId           string
 	TimestampUnixNano   uint64
 	Platform            string
 	RequestPayloadSize  int
 	EndpointName        string
 	RequestTime         int64
-	ServiceName         string
+	Service             string
 	Status              bool
 	ResponseTime        int
 	ResponsePayloadSize int
 	UserID              string
+	SessionId           string
 	Host                string
 	Device              string
 	StatusCode          int
@@ -62,15 +66,17 @@ type MobilePerfBatch struct {
 	done chan struct{}
 
 	Timestamp           *chproto.ColDateTime64
+	ProjectId           *chproto.ColStr
 	Platform            *chproto.ColStr
 	RequestPayloadSize  *chproto.ColInt64
 	EndpointName        *chproto.ColStr
 	RequestTime         *chproto.ColInt64
-	ServiceName         *chproto.ColLowCardinality[string]
+	Service             *chproto.ColLowCardinality[string]
 	Status              *chproto.ColBool
 	ResponseTime        *chproto.ColInt64
 	ResponsePayloadSize *chproto.ColInt64
 	UserID              *chproto.ColStr
+	SessionId           *chproto.ColStr
 	Host                *chproto.ColStr
 	Device              *chproto.ColStr
 	StatusCode          *chproto.ColInt64
@@ -88,15 +94,17 @@ func NewMobilePerfBatch(limit int, timeout time.Duration, exec func(query ch.Que
 		done:  make(chan struct{}),
 
 		Timestamp:           new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
+		ProjectId:           new(chproto.ColStr),
 		Platform:            new(chproto.ColStr),
 		RequestPayloadSize:  new(chproto.ColInt64),
 		EndpointName:        new(chproto.ColStr),
 		RequestTime:         new(chproto.ColInt64),
-		ServiceName:         new(chproto.ColStr).LowCardinality(),
+		Service:             new(chproto.ColStr).LowCardinality(),
 		Status:              new(chproto.ColBool),
 		ResponseTime:        new(chproto.ColInt64),
 		ResponsePayloadSize: new(chproto.ColInt64),
 		UserID:              new(chproto.ColStr),
+		SessionId:           new(chproto.ColStr),
 		Host:                new(chproto.ColStr),
 		Device:              new(chproto.ColStr),
 		StatusCode:          new(chproto.ColInt64),
@@ -137,15 +145,17 @@ func (b *MobilePerfBatch) Add(perfData *MobilePerfRequestType, raw string) {
 	defer b.lock.Unlock()
 	for _, dataPoint := range perfData.DataPoints {
 		b.Timestamp.Append(time.Unix(0, int64(dataPoint.TimestampUnixNano)))
+		b.ProjectId.Append(dataPoint.ProjectId)
 		b.Platform.Append(dataPoint.Platform)
 		b.RequestPayloadSize.Append(int64(dataPoint.RequestPayloadSize))
 		b.EndpointName.Append(dataPoint.EndpointName)
 		b.RequestTime.Append(int64(dataPoint.RequestTime))
-		b.ServiceName.Append(dataPoint.ServiceName)
+		b.Service.Append(dataPoint.Service)
 		b.Status.Append(dataPoint.Status)
 		b.ResponseTime.Append(int64(dataPoint.ResponseTime))
 		b.ResponsePayloadSize.Append(int64(dataPoint.ResponsePayloadSize))
 		b.UserID.Append(dataPoint.UserID)
+		b.SessionId.Append(dataPoint.SessionId)
 		b.Host.Append(dataPoint.Host)
 		b.Device.Append(dataPoint.Device)
 		b.StatusCode.Append(int64(dataPoint.StatusCode))
@@ -168,15 +178,17 @@ func (b *MobilePerfBatch) save() {
 
 	input := chproto.Input{
 		{Name: "Timestamp", Data: b.Timestamp},
+		{Name: "ProjectId", Data: b.ProjectId},
 		{Name: "Platform", Data: b.Platform},
 		{Name: "RequestPayloadSize", Data: b.RequestPayloadSize},
 		{Name: "EndpointName", Data: b.EndpointName},
 		{Name: "RequestTime", Data: b.RequestTime},
-		{Name: "ServiceName", Data: b.ServiceName},
+		{Name: "Service", Data: b.Service},
 		{Name: "Status", Data: b.Status},
 		{Name: "ResponseTime", Data: b.ResponseTime},
 		{Name: "ResponsePayloadSize", Data: b.ResponsePayloadSize},
 		{Name: "UserID", Data: b.UserID},
+		{Name: "SessionId", Data: b.SessionId},
 		{Name: "Host", Data: b.Host},
 		{Name: "Device", Data: b.Device},
 		{Name: "StatusCode", Data: b.StatusCode},
@@ -236,15 +248,17 @@ func (c *Collector) MobilePerf(w http.ResponseWriter, r *http.Request) {
 
 	dp := MobilePerfDataPoint{
 		TimestampUnixNano:   uint64(time.Now().UnixNano()),
+		ProjectId:           payload.ProjectId,
 		Platform:            payload.Platform,
 		RequestPayloadSize:  payload.RequestPayloadSize,
 		EndpointName:        payload.EndpointName,
 		RequestTime:         payload.RequestTime,
-		ServiceName:         payload.ServiceName,
+		Service:             payload.Service,
 		Status:              payload.Status,
 		ResponseTime:        payload.ResponseTime,
 		ResponsePayloadSize: payload.ResponsePayloadSize,
 		UserID:              payload.UserID,
+		SessionId:           payload.SessionId,
 		Host:                payload.Host,
 		Device:              payload.Device,
 		StatusCode:          payload.StatusCode,
