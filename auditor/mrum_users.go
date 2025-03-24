@@ -14,34 +14,37 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 
 	userTrendsGroup := report.GetOrCreateChartGroup("User Activity Trends", nil)
 
-	userTrendData, err := ch.GetUserTrendByTimeChart(context.Background(), from, to, w.Ctx.Step)
+	lastHourTo := timeseries.Now()
+	lastHourFrom := lastHourTo.Add(-3600)
+
+	userTrendData, err := ch.GetUserTrendByTimeChart(context.Background(), lastHourFrom, lastHourTo, w.Ctx.Step)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println(err)
 		return report
 	}
 
-	userTrendChart := userTrendsGroup.GetOrCreateChart("Total Active Users")
+	userTrendChart := userTrendsGroup.GetOrCreateChart("Total Active Users (Last Hour)")
 	userTrendChart.AddSeries("Total Users", userTrendData, "#FFA726")
 
-	newUsersTrendData, err := ch.GetNewUsersTrendByTimeChart(context.Background(), from, to, w.Ctx.Step)
+	newUsersTrendData, err := ch.GetNewUsersTrendByTimeChart(context.Background(), lastHourFrom, lastHourTo, w.Ctx.Step)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println(err)
 		return report
 	}
 
-	newUsersTrendChart := userTrendsGroup.GetOrCreateChart("New Users")
+	newUsersTrendChart := userTrendsGroup.GetOrCreateChart("New Users (Last Hour)")
 	newUsersTrendChart.AddSeries("New Users", newUsersTrendData, "#AB47BC")
 
-	returningUsersTrendData, err := ch.GetReturningUsersTrendByTimeChart(context.Background(), from, to, w.Ctx.Step)
+	returningUsersTrendData, err := ch.GetReturningUsersTrendByTimeChart(context.Background(), lastHourFrom, lastHourTo, w.Ctx.Step)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println(err)
 		return report
 	}
 
-	returningUsersTrendChart := userTrendsGroup.GetOrCreateChart("Returning Users")
+	returningUsersTrendChart := userTrendsGroup.GetOrCreateChart("Returning Users (Last Hour)")
 	returningUsersTrendChart.AddSeries("Returning Users", returningUsersTrendData, "#42A5F5")
 
 	userBreakdownGroup := report.GetOrCreateChartGroup("User Breakdown", nil)

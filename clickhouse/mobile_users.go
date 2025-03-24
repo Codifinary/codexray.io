@@ -90,7 +90,6 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 	return result, nil
 }
 
-// GetDailyUserBreakdown returns a breakdown of new and returning users for each day in the last 7 days
 func (c *Client) GetUserTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
