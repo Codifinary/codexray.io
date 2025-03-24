@@ -68,13 +68,13 @@ export default {
     },
 
     mounted() {
-        this.selectedView = this.$route.params.view || 'applications';
+        this.selectedView = this.$route.params.view || 'settings';
     },
 
     watch: {
         '$route.query': {
             handler() {
-                this.selectedView = this.$route.params.view || this.$route.query.view || 'applications';
+                this.selectedView = this.$route.params.view || this.$route.query.view || 'settings';
             },
             immediate: true,
         },
