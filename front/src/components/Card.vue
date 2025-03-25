@@ -6,7 +6,18 @@
                 {{ formattedCount }}<span v-if="unit">{{ unit }}</span>
             </v-card-text>
         </v-card-title>
-        <BaseIcon :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <BaseIcon v-if="icon" :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <v-sparkline
+            v-else-if="trend.chart"
+            :value="trend.chart.map((v) => (v === null ? 0 : v))"
+            fill
+            smooth
+            line-width="2"
+            padding="8"
+            :color="`red ${$vuetify.theme.dark ? '' : 'lighten-4'}`"
+            height="30"
+            width="80"
+        />
         <div class="bottom-border" :class="$vuetify.theme.dark ? 'theme--dark' : 'theme--light'"></div>
 
     </v-card>
@@ -27,6 +38,7 @@ export default {
         iconName: String,
         unit: String,
         bottomColor: String,
+        trend: Object,
     },
     computed: {
         formattedCount() {

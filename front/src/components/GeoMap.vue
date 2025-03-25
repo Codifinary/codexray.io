@@ -99,7 +99,7 @@ export default {
       this.chart = echarts.init(container, null, {
         renderer: 'canvas',
         useDirtyRect: false,
-        width: width * 1.15,
+        width: width,
         height: height
       });
       this.chart.showLoading();
@@ -118,35 +118,19 @@ export default {
         
         const option = {
           backgroundColor: '#fff',
-          geo: {
-            map: 'world',
-            roam: false,
-            zoom: 0.95,
-            center: [-10, 15],
-            silent: true,
-            left: -30,
-            top: 0,
-            right: 0,
-            bottom: 20,
-            itemStyle: {
-              areaColor: '#D6D6D6',
-              borderColor: '#D6D6D6',
-              borderWidth: 0.5
-            }
-          },
           series: [
             {
               name: 'World Map',
               type: 'map',
               map: 'world',
               roam: false,
-              zoom: 0.95,
-              center: [-10, 15],
-              aspectScale: 0.85,
+              zoom: 1,
+              center: [0, 0],
+              aspectScale: 1,
               top: 0,
-              left: -30,
+              left: 0,
               right: 0,
-              bottom: 20,
+              bottom: 0,
               boundingCoords: [[-180, 90], [180, -90]],
               itemStyle: {
                 areaColor: '#D6D6D6',
@@ -200,10 +184,13 @@ export default {
 }
 
 .content {
-  display: block;
-  width: 100%;
+  display: flex;
+  padding-top: 50px !important;
+  padding-left: 5% !important;
+  width: 95% !important;
   position: relative;
   height: calc(100% - 35px);
+  /* height: 100% !important; */
   padding: 5px;
 }
 
@@ -212,6 +199,9 @@ export default {
   width: 100%;
   padding: 0px;
   min-height: 700px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .color-legend {

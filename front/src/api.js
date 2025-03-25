@@ -331,4 +331,8 @@ export default class Api {
     getPerformanceData(cb) {
         this.get(this.projectPath(`mrum/perf`), {}, cb);
     }
+
+    getCrashData(cb) {
+        this.get(this.projectPath(`mrum/crash`), {}, cb);
+    }
 }

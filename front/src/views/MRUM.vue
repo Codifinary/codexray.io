@@ -9,11 +9,11 @@
         </v-tabs>
 
         <template v-if="tab === 'sessions'">
-            <div class="font-weight-bold tab-heading">Sessions</div>
+            <Sessions/>
         </template>
 
         <template v-if="tab === 'users'">
-            <div class="font-weight-bold tab-heading">Users</div>
+            <Users/>
         </template>
 
         <template v-if="tab === 'performance'">
@@ -30,8 +30,10 @@
 </template>
 
 <script>
+import Users from '@/components/Users.vue';
 import Crash from './Crash.vue';
 import Performance from './Performance.vue';
+import Sessions from './Sessions.vue';
 
 export default {
     props: {
@@ -41,7 +43,9 @@ export default {
 
     components: {
         Performance,
-        Crash
+        Crash,
+        Sessions,
+        Users
     },
 
     mounted() {
