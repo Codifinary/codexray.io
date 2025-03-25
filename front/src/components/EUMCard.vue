@@ -65,7 +65,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 300px;
-    padding: 12px 20px;
+    padding: 7px 20px;
 }
 
 .card-item {

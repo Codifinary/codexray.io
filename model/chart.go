@@ -442,6 +442,7 @@ type Grid struct {
 	Bottom int `json:"bottom,omitempty"`
 	Left   int `json:"left,omitempty"`
 	Right  int `json:"right,omitempty"`
+	ContainLabel  bool `json:"containLabel"`
 }
 
 type Axis struct {

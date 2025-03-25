@@ -8,7 +8,7 @@
 
             <div class="chart-container">
                 <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
-                    <EChart :chartOptions="config" class="chart-box" />
+                    <EChart :chartOptions="config" class="chart-box" :style="getChartStyle(index)" />
                 </div>
             </div>
         </div>
@@ -18,6 +18,7 @@
 <script>
 import EUMCard from '@/components/EUMCard.vue';
 import EChart from '@/components/EChart.vue';
+
 export default {
     props: {
         cardData: {
@@ -32,6 +33,17 @@ export default {
     components: {
         EUMCard,
         EChart,
+    },
+    methods: {
+        getChartStyle(index) {
+            if (index < 2) {
+                // First two charts
+                return { width: '250px', height: '290px' };
+            } else {
+                // Last chart
+                return { width: '350px', height: '290px' };
+            }
+        },
     },
 };
 </script>
@@ -59,8 +71,6 @@ export default {
 .chart-box {
     transform: scale(0.9);
     transform-origin: center;
-    width: 290px;
-    height: 330px;
 }
 .heading {
     color: var(--status-ok) !important;
