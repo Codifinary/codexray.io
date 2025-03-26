@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Overview
 
-Coroot's Continuous Profiling allows you easily identify and analyze any unexpected spikes in CPU and memory usage down to the precise line of code.
+CodeXray's Continuous Profiling allows you easily identify and analyze any unexpected spikes in CPU and memory usage down to the precise line of code.
 This allows you to quickly pinpoint and resolve performance bottlenecks, optimize your application's resource utilization,
 and deliver a faster and more reliable user experience.
 
@@ -21,27 +21,27 @@ These profilers operate at the user-space level and provide insights into the be
 eBPF-based profiling relies on the ability to attach eBPF programs to various events in the kernel,
 allowing for the collection of performance-related data without modifying the source code of the applications being profiled.
 
-Coroot's profiling stack consists of several components:
+CodeXray's profiling stack consists of several components:
 
-* `Coroot-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Coroot.
-* `coroot-cluster-agent` gathers profiles from applications and sends them to Coroot.
+* `codeXray-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Coroot.
+* `codexray-cluster-agent` gathers profiles from applications and sends them to Coroot.
 * ClickHouse is used as a database for storing profiling data.
-* Coroot queries profiles of a given application and visualizes them as FlameGraphs for analysis.
+* CodeXray queries profiles of a given application and visualizes them as FlameGraphs for analysis.
 
 <img alt="ebpf-based profiling" src="/img/docs/profiling/ebpf-based-profiling.png" class="card w-1200"/>
 
-When you use Helm to install Coroot, all these components are automatically installed and seamlessly integrated with each other.
+When you use Helm to install CodeXray, all these components are automatically installed and seamlessly integrated with each other.
 
 The eBFP-based approach can only gather CPU profiles.
 To collect other profile types, such as memory or lock contention, user-space profilers need to be integrated.
-Currently, Coroot only supports the built-in Golang profiler.
+Currently, CodeXray only supports the built-in Golang profiler.
 
 ## Golang pull mode
 
 The Go standard library includes the [pprof](https://pkg.go.dev/net/http/pprof) package,
 enabling developers to expose profiling data of their Go applications.
 
-`Coroot-cluster-agent` automatically discovers and periodically retrieves profiles from Golang applications.
+`CodeXray-cluster-agent` automatically discovers and periodically retrieves profiles from Golang applications.
 
 <img alt="golang pull profiling" src="/img/docs/profiling/golang-profiling.png" class="card w-1200"/>
 
@@ -55,7 +55,7 @@ including unbuffered channels and locks.
 * Mutex profile allows to identify areas where goroutines contend for access to shared resources protected by mutexes.
 
 To enable collecting profiles of a Go application, you need to expose `pprof` endpoints
-and allow Coroot to discover the application pods.
+and allow CodeXray to discover the application pods.
 
 ### Step #1: exposing pprof endpoints
 
@@ -82,7 +82,7 @@ router.PathPrefix("/debug/pprof").Handler(http.DefaultServeMux)
 ### Step #2: annotating application Pods
 
 
-Coroot-cluster-agent automatically discovers and fetches profiles from pods
+CodeXray-cluster-agent automatically discovers and fetches profiles from pods
 annotated with `coroot.com/profile-scrape` and `coroot.com/profile-port` annotations:
 
 ```yaml
