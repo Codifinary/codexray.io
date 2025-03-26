@@ -1,40 +1,39 @@
 <template>
     <div class="users-container">
+        <v-progress-linear indeterminate v-if="loading" color="green" />
+        <div v-if="!loading">
         <div class="trend-cards">
             <Card
-                v-for="(card, index) in cards"
-                :key="index"
-                :name="card.name"
-                :count="card.count"
-                :background="card.background"
-                :icon="card.icon"
-                :bottomColor="card.bottomColor"
-                :iconName="card.iconName"
-                :trend="card.trend"
+                v-for="card in computedCards"
+                :key="card.name"
+                v-bind="card"
             />
         </div>
         <div class="charts">
-            <Dashboard id="chart" :name="title" :widgets="data.data.report.widgets.slice(1)" />
-            <div class="cards">
+            <div class="chart-section">
+                <ChartGroup :title="data.data.report.widgets[1].chart_group.title" :charts="data.data.report.widgets[1].chart_group.charts"/>
+
+            </div>
+            <div class="cards-section">
                 <Card2 v-for="(card, index) in cards2" :key="index" :cardData="card"/>
             </div>
         </div>
-        <div>
+        <div class="table-section">
             <div class="font-weight-bold tab-heading">New Users</div>
             <CustomTable :items="items" :headers="headers" class="table" />
         </div>
+    </div>
     </div>
 </template>
 
 <script>
 import Card from '@/components/Card.vue';
 import CustomTable from '@/components/CustomTable.vue';
-import Dashboard from '@/components/Dashboard.vue';
 import Card2 from './Card2.vue';
-// import GeoMap from '@/components/GeoMap.vue';
+import ChartGroup from './ChartGroup.vue';
 
 export default {
-
+    name: 'Users',
     props: {
         projectId: String,
         tab: String,
@@ -42,187 +41,80 @@ export default {
     components: {
         Card,
         CustomTable,
-        Dashboard,
-        Card2
+        Card2,
+        ChartGroup,
+    },
+    computed: {
+        computedCards() {
+            return [
+                {
+                    name: 'Crash Free Users',
+                    count: this.data?.data?.summary?.crashFreeUsers || 0,
+                    background: 'light-green-bg',
+                    bottomColor: '#009688',
+                    trend: { chart: [] },
+                    iconName: 'arrow-up-thin',
+                    iconColor: '#009688',
+                },
+                { 
+                    name: 'Total Users',
+                    count: this.data?.data?.summary?.totalUsers || 0,
+                    background: 'light-green-bg',
+                    bottomColor: '#009688',
+                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[0]?.series[0] || { chart: [] },
+                },
+                { 
+                    name: 'New Users', 
+                    count: this.data?.data?.summary?.newUsers || 0, 
+                    background: 'light-red-bg',
+                    bottomColor: '#EF5350',
+                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[1]?.series[0] || { chart: [] },
+                },  
+                { 
+                    name: 'Returning Users', 
+                    count: this.data?.data?.summary?.returningUsers || 0, 
+                    background: 'light-orange-bg',
+                    bottomColor: '#F57C00',
+                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[2]?.series[0] || { chart: [] },
+                }
+            ];
+        },
+        pageTitle() {
+            return this.data?.data?.report?.name || 'Performance Dashboard';
+        }
     },
     data() {
-        const logs = {
-    "status": "info",
-    "value": "Wave pattern",
-    "chart": [
-    null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            6,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            3,
-                                            1,
-                                            2,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            2,
-                                            null,
-                                            null,
-                                            null,
-                                            null
-    ]
-};
-
-        
-            
         return {
+            title: 'Performance Dashboard',
+            chartData: { widgets: [] },
+            items: [],
+            headers: [
+                { text: 'Users', value: 'users' },
+                { text: 'Location', value: 'location' },
+                { text: 'First Seen', value: 'first_seen' },
+                { text: 'Last Seen', value: 'last_seen' },
+            ],
+            cards2: [
+                { 
+                    primaryLabel: 'Daily Active Users', 
+                    primaryValue: this.data?.data?.summary?.dailyActiveUsers || 0, 
+                    percentageChange: this.data?.data?.summary?.dailyTrend || 0, 
+                    icon: 'up-green-arrow',
+                    iconColor: '#009688',
+                    bottomColor: '#009688',
+                    trendColor: '#009688',
+                },
+                { 
+                    primaryLabel: 'Weekly Active Users', 
+                    primaryValue: this.data?.data?.summary?.weeklyActiveUsers || 0,
+                    iconColor: '#F57C00',
+                    icon: 'up-red-arrow',
+                    bottomColor: '#F57C00',
+                    trendColor: '#F57C00',
+                },
+            ],
+            countrywiseOverviews: [],
+            loading: false,
             data: {
     "context": {
         "status": {
@@ -249,12 +141,12 @@ export default {
         "status": "ok",
         "message": "",
         "summary": {
-            "totalUsers": 10,
-            "newUsers": 3,
-            "returningUsers": 7,
-            "dailyActiveUsers": 6,
-            "weeklyActiveUsers": 10,
-            "dailyTrend": 0
+            "totalUsers": 2,
+            "newUsers": 1,
+            "returningUsers": 1,
+            "dailyActiveUsers": 2,
+            "weeklyActiveUsers": 2,
+            "dailyTrend": 100
         },
         "report": {
             "name": "Mobile Users",
@@ -266,379 +158,29 @@ export default {
                         "charts": [
                             {
                                 "ctx": {
-                                    "from": 1741810328000,
-                                    "to": 1742411528000,
-                                    "step": 3600000,
-                                    "raw_step": 3600000
+                                    "from": 1742584815000,
+                                    "to": 1742843115000,
+                                    "step": 900000,
+                                    "raw_step": 900000
                                 },
-                                "title": "Total Active Users",
+                                "title": "Total Active Users (Last Hour)",
                                 "series": [
                                     {
                                         "name": "Total Users",
                                         "color": "#FFA726",
-                                        "data": [
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            6,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            3,
-                                            1,
-                                            2,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            2,
-                                            null,
-                                            null,
-                                            null,
-                                            null
-                                        ],
-                                        "value": ""
-                                    }
-                                ],
-                                "threshold": null,
-                                "featured": true,
-                                "stacked": false,
-                                "sorted": false,
-                                "column": false,
-                                "color_shift": 0,
-                                "annotations": null,
-                                "drill_down_link": null,
-                                "hide_legend": false
-                            },
-                            {
-                                "ctx": {
-                                    "from": 1741810328000,
-                                    "to": 1742411528000,
-                                    "step": 3600000,
-                                    "raw_step": 3600000
-                                },
-                                "title": "New Users",
-                                "series": [
-                                    {
-                                        "name": "New Users",
-                                        "color": "#AB47BC",
-                                        "data": [
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            1,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            1,
-                                            null,
-                                            2,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            1,
-                                            null,
-                                            null,
-                                            null,
-                                            null
-                                        ],
+                                        "chart": [
+                                            5, 7, 6, 10, 8, 12, 11, 15, 14, 18,     // Small rise with fluctuations
+                                            20, 25, 22, 28, 26 , 30, 32, 35, 34, 38, // More noticeable growth
+                                            40, 45, 42, 50, 48, 55, 52, 58, 57, 60, // Mid-range fluctuations
+                                            65, 70, 68, 75, 72, 80, 78, 85, 82, 90, // Increasing variation
+                                            95, 100, 98, 110, 105, 115, 112, 120, 118, 130, // More pronounced peaks
+                                            140, 135, 145, 150, 160, 155, 170, 165, 180, 200 // Final sharp increase
+]
+
+
+
+,
+
                                         "value": ""
                                     }
                                 ],
@@ -654,185 +196,55 @@ export default {
                             },
                             {
                                 "ctx": {
-                                    "from": 1741810328000,
-                                    "to": 1742411528000,
-                                    "step": 3600000,
-                                    "raw_step": 3600000
+                                    "from": 1742584815000,
+                                    "to": 1742843115000,
+                                    "step": 900000,
+                                    "raw_step": 900000
                                 },
-                                "title": "Returning Users",
+                                "title": "New Users (Last Hour)",
+                                "series": [
+                                    {
+                                        "name": "New Users",
+                                        "color": "#AB47BC",
+                                        "chart": [
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10,  // Plateau
+        5, 5, 5, 5, 5, 5, 5, 5, 5, 5,          // First drop
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,          // Second drop
+        -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, // Third drop
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10  // Bottom plateau
+    ],
+                                        "value": ""
+                                    }
+                                ],
+                                "threshold": null,
+                                "featured": false,
+                                "stacked": false,
+                                "sorted": false,
+                                "column": false,
+                                "color_shift": 0,
+                                "annotations": null,
+                                "drill_down_link": null,
+                                "hide_legend": false
+                            },
+                            {
+                                "ctx": {
+                                    "from": 1742584815000,
+                                    "to": 1742843115000,
+                                    "step": 900000,
+                                    "raw_step": 900000
+                                },
+                                "title": "Returning Users (Last Hour)",
                                 "series": [
                                     {
                                         "name": "Returning Users",
                                         "color": "#42A5F5",
-                                        "data": [
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            5,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            2,
-                                            1,
-                                            0,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            1,
-                                            null,
-                                            null,
-                                            null,
-                                            null
-                                        ],
+                                        "chart": [
+        10, 10, 10, 10, 10, 10, 10, 10, 10, 10,  // Plateau
+        5, 5, 5, 5, 5, 5, 5, 5, 5, 5,          // First drop
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,          // Second drop
+        -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, // Third drop
+        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10  // Bottom plateau
+    ],
                                         "value": ""
                                     }
                                 ],
@@ -855,8 +267,8 @@ export default {
                         "charts": [
                             {
                                 "ctx": {
-                                    "from": 1741890660000,
-                                    "to": 1742451206000,
+                                    "from": 1742256000000,
+                                    "to": 1742774400000,
                                     "step": 86400000,
                                     "raw_step": 86400000
                                 },
@@ -866,13 +278,12 @@ export default {
                                         "name": "New Users",
                                         "color": "#AB47BC",
                                         "data": [
-                                            3,
-                                            3,
-                                            3,
-                                            3,
-                                            3,
-                                            3,
-                                            3
+                                            100,
+                                            120,
+                                            130,
+                                            110,
+                                            120,
+                                            140
                                         ],
                                         "value": ""
                                     },
@@ -880,13 +291,12 @@ export default {
                                         "name": "Returning Users",
                                         "color": "#42A5F5",
                                         "data": [
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            5,
-                                            3
+                                            50,
+                                            55,
+                                            40,
+                                            45,
+                                            50,
+                                            55
                                         ],
                                         "value": ""
                                     }
@@ -911,70 +321,7 @@ export default {
         }
     }
 },
-            title: 'Performance Dashboard',
-            chartData: { widgets: [] },
-            items: [],
-            headers: [
-            { text: 'Users', value: 'users' },
-            { text: 'Location', value: 'location' },
-            { text: 'First Seen', value: 'first_seen' },
-            { text: 'Last Seen', value: 'last_seen' },
-        ],
-            cards: [
-                { 
-                    name: 'Total Requests', 
-                    count: 0,
-                    background: 'light-green-bg',
-                    bottomColor: '#009688',
-                    trend: logs,
-                },
-                { 
-                    name: 'Errors', 
-                    count: 0, 
-                    background: 'light-red-bg',
-                    bottomColor: '#EF5350',
-                    trend: logs,
-                },  
-                { 
-                    name: 'Users Impacted', 
-                    count: 0, 
-                    background: 'light-orange-bg',
-                    bottomColor: '#F57C00',
-                    trend: logs,
-                },
-                {
-                    name: 'Total Sessions',
-                    count: 0,
-                    background: 'light-green-bg',
-                    bottomColor: '#009688',
-                    trend: logs,
-                }
-            ],
-            cards2: [
-                { 
-                    primaryLabel: 'Total Requests', 
-                    primaryValue: 0, 
-                    secondaryLabel: 'Req/sec',
-                    secondaryValue: 0,
-                    percentageChange: 0, 
-                    icon: 'up-green-arrow',
-                    iconColor: '',
-                    bottomColor: '',
-                    trendColor: '',
-                },
-                { 
-                    primaryLabel: 'New Users', 
-                    primaryValue: 0,
-                    secondaryLabel: 'New users/sec',
-                    secondaryValue: 0,
-                    percentageChange: 0, 
-                    iconColor: '',
-                    bottomColor: '',
-                    trendColor: '',
-                },
-            ],
-            countrywiseOverviews: [],
-            loading: true
+            selection: [],
         };
     },
     mounted() {
@@ -990,12 +337,33 @@ export default {
 </script>
 
 <style scoped>
+
+.charts {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.chart-section {
+    flex: 1;
+    width: 50%;
+}
+
+.cards-section {
+    flex: 1;
+    width: 50%;
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
 .users-container {
     padding-bottom: 70px;
     margin-left: 20px !important;
     margin-right: 20px !important;
     margin-top: 30px !important;
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important; */
+}
+.table-section {
+    margin-top: 50px;
 }
 .v-tab {
     color: var(--primary-green) !important;
@@ -1042,38 +410,8 @@ export default {
     width: 100%;
 }
 
-.charts {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    min-height: 400px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    padding: 24px;
-    margin-bottom: 32px;
-}
-
-.charts #chart {
-    flex: 1;
-    height: 100%;
-    min-width: 0; /* Prevents flex item from overflowing */
-    margin-right: 24px;
-    border-right: 1px solid rgba(0, 0, 0, 0.1);
-    padding-right: 24px;
-}
-
-.charts .cards {
-    width: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    padding-left: 8px;
-}
-
 .table {
     margin-bottom: 50px;
-    margin-top: 50px;
 }
 
 .light-green-bg {

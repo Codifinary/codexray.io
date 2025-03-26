@@ -15,6 +15,7 @@
         {{ (cardData.percentageChange) > 0 ? '+' : '' }}{{ (cardData.percentageChange || 0).toFixed(2) }}%
       </div>
       <BaseIcon 
+        v-if="cardData.icon"
         :name="cardData.icon" 
         :iconColor="cardData.iconColor || 'primary'" 
         :class="['card-icon', cardData.background || '']" 
@@ -64,7 +65,9 @@ export default {
 .metrics-container {
   display: flex;
   flex-direction: column;
+  height: 100%;
   gap: 16px;
+  justify-content: center;
 }
 
 .main-metric, .secondary-metric {

@@ -1,5 +1,5 @@
 <template>
-    <div class="performance-container">
+    <div class="sessions-container">
         <div class="cards">
             <Card
                 v-for="(card, index) in cards"
@@ -13,9 +13,46 @@
                 :trend="card.trend"
             />
         </div>
-        <div>
-            <CustomTable :items="this.items" :headers="this.headers" class="table" />
+        <div class="table-section">
+            <div class="mode-selector">
+            <v-btn-toggle
+                v-model="mode"
+                mandatory
+                class="mode-buttons"
+            >
+                <v-btn value="live" x-large text class="mode-btn">Live</v-btn>
+                <v-btn value="historical" x-large text class="mode-btn">Historical</v-btn>
+            </v-btn-toggle>
         </div>
+            <v-simple-table class="table">
+            <thead>
+                <tr class="tab-heading text-body-10">
+                    <th>Session Id</th>
+                    <th>User Id</th>
+                    <th>Country</th>
+                    <th>No. of requests</th>
+                    <th>Session Duration</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template v-if="countrywiseOverviews && countrywiseOverviews.length > 0">
+                    <tr v-for="country in countrywiseOverviews" :key="country.Country">
+                        <td>{{ country.Country }}</td>
+                        <td>{{ country.Requests }}</td>
+                        <td>{{ country.Errors }}</td>
+                        <td>{{ country.ErrorRatePercentage.toFixed(2) }}</td>
+                        <td>{{ country.AvgResponseTime }}</td>
+                    </tr>
+                </template>
+                <tr v-else>
+                    <td colspan="7" class="text-center">No data found</td>
+                </tr>
+            </tbody>
+        </v-simple-table>
+        </div>
+        <GeoMap :countrywiseOverviews="countrywiseOverviews" :title="title"/>
         <!-- <Dashboard id="chart" :name="title" :widgets="chartData.widgets" />
         <v-simple-table class="table">
             <thead>
@@ -49,7 +86,7 @@
 
 <script>
 import Card from '@/components/Card.vue';
-import CustomTable from '@/components/CustomTable.vue';
+import GeoMap from '@/components/GeoMap.vue';
 // import Dashboard from '@/components/Dashboard.vue';
 // import GeoMap from '@/components/GeoMap.vue';
 
@@ -61,7 +98,7 @@ export default {
     },
     components: {
         Card,
-        CustomTable,
+        GeoMap
     },
     data() {
         
@@ -236,7 +273,6 @@ export default {
                         null,
                         null,
                         null,
-                        null,
                         null
                     ]
                 }
@@ -275,7 +311,8 @@ export default {
                 }
             ],
             countrywiseOverviews: [],
-            loading: true
+            loading: true,
+            mode: 'live'
         };
     },
     mounted() {
@@ -306,11 +343,6 @@ export default {
     width: 100%;
 }
 
-.table {
-    margin-bottom: 50px;
-    margin-top: 50px;
-}
-
 .light-green-bg {
     background-color: rgba(5, 150, 105, 0.1);
 }
@@ -325,5 +357,57 @@ export default {
 
 .geomap{
     margin-top: 50px;
+}
+
+.sessions-container {
+    padding: 20px;
+}
+
+.trend-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.table-section {
+    margin-right: 30px;  
+    margin-bottom: 50px;
+    margin-top: 50px;
+    width: 100%;
+}
+
+.table {
+    margin-top: 30px !important;
+}
+
+.tab-heading {
+    font-size: 1.1rem;
+    margin-left: 20px;
+}
+
+.mode-selector {
+    margin-bottom: 20px;
+}
+
+.mode-btn {
+    border-radius: 3px !important;
+    margin: 0 5px !important;
+    padding: 3px 20px !important;
+    font-size: 14px !important;
+    background-color: #e1e1e1 !important;
+    color: #444050 !important;
+    height: 32px !important;
+    text-transform: none !important;
+}
+
+.mode-btn.v-btn--active {
+    background-color: #1DBF73 !important;
+    color: white !important;
+}
+
+.mode-buttons {
+    background: transparent !important;
+    border: none !important;
 }
 </style>

@@ -12,12 +12,16 @@
             :value="trend.chart.map((v) => (v === null ? 0 : v))"
             fill
             smooth
-            line-width="2"
+            line-width="3"  
             padding="8"
-            :color="`red ${$vuetify.theme.dark ? '' : 'lighten-4'}`"
-            height="30"
-            width="80"
+            :color="bottomColor"  
+            :gradient="[bottomColor, 'rgba(255,255,255,0)']"  
+            auto-draw
+            height="50"
+            width="70"
+            stroke-linecap="round"
         />
+
         <div class="bottom-border" :class="$vuetify.theme.dark ? 'theme--dark' : 'theme--light'"></div>
 
     </v-card>
@@ -63,6 +67,9 @@ export default {
     line-height: 16px;
     margin-bottom: 3px;
     color: #013912;
+    white-space: pre-line;
+    word-break: break-word;
+    max-width: 120px;
 }
 
 .card-count {
