@@ -17,8 +17,8 @@ type MobileSessionDataPoint struct {
 	Timestamp uint64
 	SessionId string
 	UserId    string
-	StartTime time.Time
-	EndTime   *time.Time
+	StartTime uint64
+	EndTime   uint64
 	Country   string
 	Device    string
 	OS        string
@@ -39,13 +39,14 @@ type MobileSessionBatch struct {
 	SessionId *chproto.ColStr
 	UserId    *chproto.ColStr
 	StartTime *chproto.ColDateTime64
-	EndTime   *chproto.ColStr
+	EndTime   *chproto.ColNullable[time.Time]
 	Country   *chproto.ColStr
 	Device    *chproto.ColStr
 	OS        *chproto.ColStr
 }
 
 func NewMobileSessionBatch(limit int, timeout time.Duration, exec func(query ch.Query) error) *MobileSessionBatch {
+	endTimeCol := new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano)
 	b := &MobileSessionBatch{
 		limit: limit,
 		exec:  exec,
@@ -55,7 +56,7 @@ func NewMobileSessionBatch(limit int, timeout time.Duration, exec func(query ch.
 		SessionId: new(chproto.ColStr),
 		UserId:    new(chproto.ColStr),
 		StartTime: new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
-		EndTime:   new(chproto.ColStr),
+		EndTime:   chproto.NewColNullable[time.Time](endTimeCol),
 		Country:   new(chproto.ColStr),
 		Device:    new(chproto.ColStr),
 		OS:        new(chproto.ColStr),
@@ -93,8 +94,8 @@ func (b *MobileSessionBatch) Add(sessionData *MobileSessionRequestType) {
 		b.Timestamp.Append(time.Unix(0, int64(dataPoint.Timestamp)))
 		b.SessionId.Append(dataPoint.SessionId)
 		b.UserId.Append(dataPoint.UserId)
-		b.StartTime.Append(dataPoint.StartTime)
-		b.EndTime.Append("")
+		b.StartTime.Append(time.Unix(0, int64(dataPoint.StartTime)))
+		b.EndTime.Append(chproto.Null[time.Time]())
 		b.Country.Append(dataPoint.Country)
 		b.Device.Append(dataPoint.Device)
 		b.OS.Append(dataPoint.OS)
@@ -121,9 +122,11 @@ func (b *MobileSessionBatch) save() {
 		{Name: "OS", Data: b.OS},
 	}
 
-	err := b.exec(ch.Query{Body: input.Into("mobile_session_data"), Input: input})
+	query := ch.Query{Body: input.Into("mobile_session_data"), Input: input}
+
+	err := b.exec(query)
 	if err != nil {
-		klog.Errorln(err)
+		klog.Errorf("Error saving to mobile_session_data: %v", err)
 	}
 
 	for _, col := range input {
@@ -139,10 +142,10 @@ func (c *Collector) UpdateSessionEndTime(project *db.Project, sessionId string, 
 		return err
 	}
 
-	endTimeStr := endTime.Format(time.RFC3339Nano)
+	endTimeStr := endTime.UTC().Format("2006-01-02 15:04:05.000000000")
 
 	query := fmt.Sprintf(
-		"ALTER TABLE mobile_session_data UPDATE EndTime = '%s' WHERE SessionId = '%s'",
+		"ALTER TABLE mobile_session_data UPDATE EndTime = toDateTime64('%s', 9) WHERE SessionId = '%s' AND EndTime IS NULL",
 		endTimeStr,
 		sessionId,
 	)

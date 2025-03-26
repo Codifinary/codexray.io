@@ -228,7 +228,7 @@ func (c *Collector) MobileEvent(w http.ResponseWriter, r *http.Request) {
 			Timestamp: uint64(time.Now().UnixNano()),
 			SessionId: payload.SessionId,
 			UserId:    payload.UserId,
-			StartTime: time.Now(),
+			StartTime: uint64(time.UnixMilli(payload.StartTime).UnixNano()),
 			Country:   payload.Country,
 			Device:    payload.Device,
 			OS:        payload.Os,
@@ -236,7 +236,9 @@ func (c *Collector) MobileEvent(w http.ResponseWriter, r *http.Request) {
 		sessionReq := &MobileSessionRequestType{DataPoints: []MobileSessionDataPoint{sessionDP}}
 		c.getMobileSessionBatch(project).Add(sessionReq)
 	} else if payload.Name == "App_Exit" {
-		err := c.UpdateSessionEndTime(project, payload.SessionId, time.Now())
+		endTimeMillis := payload.StartTime
+		endTime := time.UnixMilli(endTimeMillis)
+		err := c.UpdateSessionEndTime(project, payload.SessionId, endTime)
 		if err != nil {
 			klog.Errorf("Failed to update session end time: %v", err)
 		}

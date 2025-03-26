@@ -326,7 +326,7 @@ CREATE TABLE IF NOT EXISTS mobile_session_data @on_cluster (
      SessionId           String CODEC(ZSTD(1)),
      UserId              String CODEC(ZSTD(1)),
      StartTime           DateTime64(9) CODEC(Delta, ZSTD(1)),
-     EndTime             String CODEC(ZSTD(1)),
+     EndTime             Nullable(DateTime64(9)) CODEC(Delta, ZSTD(1)),
      Country             String CODEC(ZSTD(1)),
      Device              String CODEC(ZSTD(1)),
      OS                  String CODEC(ZSTD(1)),
