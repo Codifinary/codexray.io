@@ -14,8 +14,9 @@ import (
 
 type MobileUserRegistrationPayload struct {
 	UserId           string `json:"userId"`
+	ProjectId        string `json:"projectId"`
 	OS               string `json:"os"`
-	Platform         int32  `json:"platform"`
+	Platform         string `json:"platform"`
 	ServiceVersion   string `json:"serviceVersion"`
 	Device           string `json:"device"`
 	Service          string `json:"service"`
@@ -34,8 +35,9 @@ type MobileUserRegistrationBatch struct {
 
 	Timestamp        *chproto.ColDateTime64
 	UserId           *chproto.ColStr
+	ProjectId        *chproto.ColStr
 	OS               *chproto.ColLowCardinality[string]
-	Platform         *chproto.ColInt32
+	Platform         *chproto.ColStr
 	ServiceVersion   *chproto.ColLowCardinality[string]
 	Device           *chproto.ColStr
 	Service          *chproto.ColStr
@@ -54,8 +56,9 @@ func NewMobileUserRegistrationBatch(limit int, timeout time.Duration, exec func(
 
 		Timestamp:        new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
 		UserId:           new(chproto.ColStr),
+		ProjectId:        new(chproto.ColStr),
 		OS:               new(chproto.ColStr).LowCardinality(),
-		Platform:         new(chproto.ColInt32),
+		Platform:         new(chproto.ColStr),
 		ServiceVersion:   new(chproto.ColStr).LowCardinality(),
 		Device:           new(chproto.ColStr),
 		Service:          new(chproto.ColStr),
@@ -98,6 +101,7 @@ func (b *MobileUserRegistrationBatch) Add(registration *MobileUserRegistrationPa
 	currentTime := time.Now()
 	b.Timestamp.Append(currentTime)
 	b.UserId.Append(registration.UserId)
+	b.ProjectId.Append(registration.ProjectId)
 	b.OS.Append(registration.OS)
 	b.Platform.Append(registration.Platform)
 	b.ServiceVersion.Append(registration.ServiceVersion)
@@ -131,6 +135,7 @@ func (b *MobileUserRegistrationBatch) save() {
 		{Name: "RegistrationTime", Data: b.RegistrationTime},
 		{Name: "IpAddress", Data: b.IpAddress},
 		{Name: "TimeBucket", Data: b.TimeBucket},
+		{Name: "ProjectId", Data: b.ProjectId},
 		{Name: "RawData", Data: b.RawData},
 	}
 

@@ -14,6 +14,7 @@ import (
 
 type MobileCrashReportPayload struct {
 	UniqueId        string `json:"uniqueId"`
+	ProjectId       string `json:"projectId"`
 	SessionId       string `json:"sessionId"`
 	CrashTime       int64  `json:"crashTime"`
 	CrashReason     string `json:"crashReason"`
@@ -31,6 +32,7 @@ type MobileCrashReportPayload struct {
 
 type MobileCrashReportDataPoint struct {
 	TimestampUnixNano uint64
+	ProjectId         string
 	UniqueId          string
 	SessionId         string
 	CrashTime         int64
@@ -59,6 +61,7 @@ type MobileCrashReportBatch struct {
 	done chan struct{}
 
 	Timestamp       *chproto.ColDateTime64
+	ProjectId       *chproto.ColStr
 	UniqueId        *chproto.ColStr
 	SessionId       *chproto.ColStr
 	CrashTime       *chproto.ColInt64
@@ -83,6 +86,7 @@ func NewMobileCrashReportBatch(limit int, timeout time.Duration, exec func(query
 		done:  make(chan struct{}),
 
 		Timestamp:       new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
+		ProjectId:       new(chproto.ColStr),
 		UniqueId:        new(chproto.ColStr),
 		SessionId:       new(chproto.ColStr),
 		CrashTime:       new(chproto.ColInt64),
@@ -130,6 +134,7 @@ func (b *MobileCrashReportBatch) Add(crashData *MobileCrashReportRequestType, ra
 	defer b.lock.Unlock()
 	for _, dataPoint := range crashData.DataPoints {
 		b.Timestamp.Append(time.Unix(0, int64(dataPoint.TimestampUnixNano)))
+		b.ProjectId.Append(dataPoint.ProjectId)
 		b.UniqueId.Append(dataPoint.UniqueId)
 		b.SessionId.Append(dataPoint.SessionId)
 		b.CrashTime.Append(dataPoint.CrashTime)
@@ -159,6 +164,7 @@ func (b *MobileCrashReportBatch) save() {
 
 	input := chproto.Input{
 		{Name: "Timestamp", Data: b.Timestamp},
+		{Name: "ProjectId", Data: b.ProjectId},
 		{Name: "UniqueId", Data: b.UniqueId},
 		{Name: "SessionId", Data: b.SessionId},
 		{Name: "CrashTime", Data: b.CrashTime},
@@ -225,6 +231,7 @@ func (c *Collector) MobileCrashReports(w http.ResponseWriter, r *http.Request) {
 
 	dp := MobileCrashReportDataPoint{
 		TimestampUnixNano: uint64(time.Now().UnixNano()),
+		ProjectId:         payload.ProjectId,
 		UniqueId:          payload.UniqueId,
 		SessionId:         payload.SessionId,
 		CrashTime:         payload.CrashTime,

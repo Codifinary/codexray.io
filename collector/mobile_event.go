@@ -14,6 +14,7 @@ import (
 
 type MobileEventPayload struct {
 	UserId         string `json:"userId"`
+	ProjectId      string `json:"projectId"`
 	Name           string `json:"name"`
 	StartTime      int64  `json:"startTime"`
 	SessionId      string `json:"sessionId"`
@@ -28,6 +29,7 @@ type MobileEventPayload struct {
 type MobileEventDataPoint struct {
 	TimestampUnixNano uint64
 	UserId            string
+	ProjectId         string
 	Name              string
 	StartTime         int64
 	SessionId         string
@@ -52,6 +54,7 @@ type MobileEventBatch struct {
 
 	Timestamp      *chproto.ColDateTime64
 	UserId         *chproto.ColStr
+	ProjectId      *chproto.ColStr
 	Name           *chproto.ColStr
 	StartTime      *chproto.ColInt64
 	SessionId      *chproto.ColStr
@@ -71,6 +74,7 @@ func NewMobileEventBatch(limit int, timeout time.Duration, exec func(query ch.Qu
 		done:  make(chan struct{}),
 
 		Timestamp:      new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
+		ProjectId:      new(chproto.ColStr),
 		UserId:         new(chproto.ColStr),
 		Name:           new(chproto.ColStr),
 		StartTime:      new(chproto.ColInt64),
@@ -114,6 +118,7 @@ func (b *MobileEventBatch) Add(eventData *MobileEventRequestType, raw string) {
 	defer b.lock.Unlock()
 	for _, dataPoint := range eventData.DataPoints {
 		b.Timestamp.Append(time.Unix(0, int64(dataPoint.TimestampUnixNano)))
+		b.ProjectId.Append(dataPoint.ProjectId)
 		b.UserId.Append(dataPoint.UserId)
 		b.Name.Append(dataPoint.Name)
 		b.StartTime.Append(dataPoint.StartTime)
@@ -139,6 +144,7 @@ func (b *MobileEventBatch) save() {
 
 	input := chproto.Input{
 		{Name: "Timestamp", Data: b.Timestamp},
+		{Name: "ProjectId", Data: b.ProjectId},
 		{Name: "UserId", Data: b.UserId},
 		{Name: "Name", Data: b.Name},
 		{Name: "StartTime", Data: b.StartTime},
@@ -201,6 +207,7 @@ func (c *Collector) MobileEvent(w http.ResponseWriter, r *http.Request) {
 
 	dp := MobileEventDataPoint{
 		TimestampUnixNano: uint64(time.Now().UnixNano()),
+		ProjectId:         payload.ProjectId,
 		UserId:            payload.UserId,
 		Name:              payload.Name,
 		StartTime:         payload.StartTime,
