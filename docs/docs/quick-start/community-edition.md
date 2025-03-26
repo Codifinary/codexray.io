@@ -8,12 +8,12 @@ import TabItem from '@theme/TabItem';
 
 # Community Edition
 
-This guide provides a quick overview of launching Coroot Community Edition with default options. For more details and customization options check out the Installation section.
+This guide provides a quick overview of launching CodeXray Community Edition with default options. For more details and customization options check out the Installation section.
 
 <Tabs queryString="env">
   <TabItem value="kubernetes" label="Kubernetes" default>
 
-Add the Coroot helm chart repo:
+Add the CodeXray helm chart repo:
 
 ```bash
 helm repo add coroot https://coroot.github.io/helm-charts
@@ -26,46 +26,46 @@ Next, install the Coroot Operator:
 helm install -n coroot --create-namespace coroot-operator coroot/coroot-operator
 ```
 
-Install the Coroot Community Edition. This chart creates a minimal [Coroot Custom Resource](/installation/k8s-operator):
+Install the CodeXray Community Edition. This chart creates a minimal [Coroot Custom Resource](/installation/k8s-operator):
 
 ```bash
 helm install -n coroot coroot coroot/coroot-ce \
   --set "clickhouse.shards=2,clickhouse.replicas=2"
 ```
 
-Forward the Coroot port to your machine:
+Forward the CodeXray port to your machine:
 
 ```bash
 kubectl port-forward -n coroot service/coroot-coroot 8080:8080
 ```
 
-Then, you can access Coroot at http://localhost:8080
+Then, you can access CodeXray at http://localhost:8080
 
   </TabItem>
 
   <TabItem value="docker" label="Docker">
 
-To deploy Coroot using Docker Compose, run the following command. Before applying it, you can review the configuration file in Coroot's GitHub repository: docker-compose.yaml
+To deploy CodeXray using Docker Compose, run the following command. Before applying it, you can review the configuration file in CodeXray's GitHub repository: docker-compose.yaml
 
 ```bash
 curl -fsS https://raw.githubusercontent.com/coroot/coroot/main/deploy/docker-compose.yaml | \
   docker compose -f - up -d
 ```
 
-If you installed Coroot on your desktop machine, you can access it at http://localhost:8080/. If Coroot is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: http://NODE_IP_ADDRESS:8080/.
+If you installed CodeXray on your desktop machine, you can access it at http://localhost:8080/. If Coroot is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: http://NODE_IP_ADDRESS:8080/.
 
   </TabItem>
 
   <TabItem value="docker-swarm" label="Docker Swarm">
 
-Deploy the Coroot stack to your cluster by running the following command on the manager node. Before applying, you can review the configuration file in Coroot's GitHub repository: docker-swarm-stack.yaml
+Deploy the CodeXray stack to your cluster by running the following command on the manager node. Before applying, you can review the configuration file in CodeXray's GitHub repository: docker-swarm-stack.yaml
 
 ```bash
 curl -fsS https://raw.githubusercontent.com/coroot/coroot/main/deploy/docker-swarm-stack.yaml | \
   docker stack deploy -c - coroot
 ```
 
-Since Docker Swarm doesn't support privileged containers, you'll have to manually deploy coroot-node-agent on each cluster node. Just replace `NODE_IP` with any node's IP address in the Docker Swarm cluster.
+Since Docker Swarm doesn't support privileged containers, you'll have to manually deploy codexray-node-agent on each cluster node. Just replace `NODE_IP` with any node's IP address in the Docker Swarm cluster.
 
 ```bash
 docker run --detach --name coroot-node-agent \
@@ -78,12 +78,12 @@ docker run --detach --name coroot-node-agent \
   --cgroupfs-root=/host/sys/fs/cgroup \
   --collector-endpoint=http://NODE_IP:8080
 ```
-Access Coroot through any node in your Docker Swarm cluster using its published port: http://NODE_IP:8080.
+Access CodeXray through any node in your Docker Swarm cluster using its published port: http://NODE_IP:8080.
   </TabItem>
 
   <TabItem value="ubuntu" label="Ubuntu & Debian">
 
-Coroot requires a Prometheus server with the Remote Write Receiver enabled, along with a ClickHouse server. 
+CodeXray requires a Prometheus server with the Remote Write Receiver enabled, along with a ClickHouse server. 
 For detailed steps on installing all the necessary components on an Ubuntu/Debian node, refer to the [full instructions](/installation/ubuntu).
 
 To install Coroot, run the following command:
@@ -96,7 +96,7 @@ curl -sfL https://raw.githubusercontent.com/coroot/coroot/main/deploy/install.sh
   sh -
 ```
 
-Install coroot-node-agent to every node within your infrastructure:
+Install codexray-node-agent to every node within your infrastructure:
 
 ```bash
 curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/install.sh | \
@@ -105,15 +105,15 @@ curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/instal
   sh -
 ```
 
-Access Coroot at: http://COROOT_NODE_IP:8080.
+Access CodeXray at: http://COROOT_NODE_IP:8080.
 </TabItem>
 
 <TabItem value="rhel" label="RHEL & CentOS">
 
-Coroot requires a Prometheus server with the Remote Write Receiver enabled, along with a ClickHouse server. 
+CodeXray requires a Prometheus server with the Remote Write Receiver enabled, along with a ClickHouse server. 
 For detailed steps on installing all the necessary components on an Ubuntu/Debian node, refer to the [full instructions](/installation/rhel).
 
-To install Coroot, run the following command:
+To install CodeXray, run the following command:
 
 ```bash
 curl -sfL https://raw.githubusercontent.com/coroot/coroot/main/deploy/install.sh | \
@@ -123,7 +123,7 @@ curl -sfL https://raw.githubusercontent.com/coroot/coroot/main/deploy/install.sh
   sh -
 ```
 
-Install coroot-node-agent to every node within your infrastructure:
+Install codexray-node-agent to every node within your infrastructure:
 
 ```bash
 curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/install.sh | \
@@ -131,7 +131,7 @@ curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/instal
   SCRAPE_INTERVAL=15s \
   sh -
 ```
-Access Coroot at: http://COROOT_NODE_IP:8080.
+Access CodeXray at: http://COROOT_NODE_IP:8080.
 </TabItem>
   
 
