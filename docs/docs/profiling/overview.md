@@ -83,7 +83,7 @@ router.PathPrefix("/debug/pprof").Handler(http.DefaultServeMux)
 
 
 CodeXray-cluster-agent automatically discovers and fetches profiles from pods
-annotated with `coroot.com/profile-scrape` and `coroot.com/profile-port` annotations:
+annotated with `codexray.com/profile-scrape` and `codexray.com/profile-port` annotations:
 
 ```yaml
 apiVersion: apps/v1
