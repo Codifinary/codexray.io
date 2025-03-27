@@ -4,6 +4,7 @@ import (
 	"codexray/timeseries"
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
@@ -15,6 +16,16 @@ type MobileSessionResult struct {
 	UserTrend           float64
 	AverageSession      float64
 	AverageSessionTrend float64
+}
+
+type SessionLiveData struct {
+	SessionID         string
+	UserID            string
+	Country           string
+	NoOfRequest       uint64
+	LastPageTimestamp timeseries.Time
+	LastPage          string
+	StartTime         timeseries.Time
 }
 
 func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeseries.Time) (*MobileSessionResult, error) {
@@ -284,6 +295,64 @@ func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeser
 
 	if len(result) == 0 {
 		return nil, nil
+	}
+
+	return result, nil
+}
+
+func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Time) ([]SessionLiveData, error) {
+
+	query := `
+	SELECT
+		s.SessionId,
+		s.UserId,
+		s.StartTime,
+		COUNT(p.EndpointName) AS NoOfRequest,
+		argMax(p.EndpointName, p.Timestamp) AS LastPage,
+		argMax(p.Timestamp, p.Timestamp) AS LastPageTimestamp,
+		s.Country
+	FROM mobile_session_data s
+	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
+	WHERE s.StartTime BETWEEN @from AND @to
+	AND s.EndTime IS NULL
+	GROUP BY s.SessionId, s.UserId, s.StartTime, s.Country
+	ORDER BY s.StartTime DESC
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []SessionLiveData
+
+	for rows.Next() {
+		var session SessionLiveData
+		var startTime, lastPageTimestamp time.Time
+
+		if err := rows.Scan(
+			&session.SessionID,
+			&session.UserID,
+			&startTime,
+			&session.NoOfRequest,
+			&session.LastPage,
+			&lastPageTimestamp,
+			&session.Country,
+		); err != nil {
+			return nil, err
+		}
+
+		session.StartTime = timeseries.Time(startTime.Unix())
+		session.LastPageTimestamp = timeseries.Time(lastPageTimestamp.Unix())
+		result = append(result, session)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return result, nil
