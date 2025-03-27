@@ -172,10 +172,19 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	// }
 
 	// Create the donut chart for top 5 browsers
-	donutChart1 := echartReport.GetOrCreateEChart("Top 5 Browsers", nil)
+	donutChart1 := echartReport.GetOrCreateEChart("Top Services by Browsers", nil)
+	donutChart1.Title = model.TextTitle{
+		Text: "Top Services by Browsers",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	donutChart1.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart1.Legend = model.Legend{Bottom: "0"}
 	donutChart1.SetSeries("Browsers", "pie", topBrowsersData)
+	// donutChart1.SetGraphicText(fmt.Sprintf("%d", len(topBrowsers)))
+	donutChart1.SetGraphicText("5")
 
 	// Create the donut chart for top 5 services by impacted users
 	sort.Slice(overviews, func(i, j int) bool {
@@ -191,10 +200,19 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 			Name:  overview.ServiceName,
 		})
 	}
-	donutChart2 := echartReport.GetOrCreateEChart("Top 5 Services by Impacted Users", nil)
+	donutChart2 := echartReport.GetOrCreateEChart("Top Services by Impacted Users", nil)
+	donutChart2.Title = model.TextTitle{
+		Text: "Top Services by Impacted Users",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	donutChart2.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart2.Legend = model.Legend{Bottom: "0"}
+
 	donutChart2.SetSeries("Services", "pie", topServicesByUsers)
+	donutChart2.SetGraphicText(fmt.Sprintf("%d", len(topServicesByUsers)))
 
 	// Create the bar chart for top 10 services by load
 	sort.Slice(overviews, func(i, j int) bool {
@@ -210,13 +228,40 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 			Name:  overview.ServiceName,
 		})
 	}
-	barChart := echartReport.GetOrCreateEChart("Top 10 Services by Load", nil)
+
+
+	sort.Slice(topServicesByLoad, func(i, j int) bool {
+		return topServicesByLoad[i].Value < topServicesByLoad[j].Value
+	})
+
+	barChart := echartReport.GetOrCreateEChart("Top Services by Load", nil)
+	barChart.Title = model.TextTitle{
+		Text: "Top Services by Load",
+		TextStyle: &model.TextStyle{
+			FontSize:  16,
+			FontWeight: "normal",
+		},
+	}
 	barChart.Tooltip = model.Tooltip{Trigger: "axis"}
+	barChart.Grid = &model.Grid{ContainLabel: true,Top:    30,  
+		Bottom: 40,  
+		Left:   10, 
+		Right:  20,  }
 	barChart.Legend = model.Legend{Bottom: "0"}
 	barChart.XAxis = &model.Axis{Type: "value"}
-	barChart.YAxis = &model.Axis{Type: "category", Data: extractServiceNames(topServicesByLoad)}
+	barChart.YAxis = &model.Axis{
+		Type: "category",
+		Data: extractServiceNames(topServicesByLoad),
+		AxisLabel: &model.AxisLabel{
+			Show:     true,
+			FontSize: 12,
+			Formatter: "{value}",
+			Rotate: 0,
+		},
+	}
 	barChart.SetSeries("Load", "bar", topServicesByLoad)
 	barChart.Series.BarWidth = "40%"
+
 
 	return echartReport, nil
 }

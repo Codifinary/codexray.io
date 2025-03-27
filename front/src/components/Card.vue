@@ -1,5 +1,10 @@
 <template>
-    <v-card class="card-body">
+    <v-card
+        class="card-body"
+        :style="{
+            borderBottom: lineColor ? `5px solid ${lineColor}` : 'none',
+        }"
+    >
         <v-card-title>
             <div class="card-name">{{ name }}</div>
             <v-card-text class="card-count">
@@ -24,6 +29,7 @@ export default {
         icon: String,
         iconName: String,
         unit: String,
+        lineColor: String,
     },
     computed: {
         formattedCount() {
