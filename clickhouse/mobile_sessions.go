@@ -26,6 +26,7 @@ type SessionLiveData struct {
 	LastPageTimestamp timeseries.Time
 	LastPage          string
 	StartTime         timeseries.Time
+	GeoMapColorCode   string
 }
 
 type SessionHistoricData struct {
@@ -36,6 +37,7 @@ type SessionHistoricData struct {
 	SessionDuration int64
 	LastPage        string
 	StartTime       timeseries.Time
+	GeoMapColorCode string
 }
 
 func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeseries.Time) (*MobileSessionResult, error) {
@@ -326,7 +328,7 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NULL
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.Country
-	ORDER BY s.StartTime DESC
+	ORDER BY NoOfRequest DESC
 	`
 
 	rows, err := c.Query(ctx, query,
@@ -356,6 +358,15 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 			return nil, err
 		}
 
+		switch {
+		case session.NoOfRequest <= 20:
+			session.GeoMapColorCode = "#5BBC7A" // Green
+		case session.NoOfRequest <= 80:
+			session.GeoMapColorCode = "#F1AB47" // Yellow
+		default: // > 80%
+			session.GeoMapColorCode = "#EF5350" // Red
+		}
+
 		session.StartTime = timeseries.Time(startTime.Unix())
 		session.LastPageTimestamp = timeseries.Time(lastPageTimestamp.Unix())
 		result = append(result, session)
@@ -383,7 +394,7 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NOT NULL
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.EndTime, s.Country
-	ORDER BY s.StartTime DESC
+	ORDER BY NoOfRequest DESC
 	`
 
 	rows, err := c.Query(ctx, query,
@@ -411,6 +422,15 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 			&session.Country,
 		); err != nil {
 			return nil, err
+		}
+
+		switch {
+		case session.NoOfRequest <= 20:
+			session.GeoMapColorCode = "#5BBC7A" // Green
+		case session.NoOfRequest <= 80:
+			session.GeoMapColorCode = "#F1AB47" // Yellow
+		default: // > 80%
+			session.GeoMapColorCode = "#EF5350" // Red
 		}
 
 		session.StartTime = timeseries.Time(startTime.Unix())
