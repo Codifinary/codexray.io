@@ -1,6 +1,7 @@
 package overview
 
 import (
+	"codexray/auditor"
 	"codexray/clickhouse"
 	"codexray/model"
 	"context"
@@ -50,6 +51,8 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		AverageSession:      rows.AverageSession,
 		AverageSessionTrend: rows.AverageSessionTrend,
 	}
+
+	v.Report = auditor.GenerateMrumSessionsReport(w, ch, w.Ctx.From, w.Ctx.To)
 
 	v.Status = model.OK
 	return v
