@@ -28,6 +28,16 @@ type SessionLiveData struct {
 	StartTime         timeseries.Time
 }
 
+type SessionHistoricData struct {
+	SessionID       string
+	UserID          string
+	Country         string
+	NoOfRequest     uint64
+	SessionDuration int64
+	LastPage        string
+	StartTime       timeseries.Time
+}
+
 func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeseries.Time) (*MobileSessionResult, error) {
 
 	fromTime := from.ToStandard()
@@ -348,6 +358,62 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 
 		session.StartTime = timeseries.Time(startTime.Unix())
 		session.LastPageTimestamp = timeseries.Time(lastPageTimestamp.Unix())
+		result = append(result, session)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries.Time) ([]SessionHistoricData, error) {
+	query := `
+	SELECT
+		s.SessionId,
+		s.UserId,
+		s.StartTime,
+		COUNT(p.EndpointName) AS NoOfRequest,
+		argMax(p.EndpointName, p.Timestamp) AS LastPage,
+		TIMESTAMPDIFF(SECOND, s.StartTime, s.EndTime) AS SessionDuration,
+		s.Country
+	FROM mobile_session_data s
+	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
+	WHERE s.StartTime BETWEEN @from AND @to
+	AND s.EndTime IS NOT NULL
+	GROUP BY s.SessionId, s.UserId, s.StartTime, s.EndTime, s.Country
+	ORDER BY s.StartTime DESC
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []SessionHistoricData
+
+	for rows.Next() {
+		var session SessionHistoricData
+		var startTime time.Time
+
+		if err := rows.Scan(
+			&session.SessionID,
+			&session.UserID,
+			&startTime,
+			&session.NoOfRequest,
+			&session.LastPage,
+			&session.SessionDuration,
+			&session.Country,
+		); err != nil {
+			return nil, err
+		}
+
+		session.StartTime = timeseries.Time(startTime.Unix())
 		result = append(result, session)
 	}
 

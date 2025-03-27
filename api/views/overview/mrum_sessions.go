@@ -11,11 +11,12 @@ import (
 )
 
 type MrumSessionsView struct {
-	Status          model.Status                 `json:"status"`
-	Message         string                       `json:"message"`
-	Summary         MrumSessionsData             `json:"summary"`
-	Report          *model.AuditReport           `json:"report"`
-	SessionLiveData []clickhouse.SessionLiveData `json:"sessionLiveData"`
+	Status              model.Status                     `json:"status"`
+	Message             string                           `json:"message"`
+	Summary             MrumSessionsData                 `json:"summary"`
+	Report              *model.AuditReport               `json:"report"`
+	SessionLiveData     []clickhouse.SessionLiveData     `json:"sessionLiveData"`
+	SessionHistoricData []clickhouse.SessionHistoricData `json:"sessionHistoricData"`
 }
 
 type MrumSessionsData struct {
@@ -62,7 +63,16 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
 		return v
 	}
+
+	sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+		return v
+	}
 	v.SessionLiveData = sessionLiveData
+	v.SessionHistoricData = sessionHistoricData
 	v.Status = model.OK
 	return v
 }
