@@ -17,6 +17,13 @@ type MobileUserResult struct {
 	DailyTrend        float64
 }
 
+type MobileUsersData struct {
+	UserID    string
+	Country   string
+	StartTime string
+	EndTime   string
+}
+
 func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.Time) (*MobileUserResult, error) {
 	q := `
 		WITH 
@@ -177,4 +184,32 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 		"newUsers":       newUsersSeries,
 		"returningUsers": returningUsersSeries,
 	}, nil
+}
+
+func (c *Client) GetMobileUsersData(ctx context.Context, from, to timeseries.Time) ([]MobileUsersData, error) {
+	query := `
+		SELECT
+			msd.UserId AS UserID,
+			mur.Country AS Country,
+			toString(msd.StartTime) AS StartTime,
+			toString(msd.EndTime) AS EndTime
+		FROM
+			mobile_session_data msd
+		INNER JOIN
+			mobile_user_registration mur ON msd.UserId = mur.UserId
+		WHERE
+			msd.StartTime >= @from AND
+			msd.StartTime <= @to AND
+			msd.EndTime IS NOT NULL
+		ORDER BY
+			msd.StartTime DESC
+	`
+
+	var result []MobileUsersData
+	err := c.conn.Select(ctx, &result, query, clickhouse.Named("from", from), clickhouse.Named("to", to))
+	if err != nil {
+		return nil, fmt.Errorf("error querying mobile users data: %w", err)
+	}
+
+	return result, nil
 }
