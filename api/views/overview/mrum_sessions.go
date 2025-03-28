@@ -32,6 +32,7 @@ type MrumSessionsData struct {
 
 type SessionQuery struct {
 	SessionType string `json:"session_type"`
+	Limit       int    `json:"limit"`
 }
 
 func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumSessionsView {
@@ -66,7 +67,7 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 
 	switch {
 	case q.SessionType != "":
-		sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To)
+		sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -76,7 +77,7 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		v.SessionHistoricData = sessionHistoricData
 
 	default:
-		sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To)
+		sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -92,6 +93,7 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 
 func parseSessionQuery(query string, ctx timeseries.Context) SessionQuery {
 	var res SessionQuery
+	res.Limit = 10
 	if query != "" {
 		if err := json.Unmarshal([]byte(query), &res); err != nil {
 			klog.Warningln(err)
