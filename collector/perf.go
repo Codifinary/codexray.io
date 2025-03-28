@@ -35,6 +35,7 @@ type PerfPayload struct {
 	CountryCode     string `json:"countryCode"`
 	SyntheticUser   bool   `json:"syntheticUser"`
 	SslTime         int64  `json:"sslTime"`
+	Browser         string `json:"browser"`
 }
 
 type DataPoint struct {
@@ -58,6 +59,7 @@ type DataPoint struct {
 	RedirectTime      int64
 	TtfbTime          int64
 	TtlTime           int64
+	Browser           string
 }
 
 type PerfRequestType struct {
@@ -92,6 +94,7 @@ type PerfBatch struct {
 	TtfbTime        *chproto.ColInt64
 	TtlTime         *chproto.ColInt64
 	RawData         *chproto.ColStr
+	Browser         *chproto.ColStr
 }
 
 func NewPerfBatch(limit int, timeout time.Duration, exec func(query ch.Query) error) *PerfBatch {
@@ -120,6 +123,7 @@ func NewPerfBatch(limit int, timeout time.Duration, exec func(query ch.Query) er
 		TtfbTime:        new(chproto.ColInt64),
 		TtlTime:         new(chproto.ColInt64),
 		RawData:         new(chproto.ColStr),
+		Browser:         new(chproto.ColStr),
 	}
 	go func() {
 		ticker := time.NewTicker(timeout)
@@ -169,6 +173,7 @@ func (b *PerfBatch) Add(perfData *PerfRequestType, raw string) {
 		b.RedirectTime.Append(dataPoint.RedirectTime)
 		b.TtfbTime.Append(dataPoint.TtfbTime)
 		b.TtlTime.Append(dataPoint.TtlTime)
+		b.Browser.Append(dataPoint.Browser)
 		b.RawData.Append(raw)
 	}
 	if b.Timestamp.Rows() >= b.limit {
@@ -201,6 +206,7 @@ func (b *PerfBatch) save() {
 		{Name: "RedirectTime", Data: b.RedirectTime},
 		{Name: "TtfbTime", Data: b.TtfbTime},
 		{Name: "TtlTime", Data: b.TtlTime},
+		{Name: "Browser", Data: b.Browser},
 		{Name: "RawData", Data: b.RawData},
 	}
 	err := b.exec(ch.Query{Body: input.Into("perf_data"), Input: input})
@@ -266,6 +272,7 @@ func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 		TtfbTime:          payload.TtfbTime,
 		TtlTime:           payload.TtlTime,
 		AppType:           "Browser",
+		Browser:           payload.Browser,
 	}
 	perfReq := &PerfRequestType{DataPoints: []DataPoint{dp}}
 	c.getPerfBatch(project).Add(perfReq, string(data))

@@ -405,3 +405,180 @@ func IncidentsToAnnotations(incidents []*ApplicationIncident, ctx timeseries.Con
 	}
 	return res
 }
+
+type EChart struct {
+	Title       TextTitle    `json:"title"`
+	Tooltip     Tooltip      `json:"tooltip"`
+	Legend      Legend       `json:"legend"`
+	Grid        *Grid        `json:"grid,omitempty"`
+	XAxis       *Axis        `json:"xAxis,omitempty"`
+	YAxis       *Axis        `json:"yAxis,omitempty"`
+	Series      EChartSeries `json:"series"`
+	Annotations []Annotation `json:"annotations,omitempty"`
+	Color       []string     `json:"color,omitempty"`
+		Graphic     *Graphic     `json:"graphic,omitempty"`
+}
+type TextTitle struct {
+	Text      string     `json:"text"`
+	TextStyle *TextStyle `json:"textStyle,omitempty"`
+}
+
+type TextStyle struct {
+	FontSize  int    `json:"fontSize,omitempty"`
+	FontWeight string `json:"fontWeight,omitempty"`
+}
+type Tooltip struct {
+	Trigger string `json:"trigger"`
+}
+
+type Legend struct {
+	Top    string `json:"top,omitempty"`
+	Left   string `json:"left,omitempty"`
+	Bottom string `json:"bottom,omitempty"`
+}
+
+type Grid struct {
+	Top    int `json:"top,omitempty"`
+	Bottom int `json:"bottom,omitempty"`
+	Left   int `json:"left,omitempty"`
+	Right  int `json:"right,omitempty"`
+	ContainLabel  bool `json:"containLabel"`
+}
+
+type Axis struct {
+	Type      string     `json:"type"`
+	Data      []string   `json:"data,omitempty"`
+	Max       string     `json:"max,omitempty"`
+	Inverse   bool       `json:"inverse,omitempty"`
+	AxisLabel *AxisLabel `json:"axisLabel,omitempty"`
+}
+
+type AxisLabel struct {
+	Show      bool   `json:"show,omitempty"`
+	FontSize  int    `json:"fontSize,omitempty"`
+	Formatter string `json:"formatter,omitempty"`
+	Rich      *Rich  `json:"rich,omitempty"`
+	Rotate    int    `json:"rotate,omitempty"`}
+
+type Rich struct {
+	Flag *Flag `json:"flag,omitempty"`
+}
+
+type Flag struct {
+	FontSize int `json:"fontSize,omitempty"`
+	Padding  int `json:"padding,omitempty"`
+}
+
+type EChartSeries struct {
+	Name              string      `json:"name"`
+	Type              string      `json:"type"`
+	Radius            []string    `json:"radius,omitempty"`
+	AvoidLabelOverlap bool        `json:"avoidLabelOverlap,omitempty"`
+	ItemStyle         *ItemStyle  `json:"itemStyle,omitempty"`
+	Label             *Label      `json:"label,omitempty"`
+	Emphasis          *Emphasis   `json:"emphasis,omitempty"`
+	LabelLine         *LabelLine  `json:"labelLine,omitempty"`
+	Data              []DataPoint `json:"data"`
+	Color             string      `json:"color,omitempty"`
+	BarWidth          string      `json:"barWidth,omitempty"`
+}
+
+type ItemStyle struct {
+	BorderRadius int    `json:"borderRadius,omitempty"`
+	BorderColor  string `json:"borderColor,omitempty"`
+	BorderWidth  int    `json:"borderWidth,omitempty"`
+}
+
+type Label struct {
+	Show           bool   `json:"show"`
+	Position       string `json:"position,omitempty"`
+	Precision      int    `json:"precision,omitempty"`
+	FontSize       int    `json:"fontSize,omitempty"`
+	FontWeight     string `json:"fontWeight,omitempty"`
+	FontFamily     string `json:"fontFamily,omitempty"`
+	ValueAnimation bool   `json:"valueAnimation,omitempty"`
+}
+
+type Emphasis struct {
+	Label *EmphasisLabel `json:"label,omitempty"`
+}
+
+type EmphasisLabel struct {
+	Show       bool   `json:"show,omitempty"`
+	FontSize   int    `json:"fontSize,omitempty"`
+	FontWeight string `json:"fontWeight,omitempty"`
+}
+
+type LabelLine struct {
+	Show bool `json:"show,omitempty"`
+}
+
+type DataPoint struct {
+	Value int    `json:"value"`
+	Name  string `json:"name"`
+}
+type Graphic struct {
+	Type  string     `json:"type"`
+	Left  string     `json:"left"`
+	Top   string     `json:"top"`
+	Style GraphicStyle `json:"style"`
+}
+
+type GraphicStyle struct {
+	Text       string `json:"text"`
+	FontSize   int    `json:"fontSize"`
+	FontWeight string `json:"fontWeight"`
+	Fill       string `json:"fill"`
+	TextAlign  string `json:"textAlign"`
+}
+
+func NewEChart(title string) *EChart {
+	return &EChart{
+		Title: TextTitle{
+			Text: title,
+			TextStyle: &TextStyle{
+				FontSize:  16,
+				FontWeight: "normal",
+			},
+		},
+	}
+}
+
+
+func (ec *EChart) SetSeries(name, chartType string, data []DataPoint, color ...string) *EChart {
+	s := EChartSeries{Name: name, Type: chartType, Data: data}
+	if chartType == "pie" {
+		s.Radius = []string{"40%", "70%"}
+		s.Label = &Label{Show: false}
+	}
+	if len(color) > 0 {
+		s.Color = color[0]
+	}
+	ec.Series = s
+	return ec
+}
+
+func (ec *EChart) SetGraphicText(text string) *EChart {
+	ec.Graphic = &Graphic{
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: GraphicStyle{
+			Text:       text,
+			FontSize:   26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center",
+		},
+	}
+	return ec
+}
+
+func (ec *EChart) AddAnnotation(annotations ...Annotation) *EChart {
+	ec.Annotations = append(ec.Annotations, annotations...)
+	return ec
+}
+
+func (ec *EChart) IsEmpty() bool {
+	return len(ec.Series.Data) == 0
+}
