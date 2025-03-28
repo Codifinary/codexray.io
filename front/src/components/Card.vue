@@ -6,21 +6,32 @@
                 {{ formattedCount }}<span v-if="unit">{{ unit }}</span>
             </v-card-text>
         </v-card-title>
-        <BaseIcon v-if="icon" :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
-        <v-sparkline
-            v-else-if="trend.chart"
-            :value="trend.chart.map((v) => (v === null ? 0 : v))"
-            fill
-            smooth
-            line-width="3"  
-            padding="8"
-            :color="bottomColor"  
-            :gradient="[bottomColor, 'rgba(255,255,255,0)']"  
-            auto-draw
-            height="50"
-            width="70"
-            stroke-linecap="round"
+        <BaseIcon 
+            v-if="icon" 
+            :name="iconName" 
+            :iconColor="iconColor || icon" 
+            :class="['card-icon', background]" 
+            style="border-radius: 30%" 
+            width="24px"
+            height="24px"
         />
+        <v-sparkline
+    v-else-if="trend && trend.chart"
+    :value="trend.chart.map((v) => (v === null ? 0 : v))"
+    fill
+    smooth
+    line-width="3"  
+    padding="8"
+    :color="bottomColor"  
+    :gradient="[bottomColor, 'rgba(255,255,255,0)']"  
+    auto-draw
+    height="50"
+    width="70"
+    stroke-linecap="round"
+    :min="trend.chart.length ? Math.min(...trend.chart.filter(v => v !== null)) : 0" 
+    :max="trend.chart.length ? Math.max(...trend.chart) : 0"
+/>
+
 
         <div class="bottom-border" :class="$vuetify.theme.dark ? 'theme--dark' : 'theme--light'"></div>
 
@@ -42,7 +53,11 @@ export default {
         iconName: String,
         unit: String,
         bottomColor: String,
-        trend: Object,
+        trend: {
+            type: Object,
+            required: false
+        },
+        iconColor: String,
     },
     computed: {
         formattedCount() {

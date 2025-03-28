@@ -2,8 +2,8 @@
     <div class="settings-container">
         <div class="font-weight-bold tab-heading">Details</div>
 
-        <v-tabs height="40" slider-color="success" show-arrows slider-size="2">
-            <v-tab v-for="t in tabs" :key="t.id" :to="{ params: { tab: t.id } }" exact>
+        <v-tabs v-model="activeTab" height="40" slider-color="success" show-arrows slider-size="2">
+            <v-tab v-for="t in tabs" :key="t.id" @click="handleTabClick(t.id)">
                 {{ t.name }}
             </v-tab>
         </v-tabs>
@@ -21,11 +21,9 @@
         </template>
 
         <template v-if="tab === 'crash'">
-            <div class="font-weight-bold tab-heading">Crash</div>
-            <Crash/>
+            <CrashDetails v-if="id" :id="id" />
+            <Crash v-else />
         </template>
-
-        
     </div>
 </template>
 
@@ -34,36 +32,57 @@ import Users from '@/components/Users.vue';
 import Crash from './Crash.vue';
 import Performance from './Performance.vue';
 import Sessions from './Sessions.vue';
+import CrashDetails from './CrashDetails.vue';
 
 export default {
     props: {
         projectId: String,
         tab: String,
+        id: String,
     },
 
     components: {
         Performance,
         Crash,
         Sessions,
-        Users
+        Users,
+        CrashDetails
     },
 
-    mounted() {
-        if (!this.tabs.find((t) => t.id === this.tab)) {
-            this.$router.replace({ params: { tab: undefined } });
+    data() {
+        return {
+            tabs: [
+                { id: 'sessions', name: 'Sessions'},
+                { id: 'users', name: 'Users'},
+                { id: 'performance', name: 'Performance'},
+                { id: 'crash', name: 'Crash'}
+            ],
+            activeTab: 0
+        };
+    },
+
+    watch: {
+        tab: {
+            immediate: true,
+            handler(newTab) {
+                this.activeTab = this.tabs.findIndex(t => t.id === newTab);
+            }
         }
     },
 
-    computed: {
-        tabs() {
-            return [
-                { id: 'sessions', name: 'Sessions' },
-                { id: 'users', name: 'Users'},
-                { id: 'performance', name: 'Performance'},
-                { id: 'crash', name: 'Crash'},
-            ];
-        },
-    },
+    methods: {
+        handleTabClick(tabId) {
+            this.$router.push({
+                name: 'overview',
+                params: {
+                    projectId: this.$route.params.projectId,
+                    view: 'MRUM',
+                    tab: tabId,
+                    id: tabId === 'crash' && this.id ? this.id : undefined
+                }
+            });
+        }
+    }
 };
 </script>
 

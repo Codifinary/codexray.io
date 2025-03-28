@@ -13,74 +13,38 @@
                 :trend="card.trend"
             />
         </div>
-        <div class="table-section">
-            <div class="mode-selector">
-            <v-btn-toggle
-                v-model="mode"
-                mandatory
-                class="mode-buttons"
-            >
-                <v-btn value="live" x-large text class="mode-btn">Live</v-btn>
-                <v-btn value="historical" x-large text class="mode-btn">Historical</v-btn>
-            </v-btn-toggle>
-        </div>
-            <v-simple-table class="table">
-            <thead>
-                <tr class="tab-heading text-body-10">
-                    <th>Session Id</th>
-                    <th>User Id</th>
-                    <th>Country</th>
-                    <th>No. of requests</th>
-                    <th>Session Duration</th>
-                    <th>Start Time</th>
-                    <th>End Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template v-if="countrywiseOverviews && countrywiseOverviews.length > 0">
-                    <tr v-for="country in countrywiseOverviews" :key="country.Country">
-                        <td>{{ country.Country }}</td>
-                        <td>{{ country.Requests }}</td>
-                        <td>{{ country.Errors }}</td>
-                        <td>{{ country.ErrorRatePercentage.toFixed(2) }}</td>
-                        <td>{{ country.AvgResponseTime }}</td>
-                    </tr>
-                </template>
-                <tr v-else>
-                    <td colspan="7" class="text-center">No data found</td>
-                </tr>
-            </tbody>
-        </v-simple-table>
-        </div>
-        <GeoMap :countrywiseOverviews="countrywiseOverviews" :title="title"/>
-        <!-- <Dashboard id="chart" :name="title" :widgets="chartData.widgets" />
         <v-simple-table class="table">
-            <thead>
-                <tr class="tab-heading text-body-10">
-                    <th>Country</th>
-                    <th>Requests</th>
-                    <th>Errors</th>
-                    <th>Error Rate %</th>
-                    <th>Average HTTP Response Time</th>
-                </tr>
-            </thead>
-            <tbody>
-                <template v-if="countrywiseOverviews && countrywiseOverviews.length > 0">
-                    <tr v-for="country in countrywiseOverviews" :key="country.Country">
-                        <td>{{ country.Country }}</td>
-                        <td>{{ country.Requests }}</td>
-                        <td>{{ country.Errors }}</td>
-                        <td>{{ country.ErrorRatePercentage.toFixed(2) }}</td>
-                        <td>{{ country.AvgResponseTime }}</td>
-                    </tr>
-                </template>
-                <tr v-else>
-                    <td colspan="5" class="text-center">No data found</td>
-                </tr>
-            </tbody>
-        </v-simple-table>
-
-        <GeoMap class="geomap" :title="'Geo-Wise Sessions'" :countrywiseOverviews="countrywiseOverviews"/> -->
+    <thead>
+        <tr class="tab-heading text-body-10">
+            <th>Session ID</th>
+            <th>User ID</th>
+            <th>Country</th>
+            <th>No. of Requests</th>
+            <th>Last Page</th>
+            <th>Start Time</th>
+            <th>{{ mode === 'live' ? 'Last Page Time' : 'Duration' }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <template v-if="currentSessionData && currentSessionData.length > 0">
+            <tr v-for="session in currentSessionData" :key="session.SessionID">
+                <td>{{ session.SessionID }}</td>
+                <td>{{ session.UserID }}</td>
+                <td>{{ session.Country }}</td>
+                <td>{{ session.NoOfRequest }}</td>
+                <td>{{ session.LastPage || '-' }}</td>
+                <td>{{ formatTime(session.StartTime) }}</td>
+                <td>{{ mode === 'live' 
+                    ? (session.LastPageTimestamp ? formatTime(session.LastPageTimestamp) : '-')
+                    : formatDuration(session.SessionDuration) }}</td>
+            </tr>
+        </template>
+        <tr v-else>
+            <td colspan="7" class="text-center">No data found</td>
+        </tr>
+    </tbody>
+</v-simple-table>
+        <GeoMap :countrywiseOverviews="countrywiseOverviews" :title="title"/>
     </div>
 </template>
 
@@ -101,183 +65,1040 @@ export default {
         GeoMap
     },
     data() {
-        
-        const logs = {
-            "status": "info",
-            "value": "1 unique error",
-            "chart": [
-                1,
-                        1,
-                        2,
-                        1,
-                        1,
-                        1,
-                        2,
-                        1,
-                        1,
-                        1,
-                        1,
-                        0,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        1,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        0,
-                        0,
-                        0,
-                        1,
-                        1,
-                        1,
-                        5,
-                        5,
-                        5,
-                        5,
-                        5,
-                        5,
-                        5,
-                        5,
-                        5,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null
-                    ]
-                }
-        
         return {
+            mode: 'live',
+            recentCount: 10,
+            search: '',
+            data: {
+    "context": {
+        "status": {
+            "status": "warning",
+            "error": "",
+            "prometheus": {
+                "status": "warning",
+                "message": "Prometheus is not configured",
+                "error": "",
+                "action": "configure"
+            },
+            "node_agent": {
+                "status": "warning",
+                "nodes": 0
+            },
+            "kube_state_metrics": null
+        },
+        "search": {
+            "applications": null,
+            "nodes": null
+        }
+    },
+    "data": {
+        "status": "ok",
+        "message": "",
+        "summary": {
+            "totalSessions": 4,
+            "sessionTrend": 100,
+            "totalUsers": 5,
+            "userTrend": 100,
+            "avgSession": 64013,
+            "avgSessionTrend": 100
+        },
+        "report": {
+            "name": "Mobile Sessions",
+            "status": "ok",
+            "widgets": [
+                {
+                    "chart_group": {
+                        "title": "Session Activity Trends",
+                        "charts": [
+                            {
+                                "ctx": {
+                                    "from": 1742883031000,
+                                    "to": 1743141331000,
+                                    "step": 900000,
+                                    "raw_step": 900000
+                                },
+                                "title": "Sessions by Country",
+                                "series": [
+                                    {
+                                        "name": "US",
+                                        "color": "#4285F4",
+                                        "data": [
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            2,
+                                            null,
+                                            3,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                        ],
+                                        "value": ""
+                                    }
+                                ],
+                                "threshold": null,
+                                "featured": false,
+                                "stacked": false,
+                                "sorted": false,
+                                "column": false,
+                                "color_shift": 0,
+                                "annotations": null,
+                                "drill_down_link": null,
+                                "hide_legend": false
+                            },
+                            {
+                                "ctx": {
+                                    "from": 1742883031000,
+                                    "to": 1743141331000,
+                                    "step": 900000,
+                                    "raw_step": 900000
+                                },
+                                "title": "Sessions by Device",
+                                "series": [
+                                    {
+                                        "name": "sdk_gphone",
+                                        "color": "#4285F4",
+                                        "data": [
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            2,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                        ],
+                                        "value": ""
+                                    },
+                                    {
+                                        "name": "sdk_gphone64_x86_64",
+                                        "color": "#EA4335",
+                                        "data": [
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            3,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                        ],
+                                        "value": ""
+                                    }
+                                ],
+                                "threshold": null,
+                                "featured": false,
+                                "stacked": false,
+                                "sorted": false,
+                                "column": false,
+                                "color_shift": 0,
+                                "annotations": null,
+                                "drill_down_link": null,
+                                "hide_legend": false
+                            },
+                            {
+                                "ctx": {
+                                    "from": 1742883031000,
+                                    "to": 1743141331000,
+                                    "step": 900000,
+                                    "raw_step": 900000
+                                },
+                                "title": "Sessions by Operating System",
+                                "series": [
+                                    {
+                                        "name": "Android",
+                                        "color": "#4285F4",
+                                        "data": [
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            1,
+                                            null,
+                                            3,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                        ],
+                                        "value": ""
+                                    },
+                                    {
+                                        "name": "IOS",
+                                        "color": "#EA4335",
+                                        "data": [
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            1,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null,
+                                            null
+                                        ],
+                                        "value": ""
+                                    }
+                                ],
+                                "threshold": null,
+                                "featured": false,
+                                "stacked": false,
+                                "sorted": false,
+                                "column": false,
+                                "color_shift": 0,
+                                "annotations": null,
+                                "drill_down_link": null,
+                                "hide_legend": false
+                            }
+                        ]
+                    }
+                }
+            ],
+            "checks": null,
+            "custom": false,
+            "instrumentation": ""
+        },
+        "sessionLiveData": [
+            {
+                "SessionID": "17de08b3-983b-4c1d-abcd",
+                "UserID": "95d7f6f1-12345",
+                "Country": "US",
+                "NoOfRequest": 1,
+                "LastPageTimestamp": null,
+                "LastPage": "",
+                "StartTime": 1743107731000,
+                "GeoMapColorCode": "#5BBC7A"
+            },
+            {
+                "SessionID": "17de08b3-983b-4c1d-abce",
+                "UserID": "95d7f6f1-350e-4bc9-9182",
+                "Country": "US",
+                "NoOfRequest": 1,
+                "LastPageTimestamp": null,
+                "LastPage": "",
+                "StartTime": 1743107057000,
+                "GeoMapColorCode": "#5BBC7A"
+            },
+            {
+                "SessionID": "17de08b3-983b-4c1d-abce-324589cf934a",
+                "UserID": "95d7f6f1-350e-4bc9-9182-4b00e4a71fd6",
+                "Country": "US",
+                "NoOfRequest": 1,
+                "LastPageTimestamp": 1743101354000,
+                "LastPage": "http://10.0.2.2:8081/request",
+                "StartTime": 1743101292000,
+                "GeoMapColorCode": "#5BBC7A"
+            }
+        ],
+        "sessionHistoricData": [
+            {
+                "SessionID": "17de08b3-983b-4c1d-abce-324589cf933a",
+                "UserID": "95d7f6f1-350e-4bc9-9182-4b00e4a71fd5",
+                "Country": "US",
+                "NoOfRequest": 3,
+                "SessionDuration": 64013,
+                "LastPage": "http://10.0.2.2:8081/request",
+                "StartTime": 1743099187000,
+                "GeoMapColorCode": "#5BBC7A"
+            }
+        ]
+    }
+},
             title: 'Performance Dashboard',
             chartData: { widgets: [] },
             cards: [
@@ -312,7 +1133,9 @@ export default {
             ],
             countrywiseOverviews: [],
             loading: true,
-            mode: 'live'
+            mode: 'live',
+            recentCount: 10,
+            search: ''
         };
     },
     mounted() {
@@ -324,6 +1147,11 @@ export default {
             this.get();
         },
     },
+    computed: {
+        currentSessionData() {
+            return this.mode === 'live' ? this.data.data.sessionLiveData : this.data.data.sessionHistoryData;
+        }
+    }
 };
 </script>
 
@@ -377,9 +1205,6 @@ export default {
     width: 100%;
 }
 
-.table {
-    margin-top: 30px !important;
-}
 
 .tab-heading {
     font-size: 1.1rem;
@@ -387,18 +1212,20 @@ export default {
 }
 
 .mode-selector {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .mode-btn {
-    border-radius: 3px !important;
-    margin: 0 5px !important;
+    height: 36px !important;
+    min-width: 40px !important;
+    width: fit-content !important;
+    border-radius: 0 !important;
     padding: 3px 20px !important;
     font-size: 14px !important;
     background-color: #e1e1e1 !important;
     color: #444050 !important;
-    height: 32px !important;
     text-transform: none !important;
+    letter-spacing: normal !important;
 }
 
 .mode-btn.v-btn--active {
@@ -409,5 +1236,54 @@ export default {
 .mode-buttons {
     background: transparent !important;
     border: none !important;
+    height: 36px !important;
 }
+
+.recent-container {
+    display: flex;
+    align-items: center;
+    border: none;
+    gap: 0;
+    height: 36px;
+}
+
+.recent-label {
+    color: #013912;
+    font-size: 14px;
+    padding: 0 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    margin-right: 0;
+    border-left: 1px solid #e1e1e1;
+    border-top: 1px solid #e1e1e1;
+    border-bottom: 1px solid #e1e1e1;
+    border-right: 0;
+}
+
+.recent-buttons {
+    background: transparent !important;
+    border: none !important;
+    height: 100%;
+    color: #013912 !important;
+    margin-left: 0;
+}
+
+.recent-btn {
+    height: 100% !important;
+    min-width: 40px !important;
+    width: fit-content !important;
+    color: #013912 !important;
+    border-radius: 0 !important;
+}
+
+.recent-btn.v-btn--active {
+    background-color: #1DBF73 !important;
+    color: white !important;
+}
+
+.search-field {
+    padding: 0 10px;
+}
+
 </style>

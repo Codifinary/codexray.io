@@ -335,4 +335,8 @@ export default class Api {
     getCrashData(cb) {
         this.get(this.projectPath(`mrum/crash`), {}, cb);
     }
+
+    getMRUMUsersData(cb){
+        this.get(this.projectPath(`mrum/users`), {}, cb);
+    }
 }

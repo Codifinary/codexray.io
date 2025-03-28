@@ -1,28 +1,28 @@
 <template>
     <div class="users-container">
-        <v-progress-linear indeterminate v-if="loading" color="green" />
+        <v-progress-linear indeterminate v-if="loading" color="success" />
         <div v-if="!loading">
-        <div class="trend-cards">
-            <Card
-                v-for="card in computedCards"
-                :key="card.name"
-                v-bind="card"
-            />
-        </div>
-        <div class="charts">
-            <div class="chart-section">
-                <ChartGroup :title="data.data.report.widgets[1].chart_group.title" :charts="data.data.report.widgets[1].chart_group.charts"/>
+            <div class="trend-cards">
+                <Card
+                    v-for="card in computedCards"
+                    :key="card.name"
+                    v-bind="card"
+                />
+            </div>
+            <div class="charts">
+                <div class="chart-section">
+                    <ChartGroup :title="data.report.widgets[1].chart_group.title" :charts="data.report.widgets[1].chart_group.charts"/>
 
+                </div>
+                <div class="cards-section">
+                    <Card2 v-for="(card, index) in cards2" :key="index" :cardData="card"/>
+                </div>
             </div>
-            <div class="cards-section">
-                <Card2 v-for="(card, index) in cards2" :key="index" :cardData="card"/>
+            <div class="table-section">
+                <div class="font-weight-bold tab-heading">New Users</div>
+                <CustomTable :items="items" :headers="headers" class="table" />
             </div>
         </div>
-        <div class="table-section">
-            <div class="font-weight-bold tab-heading">New Users</div>
-            <CustomTable :items="items" :headers="headers" class="table" />
-        </div>
-    </div>
     </div>
 </template>
 
@@ -49,7 +49,7 @@ export default {
             return [
                 {
                     name: 'Crash Free Users',
-                    count: this.data?.data?.summary?.crashFreeUsers || 0,
+                    count: this.data?.summary?.crashFreeUsers || 0,
                     background: 'light-green-bg',
                     bottomColor: '#009688',
                     trend: { chart: [] },
@@ -58,29 +58,29 @@ export default {
                 },
                 { 
                     name: 'Total Users',
-                    count: this.data?.data?.summary?.totalUsers || 0,
+                    count: this.data?.summary?.totalUsers || 0,
                     background: 'light-green-bg',
                     bottomColor: '#009688',
-                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[0]?.series[0] || { chart: [] },
+                    trend: this.data?.report?.widgets[0]?.chart_group?.charts[0]?.series[0] || { chart: [] },
                 },
                 { 
                     name: 'New Users', 
-                    count: this.data?.data?.summary?.newUsers || 0, 
+                    count: this.data?.summary?.newUsers || 0, 
                     background: 'light-red-bg',
                     bottomColor: '#EF5350',
-                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[1]?.series[0] || { chart: [] },
+                    trend: this.data?.report?.widgets[0]?.chart_group?.charts[1]?.series[0] || { chart: [] },
                 },  
                 { 
                     name: 'Returning Users', 
-                    count: this.data?.data?.summary?.returningUsers || 0, 
+                    count: this.data?.summary?.returningUsers || 0, 
                     background: 'light-orange-bg',
                     bottomColor: '#F57C00',
-                    trend: this.data?.data?.report?.widgets[0]?.chart_group?.charts[2]?.series[0] || { chart: [] },
+                    trend: this.data?.report?.widgets[0]?.chart_group?.charts[2]?.series[0] || { chart: [] },
                 }
             ];
         },
         pageTitle() {
-            return this.data?.data?.report?.name || 'Performance Dashboard';
+            return this.data?.report?.name;
         }
     },
     data() {
@@ -97,240 +97,50 @@ export default {
             cards2: [
                 { 
                     primaryLabel: 'Daily Active Users', 
-                    primaryValue: this.data?.data?.summary?.dailyActiveUsers || 0, 
-                    percentageChange: this.data?.data?.summary?.dailyTrend || 0, 
-                    icon: 'up-green-arrow',
+                    primaryValue: this.data?.summary?.dailyActiveUsers || 0, 
+                    percentageChange: this.data?.summary?.dailyTrend || 0, 
                     iconColor: '#009688',
                     bottomColor: '#009688',
                     trendColor: '#009688',
                 },
                 { 
                     primaryLabel: 'Weekly Active Users', 
-                    primaryValue: this.data?.data?.summary?.weeklyActiveUsers || 0,
+                    primaryValue: this.data?.summary?.weeklyActiveUsers || 0,
                     iconColor: '#F57C00',
-                    icon: 'up-red-arrow',
                     bottomColor: '#F57C00',
                     trendColor: '#F57C00',
                 },
             ],
             countrywiseOverviews: [],
-            loading: false,
-            data: {
-    "context": {
-        "status": {
-            "status": "warning",
-            "error": "",
-            "prometheus": {
-                "status": "warning",
-                "message": "Prometheus is not configured",
-                "error": "",
-                "action": "configure"
-            },
-            "node_agent": {
-                "status": "warning",
-                "nodes": 0
-            },
-            "kube_state_metrics": null
-        },
-        "search": {
-            "applications": null,
-            "nodes": null
-        }
-    },
-    "data": {
-        "status": "ok",
-        "message": "",
-        "summary": {
-            "totalUsers": 2,
-            "newUsers": 1,
-            "returningUsers": 1,
-            "dailyActiveUsers": 2,
-            "weeklyActiveUsers": 2,
-            "dailyTrend": 100
-        },
-        "report": {
-            "name": "Mobile Users",
-            "status": "ok",
-            "widgets": [
-                {
-                    "chart_group": {
-                        "title": "User Activity Trends",
-                        "charts": [
-                            {
-                                "ctx": {
-                                    "from": 1742584815000,
-                                    "to": 1742843115000,
-                                    "step": 900000,
-                                    "raw_step": 900000
-                                },
-                                "title": "Total Active Users (Last Hour)",
-                                "series": [
-                                    {
-                                        "name": "Total Users",
-                                        "color": "#FFA726",
-                                        "chart": [
-                                            5, 7, 6, 10, 8, 12, 11, 15, 14, 18,     // Small rise with fluctuations
-                                            20, 25, 22, 28, 26 , 30, 32, 35, 34, 38, // More noticeable growth
-                                            40, 45, 42, 50, 48, 55, 52, 58, 57, 60, // Mid-range fluctuations
-                                            65, 70, 68, 75, 72, 80, 78, 85, 82, 90, // Increasing variation
-                                            95, 100, 98, 110, 105, 115, 112, 120, 118, 130, // More pronounced peaks
-                                            140, 135, 145, 150, 160, 155, 170, 165, 180, 200 // Final sharp increase
-]
-
-
-
-,
-
-                                        "value": ""
-                                    }
-                                ],
-                                "threshold": null,
-                                "featured": false,
-                                "stacked": false,
-                                "sorted": false,
-                                "column": false,
-                                "color_shift": 0,
-                                "annotations": null,
-                                "drill_down_link": null,
-                                "hide_legend": false
-                            },
-                            {
-                                "ctx": {
-                                    "from": 1742584815000,
-                                    "to": 1742843115000,
-                                    "step": 900000,
-                                    "raw_step": 900000
-                                },
-                                "title": "New Users (Last Hour)",
-                                "series": [
-                                    {
-                                        "name": "New Users",
-                                        "color": "#AB47BC",
-                                        "chart": [
-        10, 10, 10, 10, 10, 10, 10, 10, 10, 10,  // Plateau
-        5, 5, 5, 5, 5, 5, 5, 5, 5, 5,          // First drop
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,          // Second drop
-        -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, // Third drop
-        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10  // Bottom plateau
-    ],
-                                        "value": ""
-                                    }
-                                ],
-                                "threshold": null,
-                                "featured": false,
-                                "stacked": false,
-                                "sorted": false,
-                                "column": false,
-                                "color_shift": 0,
-                                "annotations": null,
-                                "drill_down_link": null,
-                                "hide_legend": false
-                            },
-                            {
-                                "ctx": {
-                                    "from": 1742584815000,
-                                    "to": 1742843115000,
-                                    "step": 900000,
-                                    "raw_step": 900000
-                                },
-                                "title": "Returning Users (Last Hour)",
-                                "series": [
-                                    {
-                                        "name": "Returning Users",
-                                        "color": "#42A5F5",
-                                        "chart": [
-        10, 10, 10, 10, 10, 10, 10, 10, 10, 10,  // Plateau
-        5, 5, 5, 5, 5, 5, 5, 5, 5, 5,          // First drop
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,          // Second drop
-        -5, -5, -5, -5, -5, -5, -5, -5, -5, -5, // Third drop
-        -10, -10, -10, -10, -10, -10, -10, -10, -10, -10  // Bottom plateau
-    ],
-                                        "value": ""
-                                    }
-                                ],
-                                "threshold": null,
-                                "featured": false,
-                                "stacked": false,
-                                "sorted": false,
-                                "column": false,
-                                "color_shift": 0,
-                                "annotations": null,
-                                "drill_down_link": null,
-                                "hide_legend": false
-                            }
-                        ]
-                    }
-                },
-                {
-                    "chart_group": {
-                        "title": "User Breakdown",
-                        "charts": [
-                            {
-                                "ctx": {
-                                    "from": 1742256000000,
-                                    "to": 1742774400000,
-                                    "step": 86400000,
-                                    "raw_step": 86400000
-                                },
-                                "title": "New vs Returning Users (Last 7 Days)",
-                                "series": [
-                                    {
-                                        "name": "New Users",
-                                        "color": "#AB47BC",
-                                        "data": [
-                                            100,
-                                            120,
-                                            130,
-                                            110,
-                                            120,
-                                            140
-                                        ],
-                                        "value": ""
-                                    },
-                                    {
-                                        "name": "Returning Users",
-                                        "color": "#42A5F5",
-                                        "data": [
-                                            50,
-                                            55,
-                                            40,
-                                            45,
-                                            50,
-                                            55
-                                        ],
-                                        "value": ""
-                                    }
-                                ],
-                                "threshold": null,
-                                "featured": false,
-                                "stacked": true,
-                                "sorted": false,
-                                "column": true,
-                                "color_shift": 0,
-                                "annotations": null,
-                                "drill_down_link": null,
-                                "hide_legend": false
-                            }
-                        ]
-                    }
-                }
-            ],
-            "checks": null,
-            "custom": false,
-            "instrumentation": ""
-        }
-    }
-},
+            loading: true,
+            data: {},
             selection: [],
+            error: null,
         };
     },
     mounted() {
-        // this.get();
+        this.get();
     },
 
     watch: {
         '$route'() {
             this.get();
+        },
+    },
+
+    methods: {
+        get() {
+            this.loading = true;
+            this.error = null;
+            this.$api.getMRUMUsersData((data, error) => {
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.data = data;
+                console.log(this.data);
+                this.loading = false;
+            });
         },
     },
 };

@@ -36,7 +36,7 @@
         </template>
 
         <template v-if="view === 'MRUM'">
-            <MRUM :tab="tab" :id="id"/>
+            <MRUM :tab="$route.params.tab" :id="$route.params.id" :key="view + ($route.params.tab || 'sessions')"/>
         </template>
 
     </div>
@@ -82,7 +82,6 @@ export default {
         view: String,
         id: String,
         report: String,
-        tab: String,
     },
 
     computed: {
@@ -108,11 +107,20 @@ export default {
 
     watch: {
         view: {
-            handler(v) {
-                if (!this.views[v]) {
+            handler(newView, oldView) {
+                if (newView === 'MRUM' && oldView !== 'MRUM') {
+                    this.$router.replace({
+                        name: 'overview',
+                        params: {
+                            ...this.$route.params,
+                            tab: 'sessions'
+                        }
+                    });
+                } else if (!this.views[newView]) {
                     this.$router.replace({ params: { view: 'applications' } }).catch(() => {});
                 }
-            }
+            },
+            immediate: true
         },
         '$route.params.tab': {
             handler(newTab) {
