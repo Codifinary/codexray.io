@@ -416,7 +416,7 @@ type EChart struct {
 	Series      EChartSeries `json:"series"`
 	Annotations []Annotation `json:"annotations,omitempty"`
 	Color       []string     `json:"color,omitempty"`
-		Graphic     *Graphic     `json:"graphic,omitempty"`
+	Graphic     *Graphic     `json:"graphic,omitempty"`
 }
 type TextTitle struct {
 	Text      string     `json:"text"`
@@ -424,7 +424,7 @@ type TextTitle struct {
 }
 
 type TextStyle struct {
-	FontSize  int    `json:"fontSize,omitempty"`
+	FontSize   int    `json:"fontSize,omitempty"`
 	FontWeight string `json:"fontWeight,omitempty"`
 }
 type Tooltip struct {
@@ -435,14 +435,16 @@ type Legend struct {
 	Top    string `json:"top,omitempty"`
 	Left   string `json:"left,omitempty"`
 	Bottom string `json:"bottom,omitempty"`
+	Right  string `json:"right,omitempty"`
+	Orient string `json:"orient,omitempty"`
 }
 
 type Grid struct {
-	Top    int `json:"top,omitempty"`
-	Bottom int `json:"bottom,omitempty"`
-	Left   int `json:"left,omitempty"`
-	Right  int `json:"right,omitempty"`
-	ContainLabel  bool `json:"containLabel"`
+	Top          int  `json:"top,omitempty"`
+	Bottom       int  `json:"bottom,omitempty"`
+	Left         int  `json:"left,omitempty"`
+	Right        int  `json:"right,omitempty"`
+	ContainLabel bool `json:"containLabel"`
 }
 
 type Axis struct {
@@ -458,7 +460,8 @@ type AxisLabel struct {
 	FontSize  int    `json:"fontSize,omitempty"`
 	Formatter string `json:"formatter,omitempty"`
 	Rich      *Rich  `json:"rich,omitempty"`
-	Rotate    int    `json:"rotate,omitempty"`}
+	Rotate    int    `json:"rotate,omitempty"`
+}
 
 type Rich struct {
 	Flag *Flag `json:"flag,omitempty"`
@@ -518,9 +521,9 @@ type DataPoint struct {
 	Name  string `json:"name"`
 }
 type Graphic struct {
-	Type  string     `json:"type"`
-	Left  string     `json:"left"`
-	Top   string     `json:"top"`
+	Type  string       `json:"type"`
+	Left  string       `json:"left"`
+	Top   string       `json:"top"`
 	Style GraphicStyle `json:"style"`
 }
 
@@ -536,21 +539,13 @@ func NewEChart(title string) *EChart {
 	return &EChart{
 		Title: TextTitle{
 			Text: title,
-			TextStyle: &TextStyle{
-				FontSize:  16,
-				FontWeight: "normal",
-			},
 		},
 	}
 }
 
-
 func (ec *EChart) SetSeries(name, chartType string, data []DataPoint, color ...string) *EChart {
 	s := EChartSeries{Name: name, Type: chartType, Data: data}
-	if chartType == "pie" {
-		s.Radius = []string{"40%", "70%"}
-		s.Label = &Label{Show: false}
-	}
+	s.Label = &Label{Show: false}
 	if len(color) > 0 {
 		s.Color = color[0]
 	}
@@ -558,19 +553,14 @@ func (ec *EChart) SetSeries(name, chartType string, data []DataPoint, color ...s
 	return ec
 }
 
-func (ec *EChart) SetGraphicText(text string) *EChart {
-	ec.Graphic = &Graphic{
-		Type: "text",
-		Left: "center",
-		Top:  "center",
-		Style: GraphicStyle{
-			Text:       text,
-			FontSize:   26,
-			FontWeight: "bold",
-			Fill:       "#333",
-			TextAlign:  "center",
-		},
+func (ec *EChart) SetPieChartSeries(name, chartType string, radius []string, data []DataPoint, color ...string) *EChart {
+	s := EChartSeries{Name: name, Type: chartType, Data: data}
+	s.Radius = radius
+	s.Label = &Label{Show: false}
+	if len(color) > 0 {
+		s.Color = color[0]
 	}
+	ec.Series = s
 	return ec
 }
 
