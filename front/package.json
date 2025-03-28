@@ -20,6 +20,7 @@
         "axios": "^1.6.0",
         "color-convert": "^2.0.1",
         "core-js": "^3.8.3",
+        "echarts": "^5.6.0",
         "highlight.js": "^11.7.0",
         "pluralize": "^8.0.0",
         "sql-formatter": "^12.2.0",

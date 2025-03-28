@@ -176,15 +176,25 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	donutChart1.Title = model.TextTitle{
 		Text: "Top Services by Browsers",
 		TextStyle: &model.TextStyle{
-			FontSize:  16,
+			FontSize:   16,
 			FontWeight: "normal",
 		},
 	}
 	donutChart1.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart1.Legend = model.Legend{Bottom: "0"}
-	donutChart1.SetSeries("Browsers", "pie", topBrowsersData)
-	// donutChart1.SetGraphicText(fmt.Sprintf("%d", len(topBrowsers)))
-	donutChart1.SetGraphicText("5")
+	donutChart1.SetPieChartSeries("Browsers", "pie", []string{"40%", "70%"}, topBrowsersData)
+	donutChart1.Graphic = &model.Graphic{
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: model.GraphicStyle{
+			Text:       fmt.Sprintf("%d", len(topBrowsersData)),
+			FontSize:   26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center",
+		},
+	}
 
 	// Create the donut chart for top 5 services by impacted users
 	sort.Slice(overviews, func(i, j int) bool {
@@ -204,15 +214,27 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	donutChart2.Title = model.TextTitle{
 		Text: "Top Services by Impacted Users",
 		TextStyle: &model.TextStyle{
-			FontSize:  16,
+			FontSize:   16,
 			FontWeight: "normal",
 		},
 	}
 	donutChart2.Tooltip = model.Tooltip{Trigger: "item"}
 	donutChart2.Legend = model.Legend{Bottom: "0"}
 
-	donutChart2.SetSeries("Services", "pie", topServicesByUsers)
-	donutChart2.SetGraphicText(fmt.Sprintf("%d", len(topServicesByUsers)))
+	donutChart2.SetPieChartSeries("Services", "pie", []string{"40%", "70%"}, topServicesByUsers)
+
+	donutChart2.Graphic = &model.Graphic{
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: model.GraphicStyle{
+			Text:       fmt.Sprintf("%d", len(topServicesByUsers)),
+			FontSize:   26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center",
+		},
+	}
 
 	// Create the bar chart for top 10 services by load
 	sort.Slice(overviews, func(i, j int) bool {
@@ -229,7 +251,6 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 		})
 	}
 
-
 	sort.Slice(topServicesByLoad, func(i, j int) bool {
 		return topServicesByLoad[i].Value < topServicesByLoad[j].Value
 	})
@@ -238,30 +259,29 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	barChart.Title = model.TextTitle{
 		Text: "Top Services by Load",
 		TextStyle: &model.TextStyle{
-			FontSize:  16,
+			FontSize:   16,
 			FontWeight: "normal",
 		},
 	}
 	barChart.Tooltip = model.Tooltip{Trigger: "axis"}
-	barChart.Grid = &model.Grid{ContainLabel: true,Top:    30,  
-		Bottom: 40,  
-		Left:   10, 
-		Right:  20,  }
+	barChart.Grid = &model.Grid{ContainLabel: true, Top: 30,
+		Bottom: 40,
+		Left:   10,
+		Right:  20}
 	barChart.Legend = model.Legend{Bottom: "0"}
 	barChart.XAxis = &model.Axis{Type: "value"}
 	barChart.YAxis = &model.Axis{
 		Type: "category",
 		Data: extractServiceNames(topServicesByLoad),
 		AxisLabel: &model.AxisLabel{
-			Show:     true,
-			FontSize: 12,
+			Show:      true,
+			FontSize:  12,
 			Formatter: "{value}",
-			Rotate: 0,
+			Rotate:    0,
 		},
 	}
 	barChart.SetSeries("Load", "bar", topServicesByLoad)
 	barChart.Series.BarWidth = "40%"
-
 
 	return echartReport, nil
 }
