@@ -34,6 +34,7 @@ const (
 	AuditReportTraces      AuditReportName = "Traces"
 	AuditReportMrumPerf    AuditReportName = "Mobile Performance"
 	AuditReportMobileUsers AuditReportName = "Mobile Users"
+	AuditReportMobileSessions AuditReportName = "Mobile Sessions"
 )
 
 type ConfigurationHint struct {

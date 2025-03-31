@@ -72,6 +72,9 @@ type Collector struct {
 
 	mobileEventBatches     map[db.ProjectId]*MobileEventBatch
 	mobileEventBatchesLock sync.Mutex
+
+	mobileSessionBatches     map[db.ProjectId]*MobileSessionBatch
+	mobileSessionBatchesLock sync.Mutex
 }
 
 func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationClickhouse, globalPrometheus *db.IntegrationsPrometheus) *Collector {
@@ -85,10 +88,11 @@ func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationCl
 		profileBatches:                map[db.ProjectId]*ProfilesBatch{},
 		mobilePerfBatches:             map[db.ProjectId]*MobilePerfBatch{},
 		mobileEventBatches:            map[db.ProjectId]*MobileEventBatch{},
+		mobileSessionBatches:          map[db.ProjectId]*MobileSessionBatch{},
 		logBatches:                    map[db.ProjectId]*LogsBatch{},
 		perfBatches:                   map[db.ProjectId]*PerfBatch{},
 		errLogBatches:                 map[db.ProjectId]*ErrLogBatch{},
-    mobileCrashReportBatches:      map[db.ProjectId]*MobileCrashReportBatch{},
+		mobileCrashReportBatches:      map[db.ProjectId]*MobileCrashReportBatch{},
 		mobileUserRegistrationBatches: map[db.ProjectId]*MobileUserRegistrationBatch{},
 	}
 
@@ -413,7 +417,6 @@ func (c *Collector) getMobilePerfBatch(project *db.Project) *MobilePerfBatch {
 	return b
 }
 
-
 func (c *Collector) getMobileCrashReportBatch(project *db.Project) *MobileCrashReportBatch {
 	c.mobileCrashReportBatchesLock.Lock()
 	defer c.mobileCrashReportBatchesLock.Unlock()
@@ -423,12 +426,11 @@ func (c *Collector) getMobileCrashReportBatch(project *db.Project) *MobileCrashR
 			return c.clickhouseDo(context.TODO(), project, query)
 		})
 		c.mobileCrashReportBatches[project.Id] = b
-  }
-  
-  return b
+	}
+
+	return b
 }
-    
-    
+
 func (c *Collector) getMobileEventBatch(project *db.Project) *MobileEventBatch {
 	c.mobileEventBatchesLock.Lock()
 	defer c.mobileEventBatchesLock.Unlock()
@@ -438,6 +440,19 @@ func (c *Collector) getMobileEventBatch(project *db.Project) *MobileEventBatch {
 			return c.clickhouseDo(context.TODO(), project, query)
 		})
 		c.mobileEventBatches[project.Id] = b
+	}
+	return b
+}
+
+func (c *Collector) getMobileSessionBatch(project *db.Project) *MobileSessionBatch {
+	c.mobileSessionBatchesLock.Lock()
+	defer c.mobileSessionBatchesLock.Unlock()
+	b := c.mobileSessionBatches[project.Id]
+	if b == nil {
+		b = NewMobileSessionBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileSessionBatches[project.Id] = b
 	}
 	return b
 }

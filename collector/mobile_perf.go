@@ -18,7 +18,7 @@ type MobilePerfPayload struct {
 	RequestPayloadSize  int    `json:"requestPayloadSize"`
 	EndpointName        string `json:"endpointName"`
 	RequestTime         int64  `json:"requestTime"`
-	Service             string `json:"service"`
+	ServiceName         string `json:"serviceName"`
 	Status              bool   `json:"status"`
 	ResponseTime        int    `json:"responseTime"`
 	ResponsePayloadSize int    `json:"responsePayloadSize"`
@@ -39,7 +39,7 @@ type MobilePerfDataPoint struct {
 	RequestPayloadSize  int
 	EndpointName        string
 	RequestTime         int64
-	Service             string
+	ServiceName         string
 	Status              bool
 	ResponseTime        int
 	ResponsePayloadSize int
@@ -71,7 +71,7 @@ type MobilePerfBatch struct {
 	RequestPayloadSize  *chproto.ColInt64
 	EndpointName        *chproto.ColStr
 	RequestTime         *chproto.ColInt64
-	Service             *chproto.ColLowCardinality[string]
+	ServiceName         *chproto.ColLowCardinality[string]
 	Status              *chproto.ColBool
 	ResponseTime        *chproto.ColInt64
 	ResponsePayloadSize *chproto.ColInt64
@@ -99,7 +99,7 @@ func NewMobilePerfBatch(limit int, timeout time.Duration, exec func(query ch.Que
 		RequestPayloadSize:  new(chproto.ColInt64),
 		EndpointName:        new(chproto.ColStr),
 		RequestTime:         new(chproto.ColInt64),
-		Service:             new(chproto.ColStr).LowCardinality(),
+		ServiceName:         new(chproto.ColStr).LowCardinality(),
 		Status:              new(chproto.ColBool),
 		ResponseTime:        new(chproto.ColInt64),
 		ResponsePayloadSize: new(chproto.ColInt64),
@@ -150,7 +150,7 @@ func (b *MobilePerfBatch) Add(perfData *MobilePerfRequestType, raw string) {
 		b.RequestPayloadSize.Append(int64(dataPoint.RequestPayloadSize))
 		b.EndpointName.Append(dataPoint.EndpointName)
 		b.RequestTime.Append(int64(dataPoint.RequestTime))
-		b.Service.Append(dataPoint.Service)
+		b.ServiceName.Append(dataPoint.ServiceName)
 		b.Status.Append(dataPoint.Status)
 		b.ResponseTime.Append(int64(dataPoint.ResponseTime))
 		b.ResponsePayloadSize.Append(int64(dataPoint.ResponsePayloadSize))
@@ -183,7 +183,7 @@ func (b *MobilePerfBatch) save() {
 		{Name: "RequestPayloadSize", Data: b.RequestPayloadSize},
 		{Name: "EndpointName", Data: b.EndpointName},
 		{Name: "RequestTime", Data: b.RequestTime},
-		{Name: "Service", Data: b.Service},
+		{Name: "ServiceName", Data: b.ServiceName},
 		{Name: "Status", Data: b.Status},
 		{Name: "ResponseTime", Data: b.ResponseTime},
 		{Name: "ResponsePayloadSize", Data: b.ResponsePayloadSize},
@@ -253,7 +253,7 @@ func (c *Collector) MobilePerf(w http.ResponseWriter, r *http.Request) {
 		RequestPayloadSize:  payload.RequestPayloadSize,
 		EndpointName:        payload.EndpointName,
 		RequestTime:         payload.RequestTime,
-		Service:             payload.Service,
+		ServiceName:         payload.ServiceName,
 		Status:              payload.Status,
 		ResponseTime:        payload.ResponseTime,
 		ResponsePayloadSize: payload.ResponsePayloadSize,
