@@ -22,6 +22,7 @@ type CrashesReasonwiseOverview struct {
 type CrashReasonData struct {
 	CrashId        string
 	DeviceId       string
+	StackTrace     string
 	CrashTimestamp timeseries.Time
 	AffectedUser   string
 }
@@ -170,6 +171,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 	SELECT
 		cr.UniqueId AS CrashId,
 		cr.DeviceInfo AS DeviceId,
+		cr.CrashStackTrace AS StackTrace,
 		cr.CrashTime AS CrashTimestamp,
 		msd.UserId AS AffectedUser
 	FROM mobile_crash_reports cr
@@ -179,7 +181,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		AND msd.Timestamp BETWEEN @from AND @to
 		AND cr.CrashReason = @crashReason
 	GROUP BY 
-		cr.UniqueId, cr.DeviceInfo, cr.CrashTime, msd.UserId
+		cr.UniqueId, cr.DeviceInfo, cr.CrashStackTrace, cr.CrashTime, msd.UserId
 	ORDER BY CrashTimestamp DESC
 	LIMIT @limit
 	`
@@ -203,6 +205,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		if err := rows.Scan(
 			&result.CrashId,
 			&result.DeviceId,
+			&result.StackTrace,
 			&crashTimestamp,
 			&result.AffectedUser,
 		); err != nil {
