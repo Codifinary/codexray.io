@@ -26,6 +26,9 @@ type MrumUsersData struct {
 	WeeklyActiveUsers   uint64  `json:"weeklyActiveUsers"`
 	DailyTrend          float64 `json:"dailyTrend"`
 	CrashFreePercentage float64 `json:"crashFreePercentage"`
+	UserTrend           float64 `json:"userTrend"`
+	NewUserTrend        float64 `json:"newUserTrend"`
+	ReturningUserTrend  float64 `json:"returningUserTrend"`
 }
 
 func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumUsersView {
@@ -53,6 +56,9 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 		WeeklyActiveUsers:   rows.WeeklyActiveUsers,
 		DailyTrend:          rows.DailyTrend,
 		CrashFreePercentage: rows.CrashFreePercentage,
+		UserTrend:           rows.UserTrend,
+		NewUserTrend:        rows.NewUserTrend,
+		ReturningUserTrend:  rows.ReturningUserTrend,
 	}
 
 	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To)

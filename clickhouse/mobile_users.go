@@ -16,6 +16,9 @@ type MobileUserResult struct {
 	WeeklyActiveUsers   uint64
 	DailyTrend          float64
 	CrashFreePercentage float64
+	UserTrend           float64
+	NewUserTrend        float64
+	ReturningUserTrend  float64
 }
 
 type MobileUsersData struct {
@@ -26,74 +29,127 @@ type MobileUsersData struct {
 }
 
 func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.Time) (*MobileUserResult, error) {
+	fromTime := from.ToStandard()
+	toTime := to.ToStandard()
+	windowDuration := toTime.Sub(fromTime)
+	prevToTime := fromTime
+	prevFromTime := prevToTime.Add(-windowDuration)
+	prevFrom := timeseries.Time(prevFromTime.Unix())
+	prevTo := timeseries.Time(prevToTime.Unix())
+
 	q := `
 		WITH 
-			active_users AS (
-				SELECT DISTINCT UserId
-				FROM mobile_event_data
-				WHERE Timestamp BETWEEN @from AND @to
-			),
-			new_registrations AS (
-				SELECT DISTINCT UserId
-				FROM mobile_user_registration
-				WHERE RegistrationTime BETWEEN @from AND @to
-			),
-			new_users AS (
-				SELECT count(DISTINCT a.UserId) as count
-				FROM active_users a
-				INNER JOIN new_registrations n ON a.UserId = n.UserId
-			),
-			user_activity_windows AS (
-				SELECT 
-					countDistinctIf(UserId, Timestamp >= now() - INTERVAL 24 HOUR) AS daily_active_users,
-					countDistinctIf(UserId, Timestamp BETWEEN now() - INTERVAL 48 HOUR AND now() - INTERVAL 24 HOUR) AS previous_daily_users,
-					countDistinctIf(UserId, Timestamp >= now() - INTERVAL 7 DAY) AS weekly_active_users
-				FROM mobile_event_data
-				WHERE Timestamp >= now() - INTERVAL 7 DAY
-			),
-			daily_trend AS (
-				SELECT
-					CASE
-						WHEN uaw.previous_daily_users = 0 AND uaw.daily_active_users > 0 THEN 100.0
-						WHEN uaw.previous_daily_users > 0 THEN (uaw.daily_active_users - uaw.previous_daily_users) * 100.0 / uaw.previous_daily_users
-						ELSE 0
-					END as trend
-				FROM user_activity_windows uaw
-			),
-			user_crashes AS (
-				SELECT DISTINCT med.UserId
-				FROM mobile_crash_reports mcr
-				JOIN mobile_event_data med ON mcr.SessionId = med.SessionId
-				WHERE mcr.Timestamp BETWEEN @from AND @to
-			),
-			crash_free_users AS (
-				SELECT count(DISTINCT a.UserId) as count
-				FROM active_users a
-				LEFT JOIN user_crashes uc ON a.UserId = uc.UserId
-				WHERE uc.UserId IS NULL
-			)
+		active_users AS (
+			SELECT DISTINCT UserId
+			FROM mobile_event_data
+			WHERE Timestamp BETWEEN @from AND @to
+		),
+		new_registrations AS (
+			SELECT DISTINCT UserId
+			FROM mobile_user_registration
+			WHERE RegistrationTime BETWEEN @from AND @to
+		),
+		current_period AS (
+			SELECT
+				count(DISTINCT au.UserId) AS total_users,
+				count(DISTINCT nr.UserId) AS new_users
+			FROM active_users au
+			LEFT JOIN new_registrations nr ON au.UserId = nr.UserId
+		),
+		prev_active_users AS (
+			SELECT DISTINCT UserId
+			FROM mobile_event_data
+			WHERE Timestamp BETWEEN @prevFrom AND @prevTo
+		),
+		prev_new_registrations AS (
+			SELECT DISTINCT UserId
+			FROM mobile_user_registration
+			WHERE RegistrationTime BETWEEN @prevFrom AND @prevTo
+		),
+		previous_period AS (
+			SELECT
+				count(DISTINCT pau.UserId) AS total_users,
+				count(DISTINCT pnr.UserId) AS new_users
+			FROM prev_active_users pau
+			LEFT JOIN prev_new_registrations pnr ON pau.UserId = pnr.UserId
+		),
+		activity_windows AS (
+			SELECT 
+				countDistinctIf(UserId, Timestamp >= now() - INTERVAL 24 HOUR) AS daily_active_users,
+				countDistinctIf(UserId, Timestamp BETWEEN now() - INTERVAL 48 HOUR AND now() - INTERVAL 24 HOUR) AS previous_daily_users,
+				countDistinctIf(UserId, Timestamp >= now() - INTERVAL 7 DAY) AS weekly_active_users
+			FROM mobile_event_data
+			WHERE Timestamp >= now() - INTERVAL 7 DAY
+		),
+		user_crashes AS (
+			SELECT DISTINCT med.UserId
+			FROM mobile_event_data med
+			JOIN mobile_crash_reports mcr ON mcr.SessionId = med.SessionId
+			WHERE mcr.Timestamp BETWEEN @from AND @to
+			AND med.Timestamp BETWEEN @from AND @to
+		),
+		crash_metrics AS (
+			SELECT
+				(SELECT count(DISTINCT UserId) FROM active_users) AS total_users,
+				(SELECT count(DISTINCT UserId) FROM active_users) - 
+				(SELECT count(DISTINCT UserId) FROM user_crashes) AS crash_free_users
+		)
 		SELECT
-			toUInt64(count(DISTINCT a.UserId)) as total_users,
-			toUInt64((SELECT count FROM new_users)) as new_users,
-			toUInt64(count(DISTINCT a.UserId) - (SELECT count FROM new_users)) as returning_users,
-			toUInt64(any(uaw.daily_active_users)) as daily_active_users,
-			toUInt64(any(uaw.weekly_active_users)) as weekly_active_users,
-			toFloat64((SELECT trend FROM daily_trend)) as daily_trend,
-			CASE
-				WHEN count(DISTINCT a.UserId) > 0 THEN
-					toFloat64(COALESCE((SELECT count FROM crash_free_users), 0) * 100.0 / count(DISTINCT a.UserId))
-				ELSE 100.0
-			END as crash_free_percentage
-		FROM active_users a
-		CROSS JOIN user_activity_windows uaw
+			toUInt64(cp.total_users) AS total_users,
+			toUInt64(cp.new_users) AS new_users,
+			toUInt64(cp.total_users - cp.new_users) AS returning_users,
+			toUInt64(aw.daily_active_users) AS daily_active_users,
+			toUInt64(aw.weekly_active_users) AS weekly_active_users,
+			toFloat64(
+				CASE
+					WHEN aw.previous_daily_users = 0 AND aw.daily_active_users > 0 THEN 100.0
+					WHEN aw.previous_daily_users > 0 THEN 
+						(aw.daily_active_users - aw.previous_daily_users) * 100.0 / aw.previous_daily_users
+					ELSE 0
+				END
+			) AS daily_trend,
+			toFloat64(
+				CASE
+					WHEN cm.total_users > 0 THEN cm.crash_free_users * 100.0 / cm.total_users
+					ELSE 100.0
+				END
+			) AS crash_free_percentage,
+			least(100, greatest(-100, 
+				CASE 
+					WHEN pp.total_users > 0 THEN (cp.total_users - pp.total_users) * 100.0 / pp.total_users 
+					WHEN cp.total_users > 0 THEN 100.0
+					ELSE 0.0 
+				END
+			)) AS user_trend,
+			least(100, greatest(-100, 
+				CASE 
+					WHEN pp.new_users > 0 THEN (cp.new_users - pp.new_users) * 100.0 / pp.new_users 
+					WHEN cp.new_users > 0 THEN 100.0
+					ELSE 0.0 
+				END
+			)) AS new_user_trend,
+			least(100, greatest(-100, 
+				CASE 
+					WHEN (pp.total_users - pp.new_users) > 0 THEN 
+						((cp.total_users - cp.new_users) - (pp.total_users - pp.new_users)) * 100.0 / (pp.total_users - pp.new_users) 
+					WHEN (cp.total_users - cp.new_users) > 0 THEN 100.0
+					ELSE 0.0 
+				END
+			)) AS returning_user_trend
+		FROM current_period cp
+		CROSS JOIN previous_period pp
+		CROSS JOIN activity_windows aw
+		CROSS JOIN crash_metrics cm
 	`
 
 	rows, err := c.Query(ctx, q,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("prevFrom", prevFrom.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("prevTo", prevTo.ToStandard(), clickhouse.NanoSeconds),
 	)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to execute mobile user results query: %w", err)
 	}
 	defer rows.Close()
 
@@ -108,8 +164,11 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 			&result.WeeklyActiveUsers,
 			&result.DailyTrend,
 			&result.CrashFreePercentage,
+			&result.UserTrend,
+			&result.NewUserTrend,
+			&result.ReturningUserTrend,
 		); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to scan mobile user results: %w", err)
 		}
 	}
 
