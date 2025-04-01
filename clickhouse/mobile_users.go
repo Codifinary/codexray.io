@@ -9,12 +9,13 @@ import (
 )
 
 type MobileUserResult struct {
-	TotalUsers        uint64
-	NewUsers          uint64
-	ReturningUsers    uint64
-	DailyActiveUsers  uint64
-	WeeklyActiveUsers uint64
-	DailyTrend        float64
+	TotalUsers          uint64
+	NewUsers            uint64
+	ReturningUsers      uint64
+	DailyActiveUsers    uint64
+	WeeklyActiveUsers   uint64
+	DailyTrend          float64
+	CrashFreePercentage float64
 }
 
 type MobileUsersData struct {
@@ -58,6 +59,18 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 						ELSE 0
 					END as trend
 				FROM user_activity_windows uaw
+			),
+			user_crashes AS (
+				SELECT DISTINCT med.UserId
+				FROM mobile_crash_reports mcr
+				JOIN mobile_event_data med ON mcr.SessionId = med.SessionId
+				WHERE mcr.Timestamp BETWEEN @from AND @to
+			),
+			crash_free_users AS (
+				SELECT count(DISTINCT a.UserId) as count
+				FROM active_users a
+				LEFT JOIN user_crashes uc ON a.UserId = uc.UserId
+				WHERE uc.UserId IS NULL
 			)
 		SELECT
 			toUInt64(count(DISTINCT a.UserId)) as total_users,
@@ -65,7 +78,12 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 			toUInt64(count(DISTINCT a.UserId) - (SELECT count FROM new_users)) as returning_users,
 			toUInt64(any(uaw.daily_active_users)) as daily_active_users,
 			toUInt64(any(uaw.weekly_active_users)) as weekly_active_users,
-			toFloat64((SELECT trend FROM daily_trend)) as daily_trend
+			toFloat64((SELECT trend FROM daily_trend)) as daily_trend,
+			CASE
+				WHEN count(DISTINCT a.UserId) > 0 THEN
+					toFloat64(COALESCE((SELECT count FROM crash_free_users), 0) * 100.0 / count(DISTINCT a.UserId))
+				ELSE 100.0
+			END as crash_free_percentage
 		FROM active_users a
 		CROSS JOIN user_activity_windows uaw
 	`
@@ -89,6 +107,7 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 			&result.DailyActiveUsers,
 			&result.WeeklyActiveUsers,
 			&result.DailyTrend,
+			&result.CrashFreePercentage,
 		); err != nil {
 			return nil, err
 		}
