@@ -11,7 +11,8 @@
             </div>
             <div class="charts">
                 <div class="chart-section">
-                    <ChartGroup :title="data.report.widgets[1].chart_group.title" :charts="data.report.widgets[1].chart_group.charts"/>
+                    <!-- <ChartGroup :title="data.report.widgets[1].chart_group.title" :charts="data.report.widgets[1].chart_group.charts"/> -->
+                    <ChartGroup title="User data" :charts="this.charts"/>
 
                 </div>
                 <div class="cards-section">
@@ -85,6 +86,55 @@ export default {
     },
     data() {
         return {
+            "charts": [
+                            {
+                                "ctx": {
+                                    "from": 1742538600000,
+                                    "to": 1743100200000,
+                                    "step": 86400000,
+                                    "raw_step": 86400000
+                                },
+                                "title": "New vs Returning Users (Last 7 Days)",
+                                "series": [
+                                    {
+                                        "name": "New Users",
+                                        "color": "#AB47BC",
+                                        "data": [
+                                            5,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0,
+                                            0
+                                        ],
+                                        "value": ""
+                                    },
+                                    {
+                                        "name": "Returning Users",
+                                        "color": "#42A5F5",
+                                        "data": [
+                                            2,
+                                            3,
+                                            6,
+                                            1,
+                                            7,
+                                            8
+                                        ],
+                                        "value": ""
+                                    }
+                                ],
+                                "threshold": null,
+                                "featured": false,
+                                "stacked": true,
+                                "sorted": false,
+                                "column": true,
+                                "color_shift": 0,
+                                "annotations": null,
+                                "drill_down_link": null,
+                                "hide_legend": false
+                            }
+                        ],
             title: 'Performance Dashboard',
             chartData: { widgets: [] },
             items: [],

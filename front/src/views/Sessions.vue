@@ -69,7 +69,10 @@ export default {
             mode: 'live',
             recentCount: 10,
             search: '',
-            data: {
+            logs: [
+                
+            ],
+            demoData: {
     "context": {
         "status": {
             "status": "warning",
@@ -1099,6 +1102,11 @@ export default {
         ]
     }
 },
+            data: {
+                sessionData: {
+                    
+                }
+            },
             title: 'Performance Dashboard',
             chartData: { widgets: [] },
             cards: [
@@ -1133,15 +1141,29 @@ export default {
             ],
             countrywiseOverviews: [],
             loading: true,
-            mode: 'live',
-            recentCount: 10,
-            search: ''
+            // mode: 'live',
+            // recentCount: 10,
+            // search: ''
         };
     },
-    mounted() {
-        // this.get();
+    demoData: {
+        
     },
-
+    mounted() {
+        this.get();
+    },
+    methods: {
+        get() {
+            // this.data = demoData;
+            // this.$api.getSessionData((data, error) => {
+            //     if (error) {
+            //         this.error = error;
+            //         return;
+            //     }
+            //     this.data = data;
+            // });
+        }
+    },
     watch: {
         '$route'() {
             this.get();
