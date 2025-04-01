@@ -18,10 +18,22 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 	sevenDays := now.Add(-7 * 24 * 60 * 60)
 	oneHourStep := timeseries.Duration(3600)
 
-	colors := []string{
+	countryColors := []string{
 		"#4285F4", // Google Blue
 		"#EA4335", // Google Red
 		"#FBBC05", // Google Yellow
+	}
+
+	deviceColors := []string{
+		"#34A853", // Google Green
+		"#9C27B0", // Purple
+		"#FF9800", // Orange
+	}
+
+	osColors := []string{
+		"#2196F3", // Light Blue
+		"#F44336", // Red
+		"#4CAF50", // Green
 	}
 
 	sessionsByCountryChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Country")
@@ -32,18 +44,11 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
-	if len(sessionsByCountryData) == 0 {
-		emptyTs := timeseries.New(sevenDays, int(now.Sub(sevenDays)/oneHourStep), oneHourStep)
-		emptyTs.Set(sevenDays, 0)
-		emptyTs.Set(now-1, 0)
-		sessionsByCountryChart.AddSeries("No data available", emptyTs, "#CCCCCC")
-	} else {
-		colorIndex := 0
-		for country, timeSeries := range sessionsByCountryData {
-			color := colors[colorIndex%len(colors)]
-			sessionsByCountryChart.AddSeries(country, timeSeries, color)
-			colorIndex++
-		}
+	countryIndex := 0
+	for country, timeSeries := range sessionsByCountryData {
+		color := countryColors[countryIndex%len(countryColors)]
+		sessionsByCountryChart.AddSeriesWithFill(country, timeSeries, color, true)
+		countryIndex++
 	}
 
 	sessionsByDeviceChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Device")
@@ -54,18 +59,11 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
-	if len(sessionsByDeviceData) == 0 {
-		emptyTs := timeseries.New(sevenDays, int(now.Sub(sevenDays)/oneHourStep), oneHourStep)
-		emptyTs.Set(sevenDays, 0)
-		emptyTs.Set(now-1, 0)
-		sessionsByDeviceChart.AddSeries("No data available", emptyTs, "#CCCCCC")
-	} else {
-		colorIndex := 0
-		for device, timeSeries := range sessionsByDeviceData {
-			color := colors[colorIndex%len(colors)]
-			sessionsByDeviceChart.AddSeries(device, timeSeries, color)
-			colorIndex++
-		}
+	deviceIndex := 0
+	for device, timeSeries := range sessionsByDeviceData {
+		color := deviceColors[deviceIndex%len(deviceColors)]
+		sessionsByDeviceChart.AddSeriesWithFill(device, timeSeries, color, true)
+		deviceIndex++
 	}
 
 	sessionsByOSChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Operating System")
@@ -76,18 +74,11 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
-	if len(sessionsByOSData) == 0 {
-		emptyTs := timeseries.New(sevenDays, int(now.Sub(sevenDays)/oneHourStep), oneHourStep)
-		emptyTs.Set(sevenDays, 0)
-		emptyTs.Set(now-1, 0)
-		sessionsByOSChart.AddSeries("No data available", emptyTs, "#CCCCCC")
-	} else {
-		colorIndex := 0
-		for os, timeSeries := range sessionsByOSData {
-			color := colors[colorIndex%len(colors)]
-			sessionsByOSChart.AddSeries(os, timeSeries, color)
-			colorIndex++
-		}
+	osIndex := 0
+	for os, timeSeries := range sessionsByOSData {
+		color := osColors[osIndex%len(osColors)]
+		sessionsByOSChart.AddSeriesWithFill(os, timeSeries, color, true)
+		osIndex++
 	}
 
 	return report
