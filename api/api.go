@@ -44,6 +44,7 @@ type Api struct {
 
 	authSecret        string
 	authAnonymousRole rbac.RoleName
+	Domains           map[string]struct{}
 }
 
 func NewApi(cache *cache.Cache, db *db.DB, collector *collector.Collector, pricing *pricing.Manager, roles rbac.RoleManager,
@@ -1412,6 +1413,17 @@ func (api *Api) EumLogs(w http.ResponseWriter, r *http.Request, u *db.User) {
 	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
 }
 
+func mapsEqual(a map[string]struct{}, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for _, value := range b {
+		if _, exists := a[value]; !exists {
+			return false
+		}
+	}
+	return true
+}
 func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to timeseries.Time) (*model.World, *cache.Status, error) {
 	cacheClient := api.cache.GetCacheClient(project.Id)
 
@@ -1446,6 +1458,106 @@ func (api *Api) LoadWorld(ctx context.Context, project *db.Project, from, to tim
 	return world, cacheStatus, err
 }
 
+func (api *Api) TrustDomainsHandler(w http.ResponseWriter, r *http.Request, u *db.User) {
+	projectId := db.ProjectId(mux.Vars(r)["project"])
+	project, err := api.db.GetProject(projectId)
+	if err != nil {
+		klog.Errorln("GetProject failed:", err)
+		http.Error(w, "Project not found", http.StatusNotFound)
+		return
+	}
+
+	var form forms.TrustDomainsForm
+
+	isAllowed := api.IsAllowed(u, rbac.Actions.Project(string(projectId)).Integrations().Edit())
+	klog.Infof("User %s (ID: %d, Roles: %v) allowed to edit: %v", u.Email, u.Id, u.Roles, isAllowed)
+
+	switch r.Method {
+	case http.MethodPost:
+		if !isAllowed {
+			klog.Warningf("User %s denied POST access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if !mapsEqual(project.Settings.TrustDomains, form.Domains) {
+			for _, val := range form.Domains {
+				project.Settings.TrustDomains[val] = struct{}{}
+			}
+			if err := api.db.SaveProjectSettings(project); err != nil {
+				klog.Errorln("Failed to save Trust domains:", err)
+				http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
+				return
+			}
+			api.Domains = project.Settings.TrustDomains
+		} else {
+			http.Error(w, "Failed to update database", http.StatusConflict)
+			return
+		}
+
+	case http.MethodGet:
+		if !isAllowed {
+			klog.Warningf("User %s denied GET access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to view Trust domains.", http.StatusForbidden)
+			return
+		}
+		form.Get(project)
+		utils.WriteJson(w, form)
+
+	case http.MethodDelete:
+		if !isAllowed {
+			klog.Warningf("User %s denied DELETE access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if err := form.Update(r.Context(), project, true); err != nil {
+			klog.Errorln("Failed to update Trust domains:", err)
+			http.Error(w, "Failed to update Trust domains", http.StatusBadRequest)
+			return
+		}
+		if err := api.db.SaveProjectSettings(project); err != nil {
+			klog.Errorln("Failed to update database:", err)
+			http.Error(w, "Failed to update database", http.StatusInternalServerError)
+			return
+		}
+		api.Domains = project.Settings.TrustDomains
+		w.WriteHeader(http.StatusOK)
+
+	case http.MethodPut:
+		if !isAllowed {
+			klog.Warningf("User %s denied PUT access to Trust domains for project %s", u.Email, projectId)
+			http.Error(w, "You are not allowed to configure Trust domains.", http.StatusForbidden)
+			return
+		}
+		if err := forms.ReadAndValidate(r, &form); err != nil {
+			klog.Warningln("bad request:", err)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+		if err := form.Update(r.Context(), project, false); err != nil {
+			klog.Errorln("Failed to update Trust domains:", err)
+			http.Error(w, "Failed to update Trust domains", http.StatusBadRequest)
+			return
+		}
+		if err := api.db.SaveProjectSettings(project); err != nil {
+			klog.Errorln("Failed to save Trust domains:", err)
+			http.Error(w, "Failed to save Trust domains", http.StatusInternalServerError)
+			return
+		}
+		api.Domains = project.Settings.TrustDomains
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, *cache.Status, error) {
 	projectId := db.ProjectId(mux.Vars(r)["project"])
 	project, err := api.db.GetProject(projectId)
@@ -1459,7 +1571,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 
 	// for local purpose
 	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
+	// 	Id:   "02mn46va",
 	// 	Name: "default",
 	// 	Prometheus: db.IntegrationsPrometheus{
 	// 		Url: "http://prometheus:9090",
@@ -1468,7 +1580,11 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 	// 		Integrations: db.Integrations{
 	// 			Clickhouse: &db.IntegrationClickhouse{
 	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
+	// 				Auth: utils.BasicAuth{
+	// 					User:     "default",
+	// 					Password: "vizares",
+	// 				},
+	// 				Addr:     "labs.codexray.io:8023",
 	// 				Protocol: "http",
 	// 			},
 	// 		},

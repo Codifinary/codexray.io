@@ -104,6 +104,25 @@ func (r *AuditReport) GetOrCreateChart(title string, doc *DocLink) *Chart {
 	return ch
 }
 
+func (r *AuditReport) GetOrCreateEChart(title string, doc *DocLink) *EChart {
+	if !r.detailed {
+		return nil
+	}
+	for _, w := range r.Widgets {
+		if w.EChart != nil {
+			if echart, exists := w.EChart[title]; exists {
+				return echart
+			}
+		}
+	}
+
+	// If not found, create a new one
+	echart := NewEChart(title)
+	widget := &Widget{EChart: map[string]*EChart{title: echart}, DocLink: doc}
+	r.Widgets = append(r.Widgets, widget)
+	return echart
+}
+
 func (r *AuditReport) GetOrCreateHeatmap(title string) *Heatmap {
 	if !r.detailed {
 		return nil

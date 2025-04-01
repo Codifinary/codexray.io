@@ -1,7 +1,15 @@
 <template>
     <div class="traces-container">
         <div class="cards">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
+            <Card
+                v-for="value in summary"
+                :key="value.name"
+                :name="value.name"
+                :iconName="value.icon"
+                :count="value.value"
+                :unit="value.unit"
+                :lineColor="value.color"
+            />
         </div>
         <div class="mt-5">
             <Dashboard :name="'Application Performance'" :widgets="chartData.widgets" />
@@ -23,7 +31,7 @@ export default {
     },
     data() {
         return {
-            summary: {},
+            summary: [],
             chartData: {},
             loading: false,
             error: '',
@@ -47,41 +55,52 @@ export default {
                 const avgLatency = this.$format.convertLatency(data.traces_overview.avg_latency);
                 const totalRequest = this.$format.shortenNumber(data.traces_overview.requests);
                 const totalEndPoints = this.$format.shortenNumber(data.traces_overview.total_endpoints);
-                this.summary = {
-                    endpoints: {
+
+                this.summary = [];
+
+                if (this.$route.params.view === 'traces') {
+                    this.summary.push({
                         name: 'Total EndPoints',
                         value: totalEndPoints.value,
                         unit: totalEndPoints.unit,
                         background: 'red lighten-4',
                         icon: 'endpoints',
-                    },
-                    request_count: {
+                    });
+                }
+
+                this.summary.push(
+                    {
                         name: 'Total Requests',
                         value: totalRequest.value,
                         unit: totalRequest.unit,
                         background: 'blue lighten-4',
                         icon: 'requests',
+                        color: '#42A5F5',
                     },
-                    request_per_second: {
+                    {
                         name: 'Request/Sec',
                         value: data.traces_overview.request_per_second,
-                        background: 'orange lighten-4',
+                        background: 'purple lighten-4',
+
                         icon: 'rps',
+                        color: '#AB47BC',
                     },
-                    error_rate: {
+                    {
                         name: 'Error/Sec',
                         value: data.traces_overview.error_rate,
-                        background: 'purple lighten-4',
+                        background: 'red lighten-4',
                         icon: 'errors',
+                        color: '#EF5350',
                     },
-                    avg_latency: {
+                    {
                         name: 'Avg. Latency',
                         value: avgLatency.value,
                         unit: avgLatency.unit,
-                        background: 'green lighten-4',
+                        background: 'orange lighten-4',
                         icon: 'latency',
+                        color: '#FFA726',
                     },
-                };
+                );
             });
         },
     },
@@ -96,7 +115,11 @@ export default {
 }
 .cards {
     display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+    width: 100%;
+}
+::v-deep(.card-body) {
+    width: 23%;
 }
 </style>

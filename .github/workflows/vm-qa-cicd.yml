@@ -14,12 +14,12 @@ on:
 env:
   GHCR_IMAGE: ghcr.io/codifinary/codexray-qa:latest
   VM_INSTANCE: ${{ secrets.VM_INSTANCE_IP }}
-  VM_USER: 'codexray'
+  VM_USER: "codexray"
   VM_SSH_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
 
 permissions:
-  packages: write  # Required for pushing to GHCR
-  contents: read   # Required for accessing repository contents
+  packages: write # Required for pushing to GHCR
+  contents: read # Required for accessing repository contents
 
 # -------------------------------------
 # Job 1: CI - Build, Test, Lint
@@ -36,11 +36,11 @@ jobs:
       - name: Set Up Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.21'
+          go-version: "1.21"
 
-# -------------------------------------
-# Job 2: Build and Push Docker Image to GHCR
-# -------------------------------------
+  # -------------------------------------
+  # Job 2: Build and Push Docker Image to GHCR
+  # -------------------------------------
   build-and-push:
     name: Build and Push Docker Image to GHCR
     runs-on: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
       - name: Set Up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Install Frontend Dependencies
         run: |
@@ -79,9 +79,9 @@ jobs:
         run: |
           docker push $GHCR_IMAGE
 
-# -------------------------------------
-# Job 3: Deploy to VM with Docker Compose
-# -------------------------------------
+  # -------------------------------------
+  # Job 3: Deploy to VM with Docker Compose
+  # -------------------------------------
   deploy-to-vm:
     name: Deploy to VM
     runs-on: ubuntu-latest

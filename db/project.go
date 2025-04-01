@@ -31,6 +31,7 @@ type ProjectSettings struct {
 	Integrations                Integrations                                              `json:"integrations"`
 	CustomApplications          map[string]model.CustomApplication                        `json:"custom_applications"`
 	ApiKeys                     []ApiKey                                                  `json:"api_keys"`
+	TrustDomains                map[string]struct{}                                       `json:"trust_domain"`
 }
 
 type ApplicationCategorySettings struct {
@@ -75,6 +76,9 @@ func (p *Project) applyDefaults() {
 		if !cfg.Deployments {
 			cfg.Deployments = cfg.Enabled
 		}
+	}
+	if p.Settings.TrustDomains == nil {
+		p.Settings.TrustDomains = make(map[string]struct{})
 	}
 }
 
