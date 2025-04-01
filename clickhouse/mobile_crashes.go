@@ -53,7 +53,7 @@ func (c *Client) GetMobileCrashesResults(ctx context.Context, from, to timeserie
 	return result, nil
 }
 
-func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to timeseries.Time) ([]CrashesReasonwiseOverview, error) {
+func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to timeseries.Time, limit int) ([]CrashesReasonwiseOverview, error) {
 	query := `
 	SELECT
 		cr.CrashReason,
@@ -68,11 +68,13 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	GROUP BY 
 		cr.CrashReason
 	ORDER BY TotalCrashes DESC
+	LIMIT @limit
 	`
 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("limit", uint64(limit)),
 	)
 	if err != nil {
 		return nil, err
@@ -100,7 +102,7 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	return results, nil
 }
 
-func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, from, to timeseries.Time) ([]CrashReasonData, error) {
+func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, from, to timeseries.Time, limit int) ([]CrashReasonData, error) {
 	query := `
 	SELECT
 		cr.UniqueId AS CrashId,
@@ -116,12 +118,14 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 	GROUP BY 
 		cr.UniqueId, cr.DeviceInfo, cr.CrashTime, msd.UserId
 	ORDER BY CrashTimestamp DESC
+	LIMIT @limit
 	`
 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.Named("crashReason", crashReason),
+		clickhouse.Named("limit", uint64(limit)),
 	)
 	if err != nil {
 		return nil, err

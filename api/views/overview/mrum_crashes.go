@@ -13,6 +13,7 @@ import (
 
 type CrashQuery struct {
 	CrashReason string `json:"crash_reason"`
+	Limit       int    `json:"limit"`
 }
 
 type MrumCrashesView struct {
@@ -41,7 +42,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 
 	switch {
 	case q.CrashReason != "":
-		crashData, err := ch.GetCrashReasonData(ctx, q.CrashReason, w.Ctx.From, w.Ctx.To)
+		crashData, err := ch.GetCrashReasonData(ctx, q.CrashReason, w.Ctx.From, w.Ctx.To, q.Limit)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -63,7 +64,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 			TotalCrashes: rows.TotalCrashes,
 		}
 
-		crashReasonWiseOverviews, err := ch.GetCrashesReasonwiseOverview(ctx, w.Ctx.From, w.Ctx.To)
+		crashReasonWiseOverviews, err := ch.GetCrashesReasonwiseOverview(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -79,6 +80,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 
 func parseCrashQuery(query string, ctx timeseries.Context) CrashQuery {
 	var res CrashQuery
+	res.Limit = 10
 	if query != "" {
 		if err := json.Unmarshal([]byte(query), &res); err != nil {
 			klog.Warningln(err)
