@@ -4,7 +4,9 @@ import (
 	"codexray/auditor"
 	"codexray/clickhouse"
 	"codexray/model"
+	"codexray/timeseries"
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"k8s.io/klog"
@@ -28,6 +30,11 @@ type MrumSessionsData struct {
 	AverageSessionTrend float64 `json:"avgSessionTrend"`
 }
 
+type SessionQuery struct {
+	SessionType string `json:"session_type"`
+	Limit       int    `json:"limit"`
+}
+
 func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumSessionsView {
 	v := &MrumSessionsView{}
 
@@ -36,6 +43,8 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		v.Message = "clickhouse not available"
 		return v
 	}
+
+	q := parseSessionQuery(query, w.Ctx)
 
 	rows, err := ch.GetMobileSessionResults(ctx, w.Ctx.From, w.Ctx.To)
 	if err != nil {
@@ -56,23 +65,39 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 
 	v.Report = auditor.GenerateMrumSessionsReport(w, ch, w.Ctx.From, w.Ctx.To)
 
-	sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To)
-	if err != nil {
-		klog.Errorln(err)
-		v.Status = model.WARNING
-		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
-		return v
+	switch {
+	case q.SessionType != "":
+		sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
+		if err != nil {
+			klog.Errorln(err)
+			v.Status = model.WARNING
+			v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+			return v
+		}
+		v.SessionHistoricData = sessionHistoricData
+
+	default:
+		sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
+		if err != nil {
+			klog.Errorln(err)
+			v.Status = model.WARNING
+			v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+			return v
+		}
+		v.SessionLiveData = sessionLiveData
 	}
 
-	sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To)
-	if err != nil {
-		klog.Errorln(err)
-		v.Status = model.WARNING
-		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
-		return v
-	}
-	v.SessionLiveData = sessionLiveData
-	v.SessionHistoricData = sessionHistoricData
 	v.Status = model.OK
 	return v
+}
+
+func parseSessionQuery(query string, ctx timeseries.Context) SessionQuery {
+	var res SessionQuery
+	res.Limit = 10
+	if query != "" {
+		if err := json.Unmarshal([]byte(query), &res); err != nil {
+			klog.Warningln(err)
+		}
+	}
+	return res
 }

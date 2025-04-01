@@ -312,7 +312,7 @@ func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeser
 	return result, nil
 }
 
-func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Time) ([]SessionLiveData, error) {
+func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Time, limit int) ([]SessionLiveData, error) {
 
 	query := `
 	SELECT
@@ -329,11 +329,13 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 	AND s.EndTime IS NULL
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.Country
 	ORDER BY NoOfRequest DESC
+	LIMIT @limit
 	`
 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("limit", uint64(limit)),
 	)
 	if err != nil {
 		return nil, err
@@ -379,7 +381,7 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 	return result, nil
 }
 
-func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries.Time) ([]SessionHistoricData, error) {
+func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries.Time, limit int) ([]SessionHistoricData, error) {
 	query := `
 	SELECT
 		s.SessionId,
@@ -395,11 +397,13 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 	AND s.EndTime IS NOT NULL
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.EndTime, s.Country
 	ORDER BY NoOfRequest DESC
+	LIMIT @limit
 	`
 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("limit", uint64(limit)),
 	)
 	if err != nil {
 		return nil, err

@@ -11,10 +11,11 @@ import (
 )
 
 type MrumUsersView struct {
-	Status  model.Status       `json:"status"`
-	Message string             `json:"message"`
-	Summary MrumUsersData      `json:"summary"`
-	Report  *model.AuditReport `json:"report"`
+	Status         model.Status                 `json:"status"`
+	Message        string                       `json:"message"`
+	Summary        MrumUsersData                `json:"summary"`
+	Report         *model.AuditReport           `json:"report"`
+	MobileUserData []clickhouse.MobileUsersData `json:"mobileUserData"`
 }
 
 type MrumUsersData struct {
@@ -53,7 +54,15 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 	}
 
 	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To)
+	mobileUserData, err := ch.GetMobileUsersData(ctx, w.Ctx.From, w.Ctx.To)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+		return v
+	}
 
+	v.MobileUserData = mobileUserData
 	v.Status = model.OK
 	return v
 }
