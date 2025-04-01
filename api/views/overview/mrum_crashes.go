@@ -1,6 +1,7 @@
 package overview
 
 import (
+	"codexray/auditor"
 	"codexray/clickhouse"
 	"codexray/model"
 	"codexray/timeseries"
@@ -23,6 +24,7 @@ type MrumCrashesView struct {
 	Report                   *model.AuditReport                     `json:"report"`
 	CrashReasonWiseOverviews []clickhouse.CrashesReasonwiseOverview `json:"crashReasonWiseOverview"`
 	CrashDatabyCrashReason   []clickhouse.CrashReasonData           `json:"crashDatabyCrashReason"`
+	CrashesByDevice          map[string]*timeseries.TimeSeries      `json:"crashesByDevice"`
 }
 
 type MrumCrashesData struct {
@@ -72,6 +74,8 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 			return v
 		}
 		v.CrashReasonWiseOverviews = crashReasonWiseOverviews
+
+		v.Report = auditor.GenerateMrumCrashesReport(w, ch, w.Ctx.From, w.Ctx.To)
 	}
 
 	v.Status = model.OK
