@@ -104,6 +104,150 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	return results, nil
 }
 
+func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+	Name  string
+	Value uint64
+}, error) {
+	query := `
+	SELECT
+		DeviceInfo as Name,
+		count() as Value
+	FROM
+		mobile_crash_reports
+	WHERE
+		Timestamp BETWEEN @from AND @to
+		AND DeviceInfo != ''
+	GROUP BY
+		DeviceInfo
+	ORDER BY
+		Value DESC
+	LIMIT 5
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []struct {
+		Name  string
+		Value uint64
+	}
+
+	for rows.Next() {
+		var result struct {
+			Name  string
+			Value uint64
+		}
+		if err := rows.Scan(&result.Name, &result.Value); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	return results, nil
+}
+
+func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+	Name  string
+	Value uint64
+}, error) {
+	query := `
+	SELECT
+		Os as Name,
+		count() as Value
+	FROM
+		mobile_crash_reports
+	WHERE
+		Timestamp BETWEEN @from AND @to
+		AND Os != ''
+	GROUP BY
+		Os
+	ORDER BY
+		Value DESC
+	LIMIT 5
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []struct {
+		Name  string
+		Value uint64
+	}
+
+	for rows.Next() {
+		var result struct {
+			Name  string
+			Value uint64
+		}
+		if err := rows.Scan(&result.Name, &result.Value); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	return results, nil
+}
+
+func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+	Name  string
+	Value uint64
+}, error) {
+	query := `
+	SELECT
+		ServiceVersion as Name,
+		count() as Value
+	FROM
+		mobile_crash_reports
+	WHERE
+		Timestamp BETWEEN @from AND @to
+		AND ServiceVersion != ''
+	GROUP BY
+		Name
+	ORDER BY
+		Value DESC
+	LIMIT 5
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []struct {
+		Name  string
+		Value uint64
+	}
+
+	for rows.Next() {
+		var result struct {
+			Name  string
+			Value uint64
+		}
+		if err := rows.Scan(&result.Name, &result.Value); err != nil {
+			return nil, err
+		}
+		results = append(results, result)
+	}
+
+	return results, nil
+}
+
 func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
 	optimizedQuery := fmt.Sprintf(`
 	SELECT
@@ -160,7 +304,7 @@ func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to time
 	}
 
 	if len(result) == 0 {
-		return nil, nil
+		return make(map[string]*timeseries.TimeSeries), nil
 	}
 
 	return result, nil
