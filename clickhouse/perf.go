@@ -11,6 +11,13 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 )
 
+type BrowserStats struct {
+	Name         string  `json:"browser_name"`
+	Requests     uint64  `json:"requests"`
+	ResponseTime float64 `json:"response_time"`
+	Errors       uint64  `json:"errors"`
+}
+
 type PerfRow struct {
 	PagePath           string
 	AvgLoadPageTime    float64
@@ -85,6 +92,75 @@ GROUP BY
 	return results, nil
 }
 
+func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, to *time.Time) ([]BrowserStats, error) {
+	query := `
+        WITH browser_metrics AS (
+            SELECT 
+                p.Browser AS browser_name,
+                COUNT(*) AS requests,
+                AVG(p.ResTime) AS response_time,
+                (SELECT COUNT(*) 
+                 FROM err_log_data e 
+                 WHERE e.ServiceName = @serviceName 
+                   AND e.Timestamp BETWEEN @from AND @to 
+                   AND e.Browser = p.Browser) AS errors
+            FROM perf_data p
+            WHERE p.ServiceName = @serviceName 
+              AND p.Timestamp BETWEEN @from AND @to
+            GROUP BY p.Browser
+        ),
+        top_browsers AS (
+            SELECT 
+                browser_name,
+                requests,
+                response_time,
+                errors
+            FROM browser_metrics
+            ORDER BY requests DESC
+            LIMIT 4
+        ),
+        others AS (
+            SELECT 
+                'Others' AS browser_name,
+                SUM(requests) AS requests,
+                AVG(response_time) AS response_time,
+                SUM(errors) AS errors
+            FROM browser_metrics
+            WHERE browser_name NOT IN (SELECT browser_name FROM top_browsers)
+        )
+        SELECT * FROM top_browsers
+        UNION ALL
+        SELECT * FROM others
+        WHERE requests > 0
+        ORDER BY requests DESC`
+	// Conditionally add time range and service name filtering
+	var filters []string
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", *from, clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", *to, clickhouse.NanoSeconds),
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+	// Execute the query
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []BrowserStats
+	for rows.Next() {
+		var stats BrowserStats
+		if err := rows.Scan(&stats.Name, &stats.Requests, &stats.ResponseTime, &stats.Errors); err != nil {
+			return nil, err
+		}
+		results = append(results, stats)
+	}
+	return results, nil
+}
 func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, pageName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
 	query := fmt.Sprintf(`
     SELECT
@@ -310,7 +386,7 @@ func (c *Client) GetTopBrowser(ctx context.Context, from, to time.Time) ([]Brows
             Browser AS name,
             count(*) AS value
         FROM
-            perf_table
+            perf_data
         WHERE
             Timestamp >= @from AND Timestamp <= @to
         GROUP BY
@@ -504,4 +580,70 @@ func (c *Client) GetUsersImpactedTimeSeries(ctx context.Context, serviceName str
 	}
 
 	return usersImpactedTimeSeries, nil
+}
+
+func (c *Client) GetErrorAndUsersImpactedSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+	query := fmt.Sprintf(`
+  SELECT
+        toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+
+        sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
+        sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
+		countDistinct(p.UserId) AS totalUsers,
+        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted
+
+    FROM
+        perf_data p
+    LEFT JOIN
+        err_log_data e
+    ON
+        p.PageName = e.PagePath
+    WHERE
+        p.ServiceName = @serviceName
+        AND p.Timestamp BETWEEN @from AND @to
+    GROUP BY
+        ts
+    ORDER BY
+        ts ASC;
+    `, step)
+
+	args := []any{
+		clickhouse.Named("serviceName", serviceName),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	totalUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for rows.Next() {
+		var timestamp uint64
+		var jsErrors, apiErrors, usersImpacted, totalUsers uint64
+		if err := rows.Scan(&timestamp, &jsErrors, &apiErrors, &usersImpacted, &totalUsers); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+
+		jsErrorsSeries.Set(ts, float32(jsErrors))
+		apiErrorsSeries.Set(ts, float32(apiErrors))
+		usersImpactedSeries.Set(ts, float32(usersImpacted))
+		totalUsersSeries.Set(ts, float32(totalUsers))
+
+	}
+
+	return map[string]*timeseries.TimeSeries{
+
+		"jsErrors":      jsErrorsSeries,
+		"apiErrors":     apiErrorsSeries,
+		"usersImpacted": usersImpactedSeries,
+		"totalUsers":    totalUsersSeries,
+	}, nil
 }
