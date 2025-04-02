@@ -21,10 +21,14 @@ type CrashesReasonwiseOverview struct {
 
 type CrashReasonData struct {
 	CrashId        string
-	DeviceId       string
+	DeviceType     string
 	StackTrace     string
 	CrashTimestamp timeseries.Time
 	AffectedUser   string
+	Application    string
+	CrashReason    string
+	AppVersion     string
+	MemoryUsage    int64
 }
 
 func (c *Client) GetMobileCrashesResults(ctx context.Context, from, to timeseries.Time) (MobileCrashesResults, error) {
@@ -314,10 +318,14 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 	query := `
 	SELECT
 		cr.UniqueId AS CrashId,
-		cr.DeviceInfo AS DeviceId,
+		cr.DeviceInfo AS DeviceType,
 		cr.CrashStackTrace AS StackTrace,
 		cr.CrashTime AS CrashTimestamp,
-		msd.UserId AS AffectedUser
+		msd.UserId AS AffectedUser,
+		cr.Service AS Application,
+		cr.CrashReason AS CrashReason,
+		cr.ServiceVersion AS AppVersion,
+		IFNULL(cr.MemoryUsage, 0) AS MemoryUsage
 	FROM mobile_crash_reports cr
 	LEFT JOIN mobile_session_data msd ON cr.SessionId = msd.SessionId
 	WHERE 
@@ -325,7 +333,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		AND msd.Timestamp BETWEEN @from AND @to
 		AND cr.CrashReason = @crashReason
 	GROUP BY 
-		cr.UniqueId, cr.DeviceInfo, cr.CrashStackTrace, cr.CrashTime, msd.UserId
+		cr.UniqueId, cr.DeviceInfo, cr.CrashStackTrace, cr.CrashTime, msd.UserId, cr.Service, cr.CrashReason, cr.ServiceVersion, cr.MemoryUsage
 	ORDER BY CrashTimestamp DESC
 	LIMIT @limit
 	`
@@ -348,10 +356,14 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 
 		if err := rows.Scan(
 			&result.CrashId,
-			&result.DeviceId,
-			&result.StackTrace,
+			&result.DeviceType,
 			&crashTimestamp,
 			&result.AffectedUser,
+			&result.Application,
+			&result.CrashReason,
+			&result.AppVersion,
+			&result.MemoryUsage,
+			&result.StackTrace,
 		); err != nil {
 			return nil, err
 		}
