@@ -1662,6 +1662,7 @@ func (api *Api) getClickhouseClient(project *db.Project) (*clickhouse.Client, er
 
 func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
 	vars := mux.Vars(r)
+	service := vars["serviceName"]
 	view := vars["view"]
 
 	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
@@ -1686,10 +1687,11 @@ func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumPerf(r.Context(), ch, world, r.URL.Query().Get("query"))))
 	case "users":
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumUsers(r.Context(), ch, world, r.URL.Query().Get("query"))))
-	case "sessions":
-		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumSessions(r.Context(), ch, world, r.URL.Query().Get("query"))))
 	case "crashes":
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumCrashes(r.Context(), ch, world, r.URL.Query().Get("query"))))
+	default:
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumSessions(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
+
 	}
 }
 

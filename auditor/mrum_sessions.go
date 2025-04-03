@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to timeseries.Time) *model.AuditReport {
+func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to timeseries.Time, service string) *model.AuditReport {
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportMobileSessions, true)
 	report.Status = model.OK
 
@@ -37,7 +37,7 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 	}
 
 	sessionsByCountryChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Country")
-	sessionsByCountryData, err := ch.GetSessionsByCountryTrendChart(context.Background(), sevenDays, now, oneHourStep)
+	sessionsByCountryData, err := ch.GetSessionsByCountryTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println("Error getting sessions by country data:", err)
@@ -52,7 +52,7 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 	}
 
 	sessionsByDeviceChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Device")
-	sessionsByDeviceData, err := ch.GetSessionsByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep)
+	sessionsByDeviceData, err := ch.GetSessionsByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println("Error getting sessions by device data:", err)
@@ -67,7 +67,7 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 	}
 
 	sessionsByOSChart := sessionTrendsGroup.GetOrCreateChart("Sessions by Operating System")
-	sessionsByOSData, err := ch.GetSessionsByOSTrendChart(context.Background(), sevenDays, now, oneHourStep)
+	sessionsByOSData, err := ch.GetSessionsByOSTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println("Error getting sessions by OS data:", err)
