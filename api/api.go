@@ -1692,3 +1692,25 @@ func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumCrashes(r.Context(), ch, world, r.URL.Query().Get("query"))))
 	}
 }
+
+func (api *Api) MrumOverview(w http.ResponseWriter, r *http.Request, u *db.User) {
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	view := overview.RenderMrumOverview(r.Context(), ch, world)
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, view))
+}
