@@ -8,7 +8,7 @@ import (
 	"fmt"
 )
 
-func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to timeseries.Time) *model.AuditReport {
+func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to timeseries.Time, service string) *model.AuditReport {
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportMobileCrashes, true)
 	report.Status = model.OK
 
@@ -25,7 +25,7 @@ func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to t
 	}
 
 	crashesByDeviceChart := report.GetOrCreateChart("Crashes by Device", nil)
-	crashesByDeviceData, err := ch.GetCrashesByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep)
+	crashesByDeviceData, err := ch.GetCrashesByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
 		fmt.Println("Error getting crashes by device data:", err)

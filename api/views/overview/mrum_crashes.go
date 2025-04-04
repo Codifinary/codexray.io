@@ -38,7 +38,7 @@ type CrashPieChartConfig struct {
 	Colors     []string
 }
 
-func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumCrashesView {
+func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, service string) *MrumCrashesView {
 	v := &MrumCrashesView{}
 
 	if ch == nil {
@@ -51,7 +51,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 
 	switch {
 	case q.CrashReason != "":
-		crashData, err := ch.GetCrashReasonData(ctx, q.CrashReason, w.Ctx.From, w.Ctx.To, q.Limit)
+		crashData, err := ch.GetCrashReasonData(ctx, q.CrashReason, w.Ctx.From, w.Ctx.To, q.Limit, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -61,7 +61,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 		v.CrashDatabyCrashReason = crashData
 
 	default:
-		rows, err := ch.GetMobileCrashesResults(ctx, w.Ctx.From, w.Ctx.To)
+		rows, err := ch.GetMobileCrashesResults(ctx, w.Ctx.From, w.Ctx.To, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -73,7 +73,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 			TotalCrashes: rows.TotalCrashes,
 		}
 
-		crashReasonWiseOverviews, err := ch.GetCrashesReasonwiseOverview(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
+		crashReasonWiseOverviews, err := ch.GetCrashesReasonwiseOverview(ctx, w.Ctx.From, w.Ctx.To, q.Limit, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -82,7 +82,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 		}
 		v.CrashReasonWiseOverviews = crashReasonWiseOverviews
 
-		v.Report = auditor.GenerateMrumCrashesReport(w, ch, w.Ctx.From, w.Ctx.To)
+		v.Report = auditor.GenerateMrumCrashesReport(w, ch, w.Ctx.From, w.Ctx.To, service)
 
 		commonColors := []string{"#4169E1", "#6495ED", "#1E90FF", "#00BFFF", "#87CEEB"}
 
@@ -107,7 +107,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 			Colors:     commonColors,
 		}
 
-		v.EchartReport, err = createCrashPieCharts(ctx, ch, w, []CrashPieChartConfig{deviceConfig, osConfig, appVersionConfig})
+		v.EchartReport, err = createCrashPieCharts(ctx, ch, w, []CrashPieChartConfig{deviceConfig, osConfig, appVersionConfig}, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -132,7 +132,7 @@ func parseCrashQuery(query string, ctx timeseries.Context) CrashQuery {
 	return res
 }
 
-func createCrashPieCharts(ctx context.Context, ch *clickhouse.Client, w *model.World, configs []CrashPieChartConfig) (*model.AuditReport, error) {
+func createCrashPieCharts(ctx context.Context, ch *clickhouse.Client, w *model.World, configs []CrashPieChartConfig, service string) (*model.AuditReport, error) {
 	echartReport := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportMobileCrashes, true)
 
 	for _, config := range configs {
@@ -144,17 +144,17 @@ func createCrashPieCharts(ctx context.Context, ch *clickhouse.Client, w *model.W
 
 		switch config.ChartType {
 		case "device":
-			data, err = ch.GetTopDevicesByCrashCount(ctx, w.Ctx.From, w.Ctx.To)
+			data, err = ch.GetTopDevicesByCrashCount(ctx, w.Ctx.From, w.Ctx.To, service)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get top devices by crash count: %w", err)
 			}
 		case "os":
-			data, err = ch.GetTopOSByCrashCount(ctx, w.Ctx.From, w.Ctx.To)
+			data, err = ch.GetTopOSByCrashCount(ctx, w.Ctx.From, w.Ctx.To, service)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get top OS by crash count: %w", err)
 			}
 		case "appVersion":
-			data, err = ch.GetTopAppVersionsByCrashCount(ctx, w.Ctx.From, w.Ctx.To)
+			data, err = ch.GetTopAppVersionsByCrashCount(ctx, w.Ctx.From, w.Ctx.To, service)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get top app versions by crash count: %w", err)
 			}

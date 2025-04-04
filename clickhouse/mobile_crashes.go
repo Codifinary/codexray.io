@@ -31,18 +31,20 @@ type CrashReasonData struct {
 	MemoryUsage    int64
 }
 
-func (c *Client) GetMobileCrashesResults(ctx context.Context, from, to timeseries.Time) (MobileCrashesResults, error) {
+func (c *Client) GetMobileCrashesResults(ctx context.Context, from, to timeseries.Time, service string) (MobileCrashesResults, error) {
 	query := `
 	SELECT
 		count() AS TotalCrashes
 	FROM mobile_crash_reports
 	WHERE 
 		Timestamp BETWEEN @from AND @to
+		AND Service = @service
 	`
 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return MobileCrashesResults{}, err
@@ -59,7 +61,7 @@ func (c *Client) GetMobileCrashesResults(ctx context.Context, from, to timeserie
 	return result, nil
 }
 
-func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to timeseries.Time, limit int) ([]CrashesReasonwiseOverview, error) {
+func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to timeseries.Time, limit int, service string) ([]CrashesReasonwiseOverview, error) {
 	query := `
 	SELECT
 		cr.CrashReason,
@@ -71,6 +73,7 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	WHERE 
 		cr.Timestamp BETWEEN @from AND @to
 		AND msd.Timestamp BETWEEN @from AND @to
+		AND cr.Service = @service
 	GROUP BY 
 		cr.CrashReason
 	ORDER BY TotalCrashes DESC
@@ -81,6 +84,7 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.Named("limit", uint64(limit)),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -108,7 +112,7 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	return results, nil
 }
 
-func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeseries.Time, service string) ([]struct {
 	Name  string
 	Value uint64
 }, error) {
@@ -121,6 +125,7 @@ func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeser
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND DeviceInfo != ''
+		AND Service = @service
 	GROUP BY
 		DeviceInfo
 	ORDER BY
@@ -131,6 +136,7 @@ func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeser
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -156,7 +162,7 @@ func (c *Client) GetTopDevicesByCrashCount(ctx context.Context, from, to timeser
 	return results, nil
 }
 
-func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.Time, service string) ([]struct {
 	Name  string
 	Value uint64
 }, error) {
@@ -169,6 +175,7 @@ func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.T
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND Os != ''
+		AND Service = @service
 	GROUP BY
 		Os
 	ORDER BY
@@ -179,6 +186,7 @@ func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.T
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -204,7 +212,7 @@ func (c *Client) GetTopOSByCrashCount(ctx context.Context, from, to timeseries.T
 	return results, nil
 }
 
-func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to timeseries.Time) ([]struct {
+func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to timeseries.Time, service string) ([]struct {
 	Name  string
 	Value uint64
 }, error) {
@@ -217,6 +225,7 @@ func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to tim
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND ServiceVersion != ''
+		AND Service = @service
 	GROUP BY
 		Name
 	ORDER BY
@@ -227,6 +236,7 @@ func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to tim
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -252,7 +262,7 @@ func (c *Client) GetTopAppVersionsByCrashCount(ctx context.Context, from, to tim
 	return results, nil
 }
 
-func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
 	optimizedQuery := fmt.Sprintf(`
 	SELECT
 		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
@@ -263,11 +273,13 @@ func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to time
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND DeviceInfo != ''
+		AND Service = @service
 		AND DeviceInfo IN (
 			SELECT DeviceInfo
 			FROM mobile_crash_reports
 			WHERE Timestamp BETWEEN @from AND @to
 			AND DeviceInfo != ''
+			AND Service = @service
 			GROUP BY DeviceInfo
 			ORDER BY count() DESC
 			LIMIT 5
@@ -281,6 +293,7 @@ func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to time
 	rows, err := c.Query(ctx, optimizedQuery,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -314,7 +327,7 @@ func (c *Client) GetCrashesByDeviceTrendChart(ctx context.Context, from, to time
 	return result, nil
 }
 
-func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, from, to timeseries.Time, limit int) ([]CrashReasonData, error) {
+func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, from, to timeseries.Time, limit int, service string) ([]CrashReasonData, error) {
 	query := `
 	SELECT
 		cr.UniqueId AS CrashId,
@@ -332,6 +345,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		cr.Timestamp BETWEEN @from AND @to
 		AND msd.Timestamp BETWEEN @from AND @to
 		AND cr.CrashReason = @crashReason
+		AND cr.Service = @service
 	GROUP BY 
 		cr.UniqueId, cr.DeviceInfo, cr.CrashStackTrace, cr.CrashTime, msd.UserId, cr.Service, cr.CrashReason, cr.ServiceVersion, cr.MemoryUsage
 	ORDER BY CrashTimestamp DESC
@@ -343,6 +357,7 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.Named("crashReason", crashReason),
 		clickhouse.Named("limit", uint64(limit)),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -357,13 +372,13 @@ func (c *Client) GetCrashReasonData(ctx context.Context, crashReason string, fro
 		if err := rows.Scan(
 			&result.CrashId,
 			&result.DeviceType,
+			&result.StackTrace,
 			&crashTimestamp,
 			&result.AffectedUser,
 			&result.Application,
 			&result.CrashReason,
 			&result.AppVersion,
 			&result.MemoryUsage,
-			&result.StackTrace,
 		); err != nil {
 			return nil, err
 		}
