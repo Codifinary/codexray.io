@@ -31,7 +31,7 @@ type MrumUsersData struct {
 	ReturningUserTrend  float64 `json:"returningUserTrend"`
 }
 
-func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumUsersView {
+func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, service string) *MrumUsersView {
 	v := &MrumUsersView{}
 
 	if ch == nil {
@@ -40,7 +40,7 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 		return v
 	}
 
-	rows, err := ch.GetMobileUserResults(ctx, w.Ctx.From, w.Ctx.To)
+	rows, err := ch.GetMobileUserResults(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -61,8 +61,8 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 		ReturningUserTrend:  rows.ReturningUserTrend,
 	}
 
-	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To)
-	mobileUserData, err := ch.GetMobileUsersData(ctx, w.Ctx.From, w.Ctx.To)
+	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+	mobileUserData, err := ch.GetMobileUsersData(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING

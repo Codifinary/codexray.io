@@ -1686,7 +1686,7 @@ func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
 	case "perf":
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumPerf(r.Context(), ch, world, r.URL.Query().Get("query"))))
 	case "users":
-		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumUsers(r.Context(), ch, world, r.URL.Query().Get("query"))))
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumUsers(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
 	case "crashes":
 		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumCrashes(r.Context(), ch, world, r.URL.Query().Get("query"))))
 	default:
