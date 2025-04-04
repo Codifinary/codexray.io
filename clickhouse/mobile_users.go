@@ -187,6 +187,8 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 }
 
 func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
+	sevenDaysFrom := to.Add(-7 * timeseries.Day)
+
 	newUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	returningUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 
@@ -197,16 +199,16 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 		returningUsersSeries.Set(timePoint, 0)
 	}
 
-	query := fmt.Sprintf(`
+	query := `
 	WITH
 		date_range AS (
 			SELECT
-				toUnixTimestamp(toStartOfInterval(toDateTime(@from), INTERVAL %[1]d SECOND)) + (number * %[1]d) as interval_start
-			FROM numbers(%[2]d)
+				toUnixTimestamp(toStartOfInterval(toDateTime(@from), INTERVAL @step SECOND)) + (number * @step) as interval_start
+			FROM numbers(@numPoints)
 		),
 		active_users AS (
 			SELECT
-				toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %[1]d SECOND)) as interval_start,
+				toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL @step SECOND)) as interval_start,
 				UserId
 			FROM
 				mobile_event_data med
@@ -225,7 +227,7 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 		),
 		new_users AS (
 			SELECT
-				toUnixTimestamp(toStartOfInterval(med.Timestamp, INTERVAL %[1]d SECOND)) as interval_start,
+				toUnixTimestamp(toStartOfInterval(med.Timestamp, INTERVAL @step SECOND)) as interval_start,
 				med.UserId
 			FROM
 				mobile_event_data med
@@ -258,12 +260,14 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 		new_users_agg nu ON dr.interval_start = nu.interval_start
 	ORDER BY
 		dr.interval_start
-	`, step, numIntervals+1)
+	`
 
 	params := []interface{}{
-		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("from", sevenDaysFrom.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.Named("service", service),
+		clickhouse.Named("step", int(step)),
+		clickhouse.Named("numPoints", numIntervals+1),
 	}
 
 	rows, err := c.Query(ctx, query, params...)
