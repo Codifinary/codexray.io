@@ -350,7 +350,7 @@ CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
      RequestPayloadSize  Int64 CODEC(ZSTD(1)),
      EndpointName        String CODEC(ZSTD(1)),
      RequestTime         Int64 CODEC(ZSTD(1)),
-     ServiceName         LowCardinality(String) CODEC(ZSTD(1)),
+     Service             LowCardinality(String) CODEC(ZSTD(1)),
      Status              Bool CODEC(ZSTD(1)),
      ResponseTime        Int64 CODEC(ZSTD(1)),
      ResponsePayloadSize Int64 CODEC(ZSTD(1)),
@@ -365,7 +365,7 @@ CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
      AppType             String CODEC(ZSTD(1)),
      RawData             String CODEC(ZSTD(1)),
 
-     INDEX idx_service ServiceName TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_endpoint_name EndpointName TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_user_id UserID TYPE bloom_filter(0.01) GRANULARITY 1,
@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
 ) ENGINE @merge_tree
 TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
 PARTITION BY toDate(Timestamp)
-ORDER BY (ServiceName, EndpointName, toUnixTimestamp(Timestamp))
+ORDER BY (Service, EndpointName, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
 `,
 
