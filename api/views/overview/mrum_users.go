@@ -5,6 +5,7 @@ import (
 	"codexray/clickhouse"
 	"codexray/model"
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"k8s.io/klog"
@@ -14,7 +15,7 @@ type MrumUsersView struct {
 	Status         model.Status                 `json:"status"`
 	Message        string                       `json:"message"`
 	Summary        MrumUsersData                `json:"summary"`
-	Report         *model.AuditReport           `json:"report"`
+	Report         json.RawMessage              `json:"report"`
 	MobileUserData []clickhouse.MobileUsersData `json:"mobileUserData"`
 }
 
@@ -61,7 +62,17 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 		ReturningUserTrend:  rows.ReturningUserTrend,
 	}
 
-	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+	originalReport := auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+
+	reportJSON, err := convertReportWithChartArray(originalReport)
+	if err != nil {
+		klog.Errorln("Error converting report to JSON:", err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Error converting report: %s", err)
+		return v
+	}
+	v.Report = reportJSON
+
 	mobileUserData, err := ch.GetMobileUsersData(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
@@ -73,4 +84,39 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 	v.MobileUserData = mobileUserData
 	v.Status = model.OK
 	return v
+}
+
+func convertReportWithChartArray(report *model.AuditReport) (json.RawMessage, error) {
+	originalJSON, err := json.Marshal(report)
+	if err != nil {
+		return nil, err
+	}
+
+	var reportMap map[string]interface{}
+	if err := json.Unmarshal(originalJSON, &reportMap); err != nil {
+		return nil, err
+	}
+
+	widgets, ok := reportMap["widgets"].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("widgets not found or not an array")
+	}
+
+	for _, w := range widgets {
+		widget, ok := w.(map[string]interface{})
+		if !ok {
+			continue
+		}
+
+		if chart, exists := widget["chart"]; exists && chart != nil {
+			widget["chart"] = []interface{}{chart}
+		}
+	}
+
+	modifiedJSON, err := json.Marshal(reportMap)
+	if err != nil {
+		return nil, err
+	}
+
+	return modifiedJSON, nil
 }
