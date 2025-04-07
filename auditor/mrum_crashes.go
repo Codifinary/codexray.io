@@ -24,7 +24,7 @@ func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to t
 		"#1E88E5", // Blue
 	}
 
-	crashesByDeviceChart := report.GetOrCreateChart("Crashes by Device", nil)
+	crashesByDeviceChart := model.NewChart(w.Ctx, "Crashes by Device")
 	crashesByDeviceData, err := ch.GetCrashesByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
@@ -38,6 +38,12 @@ func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to t
 		crashesByDeviceChart.AddSeries(device, timeSeries, color)
 		deviceIndex++
 	}
+
+	crashByDeviceWidget := &model.Widget{
+		Chart: crashesByDeviceChart,
+		Width: "100%",
+	}
+	report.AddWidget(crashByDeviceWidget)
 
 	return report
 }

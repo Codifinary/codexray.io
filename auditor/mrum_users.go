@@ -23,7 +23,7 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 		return report
 	}
 
-	userBreakdownChart := model.NewChart(w.Ctx, "New vs Returning Users (Last 7 Days)")
+	userBreakdownChart := report.GetOrCreateChart("New vs Returning Users (Last 7 Days)", nil)
 
 	userBreakdownChart.Ctx = timeseries.Context{
 		From:    sevenDaysAgo,
@@ -31,12 +31,6 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 		Step:    oneDayStep,
 		RawStep: oneDayStep,
 	}
-
-	userBreakDownWidget := &model.Widget{
-		Chart: userBreakdownChart,
-		Width: "100%",
-	}
-	report.AddWidget(userBreakDownWidget)
 
 	userBreakdownChart.Column()
 
