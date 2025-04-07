@@ -34,7 +34,8 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		"#4CAF50", // Green
 	}
 
-	sessionsByCountryChart := report.GetOrCreateChart("Sessions by Country", nil)
+	width := "33%"
+
 	sessionsByCountryData, err := ch.GetSessionsByCountryTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
@@ -42,6 +43,7 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
+	sessionsByCountryChart := model.NewChart(w.Ctx, "Sessions by Country")
 	countryIndex := 0
 	for country, timeSeries := range sessionsByCountryData {
 		color := countryColors[countryIndex%len(countryColors)]
@@ -49,7 +51,12 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		countryIndex++
 	}
 
-	sessionsByDeviceChart := report.GetOrCreateChart("Sessions by Device", nil)
+	sessionsByCountryWidget := &model.Widget{
+		Chart: sessionsByCountryChart,
+		Width: width,
+	}
+	report.AddWidget(sessionsByCountryWidget)
+
 	sessionsByDeviceData, err := ch.GetSessionsByDeviceTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
@@ -57,6 +64,7 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
+	sessionsByDeviceChart := model.NewChart(w.Ctx, "Sessions by Device")
 	deviceIndex := 0
 	for device, timeSeries := range sessionsByDeviceData {
 		color := deviceColors[deviceIndex%len(deviceColors)]
@@ -64,7 +72,12 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		deviceIndex++
 	}
 
-	sessionsByOSChart := report.GetOrCreateChart("Sessions by Operating System", nil)
+	sessionsByDeviceWidget := &model.Widget{
+		Chart: sessionsByDeviceChart,
+		Width: width,
+	}
+	report.AddWidget(sessionsByDeviceWidget)
+
 	sessionsByOSData, err := ch.GetSessionsByOSTrendChart(context.Background(), sevenDays, now, oneHourStep, service)
 	if err != nil {
 		report.Status = model.WARNING
@@ -72,12 +85,19 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 		return report
 	}
 
+	sessionsByOSChart := model.NewChart(w.Ctx, "Sessions by Operating System")
 	osIndex := 0
 	for os, timeSeries := range sessionsByOSData {
 		color := osColors[osIndex%len(osColors)]
 		sessionsByOSChart.AddSeriesWithFill(os, timeSeries, color, true)
 		osIndex++
 	}
+
+	sessionsByOSWidget := &model.Widget{
+		Chart: sessionsByOSChart,
+		Width: width,
+	}
+	report.AddWidget(sessionsByOSWidget)
 
 	return report
 }
