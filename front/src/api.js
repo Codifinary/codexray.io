@@ -327,4 +327,24 @@ export default class Api {
     saveWhitelistDomain(trust_domain, cb){
         this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
+
+    getPerformanceData(cb) {
+        this.get(this.projectPath(`mrum/perf`), {}, cb);
+    }
+
+    getCrashData(cb) {
+        this.get(this.projectPath(`mrum/crash`), {}, cb);
+    }
+
+    getMRUMUsersData(cb){
+        this.get(this.projectPath(`mrum/users`), {}, cb);
+    }
+
+    getMRUMOverview(cb) {
+        this.get(this.projectPath(`mrum/overview`), {}, cb);
+    }
+
+    getMRUMSessionsData(serviceName, query,cb){
+        this.get(this.projectPath(`mrum/${serviceName}/sessions`), {query: query}, cb);
+    }
 }

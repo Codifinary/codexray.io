@@ -34,6 +34,12 @@
             <RCA v-if="id" :appId="id" />
             <Anomalies v-else />
         </template>
+
+        <template v-if="view === 'MRUM'">
+            <MRUM v-if="id" :projectId="$route.params.projectId" :id="id" :tab="tab" :sessionName="serviceName"/>
+            <MRUMOverview v-else :projectId="$route.params.projectId"/>
+        </template>
+
     </div>
 </template>
 
@@ -52,6 +58,8 @@ import RCA from '@/views/RCA.vue';
 import EUM from '@/views/EUM/EUM.vue';
 import EUMApplicationOverview from '@/views/EUM/EUMApplicationOverview.vue';
 import PagePerformanceGraph from '@/views/EUM/PagePerformanceGraph.vue';
+import MRUMOverview from './MRUMOverview.vue';
+import MRUM from './MRUM.vue';
 
 export default {
     components: {
@@ -70,11 +78,15 @@ export default {
         EUM,
         EUMApplicationOverview,
         PagePerformanceGraph,
+        MRUMOverview,
+        MRUM
     },
     props: {
         view: String,
         id: String,
         report: String,
+        tab: String,
+        serviceName: String
     },
 
     computed: {
@@ -86,6 +98,7 @@ export default {
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
+                MRUM: 'MRUM',
             };
             if (this.$codexray.edition === 'Enterprise') {
                 res.anomalies = 'Anomalies';
