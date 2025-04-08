@@ -17,11 +17,11 @@ func GenerateMrumCrashesReport(w *model.World, ch *clickhouse.Client, from, to t
 	oneHourStep := timeseries.Duration(3600)
 
 	deviceColors := []string{
-		"#E53935", // Red
-		"#8E24AA", // Purple
-		"#FB8C00", // Orange
-		"#43A047", // Green
-		"#1E88E5", // Blue
+		"#f44336", // Red
+		"#6a329f", // Purple
+		"#f3820c", // Orange
+		"#1f693f", // Green
+		"#0b5394", // Blue
 	}
 
 	crashesByDeviceChart := model.NewChart(w.Ctx, "Crashes by Device")

@@ -9,7 +9,7 @@ import (
 )
 
 type MobileOverview struct {
-	ServiceName   string `json:"serviceName"`
+	Service       string `json:"service"`
 	TotalRequests uint64 `json:"totalRequests"`
 	TotalErrors   uint64 `json:"totalErrors"`
 	TotalUsers    uint64 `json:"totalUsers"`
@@ -21,13 +21,13 @@ func (c *Client) GetMobileOverview(ctx context.Context, from, to timeseries.Time
 		WITH 
 		service_requests AS (
 			SELECT 
-				ServiceName,
+				Service,
 				COUNT(*) as total_requests,
 				COUNT(DISTINCT SessionId) as total_sessions,
 				COUNT(DISTINCT UserID) as total_users
 			FROM mobile_perf_data
-			WHERE Timestamp BETWEEN @from AND @to AND ServiceName != ''
-			GROUP BY ServiceName
+			WHERE Timestamp BETWEEN @from AND @to AND Service != ''
+			GROUP BY Service
 		),
 		service_crashes AS (
 			SELECT 
@@ -38,13 +38,13 @@ func (c *Client) GetMobileOverview(ctx context.Context, from, to timeseries.Time
 			GROUP BY Service
 		)
 		SELECT 
-			sr.ServiceName,
+			sr.Service,
 			sr.total_requests,
 			ifNull(sc.total_crashes, 0) as total_errors,
 			sr.total_users,
 			sr.total_sessions
 		FROM service_requests sr
-		LEFT JOIN service_crashes sc ON sr.ServiceName = sc.Service
+		LEFT JOIN service_crashes sc ON sr.Service = sc.Service
 		ORDER BY sr.total_requests DESC
 	`
 
@@ -62,7 +62,7 @@ func (c *Client) GetMobileOverview(ctx context.Context, from, to timeseries.Time
 		var overview MobileOverview
 
 		if err := rows.Scan(
-			&overview.ServiceName,
+			&overview.Service,
 			&overview.TotalRequests,
 			&overview.TotalErrors,
 			&overview.TotalUsers,

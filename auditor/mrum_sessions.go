@@ -17,21 +17,21 @@ func GenerateMrumSessionsReport(w *model.World, ch *clickhouse.Client, from, to 
 	oneHourStep := timeseries.Duration(3600)
 
 	countryColors := []string{
-		"#4285F4", // Google Blue
-		"#EA4335", // Google Red
-		"#FBBC05", // Google Yellow
+		"#b4a7d6", // Purple
+		"#ffd966", // Orange
+		"#bcbcbc", // Grey
 	}
 
 	deviceColors := []string{
-		"#34A853", // Google Green
-		"#9C27B0", // Purple
-		"#FF9800", // Orange
+		"#6fa8dc", // Light Blue
+		"#2986cc", // Blue
+		"#bcbcbc", // Grey
 	}
 
 	osColors := []string{
-		"#2196F3", // Light Blue
-		"#F44336", // Red
-		"#4CAF50", // Green
+		"#f44336", // Red
+		"#f1c232", // Yellow
+		"#bcbcbc", // Grey
 	}
 
 	width := "33%"

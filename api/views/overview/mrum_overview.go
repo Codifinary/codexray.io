@@ -13,7 +13,7 @@ type MrumOverviewView struct {
 }
 
 type MrumOverviewData struct {
-	ServiceName   string `json:"serviceName"`
+	Service       string `json:"service"`
 	TotalRequests uint64 `json:"totalRequests"`
 	TotalErrors   uint64 `json:"totalErrors"`
 	TotalUsers    uint64 `json:"totalUsers"`
@@ -45,7 +45,7 @@ func RenderMrumOverview(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 	var results []MrumOverviewData
 	for _, service := range services {
 		results = append(results, MrumOverviewData{
-			ServiceName:   service.ServiceName,
+			Service:       service.Service,
 			TotalRequests: service.TotalRequests,
 			TotalErrors:   service.TotalErrors,
 			TotalUsers:    service.TotalUsers,

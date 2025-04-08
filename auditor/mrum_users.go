@@ -34,8 +34,8 @@ func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to tim
 
 	userBreakdownChart.Column()
 
-	userBreakdownChart.AddSeries("New Users", userBreakdownData["newUsers"], "#AB47BC")
-	userBreakdownChart.AddSeries("Returning Users", userBreakdownData["returningUsers"], "#42A5F5")
+	userBreakdownChart.AddSeries("New Users", userBreakdownData["newUsers"], "#61d887")
+	userBreakdownChart.AddSeries("Returning Users", userBreakdownData["returningUsers"], "#2e975d")
 
 	return report
 }
