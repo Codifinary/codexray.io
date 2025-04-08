@@ -55,25 +55,45 @@ type Collector struct {
 	profileBatches     map[db.ProjectId]*ProfilesBatch
 	profileBatchesLock sync.Mutex
 
+	mobilePerfBatches     map[db.ProjectId]*MobilePerfBatch
+	mobilePerfBatchesLock sync.Mutex
+
+	mobileCrashReportBatches     map[db.ProjectId]*MobileCrashReportBatch
+	mobileCrashReportBatchesLock sync.Mutex
+
 	perfBatches     map[db.ProjectId]*PerfBatch
 	perfBatchesLock sync.Mutex
 
+	mobileUserRegistrationBatches     map[db.ProjectId]*MobileUserRegistrationBatch
+	mobileUserRegistrationBatchesLock sync.Mutex
+
 	errLogBatches     map[db.ProjectId]*ErrLogBatch
 	errLogBatchesLock sync.Mutex
+
+	mobileEventBatches     map[db.ProjectId]*MobileEventBatch
+	mobileEventBatchesLock sync.Mutex
+
+	mobileSessionBatches     map[db.ProjectId]*MobileSessionBatch
+	mobileSessionBatchesLock sync.Mutex
 }
 
 func New(database *db.DB, cache *cache.Cache, globalClickHouse *db.IntegrationClickhouse, globalPrometheus *db.IntegrationsPrometheus) *Collector {
 	c := &Collector{
-		db:                database,
-		cache:             cache,
-		globalClickHouse:  globalClickHouse,
-		globalPrometheus:  globalPrometheus,
-		clickhouseClients: map[db.ProjectId]*chClient{},
-		traceBatches:      map[db.ProjectId]*TracesBatch{},
-		profileBatches:    map[db.ProjectId]*ProfilesBatch{},
-		logBatches:        map[db.ProjectId]*LogsBatch{},
-		perfBatches:       map[db.ProjectId]*PerfBatch{},
-		errLogBatches:     map[db.ProjectId]*ErrLogBatch{},
+		db:                            database,
+		cache:                         cache,
+		globalClickHouse:              globalClickHouse,
+		globalPrometheus:              globalPrometheus,
+		clickhouseClients:             map[db.ProjectId]*chClient{},
+		traceBatches:                  map[db.ProjectId]*TracesBatch{},
+		profileBatches:                map[db.ProjectId]*ProfilesBatch{},
+		mobilePerfBatches:             map[db.ProjectId]*MobilePerfBatch{},
+		mobileEventBatches:            map[db.ProjectId]*MobileEventBatch{},
+		mobileSessionBatches:          map[db.ProjectId]*MobileSessionBatch{},
+		logBatches:                    map[db.ProjectId]*LogsBatch{},
+		perfBatches:                   map[db.ProjectId]*PerfBatch{},
+		errLogBatches:                 map[db.ProjectId]*ErrLogBatch{},
+		mobileCrashReportBatches:      map[db.ProjectId]*MobileCrashReportBatch{},
+		mobileUserRegistrationBatches: map[db.ProjectId]*MobileUserRegistrationBatch{},
 	}
 
 	c.updateProjects()
@@ -177,6 +197,7 @@ func (c *Collector) Close() {
 	for _, cl := range c.clickhouseClients {
 		cl.pool.Close()
 	}
+
 }
 
 func (c *Collector) UpdateClickhouseClient(ctx context.Context, projectId db.ProjectId, cfg *db.IntegrationClickhouse) error {
@@ -361,10 +382,77 @@ func (c *Collector) getErrLogBatch(project *db.Project) *ErrLogBatch {
 	return b
 }
 
+func (c *Collector) getMobileUserRegistrationBatch(project *db.Project) *MobileUserRegistrationBatch {
+	c.mobileUserRegistrationBatchesLock.Lock()
+	defer c.mobileUserRegistrationBatchesLock.Unlock()
+	b := c.mobileUserRegistrationBatches[project.Id]
+	if b == nil {
+		b = NewMobileUserRegistrationBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileUserRegistrationBatches[project.Id] = b
+	}
+	return b
+}
+
 func (c *Collector) IsClickhouseDistributed(project *db.Project) (bool, error) {
 	client, err := c.getClickhouseClient(project)
 	if err != nil {
 		return false, err
 	}
 	return client.cluster != "", nil
+}
+
+func (c *Collector) getMobilePerfBatch(project *db.Project) *MobilePerfBatch {
+	c.mobilePerfBatchesLock.Lock()
+	defer c.mobilePerfBatchesLock.Unlock()
+	b := c.mobilePerfBatches[project.Id]
+	if b == nil {
+		b = NewMobilePerfBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobilePerfBatches[project.Id] = b
+	}
+
+	return b
+}
+
+func (c *Collector) getMobileCrashReportBatch(project *db.Project) *MobileCrashReportBatch {
+	c.mobileCrashReportBatchesLock.Lock()
+	defer c.mobileCrashReportBatchesLock.Unlock()
+	b := c.mobileCrashReportBatches[project.Id]
+	if b == nil {
+		b = NewMobileCrashReportBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileCrashReportBatches[project.Id] = b
+	}
+
+	return b
+}
+
+func (c *Collector) getMobileEventBatch(project *db.Project) *MobileEventBatch {
+	c.mobileEventBatchesLock.Lock()
+	defer c.mobileEventBatchesLock.Unlock()
+	b := c.mobileEventBatches[project.Id]
+	if b == nil {
+		b = NewMobileEventBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileEventBatches[project.Id] = b
+	}
+	return b
+}
+
+func (c *Collector) getMobileSessionBatch(project *db.Project) *MobileSessionBatch {
+	c.mobileSessionBatchesLock.Lock()
+	defer c.mobileSessionBatchesLock.Unlock()
+	b := c.mobileSessionBatches[project.Id]
+	if b == nil {
+		b = NewMobileSessionBatch(batchLimit, batchTimeout, func(query ch.Query) error {
+			return c.clickhouseDo(context.TODO(), project, query)
+		})
+		c.mobileSessionBatches[project.Id] = b
+	}
+	return b
 }

@@ -154,6 +154,18 @@ func (ch *Chart) AddSeries(name string, data SeriesData, color ...string) *Chart
 	return ch
 }
 
+func (ch *Chart) AddSeriesWithFill(name string, data SeriesData, color string, fill bool) *Chart {
+	if ch == nil {
+		return nil
+	}
+	if data.IsEmpty() {
+		return ch
+	}
+	s := &Series{Name: name, Data: data, Color: color, Fill: fill}
+	ch.Series.series = append(ch.Series.series, s)
+	return ch
+}
+
 func (ch *Chart) AddMany(series map[string]SeriesData, topN int, topF timeseries.F) *Chart {
 	if ch == nil {
 		return nil

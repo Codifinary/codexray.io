@@ -223,6 +223,10 @@ func main() {
 	router.HandleFunc("/v1/perf", coll.Perf)
 	router.HandleFunc("/v1/errlog", coll.ErrLog)
 	router.HandleFunc("/v1/config", coll.Config)
+	router.HandleFunc("/v1/mobile/performance", coll.MobilePerf)
+	router.HandleFunc("/v1/mobile/crashReports", coll.MobileCrashReports)
+	router.HandleFunc("/v1/mobile/event", coll.MobileEvent)
+	router.HandleFunc("/v1/management/userregistration", coll.MobileUserRegistration)
 
 	r := router
 	cleanUrlBasePath(urlBasePath)
@@ -274,6 +278,9 @@ func main() {
 
 	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)
+
+	r.HandleFunc("/api/project/{project}/mrum/overview", a.Auth(a.MrumOverview)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/mrum/{serviceName}/{view}", a.Auth(a.MrumView)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)
