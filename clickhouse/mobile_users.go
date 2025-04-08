@@ -28,7 +28,7 @@ type MobileUsersData struct {
 	EndTime   string
 }
 
-func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.Time) (*MobileUserResult, error) {
+func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.Time, service string) (*MobileUserResult, error) {
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
 	windowDuration := toTime.Sub(fromTime)
@@ -37,17 +37,21 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 	prevFrom := timeseries.Time(prevFromTime.Unix())
 	prevTo := timeseries.Time(prevToTime.Unix())
 
+	serviceFilter := "AND Service = @service"
+
 	q := `
 		WITH 
 		active_users AS (
 			SELECT DISTINCT UserId
 			FROM mobile_event_data
 			WHERE Timestamp BETWEEN @from AND @to
+			` + serviceFilter + `
 		),
 		new_registrations AS (
 			SELECT DISTINCT UserId
 			FROM mobile_user_registration
 			WHERE RegistrationTime BETWEEN @from AND @to
+			` + serviceFilter + `
 		),
 		current_period AS (
 			SELECT
@@ -60,11 +64,13 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 			SELECT DISTINCT UserId
 			FROM mobile_event_data
 			WHERE Timestamp BETWEEN @prevFrom AND @prevTo
+			` + serviceFilter + `
 		),
 		prev_new_registrations AS (
 			SELECT DISTINCT UserId
 			FROM mobile_user_registration
 			WHERE RegistrationTime BETWEEN @prevFrom AND @prevTo
+			` + serviceFilter + `
 		),
 		previous_period AS (
 			SELECT
@@ -80,6 +86,7 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 				countDistinctIf(UserId, Timestamp >= now() - INTERVAL 7 DAY) AS weekly_active_users
 			FROM mobile_event_data
 			WHERE Timestamp >= now() - INTERVAL 7 DAY
+			` + serviceFilter + `
 		),
 		user_crashes AS (
 			SELECT DISTINCT med.UserId
@@ -87,6 +94,7 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 			JOIN mobile_crash_reports mcr ON mcr.SessionId = med.SessionId
 			WHERE mcr.Timestamp BETWEEN @from AND @to
 			AND med.Timestamp BETWEEN @from AND @to
+			` + serviceFilter + `
 		),
 		crash_metrics AS (
 			SELECT
@@ -142,12 +150,15 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 		CROSS JOIN crash_metrics cm
 	`
 
-	rows, err := c.Query(ctx, q,
+	params := []interface{}{
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevFrom", prevFrom.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevTo", prevTo.ToStandard(), clickhouse.NanoSeconds),
-	)
+		clickhouse.Named("service", service),
+	}
+
+	rows, err := c.Query(ctx, q, params...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute mobile user results query: %w", err)
 	}
@@ -175,20 +186,35 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 	return result, nil
 }
 
-func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
+func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
+	sevenDaysFrom := to.Add(-7 * timeseries.Day)
+
 	newUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	returningUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	query := fmt.Sprintf(`
+	numIntervals := int(to.Sub(from) / step)
+	for i := 0; i <= numIntervals; i++ {
+		timePoint := from.Add(timeseries.Duration(i) * step)
+		newUsersSeries.Set(timePoint, 0)
+		returningUsersSeries.Set(timePoint, 0)
+	}
+
+	query := `
 	WITH
+		date_range AS (
+			SELECT
+				toUnixTimestamp(toStartOfInterval(toDateTime(@from), INTERVAL @step SECOND)) + (number * @step) as interval_start
+			FROM numbers(@numPoints)
+		),
 		active_users AS (
 			SELECT
-				toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %[1]d SECOND)) * 1000 as interval_start,
+				toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL @step SECOND)) as interval_start,
 				UserId
 			FROM
-				mobile_event_data
+				mobile_event_data med
 			WHERE
 				Timestamp BETWEEN @from AND @to
+				AND med.Service = @service
 		),
 		active_users_agg AS (
 			SELECT
@@ -201,7 +227,7 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 		),
 		new_users AS (
 			SELECT
-				toUnixTimestamp(toStartOfInterval(med.Timestamp, INTERVAL %[1]d SECOND)) * 1000 as interval_start,
+				toUnixTimestamp(toStartOfInterval(med.Timestamp, INTERVAL @step SECOND)) as interval_start,
 				med.UserId
 			FROM
 				mobile_event_data med
@@ -210,6 +236,8 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 			WHERE
 				med.Timestamp BETWEEN @from AND @to
 				AND mur.RegistrationTime BETWEEN @from AND @to
+				AND med.Service = @service
+				AND mur.Service = @service
 		),
 		new_users_agg AS (
 			SELECT
@@ -221,21 +249,28 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 				interval_start
 		)
 	SELECT
-		au.interval_start,
+		dr.interval_start * 1000 as interval_start,
 		COALESCE(nu.new_users, 0) as new_users,
-		(au.total_users - COALESCE(nu.new_users, 0)) as returning_users
+		COALESCE(au.total_users, 0) - COALESCE(nu.new_users, 0) as returning_users
 	FROM
-		active_users_agg au
+		date_range dr
 	LEFT JOIN
-		new_users_agg nu ON au.interval_start = nu.interval_start
+		active_users_agg au ON dr.interval_start = au.interval_start
+	LEFT JOIN
+		new_users_agg nu ON dr.interval_start = nu.interval_start
 	ORDER BY
-		au.interval_start
-	`, step)
+		dr.interval_start
+	`
 
-	rows, err := c.Query(ctx, query,
-		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+	params := []interface{}{
+		clickhouse.DateNamed("from", sevenDaysFrom.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
-	)
+		clickhouse.Named("service", service),
+		clickhouse.Named("step", int(step)),
+		clickhouse.Named("numPoints", numIntervals+1),
+	}
+
+	rows, err := c.Query(ctx, query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -264,7 +299,9 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 	}, nil
 }
 
-func (c *Client) GetMobileUsersData(ctx context.Context, from, to timeseries.Time) ([]MobileUsersData, error) {
+func (c *Client) GetMobileUsersData(ctx context.Context, from, to timeseries.Time, service string) ([]MobileUsersData, error) {
+	serviceFilter := "AND mur.Service = @service"
+
 	query := `
 		SELECT
 			msd.UserId AS UserID,
@@ -279,12 +316,16 @@ func (c *Client) GetMobileUsersData(ctx context.Context, from, to timeseries.Tim
 			msd.StartTime >= @from AND
 			msd.StartTime <= @to AND
 			msd.EndTime IS NOT NULL
+			` + serviceFilter + `
 		ORDER BY
 			msd.StartTime DESC
 	`
 
 	var result []MobileUsersData
-	err := c.conn.Select(ctx, &result, query, clickhouse.Named("from", from), clickhouse.Named("to", to))
+	err := c.conn.Select(ctx, &result, query,
+		clickhouse.Named("from", from),
+		clickhouse.Named("to", to),
+		clickhouse.Named("service", service))
 	if err != nil {
 		return nil, fmt.Errorf("error querying mobile users data: %w", err)
 	}

@@ -40,7 +40,7 @@ type SessionHistoricData struct {
 	GeoMapColorCode string
 }
 
-func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeseries.Time) (*MobileSessionResult, error) {
+func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeseries.Time, service string) (*MobileSessionResult, error) {
 
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
@@ -52,41 +52,51 @@ func (c *Client) GetMobileSessionResults(ctx context.Context, from, to timeserie
 	prevFrom := timeseries.Time(prevFromTime.Unix())
 	prevTo := timeseries.Time(prevToTime.Unix())
 
+	serviceFilter := "AND Service = @service"
+
 	query := `
 	WITH
     current AS (
         SELECT
-            uniqExact(SessionId) AS totalSessions,
-            uniqExact(UserId) AS TotalUsers
-        FROM mobile_session_data
+            uniqExact(msd.SessionId) AS totalSessions,
+            uniqExact(msd.UserId) AS TotalUsers
+        FROM mobile_session_data msd
+        LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
         WHERE 
-            Timestamp BETWEEN @from AND @to
+            msd.Timestamp BETWEEN @from AND @to
+            ` + serviceFilter + `
     ),
     previous AS (
         SELECT
-            uniqExact(SessionId) AS totalSessions,
-            uniqExact(UserId) AS TotalUsers
-        FROM mobile_session_data
+            uniqExact(msd.SessionId) AS totalSessions,
+            uniqExact(msd.UserId) AS TotalUsers
+        FROM mobile_session_data msd
+        LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
         WHERE 
-            Timestamp BETWEEN @prevFrom AND @prevTo
+            msd.Timestamp BETWEEN @prevFrom AND @prevTo
+            ` + serviceFilter + `
     ),
     current_duration AS (
         SELECT
-            avg(dateDiff('second', StartTime, EndTime)) AS avgDuration 
-        FROM mobile_session_data
+            avg(dateDiff('second', msd.StartTime, msd.EndTime)) AS avgDuration 
+        FROM mobile_session_data msd
+        LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
         WHERE 
-            Timestamp BETWEEN @from AND @to
-            AND StartTime IS NOT NULL 
-            AND EndTime IS NOT NULL  
+            msd.Timestamp BETWEEN @from AND @to
+            AND msd.StartTime IS NOT NULL 
+            AND msd.EndTime IS NOT NULL
+            ` + serviceFilter + `
     ),
     previous_duration AS (
         SELECT
-            avg(dateDiff('second', StartTime, EndTime)) AS avgDuration 
-        FROM mobile_session_data
+            avg(dateDiff('second', msd.StartTime, msd.EndTime)) AS avgDuration 
+        FROM mobile_session_data msd
+        LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
         WHERE 
-            Timestamp BETWEEN @prevFrom AND @prevTo
-            AND StartTime IS NOT NULL 
-            AND EndTime IS NOT NULL  
+            msd.Timestamp BETWEEN @prevFrom AND @prevTo
+            AND msd.StartTime IS NOT NULL 
+            AND msd.EndTime IS NOT NULL
+            ` + serviceFilter + `
     )
 SELECT 
     current.totalSessions,
@@ -98,12 +108,15 @@ SELECT
 	AS avgSessionTrend
 FROM current, previous, current_duration, previous_duration
 `
-	rows, err := c.Query(ctx, query,
+	params := []interface{}{
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevFrom", prevFrom.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevTo", prevTo.ToStandard(), clickhouse.NanoSeconds),
-	)
+		clickhouse.Named("service", service),
+	}
+
+	rows, err := c.Query(ctx, query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -126,24 +139,29 @@ FROM current, previous, current_duration, previous_duration
 	return &result, nil
 }
 
-func (c *Client) GetSessionsByCountryTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
-	optimizedQuery := fmt.Sprintf(`
+func (c *Client) GetSessionsByCountryTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
+
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
-		Country as country,
-		count(DISTINCT SessionId) as session_count
+		toUnixTimestamp(toStartOfInterval(msd.Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
+		msd.Country as country,
+		count(DISTINCT msd.SessionId) as session_count
 	FROM
-		mobile_session_data
+		mobile_session_data msd
+	LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
 	WHERE
-		Timestamp BETWEEN @from AND @to
-		AND Country != ''
-		AND Country IN (
-			SELECT Country
-			FROM mobile_session_data
-			WHERE Timestamp BETWEEN @from AND @to
-			AND Country != ''
-			GROUP BY Country
-			ORDER BY count(DISTINCT SessionId) DESC
+		msd.Timestamp BETWEEN @from AND @to
+		AND msd.Country != ''
+		AND med.Service = @service
+		AND msd.Country IN (
+			SELECT msd2.Country
+			FROM mobile_session_data msd2
+			LEFT JOIN mobile_event_data med2 ON msd2.SessionId = med2.SessionId
+			WHERE msd2.Timestamp BETWEEN @from AND @to
+			AND msd2.Country != ''
+			AND med2.Service = @service
+			GROUP BY msd2.Country
+			ORDER BY count(DISTINCT msd2.SessionId) DESC
 			LIMIT 3
 		)
 	GROUP BY
@@ -152,9 +170,10 @@ func (c *Client) GetSessionsByCountryTrendChart(ctx context.Context, from, to ti
 		interval_start, country
 	`, step)
 
-	rows, err := c.Query(ctx, optimizedQuery,
+	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -188,24 +207,29 @@ func (c *Client) GetSessionsByCountryTrendChart(ctx context.Context, from, to ti
 	return result, nil
 }
 
-func (c *Client) GetSessionsByDeviceTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
-	optimizedQuery := fmt.Sprintf(`
+func (c *Client) GetSessionsByDeviceTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
+
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
-		Device as device,
-		count(DISTINCT SessionId) as session_count
+		toUnixTimestamp(toStartOfInterval(msd.Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
+		msd.Device as device,
+		count(DISTINCT msd.SessionId) as session_count
 	FROM
-		mobile_session_data
+		mobile_session_data msd
+	LEFT JOIN mobile_event_data med ON msd.SessionId = med.SessionId
 	WHERE
-		Timestamp BETWEEN @from AND @to
-		AND Device != ''
-		AND Device IN (
-			SELECT Device
-			FROM mobile_session_data
-			WHERE Timestamp BETWEEN @from AND @to
-			AND Device != ''
-			GROUP BY Device
-			ORDER BY count(DISTINCT SessionId) DESC
+		msd.Timestamp BETWEEN @from AND @to
+		AND msd.Device != ''
+		AND med.Service = @service
+		AND msd.Device IN (
+			SELECT msd2.Device
+			FROM mobile_session_data msd2
+			LEFT JOIN mobile_event_data med2 ON msd2.SessionId = med2.SessionId
+			WHERE msd2.Timestamp BETWEEN @from AND @to
+			AND msd2.Device != ''
+			AND med2.Service = @service
+			GROUP BY msd2.Device
+			ORDER BY count(DISTINCT msd2.SessionId) DESC
 			LIMIT 3
 		)
 	GROUP BY
@@ -214,9 +238,10 @@ func (c *Client) GetSessionsByDeviceTrendChart(ctx context.Context, from, to tim
 		interval_start, device
 	`, step)
 
-	rows, err := c.Query(ctx, optimizedQuery,
+	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -250,24 +275,30 @@ func (c *Client) GetSessionsByDeviceTrendChart(ctx context.Context, from, to tim
 	return result, nil
 }
 
-func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
-	optimizedQuery := fmt.Sprintf(`
+func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
+
+	query := fmt.Sprintf(`
 	SELECT
-		toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
-		OS as os,
-		count(DISTINCT SessionId) as session_count
+		toUnixTimestamp(toStartOfInterval(msd.Timestamp, INTERVAL %d SECOND)) * 1000 as interval_start,
+		msd.OS as os,
+		count(DISTINCT msd.SessionId) as session_count
 	FROM
-		mobile_session_data
+		mobile_session_data msd
+	JOIN
+		mobile_event_data med ON msd.SessionId = med.SessionId
 	WHERE
-		Timestamp BETWEEN @from AND @to
-		AND OS != ''
-		AND OS IN (
-			SELECT OS
-			FROM mobile_session_data
-			WHERE Timestamp BETWEEN @from AND @to
-			AND OS != ''
-			GROUP BY OS
-			ORDER BY count(DISTINCT SessionId) DESC
+		msd.Timestamp BETWEEN @from AND @to
+		AND msd.OS != ''
+		AND med.Service = @service
+		AND msd.OS IN (
+			SELECT msd2.OS
+			FROM mobile_session_data msd2
+			JOIN mobile_event_data med2 ON msd2.SessionId = med2.SessionId
+			WHERE msd2.Timestamp BETWEEN @from AND @to
+			AND msd2.OS != ''
+			AND med2.Service = @service
+			GROUP BY msd2.OS
+			ORDER BY count(DISTINCT msd2.SessionId) DESC
 			LIMIT 3
 		)
 	GROUP BY
@@ -276,9 +307,10 @@ func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeser
 		interval_start, os
 	`, step)
 
-	rows, err := c.Query(ctx, optimizedQuery,
+	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -312,7 +344,7 @@ func (c *Client) GetSessionsByOSTrendChart(ctx context.Context, from, to timeser
 	return result, nil
 }
 
-func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Time, limit int) ([]SessionLiveData, error) {
+func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Time, limit int, service string) ([]SessionLiveData, error) {
 
 	query := `
 	SELECT
@@ -325,18 +357,23 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 		s.Country
 	FROM mobile_session_data s
 	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
+	LEFT JOIN mobile_event_data med ON s.SessionId = med.SessionId
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NULL
+	AND med.Service = @service
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.Country
 	ORDER BY NoOfRequest DESC
 	LIMIT @limit
 	`
 
-	rows, err := c.Query(ctx, query,
+	params := []interface{}{
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 		clickhouse.Named("limit", uint64(limit)),
-	)
+	}
+
+	rows, err := c.Query(ctx, query, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -381,7 +418,8 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 	return result, nil
 }
 
-func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries.Time, limit int) ([]SessionHistoricData, error) {
+func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries.Time, limit int, service string) ([]SessionHistoricData, error) {
+
 	query := `
 	SELECT
 		s.SessionId,
@@ -393,18 +431,23 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 		s.Country
 	FROM mobile_session_data s
 	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
+	LEFT JOIN mobile_event_data med ON s.SessionId = med.SessionId
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NOT NULL
+	AND med.Service = @service
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.EndTime, s.Country
 	ORDER BY NoOfRequest DESC
 	LIMIT @limit
 	`
 
-	rows, err := c.Query(ctx, query,
+	params := []interface{}{
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 		clickhouse.Named("limit", uint64(limit)),
-	)
+	}
+
+	rows, err := c.Query(ctx, query, params...)
 	if err != nil {
 		return nil, err
 	}

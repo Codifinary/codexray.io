@@ -279,7 +279,8 @@ func main() {
 	r.HandleFunc("/api/project/{project}/eum/traces/{serviceName}", a.Auth(a.EumTraces)).Methods(http.MethodGet)
 	r.HandleFunc("/api/project/{project}/eum/logs/{serviceName}", a.Auth(a.EumLogs)).Methods(http.MethodGet)
 
-	r.HandleFunc("/api/project/{project}/mrum/{view}", a.Auth(a.MrumView)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/mrum/overview", a.Auth(a.MrumOverview)).Methods(http.MethodGet)
+	r.HandleFunc("/api/project/{project}/mrum/{serviceName}/{view}", a.Auth(a.MrumView)).Methods(http.MethodGet)
 
 	r.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		statsCollector.RegisterRequest(r)

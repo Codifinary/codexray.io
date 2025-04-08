@@ -35,7 +35,7 @@ type SessionQuery struct {
 	Limit       int    `json:"limit"`
 }
 
-func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumSessionsView {
+func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, service string) *MrumSessionsView {
 	v := &MrumSessionsView{}
 
 	if ch == nil {
@@ -46,7 +46,7 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 
 	q := parseSessionQuery(query, w.Ctx)
 
-	rows, err := ch.GetMobileSessionResults(ctx, w.Ctx.From, w.Ctx.To)
+	rows, err := ch.GetMobileSessionResults(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -63,11 +63,11 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		AverageSessionTrend: rows.AverageSessionTrend,
 	}
 
-	v.Report = auditor.GenerateMrumSessionsReport(w, ch, w.Ctx.From, w.Ctx.To)
+	v.Report = auditor.GenerateMrumSessionsReport(w, ch, w.Ctx.From, w.Ctx.To, service)
 
 	switch {
 	case q.SessionType != "":
-		sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
+		sessionHistoricData, err := ch.GetSessionHistoricData(ctx, w.Ctx.From, w.Ctx.To, q.Limit, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING
@@ -77,7 +77,7 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 		v.SessionHistoricData = sessionHistoricData
 
 	default:
-		sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To, q.Limit)
+		sessionLiveData, err := ch.GetSessionLiveData(ctx, w.Ctx.From, w.Ctx.To, q.Limit, service)
 		if err != nil {
 			klog.Errorln(err)
 			v.Status = model.WARNING

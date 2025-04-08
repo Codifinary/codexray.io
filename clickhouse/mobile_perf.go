@@ -32,7 +32,7 @@ type MobilePerfCountrywiseOverview struct {
 	GeoMapColorCode     string
 }
 
-func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time) (*MobilePerfResult, error) {
+func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.Time, service string) (*MobilePerfResult, error) {
 
 	fromTime := from.ToStandard()
 	toTime := to.ToStandard()
@@ -43,6 +43,8 @@ func (c *Client) GetMobilePerfResults(ctx context.Context, from, to timeseries.T
 
 	prevFrom := timeseries.Time(prevFromTime.Unix())
 	prevTo := timeseries.Time(prevToTime.Unix())
+
+	serviceFilter := "AND Service = @service"
 
 	query := `
 WITH 
@@ -58,6 +60,7 @@ WITH
             mobile_perf_data
         WHERE 
             Timestamp BETWEEN @from AND @to
+            ` + serviceFilter + `
     ),
     previous AS (
         SELECT 
@@ -68,6 +71,7 @@ WITH
             mobile_perf_data
         WHERE 
             Timestamp BETWEEN @prevFrom AND @prevTo
+            ` + serviceFilter + `
     )
 SELECT 
     current.totalRequests,
@@ -87,6 +91,7 @@ FROM
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevFrom", prevFrom.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("prevTo", prevTo.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -113,7 +118,7 @@ FROM
 	return &result, nil
 }
 
-func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	query := fmt.Sprintf(`
@@ -124,6 +129,7 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 		mobile_perf_data
 	WHERE
 		Timestamp BETWEEN @from AND @to
+		AND Service = @service
 	GROUP BY
 		interval_start
 	ORDER BY
@@ -133,6 +139,7 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -153,7 +160,7 @@ func (c *Client) GetRequestsByTimeSliceChart(ctx context.Context, from, to times
 	return ts, nil
 }
 
-func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	query := fmt.Sprintf(`
@@ -166,6 +173,7 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 		mobile_perf_data
 	WHERE
 		Timestamp BETWEEN @from AND @to
+		AND Service = @service
 	GROUP BY
 		interval_start
 	ORDER BY
@@ -175,6 +183,7 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -197,7 +206,7 @@ func (c *Client) GetErrorRateTrendByTimeChart(ctx context.Context, from, to time
 	return ts, nil
 }
 
-func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration) (*timeseries.TimeSeries, error) {
+func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (*timeseries.TimeSeries, error) {
 	ts := timeseries.New(from, int(to.Sub(from)/step), step)
 
 	query := fmt.Sprintf(`
@@ -209,6 +218,7 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND Status = 0
+		AND Service = @service
 	GROUP BY
 		interval_start
 	ORDER BY
@@ -218,6 +228,7 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -238,7 +249,7 @@ func (c *Client) GetUserImptactedByErrorsByTimeChart(ctx context.Context, from, 
 	return ts, nil
 }
 
-func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to timeseries.Time) ([]MobilePerfCountrywiseOverview, error) {
+func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to timeseries.Time, service string) ([]MobilePerfCountrywiseOverview, error) {
 
 	query := `
 	SELECT
@@ -252,6 +263,7 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 	WHERE
 		Timestamp BETWEEN @from AND @to
 		AND Country != ''
+		AND Service = @service
 	GROUP BY
 		Country
 	ORDER BY
@@ -261,6 +273,7 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 	rows, err := c.Query(ctx, query,
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 	if err != nil {
 		return nil, err
@@ -295,22 +308,26 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 	return results, nil
 }
 
-func (c *Client) GetHttpResponsePerfHistogram(ctx context.Context, q SpanQuery) ([]model.HistogramBucket, error) {
+func (c *Client) GetHttpResponsePerfHistogram(ctx context.Context, q SpanQuery, service string) ([]model.HistogramBucket, error) {
+	// Set the service name in the query
+	q.ServiceName = service
 	filter, filterArgs := q.RootSpansFilter()
-	return c.getHttpResponsePerfHistogram(ctx, q, filter, filterArgs)
+	return c.getHttpResponsePerfHistogram(ctx, q, filter, filterArgs, service)
 }
 
-func (c *Client) getHttpResponsePerfHistogram(ctx context.Context, q SpanQuery, filters []string, filterArgs []any) ([]model.HistogramBucket, error) {
+func (c *Client) getHttpResponsePerfHistogram(ctx context.Context, q SpanQuery, filters []string, filterArgs []any, service string) ([]model.HistogramBucket, error) {
 	step := q.Ctx.Step
 	from := q.Ctx.From
 	to := q.Ctx.To.Add(step)
 
 	tsFilter := "Timestamp BETWEEN @from AND @to"
-	filters = append(filters, tsFilter)
+	serviceFilter := "Service = @service"
+	filters = append(filters, tsFilter, serviceFilter)
 	filterArgs = append(filterArgs,
 		clickhouse.Named("step", step),
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
 	)
 
 	query := "SELECT toStartOfInterval(Timestamp, INTERVAL @step second) as timeInterval, count(1) as requestCount, countIf(Status = 0) as errorCount"

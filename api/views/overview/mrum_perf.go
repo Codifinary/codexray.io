@@ -31,7 +31,7 @@ type MrumPerfData struct {
 	UsersImpactedTrend     float64 `json:"usersImpactedTrend"`
 }
 
-func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, query string) *MrumPerfView {
+func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, query string, service string) *MrumPerfView {
 	v := &MrumPerfView{}
 
 	if ch == nil {
@@ -40,7 +40,7 @@ func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, 
 		return v
 	}
 
-	rows, err := ch.GetMobilePerfResults(ctx, w.Ctx.From, w.Ctx.To)
+	rows, err := ch.GetMobilePerfResults(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
@@ -60,8 +60,8 @@ func RenderMrumPerf(ctx context.Context, ch *clickhouse.Client, w *model.World, 
 		UsersImpactedTrend:     rows.UsersImpactedTrend,
 	}
 
-	v.Report = auditor.GenerateMrumPerfReport(w, ch, w.Ctx.From, w.Ctx.To)
-	countrywiseOverviews, err := ch.GetMobilePerfCountrywiseOverviews(ctx, w.Ctx.From, w.Ctx.To)
+	v.Report = auditor.GenerateMrumPerfReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+	countrywiseOverviews, err := ch.GetMobilePerfCountrywiseOverviews(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)
 		v.Status = model.WARNING
