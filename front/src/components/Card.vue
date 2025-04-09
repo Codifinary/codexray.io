@@ -51,10 +51,7 @@ export default {
     },
     computed: {
         formattedCount() {
-            if (typeof this.count === 'number') {
-                return this.count.toFixed(0);
-            }
-            return this.count;
+            return Number.isInteger(this.count) ? this.count : this.count.toFixed(2);
         },
         sparklineData() {
   const length = 10;
