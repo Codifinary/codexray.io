@@ -51,6 +51,7 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+import mockData from '@/views/overview.json';
 
 export default {
 
@@ -92,7 +93,7 @@ export default {
                     this.error = error;
                     return;
                 }
-                this.sessions = data.sessions;
+                this.sessions = data.data;
             });
         }
     },

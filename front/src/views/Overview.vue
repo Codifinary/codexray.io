@@ -85,7 +85,6 @@ export default {
         view: String,
         id: String,
         report: String,
-        tab: String,
         serviceName: String
     },
 
