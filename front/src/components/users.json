@@ -1,0 +1,104 @@
+{
+    "context": {
+        "status": {
+            "status": "warning",
+            "error": "",
+            "prometheus": {
+                "status": "warning",
+                "message": "Prometheus is not configured",
+                "error": "",
+                "action": "configure"
+            },
+            "node_agent": {
+                "status": "warning",
+                "nodes": 0
+            },
+            "kube_state_metrics": null
+        },
+        "search": {
+            "applications": null,
+            "nodes": null
+        }
+    },
+    "data": {
+        "status": "ok",
+        "message": "",
+        "summary": {
+            "totalUsers": 2,
+            "newUsers": 2,
+            "returningUsers": 0,
+            "dailyActiveUsers": 0,
+            "weeklyActiveUsers": 2,
+            "dailyTrend": 0,
+            "crashFreePercentage": 50,
+            "userTrend": 100,
+            "newUserTrend": 100,
+            "returningUserTrend": 2
+        },
+        "report": {
+            "name": "Mobile Users",
+            "status": "ok",
+            "widgets": [
+                {
+                    "chart": {
+                        "ctx": {
+                            "from": 1743465600000,
+                            "to": 1743984000000,
+                            "step": 86400000,
+                            "raw_step": 86400000
+                        },
+                        "title": "New vs Returning Users (Last 7 Days)",
+                        "series": [
+                            {
+                                "name": "New Users",
+                                "color": "#96EFC5",
+                                "data": [
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0,
+                                    0
+                                ],
+                                "value": ""
+                            },
+                            {
+                                "name": "Returning Users",
+                                "color": "#1DBF73",
+                                "data": [
+                                    0,
+                                    0,
+                                    0,
+                                    1,
+                                    0,
+                                    0
+                                ],
+                                "value": ""
+                            }
+                        ],
+                        "threshold": null,
+                        "featured": false,
+                        "stacked": true,
+                        "sorted": false,
+                        "column": true,
+                        "color_shift": 0,
+                        "annotations": null,
+                        "drill_down_link": null,
+                        "hide_legend": false
+                    }
+                }
+            ],
+            "checks": null,
+            "custom": false,
+            "instrumentation": ""
+        },
+        "mobileUserData": [
+            {
+                "UserID": "AB",
+                "Country": "UK",
+                "StartTime": "2025-04-03 08:34:21.000000000",
+                "EndTime": "2025-04-03 14:50:17.000000000"
+            }
+        ]
+    }
+}

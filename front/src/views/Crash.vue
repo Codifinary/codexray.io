@@ -2,6 +2,7 @@
     <CrashDetails 
         v-if="crashID" 
         :id="crashID" 
+        :serviceName="id"
         :project-id="projectId" 
         :crash-id="crashID"
     />
@@ -56,7 +57,8 @@ import CrashDetails from './CrashDetails.vue';
 
 export default {
     props: {
-        crashReason: String
+        crashReason: String,
+        id: String
     },
     components: {
         Card,

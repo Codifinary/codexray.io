@@ -1,10 +1,16 @@
 <template>
     <div class="crash-details">
-        <MRUMNavigation :projectId="projectId" tab="Crash"  />
         <v-progress-linear indeterminate v-if="loading" color="green" />
         <div v-else>
             <div class="font-weight-bold tab-heading">
-            {{ crashId }}
+                <router-link :to="{
+                    name: 'overview',
+                    params: {
+                        view: 'MRUM',
+                        id: serviceName,
+                        tab: 'crash'
+                    }
+                }" class="bread-heading">Crash </router-link> <v-icon class="icon">mdi-chevron-right</v-icon> <span class="crash-id-text">{{ crashId }}</span>
             </div>
 
             <CustomTable 
@@ -81,12 +87,10 @@
 <script>
 import CustomTable from '@/components/CustomTable.vue';
 import mockData from './crashD.json';
-import MRUMNavigation from './MRUMNavigation.vue';
 
 export default {
     components: {
         CustomTable,
-        MRUMNavigation
     },
     props: {
         crashId: {
@@ -94,6 +98,10 @@ export default {
             required: true
         },
         projectId: {
+            type: String,
+            required: true
+        },
+        serviceName: {
             type: String,
             required: true
         }
@@ -191,6 +199,15 @@ export default {
     opacity: 0.8;
 }
 
+.crash-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.crash-link:hover {
+    text-decoration: underline;
+}
+
 .stack-trace {
     background-color: #f5f5f5;
     padding: 16px;
@@ -207,6 +224,22 @@ export default {
     font-weight: 700;
     color: var(--status-ok);
     font-size: 18px !important;
+}
+
+.bread-heading{
+    color: var(--status-ok);
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
+}
+
+.crash-id-text {
+    display: inline-block;
+    max-width: 300px; /* Adjust this value based on your layout needs */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
 }
 
 .stack-container {
@@ -263,5 +296,9 @@ export default {
 
 .headline {
     padding: 16px;
+}
+
+.icon{
+    color: var(--status-ok);
 }
 </style>
