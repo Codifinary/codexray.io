@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package dbm.skywalking.v3;
+
+import "common/Common.proto";
+
+option java_multiple_files = true;
+option java_package = "org.apache.skywalking.apm.network.dbm.v3";
+option csharp_namespace = "SkyWalking.NetworkProtocol.V3";
+option go_package = "codexray/generated/proto/dbmonitoring/v3/dbm";
+
+message DbmEventDetails {
+  string service = 1;
+  int64 timeStamp = 2;
+  string activity=3;
+  string source=4;
+  double sourceElapsed=5;
+  string databaseName = 6;
+}
+
+service DbmEventService {
+  rpc collectEvent (stream DbmEventDetails) returns (Commands) {
+  }
+}

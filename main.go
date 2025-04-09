@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -27,6 +28,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"golang.org/x/term"
+	"google.golang.org/grpc"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"k8s.io/klog"
 )
@@ -38,6 +40,7 @@ var static embed.FS
 
 func main() {
 	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
+	grpcListen := kingpin.Flag("grpc-listen", "gRPC listen address - ip:port or :port").Envar("GRPC_LISTEN").Default("0.0.0.0:8081").String()
 	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
@@ -298,6 +301,23 @@ func main() {
 	})
 
 	router.PathPrefix("").Handler(http.RedirectHandler(*urlBasePath, http.StatusMovedPermanently))
+
+	go func() {
+		lis, err := net.Listen("tcp", *grpcListen)
+		if err != nil {
+			klog.Fatalf("failed to listen: %v", err)
+		}
+
+		s := grpc.NewServer()
+
+		collector.InitDbMonitoringServices(s)
+
+		klog.Infoln("gRPC server listening at", lis.Addr())
+		if err := s.Serve(lis); err != nil {
+			klog.Fatalf("failed to serve: %v", err)
+		}
+	}()
+
 	klog.Infoln("listening on", *listen)
 	klog.Fatalln(http.ListenAndServe(*listen, router))
 }

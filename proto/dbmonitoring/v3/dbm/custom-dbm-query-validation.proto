@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package dbm.skywalking.v3;
+
+option java_multiple_files = true;
+option java_package = "org.apache.skywalking.apm.network.dbm.v3";
+option go_package = "codexray/generated/proto/dbmonitoring/v3/dbm";
+
+import "common/Common.proto";
+
+message ValidationQuery {
+  // qid is its document-id in elasticsearch (to uniquely identify this document)
+  // this is hash of serviceId, metricName
+  repeated string qId = 1;
+  repeated string query = 2;
+  repeated string entity = 3;
+  repeated string serviceId=4;
+  repeated string status=5;
+  repeated string teamID=6;
+  repeated double value=7;
+  repeated string response=8;
+  repeated string type=9;
+  repeated string metricName=10;
+  repeated string userId=11;
+  repeated int64 createTime=12;
+  repeated string databaseName=13;
+}
+
+message ValidationQueryRequest {
+  string serviceId = 1;
+  string status = 2;
+}
+
+service ValidationService {
+
+  rpc getQueriesForValidation(ValidationQueryRequest) returns (ValidationQuery) {
+  }
+
+  rpc notifyQueryValidationStatus(ValidationQuery) returns (Commands) {
+  }
+}

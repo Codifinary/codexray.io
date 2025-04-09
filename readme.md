@@ -66,3 +66,11 @@ kubectl get svc
 ```
 
 Ensure that the Codexray pods are running and the service is exposed as expected.
+
+# Db Monitoring
+
+To generate go proto files run the following command:
+
+```bash
+protoc -I=proto/dbmonitoring/v3 --go_out=./generated/proto/dbmonitoring/v3 --go_opt=paths=source_relative --go-grpc_out=./generated/proto/dbmonitoring/v3 --go-grpc_opt=paths=source_relative proto/dbmonitoring/v3/management/Management.proto proto/dbmonitoring/v3/language-agent/Meter.proto proto/dbmonitoring/v3/dbm/query.proto proto/dbmonitoring/v3/dbm/dbevent.proto proto/dbmonitoring/v3/common/Common.proto proto/dbmonitoring/v3/dbm/custom-dbm-query-validation.proto
+```

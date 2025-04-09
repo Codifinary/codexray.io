@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package dbm.skywalking.v3;
+
+import "common/Common.proto";
+
+option java_multiple_files = true;
+option java_package = "org.apache.skywalking.apm.network.dbm.v3";
+option csharp_namespace = "SkyWalking.NetworkProtocol.V3";
+option go_package = "codexray/generated/proto/dbmonitoring/v3/dbm";
+
+message QueryDetails {
+  string query = 1;
+  string service = 2;
+  double executionTime = 3;
+  int64 timeStamp = 4;
+  string databaseName = 5;
+  int64 lastExecuted = 6;
+  string sqlId = 7;
+  string queryDeadlockStatus=8;
+}
+
+service DbmQueryService {
+  rpc collectQuery (stream QueryDetails) returns (Commands) {
+  }
+}
