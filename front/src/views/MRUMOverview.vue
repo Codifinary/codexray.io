@@ -51,7 +51,6 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import mockData from '@/views/overview.json';
 
 export default {
 
@@ -87,16 +86,14 @@ export default {
         get() {
             this.loading = true;
             this.error = '';
-            this.sessions = mockData.data;
-            this.loading = false;
-            // this.$api.getMRUMOverview((data, error) => {
-            //     this.loading = false;
-            //     if (error) {
-            //         this.error = error;
-            //         return;
-            //     }
-            //     this.sessions = data.sessions;
-            // });
+            this.$api.getMRUMOverview((data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.sessions = data.sessions;
+            });
         }
     },
 };
