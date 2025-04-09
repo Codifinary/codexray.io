@@ -328,16 +328,20 @@ export default class Api {
         this.post(this.projectPath(`integrations/eum_domains`),{trust_domain} ,cb);
     }
 
-    getPerformanceData(cb) {
-        this.get(this.projectPath(`mrum/perf`), {}, cb);
+    getPerformanceData(serviceName, query, cb) {
+        this.get(this.projectPath(`mrum/${serviceName}/perf`), {query}, cb);
     }
 
-    getCrashData(cb) {
-        this.get(this.projectPath(`mrum/crash`), {}, cb);
+    getCrashData(serviceName, query, cb) {
+        this.get(this.projectPath(`mrum/${serviceName}/crashes`), {query}, cb);
     }
 
-    getMRUMUsersData(cb){
-        this.get(this.projectPath(`mrum/users`), {}, cb);
+    getCrashDetails(serviceName, query, cb) {
+        this.get(this.projectPath(`mrum/${serviceName}/crashes`), {query}, cb);
+    }
+
+    getMRUMUsersData(serviceName, query, cb){
+        this.get(this.projectPath(`mrum/${serviceName}/users`), {query}, cb);
     }
 
     getMRUMOverview(cb) {
@@ -345,6 +349,6 @@ export default class Api {
     }
 
     getMRUMSessionsData(serviceName, query,cb){
-        this.get(this.projectPath(`mrum/${serviceName}/sessions`), {query: query}, cb);
+        this.get(this.projectPath(`mrum/${serviceName}/sessions`), {query}, cb);
     }
 }

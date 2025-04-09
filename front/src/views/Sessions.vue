@@ -15,21 +15,12 @@
             />
         </div>
         <div>
-            <Dashboard 
-                v-if="data && data.data && data.data.report"
-                :name="data.data.report.name" 
-                :widgets="data.data.report.widgets"
-            />
+            <Dashboard v-if="data && data.data && data.data.report" :name="data.data.report.name" :widgets="data.data.report.widgets" />
         </div>
         <div class="table-section">
             <div class="d-flex align-center mb-4">
                 <div class="d-flex align-center">
-                    <v-btn-toggle
-                        v-model="mode"
-                        mandatory
-                        class="mode-buttons"
-                        dense
-                    >
+                    <v-btn-toggle v-model="mode" mandatory class="mode-buttons" dense>
                         <v-btn value="live" text class="mode-btn px-6">Live</v-btn>
                         <v-btn value="historical" text class="mode-btn px-6">Historical</v-btn>
                     </v-btn-toggle>
@@ -51,7 +42,7 @@
                     dense
                     outlined
                     class="search-field"
-                    style="max-width: 250px;"
+                    style="max-width: 250px"
                 ></v-text-field>
             </div>
             <CustomTable :headers="tableHeaders" :items="filteredSessions" class="table">
@@ -63,12 +54,12 @@
                 </template>
             </CustomTable>
         </div>
-        <GeoMap 
-            :countrywiseOverviews="combinedSessions" 
-            :title="title" 
+        <GeoMap
+            :countrywiseOverviews="combinedSessions"
+            :title="title"
             :tools="tools"
             :tooltipLabel="'Session Count'"
-            :tooltipValue="item => item.ActiveSessions"
+            :tooltipValue="(item) => item.ActiveSessions"
         />
     </div>
 </template>
@@ -78,34 +69,41 @@ import Card from '@/components/Card.vue';
 import CustomTable from '@/components/CustomTable.vue';
 import Dashboard from '@/components/Dashboard.vue';
 import GeoMap from '@/components/GeoMap.vue';
-// import mockData from '@/views/session.json';
+import mockData from '@/views/session.json';
 
 export default {
-
     props: {
         projectId: String,
         tab: String,
-        id: String
+        id: String,
     },
     components: {
         Card,
         GeoMap,
         Dashboard,
-        CustomTable
+        CustomTable,
     },
     data() {
         return {
-            data: null,
-            loading: false,
-            error: '',
-            mode: 'live',
-            search: '',
-            rowCount: 10,
-            cards: [],
-            title: 'Geographic Distribution',
-            tools: []
+            data() {
+                return {
+                    data: null,
+                    loading: false,
+                    error: '',
+                    mode: 'live',
+                    search: '',
+                    rowCount: 10,
+                    cards: [],
+                    title: 'Geographic Distribution',
+                    tools: [],
+                    query: {},
+                    from: null,
+                    limit: null,
+                };
+            },
         };
     },
+
     computed: {
         tableHeaders() {
             const baseHeaders = [
@@ -114,7 +112,7 @@ export default {
                 { text: 'Country', value: 'Country', width: '10%' },
                 { text: 'No. of Requests', value: 'NoOfRequest', width: '10%' },
                 { text: 'Last Page', value: 'LastPage', width: '15%' },
-                { text: 'Start Time', value: 'StartTime', width: '15%' }
+                { text: 'Start Time', value: 'StartTime', width: '15%' },
             ];
 
             // Add the dynamic column based on mode
@@ -130,12 +128,10 @@ export default {
             if (!this.data || !this.data.data) {
                 return [];
             }
-            
+
             // Get data based on mode
-            const sessions = this.mode === 'live' ? 
-                this.data.data.sessionLiveData : 
-                this.data.data.sessionHistoricData;
-                
+            const sessions = this.mode === 'live' ? this.data.data.sessionLiveData : this.data.data.sessionHistoricData;
+
             if (!sessions) {
                 return [];
             }
@@ -145,21 +141,17 @@ export default {
                 return sessions.slice(0, this.rowCount);
             }
 
-            return sessions
-                .filter(session => 
-                    session.Country.toLowerCase().includes(this.search.toLowerCase())
-                )
-                .slice(0, this.rowCount);
+            return sessions.filter((session) => session.Country.toLowerCase().includes(this.search.toLowerCase())).slice(0, this.rowCount);
         },
         combinedSessions() {
             if (!this.data || !this.data.data) {
                 return [];
             }
-            
+
             // Combine both live and historic sessions
             const liveSessions = this.data.data.sessionLiveData || [];
             const historicSessions = this.data.data.sessionHistoricData || [];
-            
+
             const countryMap = [...liveSessions, ...historicSessions].reduce((acc, session) => {
                 const country = session.Country || 'Unknown';
                 if (!acc[country]) {
@@ -167,7 +159,7 @@ export default {
                         Country: country,
                         GeoMapColorCode: session.GeoMapColorCode || '#D6D6D6',
                         NoOfRequests: 0,
-                        ActiveSessions: 0
+                        ActiveSessions: 0,
                     };
                 }
                 acc[country].NoOfRequests += session.NoOfRequest || 0;
@@ -176,9 +168,31 @@ export default {
             }, {});
 
             return Object.values(countryMap);
-        }
+        },
     },
     methods: {
+        getQuery() {
+            const queryParams = this.$route.query;
+
+            // Parse the query object
+            let parsedQuery = {};
+            try {
+                parsedQuery = JSON.parse(decodeURIComponent(queryParams.query || '{}'));
+            } catch (e) {
+                console.warn('Failed to parse query:', e);
+            }
+
+            // Ensure serviceName is present
+            if (!parsedQuery.serviceName && this.id) {
+                parsedQuery.serviceName = this.id;
+            }
+
+            this.query = parsedQuery;
+
+            // Only assign from/limit if they exist in URL
+            this.from = queryParams.from ?? null;
+            this.limit = queryParams.limit ? parseInt(queryParams.limit) : null;
+        },
         updateCards() {
             if (this.data && this.data.data && this.data.data.summary) {
                 this.cards = [
@@ -199,7 +213,7 @@ export default {
                         count: this.data.data.summary.avgSession,
                         bottomColor: '#42A5F5',
                         trend: this.data.data.summary.avgSessionTrend,
-                    }
+                    },
                 ];
             }
         },
@@ -210,6 +224,18 @@ export default {
             const remainingMinutes = minutes % 60;
             return `${hours}h ${remainingMinutes}m`;
         },
+        setQuery() {
+            const query = {
+                query: JSON.stringify(this.query),
+                from: this.from,
+                limit: this.limit,
+            };
+
+            this.$router.push({ query }).catch((err) => {
+                if (err.name !== 'NavigationDuplicated') console.error(err);
+            });
+        },
+
         formatDateTime(epochMilliseconds) {
             if (!epochMilliseconds) return '-';
             const date = new Date(epochMilliseconds);
@@ -222,22 +248,40 @@ export default {
                 hour12: true,
             });
         },
-        get(){
+        get() {
             this.loading = true;
             this.error = '';
-            // const query = {"service": };
-            
-            // this.data = mockData;
-            this.$api.getMRUMSessionsData(this.id, query, (data, error) => {
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.data = data;
-                this.updateCards();
-                this.loading = false;
-            });
-        }
+
+            this.getQuery(); // Extract query, from, limit
+
+            const apiPayload = {
+                query: this.query,
+            };
+
+            if (this.from) {
+                apiPayload.from = this.from;
+            }
+
+            if (this.limit) {
+                apiPayload.limit = this.limit;
+            }
+
+            console.log('API Payload:', apiPayload); // Debug
+
+            this.data = mockData;
+
+            // this.$api.getMRUMSessionsData(this.id, apiPayload, (data, error) => {
+            //     if (error) {
+            //         this.error = error;
+            //         return;
+            //     }
+            //     this.data = data;
+            //     this.updateCards();
+            //     this.loading = false;
+            // });
+
+            this.loading = false;
+        },
     },
     mounted() {
         this.get();
@@ -252,7 +296,7 @@ export default {
                 delete currentQuery.recent;
             }
             // Push the updated query to the router without reloading the page
-            this.$router.push({ query: currentQuery }).catch(err => {
+            this.$router.push({ query: currentQuery }).catch((err) => {
                 // Ignore navigation duplicated errors if the query hasn't actually changed
                 if (err.name !== 'NavigationDuplicated') {
                     console.error(err);
@@ -263,14 +307,14 @@ export default {
             // Note: $forceUpdate is generally discouraged, consider if filtering logic
             // can react directly to rowCount if it's not already.
             // If filteredSessions already depends on rowCount reactively, this might be redundant.
-             this.$forceUpdate();
-        }
-    }
+            this.$forceUpdate();
+        },
+    },
 };
 </script>
 
 <style scoped>
-.performance-container{
+.performance-container {
     margin: 20px;
 }
 
@@ -299,7 +343,7 @@ export default {
     background-color: rgba(249, 115, 22, 0.1);
 }
 
-.geomap{
+.geomap {
     margin-top: 50px;
 }
 
@@ -315,7 +359,7 @@ export default {
 }
 
 .table-section {
-    margin-right: 30px;  
+    margin-right: 30px;
     margin-bottom: 50px;
     margin-top: 50px;
     width: 100%;
@@ -325,11 +369,11 @@ export default {
     margin-top: 30px !important;
 }
 
-.table td{
+.table td {
     font-size: 12px !important;
 }
 
-.table th{
+.table th {
     font-weight: bold;
 }
 
@@ -354,7 +398,7 @@ export default {
 }
 
 .mode-btn.v-btn--active {
-    background-color: #1DBF73 !important;
+    background-color: #1dbf73 !important;
     color: white !important;
 }
 
@@ -376,11 +420,11 @@ export default {
 .v-btn-toggle .v-btn {
     height: 40px !important;
     font-size: 14px;
-    background-color: #1DBF731A !important;
+    background-color: #1dbf731a !important;
 }
 
 .v-btn-toggle .v-btn.v-btn--active {
-    background-color: #1DBF73 !important;
+    background-color: #1dbf73 !important;
     color: white !important;
 }
 

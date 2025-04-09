@@ -1,0 +1,423 @@
+{
+    "context": {
+        "status": {
+            "status": "warning",
+            "error": "",
+            "prometheus": {
+                "status": "warning",
+                "message": "Prometheus is not configured",
+                "error": "",
+                "action": "configure"
+            },
+            "node_agent": {
+                "status": "warning",
+                "nodes": 0
+            },
+            "kube_state_metrics": null
+        },
+        "search": {
+            "applications": null,
+            "nodes": null
+        }
+    },
+    "data": {
+        "status": "ok",
+        "message": "",
+        "summary": {
+            "totalCrashes": 2
+        },
+        "report": {
+            "name": "Mobile Crashes",
+            "status": "ok",
+            "widgets": [
+                {
+                    "chart": {
+                        "ctx": {
+                            "from": 1743417272000,
+                            "to": 1744018472000,
+                            "step": 3600000,
+                            "raw_step": 3600000
+                        },
+                        "title": "Crashes by Device",
+                        "series": [
+                            {
+                                "name": "Samsung",
+                                "color": "#E53935",
+                                "data": [
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    2,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                                ],
+                                "value": ""
+                            }
+                        ],
+                        "threshold": null,
+                        "featured": false,
+                        "stacked": false,
+                        "sorted": false,
+                        "column": false,
+                        "color_shift": 0,
+                        "annotations": null,
+                        "drill_down_link": null,
+                        "hide_legend": false
+                    },
+                    "width": "100%"
+                }
+            ],
+            "checks": null,
+            "custom": false,
+            "instrumentation": ""
+        },
+        "echartReport": {
+            "name": "Mobile Crashes",
+            "status": "unknown",
+            "widgets": [
+                {
+                    "echarts": {
+                        "Top Devices by Crash Count": {
+                            "title": {
+                                "text": "Top Devices by Crash Count",
+                                "textStyle": {
+                                    "fontSize": 16,
+                                    "fontWeight": "normal"
+                                }
+                            },
+                            "tooltip": {
+                                "trigger": "item"
+                            },
+                            "legend": {
+                                "top": "10%",
+                                "right": "5%"
+                            },
+                            "series": {
+                                "name": "Devices",
+                                "type": "pie",
+                                "radius": [
+                                    "40%",
+                                    "70%"
+                                ],
+                                "label": {
+                                    "show": false
+                                },
+                                "data": [
+                                    {
+                                        "value": 2,
+                                        "name": "Samsung"
+                                    }
+                                ]
+                            },
+                            "color": [
+                                "#4169E1",
+                                "#6495ED",
+                                "#1E90FF",
+                                "#00BFFF",
+                                "#87CEEB"
+                            ],
+                            "graphic": {
+                                "type": "text",
+                                "left": "center",
+                                "top": "center",
+                                "style": {
+                                    "text": "",
+                                    "fontSize": 26,
+                                    "fontWeight": "bold",
+                                    "fill": "#333",
+                                    "textAlign": "center"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "echarts": {
+                        "Top OS by Crash Count": {
+                            "title": {
+                                "text": "Top OS by Crash Count",
+                                "textStyle": {
+                                    "fontSize": 16,
+                                    "fontWeight": "normal"
+                                }
+                            },
+                            "tooltip": {
+                                "trigger": "item"
+                            },
+                            "legend": {
+                                "top": "10%",
+                                "right": "5%"
+                            },
+                            "series": {
+                                "name": "OS",
+                                "type": "pie",
+                                "radius": [
+                                    "40%",
+                                    "70%"
+                                ],
+                                "label": {
+                                    "show": false
+                                },
+                                "data": [
+                                    {
+                                        "value": 2,
+                                        "name": "Android"
+                                    }
+                                ]
+                            },
+                            "color": [
+                                "#4169E1",
+                                "#6495ED",
+                                "#1E90FF",
+                                "#00BFFF",
+                                "#87CEEB"
+                            ],
+                            "graphic": {
+                                "type": "text",
+                                "left": "center",
+                                "top": "center",
+                                "style": {
+                                    "text": "",
+                                    "fontSize": 26,
+                                    "fontWeight": "bold",
+                                    "fill": "#333",
+                                    "textAlign": "center"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "echarts": {
+                        "Top App Versions by Crash Count": {
+                            "title": {
+                                "text": "Top App Versions by Crash Count",
+                                "textStyle": {
+                                    "fontSize": 16,
+                                    "fontWeight": "normal"
+                                }
+                            },
+                            "tooltip": {
+                                "trigger": "item"
+                            },
+                            "legend": {
+                                "top": "10%",
+                                "right": "5%"
+                            },
+                            "series": {
+                                "name": "App Versions",
+                                "type": "pie",
+                                "radius": [
+                                    "40%",
+                                    "70%"
+                                ],
+                                "label": {
+                                    "show": false
+                                },
+                                "data": [
+                                    {
+                                        "value": 2,
+                                        "name": "1.0"
+                                    }
+                                ]
+                            },
+                            "color": [
+                                "#4169E1",
+                                "#6495ED",
+                                "#1E90FF",
+                                "#00BFFF",
+                                "#87CEEB"
+                            ],
+                            "graphic": {
+                                "type": "text",
+                                "left": "center",
+                                "top": "center",
+                                "style": {
+                                    "text": "",
+                                    "fontSize": 26,
+                                    "fontWeight": "bold",
+                                    "fill": "#333",
+                                    "textAlign": "center"
+                                }
+                            }
+                        }
+                    }
+                }
+            ],
+            "checks": null,
+            "custom": false,
+            "instrumentation": ""
+        },
+        "crashReasonWiseOverview": [
+            {
+                "CrashReason": "NullPointerException: My custom error",
+                "TotalCrashes": 2,
+                "ImpactedUsers": 2,
+                "LastOccurance": 1743669476000000
+            }
+        ],
+        "crashDatabyCrashReason": null
+    }
+}
