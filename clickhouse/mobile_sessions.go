@@ -26,7 +26,6 @@ type SessionLiveData struct {
 	LastPageTimestamp timeseries.Time
 	LastPage          string
 	StartTime         timeseries.Time
-	GeoMapColorCode   string
 }
 
 type SessionHistoricData struct {
@@ -37,6 +36,11 @@ type SessionHistoricData struct {
 	SessionDuration int64
 	LastPage        string
 	StartTime       timeseries.Time
+}
+
+type SessionGeoMapData struct {
+	Country         string
+	Count           uint64
 	GeoMapColorCode string
 }
 
@@ -397,15 +401,6 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 			return nil, err
 		}
 
-		switch {
-		case session.NoOfRequest <= 20:
-			session.GeoMapColorCode = "#5BBC7A" // Green
-		case session.NoOfRequest <= 80:
-			session.GeoMapColorCode = "#F1AB47" // Yellow
-		default: // > 80%
-			session.GeoMapColorCode = "#EF5350" // Red
-		}
-
 		session.StartTime = timeseries.Time(startTime.Unix())
 		session.LastPageTimestamp = timeseries.Time(lastPageTimestamp.Unix())
 		result = append(result, session)
@@ -471,17 +466,63 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 			return nil, err
 		}
 
-		switch {
-		case session.NoOfRequest <= 20:
-			session.GeoMapColorCode = "#5BBC7A" // Green
-		case session.NoOfRequest <= 80:
-			session.GeoMapColorCode = "#F1AB47" // Yellow
-		default: // > 80%
-			session.GeoMapColorCode = "#EF5350" // Red
-		}
-
 		session.StartTime = timeseries.Time(startTime.Unix())
 		result = append(result, session)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *Client) GetSessionGeoMapData(ctx context.Context, from, to timeseries.Time, service string) ([]SessionGeoMapData, error) {
+	query := `
+	SELECT
+		mpd.Country as country,
+		count() as request_count
+	FROM
+		mobile_perf_data mpd
+	WHERE
+		mpd.Timestamp BETWEEN @from AND @to
+		AND mpd.Country != ''
+		AND mpd.Service = @service
+	GROUP BY
+		mpd.Country
+	ORDER BY
+		request_count DESC
+	`
+
+	rows, err := c.Query(ctx, query,
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.Named("service", service),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []SessionGeoMapData
+
+	for rows.Next() {
+		var data SessionGeoMapData
+
+		if err := rows.Scan(&data.Country, &data.Count); err != nil {
+			return nil, err
+		}
+
+		switch {
+		case data.Count <= 20:
+			data.GeoMapColorCode = "#f44336" // Red
+		case data.Count <= 80:
+			data.GeoMapColorCode = "#F1AB47" // Yellow
+		default: // > 80
+			data.GeoMapColorCode = "#5BBC7A" // Green
+		}
+
+		result = append(result, data)
 	}
 
 	if err := rows.Err(); err != nil {
