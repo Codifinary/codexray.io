@@ -63,14 +63,17 @@ export default {
     props: {
         projectId: String,
         tab: String,
+        id: String
     },
     data() {
         return {
             title: 'Performance Dashboard',
-            data: 0,
+            data: null,
             chartData: { widgets: [] },
-            loading: true,
+            loading: false,
             error: null,
+            from: null,
+            query: {},
             cards: [
                 { 
                     primaryLabel: 'Total Requests', 
@@ -78,8 +81,8 @@ export default {
                     secondaryLabel: 'Req/sec',
                     secondaryValue: 0,
                     percentageChange: 0, 
-                    icon: 'up-green-arrow',
                     iconColor: '',
+                    icon: 'up-green-arrow',
                     bottomColor: '',
                     trendColor: ''
                 },
@@ -113,25 +116,62 @@ export default {
     mounted() {
         this.get();
     },
-
     watch: {
-        '$route'() {
+        '$route.query'() {
+            this.getQuery();
             this.get();
-        },
+        }
     },
     methods: {
+        getQuery() {
+            const queryParams = this.$route.query;
+            
+            // Parse the query object
+            let parsedQuery = {};
+            try {
+                const queryParam = queryParams.query;
+                if (queryParam) {
+                    parsedQuery = JSON.parse(decodeURIComponent(queryParam || '{}'));
+                }
+            } catch (e) {
+                console.warn('Failed to parse query:', e);
+            }
+
+            this.query = parsedQuery;
+            
+            // Only assign from if it exists in URL
+            this.from = queryParams.from ?? null;
+        },
+        setQuery() {
+            const query = {
+                query: JSON.stringify(this.query)
+            };
+            this.$router.push({ query }).catch((err) => {
+                if (err.name !== 'NavigationDuplicated') {
+                    console.error(err);
+                }
+            });
+        },
         get() {
             this.loading = true;
             this.error = null;
-            this.$api.getPerformanceData((data, error) => {
+
+            this.getQuery(); // Extract query and from parameter
+
+            const apiPayload = {
+                query: encodeURIComponent(JSON.stringify({ serviceName: this.id })),
+                from: this.from
+            };
+
+            this.$api.getMRUMPerformanceData(this.id, apiPayload, (res, error) => {
+                this.loading = false;
                 if (error) {
                     this.error = error;
-                    this.loading = false;
                     return;
                 }
-        
-                if (data && data.summary) {
-                    const summary = data.summary;
+                
+                if (res && res.summary) {
+                    const summary = res.summary;
                     
                     // Update Total Requests card
                     this.cards[0].primaryValue = summary.primaryValue || 0;
@@ -158,15 +198,13 @@ export default {
                     this.cards[2].trendColor = summary.usersImpactedTrend > 0 ? '#EF5350' : '#66BB6A';
                 }
                 
-                if (data && data.countrywiseOverviews) {
-                    this.countrywiseOverviews = data.countrywiseOverviews;
+                if (res && res.countrywiseOverviews) {
+                    this.countrywiseOverviews = res.countrywiseOverviews;
                 }
                 
-                if (data && data.report) {
-                    this.chartData = data.report;
+                if (res && res.report) {
+                    this.chartData = res.report;
                 }
-                
-                this.loading = false;
             });
         },
     },

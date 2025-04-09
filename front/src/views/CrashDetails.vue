@@ -86,7 +86,6 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import mockData from './crashD.json';
 
 export default {
     components: {
@@ -104,8 +103,11 @@ export default {
         serviceName: {
             type: String,
             required: true
-        }
-
+        },
+        id: {
+            type: String,
+            required: true
+        },
     },
     data() {
         return {
@@ -124,6 +126,14 @@ export default {
                 }
             }
         };
+    },
+    watch: {
+        '$route.query': {
+            handler() {
+                this.get();
+            },
+            immediate: true
+        }
     },
     methods: {
         formatDate(epochMicroseconds) {
@@ -144,8 +154,8 @@ export default {
             this.dialogVisible = true;
         },
         copyStackTrace() {
-            if (this.selectedCrash?.stackTrace) {
-                navigator.clipboard.writeText(this.selectedCrash.stackTrace)
+            if (this.selectedCrash?.StackTrace) {
+                navigator.clipboard.writeText(this.selectedCrash.StackTrace)
                     .then(() => {
                         this.dialogVisible = false;
                     });
@@ -153,8 +163,25 @@ export default {
         },
         get() {
             this.loading = true;
-            this.data = mockData;
-            this.loading = false;
+            
+            const query = {
+                service: this.serviceName,
+                crash_reason: this.crashId
+            };
+
+            const apiPayload = {
+                query: JSON.stringify(query),
+                from: this.$route.query.from
+            };
+
+            this.$api.getMRUMCrashData(this.serviceName, apiPayload, (res, error) => {
+                this.loading = false;
+                if (error) {
+                    console.error('Error fetching crash details:', error);
+                    return;
+                }
+                this.data = res;
+            });
         }
     },
     mounted() {

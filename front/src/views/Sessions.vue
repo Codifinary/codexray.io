@@ -1,5 +1,6 @@
 <template>
-    <div class="sessions-container">
+    <v-progress-linear indeterminate v-if="loading" color="success" />
+    <div v-else class="sessions-container">
         <div class="cards my-4">
             <Card
                 v-for="(card, index) in cards"
@@ -69,7 +70,6 @@ import Card from '@/components/Card.vue';
 import CustomTable from '@/components/CustomTable.vue';
 import Dashboard from '@/components/Dashboard.vue';
 import GeoMap from '@/components/GeoMap.vue';
-import mockData from '@/views/session.json';
 
 export default {
     props: {
@@ -85,22 +85,18 @@ export default {
     },
     data() {
         return {
-            data() {
-                return {
-                    data: null,
-                    loading: false,
-                    error: '',
-                    mode: 'live',
-                    search: '',
-                    rowCount: 10,
-                    cards: [],
-                    title: 'Geographic Distribution',
-                    tools: [],
-                    query: {},
-                    from: null,
-                    limit: null,
-                };
-            },
+            data: null,
+            loading: false,
+            error: '',
+            mode: 'live',
+            search: '',
+            rowCount: 10,
+            cards: [],
+            title: 'Geographic Distribution',
+            tools: [],
+            query: {},
+            from: null,
+            limit: null,
         };
     },
 
@@ -192,6 +188,22 @@ export default {
             // Only assign from/limit if they exist in URL
             this.from = queryParams.from ?? null;
             this.limit = queryParams.limit ? parseInt(queryParams.limit) : null;
+
+            // Update rowCount to match limit if it exists
+            if (this.limit) {
+                this.rowCount = this.limit.toString();
+            }
+
+            // Update the URL with current parameters
+            const currentQuery = { ...this.$route.query };
+            if (this.from) currentQuery.from = this.from;
+            if (this.limit && this.limit !== 10) currentQuery.limit = this.limit.toString();
+            
+            this.$router.push({ query: currentQuery }).catch((err) => {
+                if (err.name !== 'NavigationDuplicated') {
+                    console.error(err);
+                }
+            });
         },
         updateCards() {
             if (this.data && this.data.data && this.data.data.summary) {
@@ -254,33 +266,23 @@ export default {
 
             this.getQuery(); // Extract query, from, limit
 
+            // Create the payload with separate parameters
             const apiPayload = {
-                query: this.query,
+                query: JSON.stringify({ serviceName: this.id }),
+                from: this.from,
+                limit: this.limit
             };
 
-            if (this.from) {
-                apiPayload.from = this.from;
-            }
 
-            if (this.limit) {
-                apiPayload.limit = this.limit;
-            }
-
-            console.log('API Payload:', apiPayload); // Debug
-
-            this.data = mockData;
-
-            // this.$api.getMRUMSessionsData(this.id, apiPayload, (data, error) => {
-            //     if (error) {
-            //         this.error = error;
-            //         return;
-            //     }
-            //     this.data = data;
-            //     this.updateCards();
-            //     this.loading = false;
-            // });
-
-            this.loading = false;
+            this.$api.getMRUMSessionsData(this.id, apiPayload, (data, error) => {
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.data = data;
+                this.updateCards();
+                this.loading = false;
+            });
         },
     },
     mounted() {
@@ -288,15 +290,16 @@ export default {
     },
     watch: {
         rowCount(newVal) {
-            // Update URL query parameter for limit, removing it if default (10) is selected
-            const currentQuery = { ...this.$route.query };
+            // Update URL query parameter for limit
+            const currentQuery = { ...this.$route.query }; // Copy existing query parameters
             if (newVal && newVal !== '10') {
-                currentQuery.recent = newVal;
+                currentQuery.limit = newVal;
             } else {
-                delete currentQuery.recent;
+                delete currentQuery.limit;
             }
-            // Push the updated query to the router without reloading the page
-            this.$router.push({ query: currentQuery }).catch((err) => {
+            
+            // Update the route query while preserving other parameters
+            this.$router.push({ query: { ...currentQuery } }).catch((err) => {
                 // Ignore navigation duplicated errors if the query hasn't actually changed
                 if (err.name !== 'NavigationDuplicated') {
                     console.error(err);
@@ -304,10 +307,13 @@ export default {
             });
 
             // Existing logic: Trigger recompute of filteredSessions if needed
-            // Note: $forceUpdate is generally discouraged, consider if filtering logic
-            // can react directly to rowCount if it's not already.
-            // If filteredSessions already depends on rowCount reactively, this might be redundant.
             this.$forceUpdate();
+        },
+        '$route.query'(curr) {
+            if (!curr.limit) {
+                this.rowCount = '10';
+            }
+            this.get();
         },
     },
 };
@@ -319,13 +325,6 @@ export default {
 }
 
 .cards {
-    /* display: flex; */
-    /* justify-content: start; */
-    /* flex-wrap: wrap; */
-    /* margin-right: 30px;   */
-    /* margin-bottom: 50px; */
-    /* margin-top: 50px; */
-    /* width: 100%; */
     display: flex;
     gap: 20px;
     align-items: center;
