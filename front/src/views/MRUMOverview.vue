@@ -13,8 +13,16 @@
             class="table"
         >
             <template #item.serviceName="{ item: { serviceName } }">
-                <div class="service-name clickable" @click="goToService(serviceName)">
-                    {{ serviceName }}
+                <div class="service-name clickable">
+                    <router-link
+                            :to="{
+                                name: 'overview',
+                                params: { view: 'MRUM', id: serviceName },
+                                query: $route.query,
+                            }"
+                        >
+                            {{ serviceName }}
+                        </router-link>
                 </div>
             </template>
             <template #item.totalUsers="{ item: { totalUsers } }">
@@ -43,12 +51,13 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
+import mockData from '@/views/overview.json';
 
 export default {
 
     props: {
         id: String,
-        projectId: String
+        report: String
     },
     components: {
         CustomTable
@@ -78,28 +87,16 @@ export default {
         get() {
             this.loading = true;
             this.error = '';
-            this.$api.getMRUMOverview((data, error) => {
-                this.loading = false;
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.sessions = data.sessions;
-            });
-        },
-        goToService(serviceName) {
-            this.$router.push(this.link(serviceName));
-        },
-        link(serviceName) {
-            return {
-                name: 'overview',
-                params: {
-                    projectId: this.projectId,
-                    view: 'MRUM',
-                    id: serviceName,
-                    tab: 'sessions'
-                }
-            };
+            this.sessions = mockData.data;
+            this.loading = false;
+            // this.$api.getMRUMOverview((data, error) => {
+            //     this.loading = false;
+            //     if (error) {
+            //         this.error = error;
+            //         return;
+            //     }
+            //     this.sessions = data.sessions;
+            // });
         }
     },
 };

@@ -73,8 +73,7 @@ import GeoMap from '@/components/GeoMap.vue';
 
 export default {
     props: {
-        projectId: String,
-        tab: String,
+        report: String,
         id: String,
     },
     components: {

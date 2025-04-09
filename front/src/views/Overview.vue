@@ -36,8 +36,8 @@
         </template>
 
         <template v-if="view === 'MRUM'">
-            <MRUM v-if="id" :projectId="$route.params.projectId" :id="id" :tab="tab" :sessionName="serviceName"/>
-            <MRUMOverview v-else :projectId="$route.params.projectId"/>
+            <MRUM v-if="id" :id="id"/>
+            <MRUMOverview v-else />
         </template>
 
     </div>

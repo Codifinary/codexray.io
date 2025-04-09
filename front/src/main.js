@@ -34,11 +34,11 @@ const router = new VueRouter({
         { path: '/p/settings/:tab?', name: 'project_new', component: Project, props: true },
         { path: '/p/:projectId/settings/:tab?', name: 'project_settings', component: Project, props: true, meta: { stats: { params: ['tab'] } } },
         {
-            path: '/p/:projectId/:view?/:id?/:tab?/:report?',
+            path: '/p/:projectId/:view?/:id?/:report?',
             name: 'overview',
             component: Overview,
             props: true,
-            meta: { stats: { params: ['view', 'tab', 'report'] } },
+            meta: { stats: { params: ['view', 'report'] } },
         },
         { path: '/welcome', name: 'welcome', component: Welcome },
         { path: '/', name: 'index', component: App },

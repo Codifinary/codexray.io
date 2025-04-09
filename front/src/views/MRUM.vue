@@ -2,41 +2,32 @@
     <div class="settings-container">
         <div class="font-weight-bold tab-heading">{{id}}</div>
 
-
-        <v-tabs height="40" slider-color="success" show-arrows slider-size="2">
-            <v-tab v-for="t in tabs" :key="t.id" :to="link(t.id)">
-                {{ t.name }}
-            </v-tab>
+        <v-tabs v-model="activeTab" height="40" slider-color="success" show-arrows slider-size="2" @change="updateUrl">
+            <v-tab v-for="(report, index) in reports" :key="index">{{ report.label }}</v-tab>
         </v-tabs>
 
-        <template v-if="tab === 'sessions'">
-            <Sessions :id="id" :projectId="projectId" :tab="tab"/>
-        </template>
-
-        <template v-if="tab === 'users'">
-            <Users :id="id" :projectId="projectId" :tab="tab"/>
-        </template>
-
-        <template v-if="tab === 'performance'">
-            <Performance :id="id" :projectId="projectId" :tab="tab"/>
-        </template>
-
-        <template v-if="tab === 'crash'">
-            <Crash :id="id" :projectId="projectId" :tab="tab"/>
-        </template>
+        <v-tabs-items v-model="activeTab">
+            <v-tab-item v-for="(report, index) in reports" :key="index">
+                <component
+                    :is="report.component"
+                    v-if="activeTab === index"
+                    :id="id"
+                    :report="reports[index].name"
+                />
+            </v-tab-item>
+        </v-tabs-items>
     </div>
 </template>
 
 <script>
-import Users from '@/components/Users.vue';
-import Crash from './Crash.vue';
-import Performance from './Performance.vue';
-import Sessions from './Sessions.vue';
+import Users from '@/views/MRUMUsers.vue';
+import Crash from '@/views/Crash.vue';
+import Performance from '@/views/Performance.vue';
+import Sessions from '@/views/Sessions.vue';
 
 export default {
     props: {
-        projectId: String,
-        tab: String,
+        report: String,
         id: String,
     },
 
@@ -49,66 +40,79 @@ export default {
 
     data() {
         return {
+            activeTab: 0,
             loading: false,
             error: '',
-            mrumData: null
+            reports :[
+                { name: 'sessions', label: 'Sessions', component: 'Sessions'},
+                { name: 'users', label: 'Users', component: 'Users'},
+                { name: 'performance', label: 'Performance', component: 'Performance'},
+                { name: 'crash', label: 'Crash', component: 'Crash'}
+            ]
         };
     },
 
     mounted() {
-        this.get();
-        this.$events.watch(this, this.get, 'refresh');
+        this.$events.watch(this, () => {}, 'refresh');
         if (!this.tabs.find((t) => t.id === this.tab)) {
-            this.$router.replace({ params: { tab: undefined } });
+            this.$router.replace({ params: { report: undefined } });
         }
     },
     watch: {
-        id() {
-            this.mrumData = null;
-            this.get();
-        },
-        tab() {
-            this.get();
-        }
+        report: {immediate: true, handler: 'setActiveTab'},
+        '$route.params.report': { immediate: true, handler: 'setActiveTab' },
+
     },
 
-    computed: {
-        tabs() {
-            return [
-                { id: 'sessions', name: 'Sessions'},
-                { id: 'users', name: 'Users'},
-                { id: 'performance', name: 'Performance'},
-                { id: 'crash', name: 'Crash'}
-            ];
+    created() {
+        const report = this.$route.params.report || this.report;
+        if (!report) {
+            this.$router
+                .replace({
+                    name: 'overview',
+                    params: { view: 'MRUM', id: this.id, report: this.reports[0].name },
+                    query: this.$utils.contextQuery(),
+                })
+                .catch(this.handleNavigationError);
+        } else {
+            this.setActiveTab(report);
         }
     },
 
     methods: {
-        get() {
-            if (!this.id) return;
-            
-            this.loading = true;
-            this.error = '';
-            this.$api.getOverview('MRUM', this.id, (data, error) => {
-                this.loading = false;
-                if (error) {
-                    this.error = error;
-                    return;
-                }
-                this.mrumData = data;
-            });
+        updateUrl(tabIndex) {
+            if (tabIndex < 0 || tabIndex >= this.reports.length) return;
+            const report = this.reports[tabIndex].name;
+            if (this.$route.params.report !== report) {
+                this.$router
+                    .push({
+                        name: 'overview',
+                        params: { view: 'MRUM', id: this.id, report },
+                        query: { ...this.$utils.contextQuery(), error: this.selectedError || undefined },
+                    })
+                    .catch(this.handleNavigationError);
+            }
         },
-        link(tabId) {
-            return {
-                name: 'overview',
-                params: {
-                    projectId: this.projectId,
-                    view: 'MRUM',
-                    id: this.id,
-                    tab: tabId
+        setActiveTab(report){
+            if (!report) return;
+
+            const decodedReport = decodeURIComponent(report);
+            const tabIndex = this.reports.findIndex((r) => decodedReport.startsWith(r.name));
+
+            if (tabIndex !== -1) {
+                this.activeTab = tabIndex;
+                if (decodedReport.startsWith('errors/')) {
+                    this.selectedError = decodedReport.split('/')[1] || null;
+                } else {
+                    this.selectedError = null;
                 }
-            };
-        }
+            } else {
+                this.activeTab = 0; // Fallback to first tab if not found
+            }
+        },
+        handleNavigationError(err) {
+            if (err.name !== 'NavigationDuplicated') console.error(err);
+        },
     },
 };
 </script>
