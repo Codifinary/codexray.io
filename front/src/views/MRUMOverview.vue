@@ -43,7 +43,6 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import mockData from './overview.json';
 
 export default {
 
@@ -79,16 +78,14 @@ export default {
         get() {
             this.loading = true;
             this.error = '';
-            this.sessions = mockData.data;
-            this.loading = false;
-            // this.$api.getMRUMOverview((data, error) => {
-            //     this.loading = false;
-            //     if (error) {
-            //         this.error = error;
-            //         return;
-            //     }
-            //     this.sessions = data.sessions;
-            // });
+            this.$api.getMRUMOverview((data, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.sessions = data.sessions;
+            });
         },
         goToService(serviceName) {
             this.$router.push(this.link(serviceName));

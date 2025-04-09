@@ -1,15 +1,18 @@
 <template>
-    <CrashDetails 
+    <v-progress-linear indeterminate v-if="loading" color="success" />
+    <div v-else>
+
+        <CrashDetails 
         v-if="crashID" 
         :id="crashID" 
-        :serviceName="id"
+        :serviceName="this.$route.params.serviceName"
         :project-id="projectId" 
         :crash-id="crashID"
     />
     <div v-else class="crash-container">
         <Card :name="name" :count="count" :bottomColor="bottomColor"/>
         <div class="charts-container">
-            <div v-for="(widget, index) in chartWidgets" :key="index" class="chart-wrapper">
+            <div v-for="(widget, index) in data.echartReport.widgets" :key="index" class="chart-wrapper">
                 <EChart 
                     :chartOptions="widget.config" 
                     :style="getChartStyle()"
@@ -17,9 +20,9 @@
             </div>
         </div>
         <CustomTable 
-            v-if="data.data && data.data.crashReasonWiseOverview" 
+            v-if="data && data.crashReasonWiseOverview && data.crashReasonWiseOverview.length > 0" 
             :headers="headers" 
-            :items="data.data.crashReasonWiseOverview" 
+            :items="data.crashReasonWiseOverview" 
             class="table"
         >
             <template #item.CrashReason="{ item: { CrashReason } }">
@@ -43,7 +46,14 @@
                 </div>
             </template>
         </CustomTable>
-        <Dashboard id="chart" class="chart" :name="data.data.report.name" :widgets="data.data.report.widgets" />
+        <Dashboard 
+            v-if="data && data.report && data.report.widgets && data.report.widgets.length > 0" 
+            id="chart" 
+            class="chart" 
+            :name="data.report.name || ''" 
+            :widgets="data.report.widgets"
+        />
+        </div>
     </div>
 </template>
 
@@ -52,7 +62,6 @@ import Card from '@/components/Card.vue';
 import CustomTable from '@/components/CustomTable.vue';
 import Dashboard from '@/components/Dashboard.vue';
 import EChart from '@/components/EChart.vue';
-import mockData from './crash.json';
 import CrashDetails from './CrashDetails.vue';
 
 export default {
@@ -69,11 +78,31 @@ export default {
     },
     data() {
         return {
-            name: 'Crashes',
-            count: 0,
-            bottomColor: '#F57C00',
-            title: 'Mobile Crashes',
+            data: {
+                status: "ok",
+                message: "",
+                summary: {
+                    totalCrashes: 0
+                },
+                report: {
+                    name: "Mobile Crashes",
+                    status: "ok",
+                    widgets: []
+                },
+                echartReport: {
+                    name: "Mobile Crashes",
+                    status: "unknown",
+                    widgets: []
+                },
+                crashReasonWiseOverview: [],
+                crashDatabyCrashReason: null
+            },
+            loading: false,
+            error: null,
+            from: null,
+            query: {},
             chartData: {
+                name: "Mobile Crashes",
                 widgets: []
             },
             chartConfigs: [],
@@ -83,53 +112,90 @@ export default {
                 { text: 'Affected Users', value: 'AffectedUsers', width: '20%' },
                 { text: 'Last Occurrence', value: 'LastOccurance', width: '20%' }
             ],
-            data: {
-                data: {
-                    crashReasonWiseOverview: [],
-                    report: {
-                        name: '',
-                        widgets: []
-                    },
-                    echartReport: {
-                        name: '',
-                        widgets: []
-                    }
-                }
-            },
-            loading: false,
             chartWidgets: [],
             crashID: this.$route.query.crashID || null,
-            projectId: this.$route.params.projectId || ''
+            projectId: this.$route.params.projectId || '',
+            name: 'Crashes',
+            count: 0,
+            bottomColor: '#F57C00'
         };
     },
-    async mounted() {
-        await this.get();
+    mounted() {
+        this.get();
     },
     watch: {
-  '$route.query.crashID': {
-    immediate: true,
-    handler(newVal) {
-      this.crashID = newVal;
-    }
-  }
-},
-    methods: {
-        link(CrashReason) {
-  return {
-    name: 'overview',
-    params: {
-      projectId: this.$route.params.projectId,
-      view: 'MRUM',
-      id: this.$route.params.id,
-      tab: 'crash',
+        '$route.query'() {
+            this.getQuery();
+            this.get();
+        }
     },
-    query: {
-      ...this.$route.query,
-      crashID: CrashReason
-    }
-  };
-}
-,
+    methods: {
+        getQuery() {
+            const queryParams = this.$route.query;
+            
+            // Parse the query object
+            let parsedQuery = {};
+            try {
+                const queryParam = queryParams.query;
+                if (queryParam) {
+                    parsedQuery = JSON.parse(decodeURIComponent(queryParam || '{}'));
+                }
+            } catch (e) {
+                console.warn('Failed to parse query:', e);
+            }
+
+            this.query = parsedQuery;
+            
+            // Only assign from if it exists in URL
+            this.from = queryParams.from ?? null;
+        },
+        setQuery() {
+            const query = {
+                query: JSON.stringify({ serviceName: this.$route.params.serviceName }),
+                from: this.from
+            };
+            this.$router.push({ query }).catch((err) => {
+                if (err.name !== 'NavigationDuplicated') {
+                    console.error(err);
+                }
+            });
+        },
+        get() {
+            this.loading = true;
+            this.error = null;
+
+            this.getQuery(); // Extract query and from parameter
+
+            const apiPayload = {
+                query: encodeURIComponent(JSON.stringify({ serviceName: this.$route.params.serviceName })),
+                from: this.from
+            };
+
+            this.$api.getMRUMCrashData(this.$route.params.serviceName, apiPayload, (res, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+
+                this.data = res;
+            });
+        },
+        link(CrashReason) {
+            return {
+                name: 'overview',
+                params: {
+                    projectId: this.$route.params.projectId,
+                    view: 'MRUM',
+                    id: this.$route.params.id,
+                    tab: 'crash',
+                },
+                query: {
+                    ...this.$route.query,
+                    crashID: CrashReason
+                }
+            };
+        },
         formatDate(epochMicroseconds) {
             if (!epochMicroseconds) return '-';
 
@@ -149,39 +215,6 @@ export default {
                 width: '100%'
 
             };
-        },
-        get(){
-            this.loading = true;
-            this.data = mockData;
-            
-            // Process chart widgets from the mock data
-            if (this.data.data.echartReport && this.data.data.echartReport.widgets) {
-                this.chartWidgets = this.data.data.echartReport.widgets.map(widget => {
-                    if (widget.echarts) {
-                        // Extract the first chart configuration from the echarts object
-                        const chartKey = Object.keys(widget.echarts)[0];
-                        const config = widget.echarts[chartKey];
-                        
-                        // Ensure consistent legend positioning
-                        if (!config.legend) {
-                            config.legend = {};
-                        }
-                        config.legend = {
-                            ...config.legend,
-                            top: '10%',
-                            right: '5%',
-                            orient: 'vertical'
-                        };
-                        
-                        return {
-                            config
-                        };
-                    }
-                    return null;
-                }).filter(widget => widget !== null);
-            }
-            
-            this.loading = false;
         }
     }
 };

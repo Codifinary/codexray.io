@@ -47,7 +47,6 @@
 <script>
 import Card from '@/components/Card.vue';
 import Card2 from './Card2.vue';
-import mockData from './users.json';
 import Chart from './Chart.vue';
 
 export default {
@@ -55,6 +54,7 @@ export default {
     props: {
         projectId: String,
         tab: String,
+        id: String
     },
     components: {
         Card,
@@ -136,7 +136,6 @@ export default {
                 { text: 'First Seen', value: 'firstSeen' },
                 { text: 'Last Seen', value: 'lastSeen' },
             ],
-            loading: false,
             data: {
                 data: {
                     mobileUserData: [],
@@ -153,18 +152,85 @@ export default {
                     }
                 }
             },
+            loading: false,
             error: null,
+            from: null,
+            query: {},
         };
     },
     mounted() {
         this.get();
     },
     watch: {
-        '$route'() {
+        '$route.query'() {
+            // When URL parameters change, update the component state
+            this.getQuery();
             this.get();
-        },
+        }
     },
     methods: {
+        // Get query parameters from URL and update internal state
+        getQuery() {
+            const queryParams = this.$route.query;
+
+            // Parse the query object
+            let parsedQuery = {};
+            try {
+                // Only accept query parameter in JSON string format
+                const queryParam = queryParams.query;
+                if (queryParam) {
+                    parsedQuery = JSON.parse(decodeURIComponent(queryParam || '{}'));
+                }
+            } catch (e) {
+                console.warn('Failed to parse query:', e);
+            }
+
+            // Ensure serviceName is present
+            if (!parsedQuery.serviceName && this.id) {
+                parsedQuery.serviceName = this.id;
+            }
+
+            this.query = parsedQuery;
+            
+            // Only assign from if it exists in URL
+            this.from = queryParams.from ?? null;
+        },
+
+        // Update URL with current parameters
+        setQuery() {
+            const query = {
+                query: JSON.stringify(this.query)
+            };
+            this.$router.push({ query }).catch((err) => {
+                if (err.name !== 'NavigationDuplicated') {
+                    console.error(err);
+                }
+            });
+        },
+
+        // Main get method to fetch data
+        get() {
+            this.loading = true;
+            this.error = null;
+
+            this.getQuery(); // Extract query and from parameter
+
+            // Create the payload with parameters
+            const apiPayload = {
+                query: JSON.stringify(this.query),
+                from: this.from
+            };
+
+
+            this.$api.getMRUMUsersData(this.id, apiPayload, (res, error) => {
+                this.loading = false;
+                if (error) {
+                    this.error = error;
+                    return;
+                }
+                this.data = res;
+            });
+        },
         formatDate(dateStr) {
   if (!dateStr || typeof dateStr !== 'string') return 'Invalid date';
 
@@ -195,12 +261,6 @@ export default {
                 case 3: return 'rd';
                 default: return 'th';
             }
-        },
-        get() {
-            this.loading = true;
-            this.error = null;
-            this.data = mockData;
-            this.loading = false;
         },
     },
 };

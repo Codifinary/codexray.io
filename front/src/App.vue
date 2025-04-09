@@ -205,7 +205,7 @@ export default {
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
-                MRUM: 'MRUM'
+                MRUM: 'MRUM',
                 // deployments: 'Deployments',
             };
         },
@@ -217,7 +217,7 @@ export default {
                 nodes: { name: 'nodes', class: 'nodes-icon' },
                 incidents: { name: 'incidents', class: 'incident-icon' },
                 EUM: { name: 'eum', class: 'eum-icon' },
-                MRUM: {name: 'mrum', class: 'eum-icon'}
+                MRUM: {name: 'eum', class: 'eum-icon'}
                 // deployments: { name: 'deployments', class: 'dep-icon' },
             };
         },

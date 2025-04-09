@@ -107,7 +107,9 @@ export default {
         };
     },
     mounted() {
-        this.$nextTick(this.redraw);
+        this.$nextTick(() => {
+            this.redraw();
+        });
     },
     beforeDestroy() {
         this.ch && this.ch.destroy();
@@ -218,6 +220,17 @@ export default {
 
     methods: {
         redraw() {
+            if (!this.$refs.container || !this.$refs.uplot) {
+                return;
+            }
+
+            const container = this.$refs.container;
+            const uplot = this.$refs.uplot;
+
+            if (!container.clientWidth || !uplot.clientWidth) {
+                return;
+            }
+
             const c = this.config;
             const ss = c.series.filter(this.isActive);
             const f = (s) => ({
@@ -256,7 +269,7 @@ export default {
             const opts = {
                 height: 150,
                 padding: [10, 20, -10, 0],
-                width: this.$refs.uplot.clientWidth,
+                width: uplot.clientWidth,
                 ms: 1,
                 axes: [
                     {
@@ -296,7 +309,7 @@ export default {
             if (this.ch) {
                 this.ch.destroy();
             }
-            this.ch = new uPlot(opts, [c.ctx.data, ...data], this.$refs.uplot);
+            this.ch = new uPlot(opts, [c.ctx.data, ...data], uplot);
             this.ch.root.style.font = font;
             this.bbox = Object.entries(this.ch.bbox).reduce((o, e) => {
                 o[e[0]] = e[1] / devicePixelRatio;
