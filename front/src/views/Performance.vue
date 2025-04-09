@@ -1,7 +1,7 @@
 <template>
-    <div class="performance-container">
-        <v-progress-linear indeterminate v-if="loading" color="green" />
-        <div v-if="!loading">
+    <v-progress-linear indeterminate v-if="loading" color="green" />
+    <div v-else class="performance-container">
+        <div>
         <div class="cards">
             <Card2
                 v-for="(card, index) in cards"
@@ -61,8 +61,7 @@ import Heatmap from '@/components/Heatmap.vue';
 import Chart from '@/components/Chart.vue';
 export default {
     props: {
-        projectId: String,
-        tab: String,
+        report: String,
         id: String
     },
     data() {

@@ -1,7 +1,7 @@
 <template>
-    <div class="users-container">
-        <v-progress-linear indeterminate v-if="loading" color="success" />
-        <div v-if="!loading">
+    <v-progress-linear indeterminate v-if="loading" color="success" />
+    <div v-else class="users-container">
+        <div>
             <div class="trend-cards">
                 <Card
                     v-for="card in computedCards"
@@ -46,14 +46,13 @@
 
 <script>
 import Card from '@/components/Card.vue';
-import Card2 from './Card2.vue';
-import Chart from './Chart.vue';
+import Card2 from '@/components/Card2.vue';
+import Chart from '@/components/Chart.vue';
 
 export default {
     name: 'Users',
     props: {
-        projectId: String,
-        tab: String,
+        report: String,
         id: String
     },
     components: {

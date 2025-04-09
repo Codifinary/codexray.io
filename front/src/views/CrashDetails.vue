@@ -92,14 +92,6 @@ export default {
         CustomTable,
     },
     props: {
-        crashId: {
-            type: String,
-            required: true
-        },
-        projectId: {
-            type: String,
-            required: true
-        },
         serviceName: {
             type: String,
             required: true

@@ -6,8 +6,6 @@
         v-if="crashID" 
         :id="crashID" 
         :serviceName="this.$route.params.serviceName"
-        :project-id="projectId" 
-        :crash-id="crashID"
     />
     <div v-else class="crash-container">
         <Card :name="name" :count="count" :bottomColor="bottomColor"/>
@@ -27,7 +25,16 @@
         >
             <template #item.CrashReason="{ item: { CrashReason } }">
                 <div class="crash-reason">
-                    <router-link :to="link(CrashReason)">{{ CrashReason }}</router-link>
+                    <router-link :to="{name: 'overview',
+                params: {
+                    view: 'MRUM',
+                    id: this.$route.params.id,
+                    report: 'crash',
+                },
+                query: {
+                    ...this.$route.query,
+                    crashID: CrashReason
+                }}">{{ CrashReason }}</router-link>
                 </div>
             </template>
             <template #item.Crashes="{ item: { TotalCrashes } }">
@@ -67,7 +74,8 @@ import CrashDetails from './CrashDetails.vue';
 export default {
     props: {
         crashReason: String,
-        id: String
+        id: String,
+        report: String
     },
     components: {
         Card,
@@ -180,21 +188,6 @@ export default {
 
                 this.data = res;
             });
-        },
-        link(CrashReason) {
-            return {
-                name: 'overview',
-                params: {
-                    projectId: this.$route.params.projectId,
-                    view: 'MRUM',
-                    id: this.$route.params.id,
-                    tab: 'crash',
-                },
-                query: {
-                    ...this.$route.query,
-                    crashID: CrashReason
-                }
-            };
         },
         formatDate(epochMicroseconds) {
             if (!epochMicroseconds) return '-';
