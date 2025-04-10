@@ -27,8 +27,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/soheilhy/cmux"
 	"golang.org/x/term"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"k8s.io/klog"
 )
@@ -40,7 +42,6 @@ var static embed.FS
 
 func main() {
 	listen := kingpin.Flag("listen", "Listen address - ip:port or :port").Envar("LISTEN").Default("0.0.0.0:8080").String()
-	grpcListen := kingpin.Flag("grpc-listen", "gRPC listen address - ip:port or :port").Envar("GRPC_LISTEN").Default("0.0.0.0:8081").String()
 	urlBasePath := kingpin.Flag("url-base-path", "The base URL to run codexray at a sub-path, e.g. /codexray/").Envar("URL_BASE_PATH").Default("/").String()
 	dataDir := kingpin.Flag("data-dir", `Path to the data directory`).Envar("DATA_DIR").Default("./data").String()
 	cacheTTL := kingpin.Flag("cache-ttl", "Cache TTL").Envar("CACHE_TTL").Default("720h").Duration()
@@ -302,24 +303,37 @@ func main() {
 
 	router.PathPrefix("").Handler(http.RedirectHandler(*urlBasePath, http.StatusMovedPermanently))
 
+	lis, err := net.Listen("tcp", *listen)
+	if err != nil {
+		klog.Fatalf("failed to listen: %v", err)
+	}
+
+	m := cmux.New(lis)
+
+	grpcL := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpL := m.Match(cmux.Any())
+
+	grpcServer := grpc.NewServer()
+	collector.InitDbMonitoringServices(grpcServer)
+
+	reflection.Register(grpcServer)
+
 	go func() {
-		lis, err := net.Listen("tcp", *grpcListen)
-		if err != nil {
-			klog.Fatalf("failed to listen: %v", err)
-		}
-
-		s := grpc.NewServer()
-
-		collector.InitDbMonitoringServices(s)
-
-		klog.Infoln("gRPC server listening at", lis.Addr())
-		if err := s.Serve(lis); err != nil {
-			klog.Fatalf("failed to serve: %v", err)
+		klog.Infoln("gRPC server listening at", grpcL.Addr())
+		if err := grpcServer.Serve(grpcL); err != nil {
+			klog.Fatalf("failed to serve gRPC: %v", err)
 		}
 	}()
 
-	klog.Infoln("listening on", *listen)
-	klog.Fatalln(http.ListenAndServe(*listen, router))
+	go func() {
+		klog.Infoln("HTTP server listening at", httpL.Addr())
+		if err := http.Serve(httpL, router); err != nil {
+			klog.Fatalf("failed to serve HTTP: %v", err)
+		}
+	}()
+
+	klog.Infoln("cmux multiplexer listening on", lis.Addr())
+	klog.Fatalln(m.Serve())
 }
 
 func readIndexHtml(basePath, version, instanceUuid string, checkForUpdates bool, developerMode bool) []byte {

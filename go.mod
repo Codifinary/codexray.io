@@ -28,6 +28,7 @@ require (
 	github.com/prometheus/prometheus v0.300.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/slack-go/slack v0.11.3
+	github.com/soheilhy/cmux v0.1.5
 	github.com/stretchr/testify v1.9.0
 	github.com/xhit/go-str2duration/v2 v2.1.0
 	go.opentelemetry.io/collector/semconv v0.110.0
