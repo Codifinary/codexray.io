@@ -38,6 +38,7 @@ export default {
         getChartStyle(index) {
             if (index < 2) {
                 // First two charts
+                console.log(this.chartData);
                 return { width: '250px', height: '290px' };
             } else {
                 // Last chart
