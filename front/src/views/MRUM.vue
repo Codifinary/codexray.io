@@ -54,7 +54,7 @@ export default {
 
     mounted() {
         this.$events.watch(this, () => {}, 'refresh');
-        if (!this.tabs.find((t) => t.id === this.tab)) {
+        if (!this.reports.find((r) => r.name === this.$route.params.report)) {
             this.$router.replace({ params: { report: undefined } });
         }
     },

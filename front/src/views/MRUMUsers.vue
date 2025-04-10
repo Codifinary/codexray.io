@@ -77,7 +77,7 @@ export default {
                 {
                     name: 'Crash Free Users',
                     count: crashFreeUsers,
-                    bottomColor: '#009688',
+                    lineColor: '#009688',
                     trend: 0,
                     iconName: 'arrow-up-thin',
                     iconColor: '#009688',
@@ -86,19 +86,19 @@ export default {
                 { 
                     name: 'Users',
                     count: totalUsers,
-                    bottomColor: '#FFA726',
+                    lineColor: '#FFA726',
                     trend: userTrend || 0,
                 },
                 { 
                     name: 'New Users', 
                     count: newUsers,
-                    bottomColor: '#AB47BC',
+                    lineColor: '#AB47BC',
                     trend: newUserTrend || 0,
                 },  
                 { 
                     name: 'Returning Users', 
                     count: returningUsers,
-                    bottomColor: '#42A5F5',
+                    lineColor: '#42A5F5',
                     trend: returningUserTrend || 0,
                 }
             ];
@@ -109,7 +109,7 @@ export default {
                     primaryLabel: 'Daily Active Users', 
                     primaryValue: this.data?.data?.summary?.dailyActiveUsers,
                     percentageChange: this.data?.data?.summary?.dailyTrend,
-                    bottomColor: '#009688',
+                    lineColor: '#009688',
                     icon: 'up-green-arrow',
 
                 },
@@ -117,7 +117,7 @@ export default {
                     primaryLabel: 'Weekly Active Users', 
                     primaryValue: this.data?.data?.summary?.weeklyActiveUsers,
                     iconColor: '#F57C00',
-                    bottomColor: '#F57C00',
+                    lineColor: '#F57C00',
 
                 },
             ];
@@ -264,7 +264,6 @@ export default {
     },
 };
 </script>
-
 <style scoped>
 .charts {
     display: flex;
