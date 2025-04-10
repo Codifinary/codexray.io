@@ -120,26 +120,26 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 	}
 
 	// // Get browser stats
-	// perfBrowsers, err := ch.GetBrowserStats(ctx, serviceName, &from, &to)
-	// if err != nil {
-	// 	return nil, Badge{}, nil, fmt.Errorf("failed to get browser stats: %w", err)
-	// }
-	// browserStats := make([]BrowserStats, len(perfBrowsers))
-	// for i, stat := range perfBrowsers {
-	// 	browserStats[i] = BrowserStats{
-	// 		Name:         stat.Name,
-	// 		Requests:     stat.Requests,
-	// 		ResponseTime: stat.ResponseTime,
-	// 		Errors:       stat.Errors,
-	// 	}
-	// }
-	browserStats := []BrowserStats{
-		{"Chrome", 12000, 1.23, 150},
-		{"Firefox", 8500, 1.45, 120},
-		{"Safari", 7300, 1.30, 100},
-		{"Edge", 6500, 1.50, 90},
-		{"Opera", 4000, 1.35, 60},
+	perfBrowsers, err := ch.GetBrowserStats(ctx, serviceName, &from, &to)
+	if err != nil {
+		return nil, Badge{}, nil, fmt.Errorf("failed to get browser stats: %w", err)
 	}
+	browserStats := make([]BrowserStats, len(perfBrowsers))
+	for i, stat := range perfBrowsers {
+		browserStats[i] = BrowserStats{
+			Name:         stat.Name,
+			Requests:     stat.Requests,
+			ResponseTime: stat.ResponseTime,
+			Errors:       stat.Errors,
+		}
+	}
+	// browserStats := []BrowserStats{
+	// 	{"Chrome", 12000, 1.23, 150},
+	// 	{"Firefox", 8500, 1.45, 120},
+	// 	{"Safari", 7300, 1.30, 100},
+	// 	{"Edge", 6500, 1.50, 90},
+	// 	{"Opera", 4000, 1.35, 60},
+	// }
 
 	var overviews []PerfOverview
 	var totalRequests, totalErrors uint64
