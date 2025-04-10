@@ -18,6 +18,11 @@ type BrowserStats struct {
 	Errors       uint64  `json:"errors"`
 }
 
+type BrowserDataPoint struct {
+	Value uint64 `json:"value"`
+	Name  string `json:"name"`
+}
+
 type PerfRow struct {
 	PagePath           string
 	AvgLoadPageTime    float64
@@ -99,12 +104,12 @@ func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, 
                 p.Browser AS browser_name,
                 COUNT(*) AS requests,
                 AVG(p.ResTime) AS response_time,
-                (SELECT COUNT(*) 
-                 FROM err_log_data e 
-                 WHERE e.ServiceName = @serviceName 
-                   AND e.Timestamp BETWEEN @from AND @to 
-                   AND e.Browser = p.Browser) AS errors
+                COUNT(e.Browser) AS errors
             FROM perf_data p
+            LEFT JOIN err_log_data e
+            ON p.Browser = e.Browser
+               AND e.ServiceName = @serviceName
+               AND e.Timestamp BETWEEN @from AND @to
             WHERE p.ServiceName = @serviceName 
               AND p.Timestamp BETWEEN @from AND @to
             GROUP BY p.Browser
@@ -117,7 +122,7 @@ func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, 
                 errors
             FROM browser_metrics
             ORDER BY requests DESC
-            LIMIT 4
+            LIMIT 5
         ),
         others AS (
             SELECT 
@@ -133,18 +138,13 @@ func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, 
         SELECT * FROM others
         WHERE requests > 0
         ORDER BY requests DESC`
-	// Conditionally add time range and service name filtering
-	var filters []string
+
 	args := []any{
 		clickhouse.Named("serviceName", serviceName),
 		clickhouse.DateNamed("from", *from, clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", *to, clickhouse.NanoSeconds),
 	}
 
-	if len(filters) > 0 {
-		query += " WHERE " + strings.Join(filters, " AND ")
-	}
-	// Execute the query
 	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -373,11 +373,6 @@ func (c *Client) GetTotalErrors(ctx context.Context, from, to *time.Time, servic
 	}
 
 	return totalErrors, nil
-}
-
-type BrowserDataPoint struct {
-	Value int    `json:"value"`
-	Name  string `json:"name"`
 }
 
 func (c *Client) GetTopBrowser(ctx context.Context, from, to time.Time) ([]BrowserDataPoint, error) {
