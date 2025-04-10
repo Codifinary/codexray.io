@@ -4,15 +4,15 @@
 
         <CrashDetails 
         v-if="crashID" 
-        :id="crashID" 
-        :serviceName="this.$route.params.serviceName"
+        :id="id"
+        :crashID="crashID"
     />
     <div v-else class="crash-container">
-        <Card :name="name" :count="count" :bottomColor="bottomColor"/>
+        <Card :name="name" :count="count" :lineColor="lineColor"/>
         <div class="charts-container">
             <div v-for="(widget, index) in data.echartReport.widgets" :key="index" class="chart-wrapper">
                 <EChart 
-                    :chartOptions="widget.config" 
+                    :chartOptions="Object.values(widget.echarts)[0]" 
                     :style="getChartStyle()"
                 />
             </div>
@@ -25,16 +25,18 @@
         >
             <template #item.CrashReason="{ item: { CrashReason } }">
                 <div class="crash-reason">
-                    <router-link :to="{name: 'overview',
-                params: {
-                    view: 'MRUM',
-                    id: this.$route.params.id,
-                    report: 'crash',
-                },
-                query: {
-                    ...this.$route.query,
-                    crashID: CrashReason
-                }}">{{ CrashReason }}</router-link>
+                    <router-link :to="{
+                        name: 'overview',
+                        params: {
+                            view: 'MRUM',
+                            id: id,
+                            report: 'crash',
+                        },
+                        query: {
+                            ...query,
+                            crashID: CrashReason
+                        }
+                    }">{{ CrashReason }}</router-link>
                 </div>
             </template>
             <template #item.Crashes="{ item: { TotalCrashes } }">
@@ -116,26 +118,23 @@ export default {
             chartConfigs: [],
             headers: [
                 { text: 'Crash Reason', value: 'CrashReason', width: '40%' },
-                { text: 'Crashes', value: 'Crashes', width: '20%' },
-                { text: 'Affected Users', value: 'AffectedUsers', width: '20%' },
+                { text: 'Total Crashes', value: 'TotalCrashes', width: '20%' },
+                { text: 'Affected Users', value: 'ImpactedUsers', width: '20%' },
                 { text: 'Last Occurrence', value: 'LastOccurance', width: '20%' }
             ],
             chartWidgets: [],
-            crashID: this.$route.query.crashID || null,
-            projectId: this.$route.params.projectId || '',
+            crashID: null,
             name: 'Crashes',
             count: 0,
-            bottomColor: '#F57C00'
+            lineColor: '#F57C00'
         };
     },
     mounted() {
-        this.get();
-    },
-    watch: {
-        '$route.query'() {
-            this.getQuery();
+        this.$watch('$route', (to) => {
+            this.crashID = to.query.crashID || null;
+            this.query = { ...to.query };
             this.get();
-        }
+        }, { immediate: true });
     },
     methods: {
         getQuery() {
@@ -159,7 +158,7 @@ export default {
         },
         setQuery() {
             const query = {
-                query: JSON.stringify({ serviceName: this.$route.params.serviceName }),
+                query: JSON.stringify({ }),
                 from: this.from
             };
             this.$router.push({ query }).catch((err) => {
@@ -175,11 +174,11 @@ export default {
             this.getQuery(); // Extract query and from parameter
 
             const apiPayload = {
-                query: encodeURIComponent(JSON.stringify({ serviceName: this.$route.params.serviceName })),
+                query: encodeURIComponent(JSON.stringify({ service: this.id })),
                 from: this.from
             };
 
-            this.$api.getMRUMCrashData(this.$route.params.serviceName, apiPayload, (res, error) => {
+            this.$api.getMRUMCrashData(this.id, apiPayload, (res, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
@@ -212,7 +211,6 @@ export default {
     }
 };
 </script>
-
 <style scoped>
 .crash-container {
     padding: 20px;

@@ -103,7 +103,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 50px;
+    gap: 60px;
   }
   
   .percentage {
@@ -119,12 +119,6 @@
     color: #EF4444;
   }
   
-  .triangle-icon {
-    width: 16px;
-    height: 16px;
-    filter: invert(72%) sepia(40%) saturate(463%) hue-rotate(95deg) brightness(91%) contrast(91%);
-  }
-  
   .bottom-border {
     position: absolute;
     bottom: 0;
@@ -138,17 +132,17 @@
   
   
   @media (min-width: 1440px) {
-    .card {
-      width: 320px;
-      padding: 28px;
-    }
-  
-    .main-metric .metric-value {
-      font-size: 36px;
-    }
-  
-    .secondary-metric .metric-value {
-      font-size: 28px;
-    }
+  .card {
+    width: 18vw;
+    padding: 2%;
   }
+
+  .main-metric .metric-value {
+    font-size: 2.5vw;
+  }
+
+  .secondary-metric .metric-value {
+    font-size: 1.8vw;
+  }
+}
   </style>

@@ -51,8 +51,6 @@
 
 <script>
 import CustomTable from '@/components/CustomTable.vue';
-import mockData from '@/views/overview.json';
-
 export default {
 
     props: {

@@ -1,5 +1,5 @@
 <template>
-    <v-card class="card-body" :style="{ '--bottom-color': bottomColor }">
+    <v-card class="card-body" :style="{ '--line-color': lineColor }">
         <div class="card-content">
             <v-card-title class="card-title">
                 <div class="card-name">{{ name }}</div>
@@ -17,8 +17,8 @@
             smooth
             line-width="3"
             padding="4"
-            :color="bottomColor"
-            :gradient="[bottomColor, 'rgba(255,255,255,0)']"
+            :color="lineColor"
+            :gradient="[lineColor, 'rgba(255,255,255,0)']"
             auto-draw
             height="400"
             width="350"
@@ -47,7 +47,7 @@ export default {
         unit: String,
         trendIcon: Boolean,
         trend: Number,
-        bottomColor: String,
+        lineColor: String,
     },
     computed: {
         formattedCount() {
@@ -171,7 +171,7 @@ export default {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--bottom-color);
+    background: var(--line-color);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }

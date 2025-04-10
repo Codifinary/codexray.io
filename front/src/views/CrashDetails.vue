@@ -3,14 +3,17 @@
         <v-progress-linear indeterminate v-if="loading" color="green" />
         <div v-else>
             <div class="font-weight-bold tab-heading">
-                <router-link :to="{
-                    name: 'overview',
-                    params: {
-                        view: 'MRUM',
-                        id: serviceName,
-                        tab: 'crash'
-                    }
-                }" class="bread-heading">Crash </router-link> <v-icon class="icon">mdi-chevron-right</v-icon> <span class="crash-id-text">{{ crashId }}</span>
+                <router-link 
+                    :to="{
+                        name: 'overview',
+                        params: {
+                            view: 'MRUM',
+                            id: id,
+                            report: 'crash'
+                        }
+                    }" 
+                    class="bread-heading"
+                >Crash </router-link> <v-icon class="icon">mdi-chevron-right</v-icon> <span class="crash-id-text">{{ crashID }}</span>
             </div>
 
             <CustomTable 
@@ -92,14 +95,14 @@ export default {
         CustomTable,
     },
     props: {
-        serviceName: {
-            type: String,
-            required: true
-        },
         id: {
             type: String,
             required: true
         },
+        crashID: {
+            type: String,
+            required: true
+        }
     },
     data() {
         return {
@@ -157,8 +160,8 @@ export default {
             this.loading = true;
             
             const query = {
-                service: this.serviceName,
-                crash_reason: this.crashId
+                service: this.id,
+                crash_reason: this.crashID
             };
 
             const apiPayload = {
@@ -166,7 +169,7 @@ export default {
                 from: this.$route.query.from
             };
 
-            this.$api.getMRUMCrashData(this.serviceName, apiPayload, (res, error) => {
+            this.$api.getMRUMCrashData(this.id, apiPayload, (res, error) => {
                 this.loading = false;
                 if (error) {
                     console.error('Error fetching crash details:', error);

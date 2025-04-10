@@ -9,7 +9,7 @@
                 :count="card.count"
                 :background="card.background"
                 :icon="card.icon"
-                :bottomColor="card.bottomColor"
+                :lineColor="card.lineColor"
                 :iconName="card.iconName"
                 :iconColor="card.iconColor"
                 :trend="card.trend"
@@ -56,11 +56,11 @@
             </CustomTable>
         </div>
         <GeoMap
-            :countrywiseOverviews="combinedSessions"
+            :countrywiseOverviews="data.data.sessionGeoMapData"
             :title="title"
             :tools="tools"
             :tooltipLabel="'Session Count'"
-            :tooltipValue="(item) => item.ActiveSessions"
+            :tooltipValue="(item) => item.Count"
         />
     </div>
 </template>
@@ -112,7 +112,7 @@ export default {
 
             // Add the dynamic column based on mode
             if (this.mode === 'historical') {
-                baseHeaders.splice(4, 0, { text: 'Session Duration', value: 'sessionDuration', width: '20%' });
+                baseHeaders.splice(4, 0, { text: 'Session Duration', value: 'SessionDuration', width: '20%' });
             } else {
                 baseHeaders.splice(4, 0, { text: 'Last Page Timestamp', value: 'LastPageTimestamp', width: '20%' });
             }
@@ -137,33 +137,7 @@ export default {
             }
 
             return sessions.filter((session) => session.Country.toLowerCase().includes(this.search.toLowerCase())).slice(0, this.rowCount);
-        },
-        combinedSessions() {
-            if (!this.data || !this.data.data) {
-                return [];
-            }
-
-            // Combine both live and historic sessions
-            const liveSessions = this.data.data.sessionLiveData || [];
-            const historicSessions = this.data.data.sessionHistoricData || [];
-
-            const countryMap = [...liveSessions, ...historicSessions].reduce((acc, session) => {
-                const country = session.Country || 'Unknown';
-                if (!acc[country]) {
-                    acc[country] = {
-                        Country: country,
-                        GeoMapColorCode: session.GeoMapColorCode || '#D6D6D6',
-                        NoOfRequests: 0,
-                        ActiveSessions: 0,
-                    };
-                }
-                acc[country].NoOfRequests += session.NoOfRequest || 0;
-                acc[country].ActiveSessions++;
-                return acc;
-            }, {});
-
-            return Object.values(countryMap);
-        },
+        }
     },
     methods: {
         getQuery() {
@@ -210,19 +184,19 @@ export default {
                     {
                         name: 'Sessions',
                         count: this.data.data.summary.totalSessions,
-                        bottomColor: '#1DBF73',
+                        lineColor: '#1DBF73',
                         trend: this.data.data.summary.sessionTrend,
                     },
                     {
                         name: 'Users',
                         count: this.data.data.summary.totalUsers,
-                        bottomColor: '#AB47BC',
+                        lineColor: '#AB47BC',
                         trend: this.data.data.summary.userTrend,
                     },
                     {
                         name: 'Median Length',
                         count: this.data.data.summary.avgSession,
-                        bottomColor: '#42A5F5',
+                        lineColor: '#42A5F5',
                         trend: this.data.data.summary.avgSessionTrend,
                     },
                 ];

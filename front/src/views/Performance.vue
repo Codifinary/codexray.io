@@ -59,6 +59,8 @@ import Dashboard from '@/components/Dashboard.vue';
 import GeoMap from '@/components/GeoMap.vue';
 import Heatmap from '@/components/Heatmap.vue';
 import Chart from '@/components/Chart.vue';
+// import mockData from '@/mock/performance.json';
+
 export default {
     props: {
         report: String,
@@ -82,7 +84,7 @@ export default {
                     percentageChange: 0, 
                     iconColor: '',
                     icon: 'up-green-arrow',
-                    bottomColor: '',
+                    lineColor: '',
                     trendColor: ''
                 },
                 { 
@@ -93,7 +95,7 @@ export default {
                     percentageChange: 0, 
                     icon: 'up-red-arrow',
                     iconColor: '',
-                    bottomColor: '',
+                    lineColor: '',
                     trendColor: ''
                 },  
                 { 
@@ -104,7 +106,7 @@ export default {
                     percentageChange: 0, 
                     icon: 'up-red-arrow',
                     iconColor: '',
-                    bottomColor: '',
+                    lineColor: '',
                     trendColor: ''
                 },
             ],
