@@ -14,7 +14,7 @@
                     :style="{ backgroundColor: item.background || '#fff7ed' }"
                 >
                     <div class="icon-placeholder">
-                        <img :src="`${$codexray.base_path}static/img/tech-icons/${item.status}.svg`" alt="Trend Icon" />
+                        <img :src="`${$codexray.base_path}static/img/tech-icons/${item.status.toLowerCase()}.svg`" alt="Trend Icon" />
                     </div>
                     <div class="experience-title">{{ item.title }}</div>
                     <div class="experience-status" :style="{ color: item.color || '#f97316' }">

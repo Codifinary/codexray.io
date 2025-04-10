@@ -36,6 +36,32 @@ type Totals struct {
 	TotalErrors   uint64 `json:"totalErrors"`
 }
 
+type PagePerformanceMetrics struct {
+	MedianLoadTime float64
+	P90LoadTime    float64
+	AvgLoadTime    float64
+	UniqueUsers    uint64
+	LoadCount      uint64
+}
+
+type PageExperienceScore struct {
+	PageLoadingClass       string
+	PageInteractivityClass string
+	PageRenderingClass     string
+	ResourceLoadingClass   string
+	ServerPerformanceClass string
+}
+
+type rawPageStats struct {
+	ServiceName                             string
+	PageName                                string
+	FptTime, FmpTime, DomReadyTime          float64
+	LoadPageTime, TtlTime, DomAnalysisTime  float64
+	ResTime, TransTime                      float64
+	RedirectTime, DnsTime, TcpTime, SslTime float64
+	TtfbTime                                float64
+}
+
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
 	// Build the base query
 	query := `
@@ -205,6 +231,10 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		clickhouse.Named("pageName", pageName),
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
+	}
+	var filters []string
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
 	}
 
 	rows, err := c.Query(ctx, query, args...)
@@ -641,4 +671,192 @@ func (c *Client) GetErrorAndUsersImpactedSeries(ctx context.Context, serviceName
 		"usersImpacted": usersImpactedSeries,
 		"totalUsers":    totalUsersSeries,
 	}, nil
+}
+
+func (c *Client) GetPagePerformanceMetrics(ctx context.Context, from, to *time.Time, serviceName, pageName string) (PagePerformanceMetrics, error) {
+	query := `
+    SELECT
+        quantile(0.5)(p.LoadPageTime) AS medianLoadTime,
+        quantile(0.9)(p.LoadPageTime) AS p90LoadTime,
+        avg(p.LoadPageTime) AS avgLoadTime,
+        countDistinct(p.UserId) AS uniqueUsers,
+        count(*) AS loadCount
+    FROM
+        perf_data p`
+
+	// Filters
+	var filters []string
+	var args []any
+	if from != nil {
+		filters = append(filters, "p.Timestamp >= @from")
+		args = append(args, clickhouse.Named("from", *from))
+	}
+	if to != nil {
+		filters = append(filters, "p.Timestamp <= @to")
+		args = append(args, clickhouse.Named("to", *to))
+	}
+	if serviceName != "" {
+		filters = append(filters, "p.ServiceName = @serviceName")
+		args = append(args, clickhouse.Named("serviceName", serviceName))
+	}
+	if pageName != "" {
+		filters = append(filters, "p.PageName = @pageName")
+		args = append(args, clickhouse.Named("pageName", pageName))
+	}
+
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	query += `
+    GROUP BY
+        p.ServiceName, p.PageName
+    ORDER BY
+        medianLoadTime DESC`
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return PagePerformanceMetrics{}, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var row PagePerformanceMetrics
+		if err := rows.Scan(
+			&row.MedianLoadTime,
+			&row.P90LoadTime,
+			&row.AvgLoadTime,
+			&row.UniqueUsers,
+			&row.LoadCount,
+		); err != nil {
+			return PagePerformanceMetrics{}, err
+		}
+		return row, nil
+	}
+
+	return PagePerformanceMetrics{}, fmt.Errorf("no data found")
+}
+
+var metricRanges = map[string]struct{ Min, Max float64 }{
+	"FptTime":         {1.8, 3.5},
+	"FmpTime":         {2.0, 4.0},
+	"DomReadyTime":    {2.0, 4.5},
+	"LoadPageTime":    {2.0, 4.5},
+	"TtlTime":         {3.0, 6.0},
+	"DomAnalysisTime": {0.5, 1.5},
+	"ResTime":         {1.0, 3.0},
+	"TransTime":       {1.0, 3.0},
+	"RedirectTime":    {0.1, 0.5},
+	"DnsTime":         {0.1, 0.5},
+	"TcpTime":         {0.1, 0.5},
+	"SslTime":         {0.1, 0.5},
+	"TtfbTime":        {0.2, 0.8},
+}
+
+func classify(score float64) string {
+	switch {
+	case score > 0.6:
+		return "Good"
+	case score >= 0.3:
+		return "Moderate"
+	default:
+		return "Poor"
+	}
+}
+
+func normalize(value, min, max float64) float64 {
+	if value <= min {
+		return 1.0
+	}
+	if value >= max {
+		return 0.0
+	}
+	return (max - value) / (max - min) // Invert so lower times = higher scores
+}
+
+func (c *Client) GetPageExperienceScores(ctx context.Context, from, to *time.Time, serviceName, pageName string) (PageExperienceScore, error) {
+	query := `
+    SELECT
+        avg(FptTime),
+        avg(FmpTime),
+        avg(DomReadyTime),
+        avg(LoadPageTime),
+        avg(TtlTime),
+        avg(DomAnalysisTime),
+        avg(ResTime),
+        avg(TransTime),
+        avg(RedirectTime),
+        avg(DnsTime),
+        avg(TcpTime),
+        avg(SslTime),
+        avg(TtfbTime)
+    FROM perf_data p
+    `
+	var filters []string
+	var args []any
+	if from != nil {
+		filters = append(filters, "p.Timestamp >= @from")
+		args = append(args, clickhouse.Named("from", *from))
+	}
+	if to != nil {
+		filters = append(filters, "p.Timestamp <= @to")
+		args = append(args, clickhouse.Named("to", *to))
+	}
+	if serviceName != "" {
+		filters = append(filters, "p.ServiceName = @serviceName")
+		args = append(args, clickhouse.Named("serviceName", serviceName))
+	}
+	if pageName != "" {
+		filters = append(filters, "p.PageName = @pageName")
+		args = append(args, clickhouse.Named("pageName", pageName))
+	}
+	if len(filters) > 0 {
+		query += " WHERE " + strings.Join(filters, " AND ")
+	}
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return PageExperienceScore{}, err
+	}
+	defer rows.Close()
+
+	if rows.Next() {
+		var r rawPageStats
+		err := rows.Scan(
+			&r.FptTime, &r.FmpTime, &r.DomReadyTime,
+			&r.LoadPageTime, &r.TtlTime, &r.DomAnalysisTime,
+			&r.ResTime, &r.TransTime,
+			&r.RedirectTime, &r.DnsTime, &r.TcpTime, &r.SslTime,
+			&r.TtfbTime,
+		)
+		if err != nil {
+			return PageExperienceScore{}, err
+		}
+		n := func(field string, val float64) float64 {
+			r := metricRanges[field]
+			return normalize(val, r.Min, r.Max)
+		}
+
+		// Weighted averages with rationale-based weights
+		pl := 0.2*n("FptTime", r.FptTime) + 0.2*n("FmpTime", r.FmpTime) +
+			0.2*n("DomReadyTime", r.DomReadyTime) + 0.3*n("LoadPageTime", r.LoadPageTime) +
+			0.1*n("TtlTime", r.TtlTime)
+		pi := 0.4*n("DomReadyTime", r.DomReadyTime) + 0.3*n("FmpTime", r.FmpTime) +
+			0.3*n("LoadPageTime", r.LoadPageTime)
+		pr := 0.3*n("FptTime", r.FptTime) + 0.3*n("FmpTime", r.FmpTime) +
+			0.4*n("DomAnalysisTime", r.DomAnalysisTime)
+		rl := 0.5*n("ResTime", r.ResTime) + 0.5*n("TransTime", r.TransTime)
+		sp := 0.15*n("RedirectTime", r.RedirectTime) + 0.2*n("DnsTime", r.DnsTime) +
+			0.2*n("TcpTime", r.TcpTime) + 0.2*n("SslTime", r.SslTime) +
+			0.25*n("TtfbTime", r.TtfbTime)
+		return PageExperienceScore{
+			PageLoadingClass:       classify(pl),
+			PageInteractivityClass: classify(pi),
+			PageRenderingClass:     classify(pr),
+			ResourceLoadingClass:   classify(rl),
+			ServerPerformanceClass: classify(sp),
+		}, nil
+	}
+
+	return PageExperienceScore{}, fmt.Errorf("no data found")
 }
