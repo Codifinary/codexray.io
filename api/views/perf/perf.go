@@ -59,7 +59,6 @@ type BrowserStats struct {
 func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query url.Values, serviceName string) *View {
 	v := &View{}
 
-	// Parse query parameters
 	var q Query
 	if s := query.Get("query"); s != "" {
 		if err := json.Unmarshal([]byte(s), &q); err != nil {
@@ -79,7 +78,6 @@ func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query ur
 	from := w.Ctx.From.ToStandard()
 	to := w.Ctx.To.ToStandard()
 
-	// Fetch performance data including browser stats
 	rows, badge, browserStats, err := getPerformanceData(ctx, ch, serviceName, from, to)
 	if err != nil {
 		klog.Errorf("Failed to get performance data: %v", err)
@@ -93,7 +91,6 @@ func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query ur
 	v.BrowserStats = browserStats
 	v.Limit = q.Limit
 
-	// Generate line charts
 	lineChartReport, err := createLineCharts(w, ctx, ch, serviceName)
 	if err != nil {
 		klog.Errorf("Failed to create line charts: %v", err)
@@ -102,7 +99,6 @@ func Render(w *model.World, ctx context.Context, ch *clickhouse.Client, query ur
 		return v
 	}
 
-	// Generate ECharts
 	echartReport, err := createECharts(w, ctx, ch, serviceName, from, to, rows)
 	if err != nil {
 		klog.Errorf("Failed to create ECharts: %v", err)
@@ -143,11 +139,6 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 		{"Safari", 7300, 1.30, 100},
 		{"Edge", 6500, 1.50, 90},
 		{"Opera", 4000, 1.35, 60},
-		{"Brave", 3200, 1.25, 50},
-		{"Samsung Internet", 2900, 1.40, 45},
-		{"UC Browser", 2100, 1.55, 35},
-		{"Vivaldi", 1800, 1.20, 25},
-		{"Tor Browser", 900, 2.00, 15},
 	}
 
 	var overviews []PerfOverview
@@ -170,7 +161,6 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 		return overviews[i].PagePath < overviews[j].PagePath
 	})
 
-	// Calculate per-second metrics
 	durationSeconds := to.Sub(from).Seconds()
 	var requestsPerSecond, errorsPerSecond float64
 	if durationSeconds > 0 {
@@ -212,7 +202,6 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 
 func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, serviceName string, from, to time.Time, overviews []PerfOverview) (*model.AuditReport, error) {
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
-
 	// Impacted users pie chart
 	sort.Slice(overviews, func(i, j int) bool {
 		return overviews[i].ImpactedUsers > overviews[j].ImpactedUsers
@@ -246,7 +235,6 @@ func createLineCharts(w *model.World, ctx context.Context, ch *clickhouse.Client
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
 	report.Status = model.OK
 
-	// Load time series
 	loadChart := report.GetOrCreateChart("Load Time", nil).Stacked()
 	loadSeries, err := ch.GetLoadTimeSeries(ctx, serviceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
 	if err != nil {
@@ -254,7 +242,6 @@ func createLineCharts(w *model.World, ctx context.Context, ch *clickhouse.Client
 	}
 	loadChart.AddSeries("Load Time", loadSeries, "blue")
 
-	// Response time series
 	respChart := report.GetOrCreateChart("Response Time", nil).Stacked()
 	respSeries, err := ch.GetResponseTimeSeries(ctx, serviceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
 	if err != nil {
@@ -262,22 +249,20 @@ func createLineCharts(w *model.World, ctx context.Context, ch *clickhouse.Client
 	}
 	respChart.AddSeries("Response Time", respSeries, "green")
 
-	// Fetch metrics from ClickHouse
 	metrics, err := ch.GetErrorAndUsersImpactedSeries(context.Background(), serviceName, w.Ctx.From, w.Ctx.To, w.Ctx.Step)
 	if err != nil {
 		report.Status = model.UNKNOWN
 		return report, err
 	}
 
-	// Create & populate charts
-	usersImpactedChart := report.GetOrCreateChart("Users Impacted", nil).Stacked().Column()
-	usersImpactedChart.AddSeries("Total Users", metrics["totalUsers"], "green")
-	usersImpactedChart.AddSeries("Users Impacted", metrics["usersImpacted"], "red")
-
 	errorChartGroup := report.GetOrCreateChartGroup("Errors <selector>", nil)
 	errorChartGroup.GetOrCreateChart("Errors").Stacked().
 		AddSeries("JS Errors", metrics["jsErrors"], "orange").
 		AddSeries("API Errors", metrics["apiErrors"], "purple")
+
+	usersImpactedChart := report.GetOrCreateChart("Users Impacted", nil).Stacked().Column()
+	usersImpactedChart.AddSeries("Total Users", metrics["totalUsers"], "green")
+	usersImpactedChart.AddSeries("Users Impacted", metrics["usersImpacted"], "red")
 
 	return report, nil
 }
