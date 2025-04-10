@@ -9,7 +9,13 @@
             <div class="metrics-grid">
                 <div v-for="(key, index) in displayOrder" :key="key" class="metric-item" :class="{ 'no-border': index === displayOrder.length - 1 }">
                     <div class="metric-label">{{ labels[key] }}</div>
-                    <div class="metric-value">{{ formatValue(data[key], key) }}</div>
+                    <div class="metric-value">
+                        {{
+                            key === 'users' || key === 'load'
+                                ? `${$format.shortenNumber(data[key]).value}${$format.shortenNumber(data[key]).unit}`
+                                : `${$format.formatUnits(data[key], 'ms')}ms `
+                        }}
+                    </div>
                 </div>
             </div>
         </v-card-text>
@@ -35,17 +41,6 @@ export default {
             },
             displayOrder: ['medLoadTime', 'p90LoadTime', 'avgLoadTime', 'users', 'load'],
         };
-    },
-    methods: {
-        formatValue(val, key) {
-            if (val == null) {
-                return '-';
-            }
-            if (typeof val === 'number' && key.toLowerCase().includes('time')) {
-                return val.toFixed(2) + 's';
-            }
-            return val;
-        },
     },
 };
 </script>
