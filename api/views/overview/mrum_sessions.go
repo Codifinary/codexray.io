@@ -19,6 +19,7 @@ type MrumSessionsView struct {
 	Report              *model.AuditReport               `json:"report"`
 	SessionLiveData     []clickhouse.SessionLiveData     `json:"sessionLiveData"`
 	SessionHistoricData []clickhouse.SessionHistoricData `json:"sessionHistoricData"`
+	SessionGeoMapData   []clickhouse.SessionGeoMapData   `json:"sessionGeoMapData"`
 }
 
 type MrumSessionsData struct {
@@ -64,6 +65,14 @@ func RenderMrumSessions(ctx context.Context, ch *clickhouse.Client, w *model.Wor
 	}
 
 	v.Report = auditor.GenerateMrumSessionsReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+	sessionGeoMapData, err := ch.GetSessionGeoMapData(ctx, w.Ctx.From, w.Ctx.To, service)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = fmt.Sprintf("Clickhouse error: %s", err)
+		return v
+	}
+	v.SessionGeoMapData = sessionGeoMapData
 
 	switch {
 	case q.SessionType != "":
