@@ -226,7 +226,7 @@ func main() {
 	router.HandleFunc("/v1/mobile/performance", coll.MobilePerf)
 	router.HandleFunc("/v1/mobile/crashReports", coll.MobileCrashReports)
 	router.HandleFunc("/v1/mobile/event", coll.MobileEvent)
-	router.HandleFunc("/v1/management/userregistration", coll.MobileUserRegistration)
+	router.HandleFunc("/v1/mobile/management/userregistration", coll.MobileUserRegistration)
 
 	r := router
 	cleanUrlBasePath(urlBasePath)
