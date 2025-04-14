@@ -20,6 +20,7 @@
   <script>
   import * as echarts from 'echarts';
   import axios from 'axios';
+
   
   export default {
     name: 'GeoMap',
@@ -51,10 +52,20 @@
       return {
         chart: null,
         resizeObserver: null,
-        initTimeout: null
+        initTimeout: null,
+        countryCodeMap: null
       };
     },
-    mounted() {
+    async mounted() {
+      try {
+        const response = await fetch('/static/country_code_to_name.json');
+        if (!response.ok) throw new Error('Failed to fetch country codes');
+        this.countryCodeMap = await response.json();
+      } catch (error) {
+        console.error("Error loading country code map:", error);
+        this.countryCodeMap = {};
+      }
+
       window.addEventListener('resize', this.handleResize);
       this.resizeObserver = new ResizeObserver(() => {
         this.handleResize();
@@ -89,13 +100,29 @@
             this.initChart();
           }, 100);
         },
-        deep: true
+        deep: true,
+        immediate: true
       }
     },
     computed: {
+      mappedCountrywiseOverviews() {
+        // Prop 'countrywiseOverviews' has country CODES ('UK', 'IN').
+        // We need to map them to full names ('United Kingdom', 'India') using the fetched map.
+        if (!this.countryCodeMap || !this.countrywiseOverviews) {
+            return [];
+        }
+        return this.countrywiseOverviews.map(item => {
+          // Use the fetched map to get the full name from the code
+          const fullName = this.countryCodeMap[item.Country] || item.Country; 
+          return {
+            ...item,
+            Country: fullName // Use the mapped full name
+          };
+        });
+      },
       colorMapping() {
         const mapping = {};
-        this.countrywiseOverviews.forEach(item => {
+        this.mappedCountrywiseOverviews.forEach(item => {
           if (item.GeoMapColorCode) {
             mapping[item.Country] = item.GeoMapColorCode;
           }
@@ -150,7 +177,7 @@
           echarts.registerMap('world', response.data);
           this.chart.hideLoading();
           
-          const mapData = this.countrywiseOverviews.map(item => ({
+          const mapData = this.mappedCountrywiseOverviews.map(item => ({
             name: item.Country,
             value: this.tooltipValue(item),
             itemStyle: {
@@ -211,7 +238,7 @@
                     }
                   }
                 },
-                data: this.countrywiseOverviews.length > 0 ? mapData : []
+                data: this.mappedCountrywiseOverviews.length > 0 ? mapData : []
               }
             ]
           };
