@@ -222,10 +222,13 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, s
 	impactedChart.Legend = model.Legend{Bottom: "0"}
 	impactedChart.SetPieChartSeries("Users", "pie", []string{"40%", "70%"}, impactedData)
 	impactedChart.Graphic = &model.Graphic{
-		Type:  "text",
-		Left:  "center",
-		Top:   "center",
-		Style: model.GraphicStyle{Text: fmt.Sprintf("%d", totalImpacted)},
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: model.GraphicStyle{Text: fmt.Sprintf("%d", totalImpacted), FontSize: 26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center"},
 	}
 
 	return report, nil

@@ -6,11 +6,11 @@
         <div class="card-container">
             <EUMCard :data="cardData" />
 
-            <div class="chart-container">
-                <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
-                    <EChart :chartOptions="config" class="chart-box" :style="getChartStyle(index)" />
-                </div>
+            <!-- <div class="chart-container"> -->
+            <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
+                <EChart :chartOptions="config" class="chart-box" :style="getChartStyle(index)" />
             </div>
+            <!-- </div> -->
         </div>
     </div>
 </template>
@@ -56,13 +56,13 @@ export default {
     width: 100%;
     justify-content: space-between;
 }
-.chart-container {
+/* .chart-container {
     display: flex;
     flex-direction: row;
     gap: 20px;
     justify-content: center;
     padding-left: 20px;
-}
+} */
 .chart-wrapper {
     box-shadow:
         0px 3px 1px -2px rgba(0, 0, 0, 0.2),
