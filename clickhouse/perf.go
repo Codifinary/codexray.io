@@ -125,45 +125,60 @@ GROUP BY
 
 func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, to *time.Time) ([]BrowserStats, error) {
 	query := `
-        WITH browser_metrics AS (
-            SELECT 
-                p.Browser AS browser_name,
-                COUNT(*) AS requests,
-                AVG(p.ResTime) AS response_time,
-                COUNT(e.Browser) AS errors
-            FROM perf_data p
-            LEFT JOIN err_log_data e
-            ON p.Browser = e.Browser
-               AND e.ServiceName = @serviceName
-               AND e.Timestamp BETWEEN @from AND @to
-            WHERE p.ServiceName = @serviceName 
-              AND p.Timestamp BETWEEN @from AND @to
-            GROUP BY p.Browser
-        ),
-        top_browsers AS (
-            SELECT 
-                browser_name,
-                requests,
-                response_time,
-                errors
-            FROM browser_metrics
-            ORDER BY requests DESC
-            LIMIT 5
-        ),
-        others AS (
-            SELECT 
-                'Others' AS browser_name,
-                SUM(requests) AS requests,
-                AVG(response_time) AS response_time,
-                SUM(errors) AS errors
-            FROM browser_metrics
-            WHERE browser_name NOT IN (SELECT browser_name FROM top_browsers)
-        )
-        SELECT * FROM top_browsers
-        UNION ALL
-        SELECT * FROM others
-        WHERE requests > 0
-        ORDER BY requests DESC`
+            WITH browser_requests AS (
+    SELECT 
+        Browser AS browser_name,
+        COUNT(*) AS requests,
+        AVG(ResTime) AS response_time
+    FROM perf_data
+    WHERE ServiceName = @serviceName
+      AND Timestamp BETWEEN @from AND @to
+    GROUP BY Browser
+),
+browser_errors AS (
+    SELECT 
+        Browser AS browser_name,
+        COUNT(*) AS errors
+    FROM err_log_data
+    WHERE ServiceName = @serviceName
+      AND Timestamp BETWEEN @from AND @to
+    GROUP BY Browser
+),
+browser_metrics AS (
+    SELECT 
+        r.browser_name,
+        r.requests,
+        r.response_time,
+        COALESCE(e.errors, 0) AS errors
+    FROM browser_requests r
+    LEFT JOIN browser_errors e ON r.browser_name = e.browser_name
+),
+top_browsers AS (
+    SELECT 
+        browser_name,
+        requests,
+        response_time,
+        errors
+    FROM browser_metrics
+    ORDER BY requests DESC
+    LIMIT 5
+),
+others AS (
+    SELECT 
+        'Others' AS browser_name,
+        SUM(requests) AS requests,
+        AVG(response_time) AS response_time,
+        SUM(errors) AS errors
+    FROM browser_metrics
+    WHERE browser_name NOT IN (SELECT browser_name FROM top_browsers)
+)
+SELECT * FROM top_browsers
+UNION ALL
+SELECT * FROM others
+WHERE requests > 0
+ORDER BY requests DESC;
+
+`
 
 	args := []any{
 		clickhouse.Named("serviceName", serviceName),

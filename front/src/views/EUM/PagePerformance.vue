@@ -152,7 +152,7 @@ export default {
 }
 .chart-box {
     width: 300px;
-    height: 280px;
+    height: 320px;
     transform: scale(0.9);
     transform-origin: center;
 }
