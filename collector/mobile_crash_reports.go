@@ -224,9 +224,20 @@ func (c *Collector) MobileCrashReports(w http.ResponseWriter, r *http.Request) {
 	var payload MobileCrashReportPayload
 	err = json.Unmarshal(data, &payload)
 	if err != nil {
-		klog.Errorln(err)
-		http.Error(w, "failed to decode JSON", http.StatusBadRequest)
-		return
+		var payloads []MobileCrashReportPayload
+		err = json.Unmarshal(data, &payloads)
+		if err != nil {
+			klog.Errorln(err)
+			http.Error(w, "failed to decode JSON", http.StatusBadRequest)
+			return
+		}
+
+		if len(payloads) == 0 {
+			http.Error(w, "empty payload", http.StatusBadRequest)
+			return
+		}
+
+		payload = payloads[0]
 	}
 
 	dp := MobileCrashReportDataPoint{
