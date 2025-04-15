@@ -1,8 +1,8 @@
 <template>
-    <div class="mt-10">
+    <div class="mt-10 ml-5">
         <Navigation :id="id" :pagePath="pagePath" />
 
-        <div v-if="mappedExperiences.length">
+        <div v-if="mappedExperiences.length" class="page-experience">
             <PageExp :experiences="mappedExperiences" />
         </div>
 
@@ -114,3 +114,12 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+.page-experience {
+    display: flex;
+
+    flex-direction: row;
+    gap: 16px;
+}
+</style>

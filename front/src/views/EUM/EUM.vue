@@ -1,50 +1,55 @@
 <template>
-    <div class="my-10 mx-5">
-        <EUMSummary :cardData="cardData" :chartData="chartData" />
-        <div class="my-10 mx-5">
-            <div class="search">
-                <span class="search-label">Search: </span>
-                <v-text-field
-                    v-model="searchQuery"
-                    label="Search by Service Name"
-                    outlined
-                    dense
-                    class="search-input"
-                    clearable
-                    placeholder="Enter service name"
-                />
-            </div>
-
-            <CustomTable :headers="headers" :items="filteredTableItems" item-key="serviceName" class="mt-1 elevation-1">
-                <template v-slot:item.serviceName="{ item }">
-                    <div class="name d-flex">
-                        <div class="mr-3">
-                            <img
-                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
-                                style="width: 16px; height: 16px"
-                                alt="App Icon"
-                            />
-                        </div>
-                        <router-link
-                            :to="{
-                                name: 'overview',
-                                params: { view: 'EUM', id: item.serviceName },
-                                query: $route.query,
-                            }"
-                        >
-                            {{ item.serviceName }}
-                        </router-link>
-                    </div>
-                </template>
-                <template v-slot:item.avgLoadPageTime="{ item }">
-                    {{ format(item.avgLoadPageTime, 'ms') }}
-                </template>
-            </CustomTable>
-
+    <div class="eum-container">
+        <div v-if="tableItems.length !== 0" class="my-10">
+            <EUMSummary :cardData="cardData" :chartData="chartData" />
             <div class="my-10 mx-5">
-                <span class="heading mb-5">Top 5 applications</span>
-                <Dashboard :name="'performance'" :widgets="performanceCharts.widgets" />
+                <div class="search">
+                    <span class="search-label">Search: </span>
+                    <v-text-field
+                        v-model="searchQuery"
+                        label="Search by Service Name"
+                        outlined
+                        dense
+                        class="search-input"
+                        clearable
+                        placeholder="Enter service name"
+                    />
+                </div>
+
+                <CustomTable :headers="headers" :items="filteredTableItems" item-key="serviceName" class="mt-1 elevation-1">
+                    <template v-slot:item.serviceName="{ item }">
+                        <div class="name d-flex">
+                            <div class="mr-3">
+                                <img
+                                    :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`"
+                                    style="width: 16px; height: 16px"
+                                    alt="App Icon"
+                                />
+                            </div>
+                            <router-link
+                                :to="{
+                                    name: 'overview',
+                                    params: { view: 'EUM', id: item.serviceName },
+                                    query: $route.query,
+                                }"
+                            >
+                                {{ item.serviceName }}
+                            </router-link>
+                        </div>
+                    </template>
+                    <template v-slot:item.avgLoadPageTime="{ item }">
+                        {{ format(item.avgLoadPageTime, 'ms') }}
+                    </template>
+                </CustomTable>
+
+                <div class="my-10 mx-5">
+                    <span class="heading mb-5">Top 5 applications</span>
+                    <Dashboard :name="'performance'" :widgets="performanceCharts.widgets" />
+                </div>
             </div>
+        </div>
+        <div v-else class="no-data-container">
+            <p>No Data Available</p>
         </div>
     </div>
 </template>
@@ -120,8 +125,11 @@ export default {
 <style scoped>
 .eum-container {
     padding-bottom: 70px;
-    margin-left: 20px !important;
-    margin-right: 20px !important;
+    overflow-x: hidden;
+    width: 100%;
+    box-sizing: border-box;
+    margin-left: 0;
+    margin-right: 5px;
 }
 .heading {
     color: var(--status-ok) !important;
@@ -139,5 +147,11 @@ export default {
     font-size: 16px;
     margin-top: 5px;
     margin-right: 10px;
+}
+.no-data-container {
+    text-align: center;
+    margin-top: 50px;
+    font-size: 18px;
+    color: #888;
 }
 </style>
