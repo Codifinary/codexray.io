@@ -148,7 +148,7 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	// Create a new audit report for ECharts
 	echartReport := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
 
-	// Fetch top browsers from perf_table
+	// Fetch top browsers from perf_data
 	topBrowsers, err := ch.GetTopBrowser(ctx, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get top browsers: %w", err)
@@ -157,7 +157,7 @@ func createECharts(w *model.World, ctx context.Context, ch *clickhouse.Client, f
 	topBrowsersData := make([]model.DataPoint, len(topBrowsers))
 	for i, browser := range topBrowsers {
 		topBrowsersData[i] = model.DataPoint{
-			Value: browser.Value,
+			Value: int(browser.Value),
 			Name:  browser.Name,
 		}
 	}

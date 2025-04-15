@@ -42,7 +42,7 @@ func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch 
 		AddSeries("API Errors", metrics["apiErrors"], "purple")
 
 	// 5) User-Centric Metrics Chart
-	userCentric := report.GetOrCreateChart("User-Centric Metrics", nil).Stacked()
+	userCentric := model.NewChart(w.Ctx, "User-Centric Metrics").Stacked()
 	userCentric.AddSeries("DNS Time", metrics["dnsTime"], "cyan")
 	userCentric.AddSeries("TCP Time", metrics["tcpTime"], "magenta")
 	userCentric.AddSeries("SSL Time", metrics["sslTime"], "yellow")
@@ -56,6 +56,10 @@ func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch 
 	userCentric.AddSeries("TTL Time", metrics["ttlTime"], "gray")
 	userCentric.AddSeries("Trans Time", metrics["transTime"], "black")
 	userCentric.AddSeries("Response Time", metrics["responseTime"], "blue")
-
+	userCentricWidget := &model.Widget{
+		Chart: userCentric,
+		Width: "100%",
+	}
+	report.AddWidget(userCentricWidget)
 	return report
 }
