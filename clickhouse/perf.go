@@ -125,7 +125,7 @@ GROUP BY
 
 func (c *Client) GetBrowserStats(ctx context.Context, serviceName string, from, to *time.Time) ([]BrowserStats, error) {
 	query := `
-            WITH browser_requests AS (
+WITH browser_requests AS (
     SELECT 
         Browser AS browser_name,
         COUNT(*) AS requests,
@@ -163,21 +163,29 @@ top_browsers AS (
     ORDER BY requests DESC
     LIMIT 5
 ),
+remaining_browsers AS (
+    SELECT 
+        browser_name,
+        requests,
+        response_time,
+        errors
+    FROM browser_metrics
+    WHERE browser_name NOT IN (SELECT browser_name FROM top_browsers)
+),
 others AS (
     SELECT 
         'Others' AS browser_name,
         SUM(requests) AS requests,
         AVG(response_time) AS response_time,
         SUM(errors) AS errors
-    FROM browser_metrics
-    WHERE browser_name NOT IN (SELECT browser_name FROM top_browsers)
+    FROM remaining_browsers
+    GROUP BY 'Others'
 )
 SELECT * FROM top_browsers
 UNION ALL
 SELECT * FROM others
-WHERE requests > 0
+WHERE requests > 0 
 ORDER BY requests DESC;
-
 `
 
 	args := []any{

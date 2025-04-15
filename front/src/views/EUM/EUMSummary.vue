@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="mb-5">
-            <span class="heading">ESummary of all browser applications</span>
+            <span class="heading">Summary of all browser applications</span>
         </div>
         <div class="card-container">
             <EUMCard :data="cardData" />
