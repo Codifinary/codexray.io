@@ -9,9 +9,9 @@
                     v-bind="card"
                 />
             </div>
-            <div class="charts" v-if="data.data && data.data.report && data.data.report.widgets && data.data.report.widgets[0]">
-                <div class="chart-section" v-if="data.data.report.widgets[0].chart">
-                    <Chart :chart="data.data.report.widgets[0].chart" />
+            <div class="charts" v-if="data && data.report && data.report.widgets && data.report.widgets[0]">
+                <div class="chart-section" v-if="data.report.widgets[0].chart">
+                    <Chart :chart="data.report.widgets[0].chart" />
                 </div>
                 <div class="cards-section">
                     <Card2 v-for="card in cards2" :key="card.primaryLabel" :cardData="card"/>
@@ -26,8 +26,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template v-if="data?.data?.mobileUserData?.length > 0">
-                            <tr v-for="item in data.data.mobileUserData" :key="item.UserID">
+                        <template v-if="data?.mobileUserData?.length > 0">
+                            <tr v-for="item in data.mobileUserData" :key="item.UserID">
                                 <td>{{ item.UserID }}</td>
                                 <td>{{ item.Country }}</td>
                                 <td>{{ formatDate(item.StartTime) }}</td>
@@ -62,7 +62,7 @@ export default {
     },
     computed: {
         computedCards() {
-            const { summary = {} } = this.data?.data || {};
+            const { summary = {} } = this.data || {};
             const { 
                 crashFreeUsers = 0,
                 totalUsers = 0,
@@ -107,15 +107,15 @@ export default {
             return [
                 { 
                     primaryLabel: 'Daily Active Users', 
-                    primaryValue: this.data?.data?.summary?.dailyActiveUsers,
-                    percentageChange: this.data?.data?.summary?.dailyTrend,
+                    primaryValue: this.data?.summary?.dailyActiveUsers,
+                    percentageChange: this.data?.summary?.dailyTrend,
                     lineColor: '#009688',
                     icon: 'up-green-arrow',
 
                 },
                 { 
                     primaryLabel: 'Weekly Active Users', 
-                    primaryValue: this.data?.data?.summary?.weeklyActiveUsers,
+                    primaryValue: this.data?.summary?.weeklyActiveUsers,
                     iconColor: '#F57C00',
                     lineColor: '#F57C00',
 
@@ -136,12 +136,11 @@ export default {
                 { text: 'Last Seen', value: 'lastSeen' },
             ],
             data: {
-                data: {
-                    mobileUserData: [],
-                    summary: {},
-                    report: {
-                        name: '',
-                        widgets: [{
+                mobileUserData: [],
+                summary: {},
+                report: {
+                    name: '',
+                    widgets: [{
                             chart: {
                                 series: [],
                                 ctx: {},
@@ -149,8 +148,7 @@ export default {
                             }
                         }]
                     }
-                }
-            },
+                },
             loading: false,
             error: null,
             from: null,
