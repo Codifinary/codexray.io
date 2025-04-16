@@ -131,7 +131,7 @@ export default {
     display: flex;
     flex-direction: row;
     width: 100%;
-    justify-content: space-between;
+    gap: 20px;
 }
 .clickable {
     cursor: pointer;

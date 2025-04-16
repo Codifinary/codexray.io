@@ -169,7 +169,7 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 	}
 
 	var requestTrend, errorTrend float64
-	if duration := to.Sub(from); duration == time.Hour {
+	if duration := to.Sub(from); duration <= 60*time.Minute {
 		prevFrom := from.Add(-duration)
 		prevRows, err := ch.GetPerformanceOverview(ctx, &prevFrom, &from, serviceName)
 		if err != nil {
@@ -180,12 +180,20 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 			prevRequests += row.Requests
 			prevErrors += uint64(row.JsErrorPercentage*float64(row.Requests)/100 + row.ApiErrorPercentage*float64(row.Requests)/100)
 		}
+
 		if prevRequests > 0 {
-			requestTrend = float64(totalRequests-prevRequests) / float64(prevRequests) * 100
+			requestTrend = float64(int64(totalRequests)-int64(prevRequests)) / float64(prevRequests) * 100
+		} else {
+			requestTrend = 0 // Avoid division by zero
 		}
+
 		if prevErrors > 0 {
-			errorTrend = float64(totalErrors-prevErrors) / float64(prevErrors) * 100
+			errorTrend = float64(int64(totalErrors)-int64(prevErrors)) / float64(prevErrors) * 100
+		} else {
+			errorTrend = 0 // Avoid division by zero
 		}
+
+		klog.Infof("RequestTrend: %f, ErrorTrend: %f", requestTrend, errorTrend)
 	}
 
 	badge := Badge{

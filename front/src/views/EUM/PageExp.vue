@@ -40,8 +40,8 @@ export default {
 <style scoped>
 .page-experience-card {
     border-radius: 12px;
-    padding: 16px;
-    width: 100%; /* Outer container takes full width */
+
+    width: 100%;
     justify-content: center;
 }
 
@@ -61,17 +61,17 @@ export default {
 
 .cards-container {
     display: flex;
-    flex-wrap: wrap; /* Allow cards to wrap to the next line */
-    gap: 16px; /* Space between cards */
+    flex-wrap: wrap;
+    gap: 16px;
     margin-top: 1rem;
-    justify-content: space-between; /* Space between cards */
-    width: 100%; /* Ensure the container takes full width */
+
+    width: 100%;
 }
 
 .experience-box {
     position: relative;
-    width: 220px; /* Fixed width for each card */
-    height: 130px; /* Fixed height for each card */
+    width: 200px;
+    height: 130px;
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);

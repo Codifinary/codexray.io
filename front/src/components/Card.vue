@@ -44,7 +44,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 18%;
+    width: 19%;
     height: 100px;
 }
 
@@ -58,7 +58,7 @@ export default {
 
 .card-count {
     font-weight: 700;
-    font-size: 26px;
+    font-size: 24px;
     padding: 0;
     line-height: 33px;
     color: #013912;

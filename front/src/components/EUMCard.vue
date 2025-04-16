@@ -25,7 +25,9 @@
                         <v-card-text class="card-sub-count">{{ data.errorPerSec }}</v-card-text>
                     </div>
                     <div class="trend-info" v-if="!isFromNowQuery">
-                        <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage"> {{ data.errorTrend }}% </span>
+                        <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage">
+                            {{ parseFloat(data.errorTrend).toFixed(2) }}%
+                        </span>
                         <img :src="`${$codexray.base_path}static/img/tech-icons/${trend}.svg`" class="card-icon" alt="Trend Icon" />
                     </div>
                 </div>

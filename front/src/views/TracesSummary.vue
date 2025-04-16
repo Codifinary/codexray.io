@@ -65,6 +65,7 @@ export default {
                         unit: totalEndPoints.unit,
                         background: 'red lighten-4',
                         icon: 'endpoints',
+                        color: '#EF5350',
                     });
                 }
 
