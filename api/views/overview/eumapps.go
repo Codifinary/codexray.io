@@ -66,7 +66,7 @@ func renderEumApps(ctx context.Context, ch *clickhouse.Client, w *model.World, q
 		v.Message = fmt.Sprintf("Failed to create echart: %s", err)
 		return v
 	}
-	// Create and add the line charts
+
 	lineChartReport, err := createLineChart(w, ch, overviews)
 	if err != nil {
 		klog.Errorln(err)
@@ -122,13 +122,19 @@ func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to ti
 
 	var errorTrend float64
 	duration := to.Sub(from)
-	if duration == time.Hour {
+	if duration <= 60*time.Minute {
 		previousFrom := from.Add(-duration)
 		previousTotalErrors, err := ch.GetTotalErrors(ctx, &previousFrom, &from, "", "")
 		if err != nil {
 			return nil, Badge{}, err
 		}
-		errorTrend = float64(totalErrors-previousTotalErrors) / float64(previousTotalErrors) * 100
+
+		if previousTotalErrors == 0 {
+			errorTrend = 0 // Avoid division by zero
+		} else {
+			errorTrend = float64(int64(totalErrors)-int64(previousTotalErrors)) / float64(previousTotalErrors) * 100
+		}
+
 	} else {
 		errorTrend = 0
 	}
