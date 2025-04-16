@@ -16,7 +16,7 @@
             />
         </div>
         <div>
-            <Dashboard v-if="data && data.data && data.data.report" :name="data.data.report.name" :widgets="data.data.report.widgets" />
+            <Dashboard v-if="data && data.report" :name="data.report.name" :widgets="data.report.widgets" />
         </div>
         <div class="table-section">
             <div class="d-flex align-center mb-4">
@@ -56,7 +56,7 @@
             </CustomTable>
         </div>
         <GeoMap
-            :countrywiseOverviews="data.data.sessionGeoMapData"
+            :countrywiseOverviews="data.sessionGeoMapData"
             :title="title"
             :tools="tools"
             :tooltipLabel="'Session Count'"
@@ -120,12 +120,12 @@ export default {
             return baseHeaders;
         },
         filteredSessions() {
-            if (!this.data || !this.data.data) {
+            if (!this.data) {
                 return [];
             }
 
             // Get data based on mode
-            const sessions = this.mode === 'live' ? this.data.data.sessionLiveData : this.data.data.sessionHistoricData;
+            const sessions = this.mode === 'live' ? this.data.sessionLiveData : this.data.sessionHistoricData;
 
             if (!sessions) {
                 return [];
@@ -179,25 +179,25 @@ export default {
             });
         },
         updateCards() {
-            if (this.data && this.data.data && this.data.data.summary) {
+            if (this.data && this.data.summary) {
                 this.cards = [
                     {
                         name: 'Sessions',
-                        count: this.data.data.summary.totalSessions,
+                        count: this.data.summary.totalSessions,
                         lineColor: '#1DBF73',
-                        trend: this.data.data.summary.sessionTrend,
+                        trend: this.data.summary.sessionTrend,
                     },
                     {
                         name: 'Users',
-                        count: this.data.data.summary.totalUsers,
+                        count: this.data.summary.totalUsers,
                         lineColor: '#AB47BC',
-                        trend: this.data.data.summary.userTrend,
+                        trend: this.data.summary.userTrend,
                     },
                     {
                         name: 'Median Length',
-                        count: this.data.data.summary.avgSession,
+                        count: this.data.summary.avgSession,
                         lineColor: '#42A5F5',
-                        trend: this.data.data.summary.avgSessionTrend,
+                        trend: this.data.summary.avgSessionTrend,
                     },
                 ];
             }
@@ -253,6 +253,7 @@ export default {
                     return;
                 }
                 this.data = data;
+                console.log(data);
                 this.updateCards();
                 this.loading = false;
             });

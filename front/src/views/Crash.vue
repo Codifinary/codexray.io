@@ -18,7 +18,7 @@
             </div>
         </div>
         <CustomTable 
-            v-if="data && data.crashReasonWiseOverview && data.crashReasonWiseOverview.length > 0" 
+            v-if="data" 
             :headers="headers" 
             :items="data.crashReasonWiseOverview" 
             class="table"
@@ -32,10 +32,7 @@
                             id: id,
                             report: 'crash',
                         },
-                        query: {
-                            ...query,
-                            crashID: CrashReason
-                        }
+                        query: getLinkQuery(CrashReason)
                     }">{{ CrashReason }}</router-link>
                 </div>
             </template>
@@ -131,8 +128,8 @@ export default {
     },
     mounted() {
         this.$watch('$route', (to) => {
-            this.crashID = to.query.crashID || null;
             this.query = { ...to.query };
+            this.crashID = to.query.crashID || null;
             this.get();
         }, { immediate: true });
     },
@@ -186,6 +183,7 @@ export default {
                 }
 
                 this.data = res;
+                this.count = res.summary.totalCrashes;
             });
         },
         formatDate(epochMicroseconds) {
@@ -207,6 +205,24 @@ export default {
                 width: '100%'
 
             };
+        },
+        getLinkQuery(crashReason) {
+            const currentRouteQuery = this.$route.query;
+            const newQuery = {};
+            // Copy relevant params, excluding nested 'query' and 'crashID'
+            for (const key in currentRouteQuery) {
+                if (key !== 'query' && key !== 'crashID') {
+                    newQuery[key] = currentRouteQuery[key];
+                }
+            }
+            // Set the specific crashID for this link
+            newQuery.crashID = crashReason;
+
+            // Explicitly add 'from' only if it's truthy in the current route
+            if (currentRouteQuery.from) {
+                newQuery.from = currentRouteQuery.from;
+            }
+            return newQuery;
         }
     }
 };

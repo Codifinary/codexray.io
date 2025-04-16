@@ -10,6 +10,11 @@
                             view: 'MRUM',
                             id: id,
                             report: 'crash'
+                        },
+                        query: {
+                            ...Object.fromEntries(
+                                Object.entries(this.$route.query).filter(([key]) => key !== 'crashID')
+                            )
                         }
                     }" 
                     class="bread-heading"
@@ -160,6 +165,7 @@ export default {
             this.loading = true;
             
             const query = {
+                ...this.query,
                 service: this.id,
                 crash_reason: this.crashID
             };

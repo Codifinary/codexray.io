@@ -47,7 +47,11 @@
             </tbody>
         </v-simple-table>
 
-        <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"/>
+        <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"
+            :tools="tools"
+            :tooltipLabel="'Requests'"
+            :tooltipValue="(item) => item.Requests"
+        />
     </div>
     </div>
 
@@ -75,6 +79,7 @@ export default {
             error: null,
             from: null,
             query: {},
+            tools: [],
             cards: [
                 { 
                     primaryLabel: 'Total Requests', 
@@ -175,7 +180,7 @@ export default {
                     const summary = res.summary;
                     
                     // Update Total Requests card
-                    this.cards[0].primaryValue = summary.primaryValue || 0;
+                    this.cards[0].primaryValue = summary.totalRequests || 0;
                     this.cards[0].secondaryValue = summary.requestsPerSecond ? summary.requestsPerSecond.toFixed(2) : 0;
                     this.cards[0].percentageChange = summary.requestsTrend ? Math.round(summary.requestsTrend / 100) : 0;
                     this.cards[0].iconColor = summary.requestsTrend > 0 ? '#66BB6A' : '#EF5350';
