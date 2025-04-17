@@ -19,9 +19,9 @@ apt update
 apt install docker-compose-v2
 ```
 
-**Step #2: Deploy Coroot**
+**Step #2: Deploy Codexray**
 
-To deploy Coroot using Docker Compose, run the following command. Before applying it, you can review the configuration file in Coroot's GitHub repository: docker-compose.yaml
+To deploy Codexray using Docker Compose, run the following command. Before applying it, you can review the configuration file in Codexray's GitHub repository: docker-compose.yaml
 
 ```bash
 curl -fsS https://raw.githubusercontent.com/coroot/coroot/main/deploy/docker-compose.yaml | \
@@ -47,18 +47,18 @@ d0143aea889b   clickhouse/clickhouse-server:24.3     "/entrypoint.sh"         5 
 a6618978d560   prom/prometheus:v2.45.4               "/bin/prometheus --c…"   5 seconds ago   Up 4 seconds   127.0.0.1:9090->9090/tcp                              coroot-prometheus-1
 ```
 
-**Step #4: Accessing Coroot**
+**Step #4: Accessing Codexray**
 
-If you installed Coroot on your desktop machine, you can access it at http://localhost:8080/.
-If Coroot is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: 
+If you installed Codexray on your desktop machine, you can access it at http://localhost:8080/.
+If Codexray is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: 
 http://NODE_IP_ADDRESS:8080/.
 
-**Uninstall Coroot**
+**Uninstall Codexray**
 
-To uninstall Coroot run the following command:
+To uninstall Codexray run the following command:
 
 ```bash
-curl -fsS https://raw.githubusercontent.com/coroot/coroot/main/deploy/docker-compose.yaml | \
+curl -fsS https://raw.githubusercontent.com/coroot/codexray/main/deploy/docker-compose.yaml | \
   docker compose rm -f -s -v
 ```
   </TabItem>
@@ -66,7 +66,7 @@ curl -fsS https://raw.githubusercontent.com/coroot/coroot/main/deploy/docker-com
   <TabItem value="ee" label="Enterprise Edition">
 
 :::info
-Coroot Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
+Codexray Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
 To install the Enterprise Edition, you'll need a license. [Start](https://coroot.com/account) your free trial today.
 :::
 
@@ -79,12 +79,12 @@ apt update
 apt install docker-compose-v2
 ```
 
-**Step #2: Deploy Coroot**
+**Step #2: Deploy Codexray**
 
-To install Coroot Enterprise Edition, you'll need a license (from $1 per CPU core/month). Start your free trial today.
+To install Codexray Enterprise Edition, you'll need a license (from $1 per CPU core/month). Start your free trial today.
 
-To deploy Coroot using Docker Compose, run the following command. Before applying it, 
-you can review the configuration file in Coroot's GitHub repository: docker-compose.yaml
+To deploy Codexray using Docker Compose, run the following command. Before applying it, 
+you can review the configuration file in Codexray's GitHub repository: docker-compose.yaml
 
 ```
 curl -fsS https://raw.githubusercontent.com/coroot/coroot-ee/main/deploy/docker-compose.yaml | \
@@ -93,7 +93,7 @@ curl -fsS https://raw.githubusercontent.com/coroot/coroot-ee/main/deploy/docker-
 
 **Step #3: Validate the deployment**
 
-Ensure that the Coroot containers are running by executing the following command:
+Ensure that the Codexray containers are running by executing the following command:
 
 ```
 docker ps
@@ -110,15 +110,15 @@ CONTAINER ID   IMAGE                                 COMMAND                  CR
 51e91e09e58a   ghcr.io/coroot/coroot-node-agent      "coroot-node-agent -…"   About a minute ago   Up About a minute                                                  coroot-ee-node-agent-1
 ```
 
-**Step #4: Accessing Coroot**
+**Step #4: Accessing Codexray**
 
-If you installed Coroot on your desktop machine, you can access it at http://localhost:8080/.
-If Coroot is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: 
+If you installed Codexray on your desktop machine, you can access it at http://localhost:8080/.
+If Codexray is deployed on a remote node, replace `NODE_IP_ADDRESS` with the IP address of the node in the following URL: 
 http://NODE_IP_ADDRESS:8080/.
 
-**Uninstall Coroot**
+**Uninstall Codexray**
 
-To uninstall Coroot run the following command:
+To uninstall Codexray run the following command:
 
 ```
 curl -fsS https://raw.githubusercontent.com/coroot/coroot-ee/main/deploy/docker-compose.yaml | \
