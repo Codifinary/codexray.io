@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container">
         <div class="summary-container">
             <DataCards :data="badges" />
 
@@ -8,9 +8,9 @@
                     <EChart :chartOptions="config" class="chart-box" />
                 </div>
             </div>
-            <div>
-                <span>Browser Types</span>
-                <v-simple-table class="elevation-1 mt-5 browser-table">
+            <div class="mt-3">
+                <span class="span">Browser Types</span>
+                <v-simple-table class="elevation-1 mt-3 browser-table">
                     <thead>
                         <tr>
                             <th v-for="header in browserHeaders" :key="header.value">
@@ -126,12 +126,15 @@ export default {
 </script>
 
 <style scoped>
+.span {
+    font-size: 1.25rem;
+    font-weight: 500;
+}
 .summary-container {
-    margin-top: 10px;
     display: flex;
     flex-direction: row;
     width: 100%;
-    gap: 20px;
+    gap: 1.25rem;
 }
 .clickable {
     cursor: pointer;
@@ -141,8 +144,9 @@ export default {
 .chart-container {
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    gap: 1.25rem;
     justify-content: center;
+    margin-top: 0.86rem;
 }
 .chart-wrapper {
     box-shadow:
@@ -151,13 +155,13 @@ export default {
         0px 1px 5px 0px rgba(0, 0, 0, 0.12);
 }
 .chart-box {
-    width: 300px;
-    height: 320px;
+    width: 25vw;
+    height: 30vh;
     transform: scale(0.9);
     transform-origin: center;
 }
 .browser-table {
-    width: 580px;
-    height: 290px;
+    width: 40vw;
+    height: 33vh;
 }
 </style>
