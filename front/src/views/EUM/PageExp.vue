@@ -36,18 +36,16 @@ export default {
     },
 };
 </script>
-
 <style scoped>
 .page-experience-card {
     border-radius: 12px;
-
-    width: 100%;
+    width: 90vw;
     justify-content: center;
 }
 
 .section-title {
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: #14532d;
     display: flex;
     align-items: center;
@@ -56,50 +54,50 @@ export default {
 .info-icon {
     margin-left: 0.5rem;
     color: #22c55e;
-    font-size: 0.85rem;
+    font-size: 1rem;
 }
 
 .cards-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 16px;
+    justify-content: space-between;
     margin-top: 1rem;
-
     width: 100%;
 }
 
 .experience-box {
     position: relative;
-    width: 200px;
-    height: 130px;
+    width: 15vw;
+    height: 15vh;
     border-radius: 12px;
-    padding: 16px;
+    padding: 1rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .icon-placeholder {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 1rem;
+    right: 1rem;
     border-radius: 50%;
-    width: 22px;
-    height: 22px;
+    width: 2rem;
+    height: 2rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .experience-title {
-    margin-top: 35px;
+    margin-top: 2rem;
     color: #4b5563;
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .experience-status {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 700;
-    margin-top: 4px;
+    margin-top: 0.5rem;
 }
+
 .v-sheet.v-card:not(.v-sheet--outlined) {
     box-shadow: none !important;
 }

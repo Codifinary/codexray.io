@@ -58,18 +58,15 @@ export default {
 
                 this.summary = [];
 
-                if (this.$route.params.view === 'traces') {
-                    this.summary.push({
+                this.summary.push(
+                    {
                         name: 'Total EndPoints',
                         value: totalEndPoints.value,
                         unit: totalEndPoints.unit,
-                        background: 'red lighten-4',
+                        background: 'green lighten-4',
                         icon: 'endpoints',
-                        color: '#EF5350',
-                    });
-                }
-
-                this.summary.push(
+                        color: '#33925d',
+                    },
                     {
                         name: 'Total Requests',
                         value: totalRequest.value,
