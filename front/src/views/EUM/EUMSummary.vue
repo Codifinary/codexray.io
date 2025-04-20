@@ -38,10 +38,10 @@ export default {
         getChartStyle(index) {
             if (index < 2) {
                 // First two charts
-                return { width: '250px', height: '290px' };
+                return { width: '18vw', height: '30vh' };
             } else {
                 // Last chart
-                return { width: '350px', height: '290px' };
+                return { width: '25vw', height: '30vh' };
             }
         },
     },

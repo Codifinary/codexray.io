@@ -142,6 +142,6 @@ export default {
     width: 100%;
 }
 ::v-deep(.card-body) {
-    width: 30%;
+    width: 20vw;
 }
 </style>
