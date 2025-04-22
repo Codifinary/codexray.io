@@ -130,7 +130,7 @@ func getServiceOverviews(ctx context.Context, ch *clickhouse.Client, from, to ti
 		}
 
 		if previousTotalErrors == 0 {
-			errorTrend = 0 // Avoid division by zero
+			errorTrend = float64(totalErrors) * 100
 		} else {
 			errorTrend = float64(int64(totalErrors)-int64(previousTotalErrors)) / float64(previousTotalErrors) * 100
 		}

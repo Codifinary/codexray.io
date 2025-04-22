@@ -142,7 +142,7 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 	// }
 
 	var overviews []PerfOverview
-	var totalRequests, totalErrors uint64
+	var totalRequests uint64
 	for _, row := range rows {
 		overview := PerfOverview{
 			PagePath:           row.PagePath,
@@ -154,8 +154,9 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 		}
 		overviews = append(overviews, overview)
 		totalRequests += row.Requests
-		totalErrors += uint64(row.JsErrorPercentage*float64(row.Requests)/100 + row.ApiErrorPercentage*float64(row.Requests)/100)
 	}
+
+	totalErrors, err := ch.GetTotalErrors(ctx, &from, &to, serviceName, "")
 
 	sort.Slice(overviews, func(i, j int) bool {
 		return overviews[i].PagePath < overviews[j].PagePath
@@ -184,13 +185,13 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 		if prevRequests > 0 {
 			requestTrend = float64(int64(totalRequests)-int64(prevRequests)) / float64(prevRequests) * 100
 		} else {
-			requestTrend = 0 // Avoid division by zero
+			requestTrend = float64(totalRequests) * 100
 		}
 
 		if prevErrors > 0 {
 			errorTrend = float64(int64(totalErrors)-int64(prevErrors)) / float64(prevErrors) * 100
 		} else {
-			errorTrend = 0 // Avoid division by zero
+			errorTrend = float64(totalErrors) * 100
 		}
 
 		klog.Infof("RequestTrend: %f, ErrorTrend: %f", requestTrend, errorTrend)

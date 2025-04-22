@@ -358,7 +358,7 @@ export default {
 
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
     width: 95%;
 }
 ::v-deep(.card-body) {
