@@ -63,59 +63,114 @@ type rawPageStats struct {
 }
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
-	// Build the base query
-	query := `
+	// Query for performance data from perf_data table
+	perfQuery := `
 SELECT 
-    p.PageName AS PagePath, 
-    avg(p.LoadPageTime) AS avgLoadPageTime,
-    countIf(e.Category = 'js') * 100.0 / count() AS jsErrorPercentage,
-    countIf(e.Category = 'api') * 100.0 / count() AS apiErrorPercentage,
-    countDistinct(e.UserId) AS impactedUsers,
-    count(p.PageName) AS Requests
+    PageName AS PagePath, 
+    avg(LoadPageTime) AS avgLoadPageTime,
+    count(PageName) AS Requests
 FROM 
-    perf_data p
-LEFT JOIN 
-    err_log_data e 
-ON 
-    p.PageName = e.PagePath
-    AND p.ServiceName = e.ServiceName`
-
-	// Conditionally add time range and service name filtering
-	var filters []string
-	var args []any
-	if from != nil {
-		filters = append(filters, "p.Timestamp >= @from")
-		args = append(args, clickhouse.Named("from", *from))
-	}
-	if to != nil {
-		filters = append(filters, "p.Timestamp <= @to")
-		args = append(args, clickhouse.Named("to", *to))
-	}
-	if serviceName != "" {
-		filters = append(filters, "p.ServiceName = @serviceName")
-		args = append(args, clickhouse.Named("serviceName", serviceName))
-	}
-
-	if len(filters) > 0 {
-		query += " WHERE " + strings.Join(filters, " AND ")
-	}
-
-	query += `
+    perf_data
+WHERE 
+    Timestamp >= @from
+    AND Timestamp <= @to
+    AND ServiceName = @serviceName
 GROUP BY 
-    p.PageName`
+    PageName`
 
-	// Execute the query
+	// Query for error data from err_log_data table
+	errorQuery := `
+SELECT 
+    PagePath, 
+    countIf(Category = 'js') * 100.0 / count() AS jsErrorPercentage,
+    countIf(Category = 'api') * 100.0 / count() AS apiErrorPercentage,
+    countDistinct(UserId) AS impactedUsers
+FROM 
+    err_log_data
+WHERE 
+    Timestamp >= @from
+    AND Timestamp <= @to
+    AND ServiceName = @serviceName
+GROUP BY 
+    PagePath`
+
+	// Execute the queries and combine results
+	var perfRows []PerfRow
+	perfData := make(map[string]*PerfRow)
+
+	// Execute performance query
+	perfResults, err := c.executePerfQueryForPerformance(ctx, perfQuery, from, to, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range perfResults {
+		perfData[row.PagePath] = &row
+	}
+
+	// Execute error query
+	errorResults, err := c.executeErrorQueryForPerformance(ctx, errorQuery, from, to, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range errorResults {
+		if perfData[row.PagePath] != nil {
+			perfData[row.PagePath].JsErrorPercentage = row.JsErrorPercentage
+			perfData[row.PagePath].ApiErrorPercentage = row.ApiErrorPercentage
+			perfData[row.PagePath].ImpactedUsers = row.ImpactedUsers
+		}
+	}
+
+	// Combine results into a single slice
+	for _, row := range perfData {
+		perfRows = append(perfRows, *row)
+	}
+
+	return perfRows, nil
+}
+
+// Helper function to execute performance query
+func (c *Client) executePerfQueryForPerformance(ctx context.Context, query string, from, to *time.Time, serviceName string) ([]PerfRow, error) {
+	args := []any{
+		clickhouse.Named("from", *from),
+		clickhouse.Named("to", *to),
+		clickhouse.Named("serviceName", serviceName),
+	}
+
 	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Process results
 	var results []PerfRow
 	for rows.Next() {
 		var row PerfRow
-		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests); err != nil {
+		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.Requests); err != nil {
+			return nil, err
+		}
+		results = append(results, row)
+	}
+	return results, nil
+}
+
+// Helper function to execute error query
+func (c *Client) executeErrorQueryForPerformance(ctx context.Context, query string, from, to *time.Time, serviceName string) ([]PerfRow, error) {
+	args := []any{
+		clickhouse.Named("from", *from),
+		clickhouse.Named("to", *to),
+		clickhouse.Named("serviceName", serviceName),
+	}
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []PerfRow
+	for rows.Next() {
+		var row PerfRow
+		if err := rows.Scan(&row.PagePath, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
