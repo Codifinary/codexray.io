@@ -142,7 +142,7 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 	// }
 
 	var overviews []PerfOverview
-	var totalRequests, totalErrors uint64
+	var totalRequests uint64
 	for _, row := range rows {
 		overview := PerfOverview{
 			PagePath:           row.PagePath,
@@ -154,8 +154,9 @@ func getPerformanceData(ctx context.Context, ch *clickhouse.Client, serviceName 
 		}
 		overviews = append(overviews, overview)
 		totalRequests += row.Requests
-		totalErrors += uint64(row.JsErrorPercentage*float64(row.Requests)/100 + row.ApiErrorPercentage*float64(row.Requests)/100)
 	}
+
+	totalErrors, err := ch.GetTotalErrors(ctx, &from, &to, serviceName, "")
 
 	sort.Slice(overviews, func(i, j int) bool {
 		return overviews[i].PagePath < overviews[j].PagePath
