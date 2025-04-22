@@ -49,8 +49,8 @@
 
         <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"
             :tools="tools"
-            :tooltipLabel="'Requests'"
-            :tooltipValue="(item) => item.Requests"
+            :tooltipLabel="'Errors'"
+            :tooltipValue="(item) => item.Errors"
         />
     </div>
     </div>
@@ -182,7 +182,7 @@ export default {
                     // Update Total Requests card
                     this.cards[0].primaryValue = summary.totalRequests || 0;
                     this.cards[0].secondaryValue = summary.requestsPerSecond ? summary.requestsPerSecond.toFixed(2) : 0;
-                    this.cards[0].percentageChange = summary.requestsTrend ? Math.round(summary.requestsTrend / 100) : 0;
+                    this.cards[0].percentageChange = summary.requestsTrend || 0;
                     this.cards[0].iconColor = summary.requestsTrend > 0 ? '#66BB6A' : '#EF5350';
                     this.cards[0].icon = summary.requestsTrend > 0 ? 'up-green-arrow' : 'up-red-arrow';
                     this.cards[0].trendColor = summary.requestsTrend > 0 ? '#66BB6A' : '#EF5350';
@@ -190,7 +190,7 @@ export default {
                     // Update Errors card
                     this.cards[1].primaryValue = summary.totalErrors || 0;
                     this.cards[1].secondaryValue = summary.errorsPerSecond ? summary.errorsPerSecond.toFixed(2) : 0;
-                    this.cards[1].percentageChange = summary.errorsTrend ? Math.round(summary.errorsTrend / 100) : 0;
+                    this.cards[1].percentageChange = summary.errorsTrend || 0;
                     this.cards[1].iconColor = summary.errorsTrend > 0 ? '#EF5350' : '#66BB6A';
                     this.cards[1].icon = summary.errorsTrend > 0 ? 'up-red-arrow' : 'up-green-arrow';
                     this.cards[1].trendColor = summary.errorsTrend > 0 ? '#EF5350' : '#66BB6A';
@@ -198,7 +198,7 @@ export default {
                     // Update Users Impacted card
                     this.cards[2].primaryValue = summary.usersImpacted || 0;
                     this.cards[2].secondaryValue = summary.usersImpactedPerSecond ? summary.usersImpactedPerSecond.toFixed(2) : 0;
-                    this.cards[2].percentageChange = summary.usersImpactedTrend ? Math.round(summary.usersImpactedTrend / 100) : 0;
+                    this.cards[2].percentageChange = summary.usersImpactedTrend || 0;
                     this.cards[2].iconColor = summary.usersImpactedTrend > 0 ? '#EF5350' : '#66BB6A';
                     this.cards[2].icon = summary.usersImpactedTrend > 0 ? 'up-red-arrow' : 'up-green-arrow';
                     this.cards[2].trendColor = summary.usersImpactedTrend > 0 ? '#EF5350' : '#66BB6A';
@@ -226,35 +226,35 @@ export default {
 
 <style scoped>
 .performance-container{
-    margin: 20px;
+    margin: 1.25rem;
 }
 
 .charts{
     display: flex;
     flex-direction: column;
-    gap: 50px;
-    margin-top: 50px;
-    margin-bottom: 50px;
-    margin-right: 30px;
+    gap: 3.125rem;
+    margin-top: 3.125rem;
+    margin-bottom: 3.125rem;
+    margin-right: 1.875rem;
 }
 
 .cards {
     display: flex;
     flex-wrap: wrap;
-    gap: 50px;
-    margin-right: 30px;  
-    margin-bottom: 50px;
-    margin-top: 50px;
+    gap: 3.125rem;
+    margin-right: 1.875rem;
+    margin-bottom: 3.125rem;
+    margin-top: 3.125rem;
 }
 
 .table td, 
 .table th {
-    font-size: 12px !important;
+    font-size: 0.75rem !important;
 }
 
 .table {
-    margin-bottom: 50px;
-    margin-top: 50px;
+    margin-bottom: 3.125rem;
+    margin-top: 3.125rem;
 }
 
 .light-green-bg {
@@ -270,6 +270,6 @@ export default {
 }
 
 .geomap{
-    margin-top: 50px;
+    margin-top: 3.125rem;
 }
 </style>

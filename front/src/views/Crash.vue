@@ -203,7 +203,7 @@ export default {
             return {
                 height: '300px',
                 width: '100%'
-
+                
             };
         },
         getLinkQuery(crashReason) {
@@ -229,25 +229,25 @@ export default {
 </script>
 <style scoped>
 .crash-container {
-    padding: 20px;
+    padding: 1.25rem;
 }
 
 .charts-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin: 20px 0;
+    gap: 1.25rem;
+    margin: 1.25rem 0;
 }
 
 .chart-wrapper {
     background: white;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 0.5rem;
+    padding: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .table {
-    margin-top: 50px;
+    margin-top: 3.125rem;
 }
 
 .crash-reason a,
@@ -263,6 +263,6 @@ export default {
 }
 
 .chart{
-    margin-top: 50px;
+    margin-top: 3.125rem;
 }
 </style>

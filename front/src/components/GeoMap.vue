@@ -67,11 +67,8 @@
       }
 
       window.addEventListener('resize', this.handleResize);
-      this.resizeObserver = new ResizeObserver(() => {
-        this.handleResize();
-      });
-      this.resizeObserver.observe(this.$refs.chartContainer);
       
+      // Call initChart after DOM is ready
       this.$nextTick(() => {
         this.initChart();
       });
@@ -100,8 +97,7 @@
             this.initChart();
           }, 100);
         },
-        deep: true,
-        immediate: true
+        deep: true
       }
     },
     computed: {
@@ -143,6 +139,12 @@
         }
       },
       async initChart() {
+        // Disconnect existing observer first
+        if (this.resizeObserver) {
+          this.resizeObserver.disconnect();
+          this.resizeObserver = null; 
+        }
+
         // Always dispose the existing chart first
         if (this.chart) {
           this.chart.dispose();
@@ -154,6 +156,7 @@
         const container = this.$refs.chartContainer;
         
         if (!container) {
+          console.warn("GeoMap: container not found in initChart");
           return;
         }
         
@@ -166,10 +169,22 @@
         // Clear any existing chart instances on this container
         echarts.dispose(container);
         
+        // Initialize chart
         this.chart = echarts.init(container, null, {
           renderer: 'canvas',
           useDirtyRect: false
         });
+
+        // Setup ResizeObserver AFTER successful chart init
+        if (this.chart) {
+          this.resizeObserver = new ResizeObserver(() => {
+            this.handleResize();
+          });
+          this.resizeObserver.observe(container);
+        } else {
+            console.warn("GeoMap: Chart not initialized, observer not attached.");
+        }
+
         this.chart.showLoading();
         
         try {
@@ -244,10 +259,12 @@
           };
   
           this.chart.setOption(option);
-          this.chart.resize();
+          // Consider resizing after setting options
+          this.chart.resize(); 
         } catch (error) {
           console.error('Error initializing chart:', error);
-          this.chart.hideLoading();
+          // Ensure loading is hidden even if error occurs after showLoading
+          if (this.chart) this.chart.hideLoading(); 
         }
       }
     }

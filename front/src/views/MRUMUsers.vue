@@ -78,9 +78,8 @@ export default {
                     name: 'Crash Free Users',
                     count: crashFreeUsers,
                     lineColor: '#009688',
-                    trend: 0,
-                    iconName: 'arrow-up-thin',
-                    iconColor: '#009688',
+                    iconName: crashFreeUsers > 0 ? 'arrow-up-thin' : 'arrow-down-thin',
+                    iconColor: crashFreeUsers > 0 ? '#009688' : '#EF5350',
                     trendIcon: true
                 },
                 { 
@@ -110,15 +109,12 @@ export default {
                     primaryValue: this.data?.summary?.dailyActiveUsers,
                     percentageChange: this.data?.summary?.dailyTrend,
                     lineColor: '#009688',
-                    icon: 'up-green-arrow',
-
+                    icon: this.data?.summary?.dailyTrend > 0 ? 'up-green-arrow' : 'up-red-arrow',
+                    trendColor: this.data?.summary?.dailyTrend > 0 ? '#66BB6A' : '#EF5350',
                 },
                 { 
                     primaryLabel: 'Weekly Active Users', 
                     primaryValue: this.data?.summary?.weeklyActiveUsers,
-                    iconColor: '#F57C00',
-                    lineColor: '#F57C00',
-
                 },
             ];
         },
@@ -193,17 +189,17 @@ export default {
             this.from = queryParams.from ?? null;
         },
 
-        // Update URL with current parameters
-        setQuery() {
-            const query = {
-                query: JSON.stringify(this.query)
-            };
-            this.$router.push({ query }).catch((err) => {
-                if (err.name !== 'NavigationDuplicated') {
-                    console.error(err);
-                }
-            });
-        },
+        // // Update URL with current parameters
+        // setQuery() {
+        //     const query = {
+        //         query: JSON.stringify(this.query)
+        //     };
+        //     this.$router.push({ query }).catch((err) => {
+        //         if (err.name !== 'NavigationDuplicated') {
+        //             console.error(err);
+        //         }
+        //     });
+        // },
 
         // Main get method to fetch data
         get() {
@@ -308,9 +304,8 @@ export default {
 
 .trend-cards {
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 50px;
+    gap: 20px;
     margin-right: 30px;  
     margin-bottom: 50px;
     margin-top: 50px;
