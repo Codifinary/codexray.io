@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Anonymous usage statistics
 
-To improve Coroot we collect anonymous usage statistics. The collection of statistics is enabled by default, but you can opt out at any time.
+To improve Codexray we collect anonymous usage statistics. The collection of statistics is enabled by default, but you can opt out at any time.
 
 ## What exactly is being collected
 
@@ -105,7 +105,7 @@ As you can see, the data is absolutely anonymous.
 ## How we process the data
 
 Anonymous usage statistics are reported to our collector at https://coroot.com/ce/usage-statistics. 
-Coroot Inc uses the described statistics for its own purposes (improving the product) and does not share the data with any third parties.
+Codexray Inc uses the described statistics for its own purposes (improving the product) and does not share the data with any third parties.
 
 ## Disable usage statistics
 You can disable the collecting of usage statistics by using the `--disable-usage-statistics` command line argument.
