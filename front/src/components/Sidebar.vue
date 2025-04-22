@@ -27,13 +27,13 @@
                         <!-- Submenu for Applications -->
                         <v-list v-if="showTitles && id === 'applications' && expanded.applications" :key="`${id}-submenu`" dense nav>
                             <v-list-item :class="{ 'selected-subview': selectedView === 'applications' }" :to="getNavigationLink('applications')">
-                                <div class="submenu-circle"></div>
+                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">Health</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
                             <v-list-item :class="{ 'selected-subview': selectedView === 'traces' }" :to="getNavigationLink('traces')">
-                                <div class="submenu-circle"></div>
+                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">Tracing</v-list-item-title>
                                 </v-list-item-content>
@@ -42,13 +42,13 @@
                         <!-- Submenu for EUM -->
                         <v-list v-if="showTitles && id === 'EUM' && expanded.EUM" :key="`${id}-submenu`" dense nav>
                             <v-list-item :class="{ 'selected-subview': selectedView === 'EUM' }" :to="getNavigationLink('EUM')">
-                                <div class="submenu-circle"></div>
+                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">BRUM</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
                             <v-list-item :class="{ 'selected-subview': selectedView === 'MRUM' }" :to="getNavigationLink('MRUM')">
-                                <div class="submenu-circle"></div>
+                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">MRUM</v-list-item-title>
                                 </v-list-item-content>
@@ -276,11 +276,12 @@ export default {
 }
 
 .selected-subview {
-    background-color: #f5faf7;
+    background-color: #e7f8efa9;
     color: #1dbf73;
 }
 .selected-subview .sidebar-subname {
-    color: #1dbf73;
+    color: black;
+    font-weight: 600 !important;
 }
 
 .v-list-item {
@@ -310,17 +311,11 @@ export default {
     margin-left: 20px;
 }
 
-.submenu-circle {
-    width: 6px;
-    height: 6px;
-    background-color: #013912;
-    border-radius: 50%;
-    margin-left: 30px;
-    margin-right: 10px;
-}
-
-.selected-subview .submenu-circle {
-    background-color: #1dbf73;
+.submenu-circle-icon {
+    font-size: 12px !important;
+    color: #013912 !important;
+    margin-left: 30px !important;
+    margin-right: 10px !important;
 }
 
 .v-list {
