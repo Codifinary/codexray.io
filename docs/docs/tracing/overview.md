@@ -20,20 +20,19 @@ system performance with just a few clicks.
 
 
 Here's a HeatMap showing request distribution over time, their statuses, and durations. 
-It indicates that in this case the system is handling roughly 70 requests per second, with most taking less than 250ms and no errors detected.
 
 ## Errors
 
 Using HeatMaps it's easy to spot anomalies.
 
-<img alt="Tracing Errors Overview" src="/img/docs/tracing_errors_overview.png" class="card w-1200"/>
+<img alt="Tracing Errors Overview" src="/docs/docs/Doc_Tracing_Overview.png" class="card w-1200"/>
 
-As seen in the HeatMap, there are approximately 5 errors per second. While we know precisely when this started, we're 
+While we can see errors and know precisely when this started, we're 
 still unsure about the reasons behind it. Are these errors of a single type, or are multiple failures occurring simultaneously?
 
 By selecting any area on the chart, we can view relevant traces or even summaries of ALL related traces:
 
-<img alt="Tracing Error Reasons" src="/img/docs/tracing_error_reasons.png" class="card w-1200"/>
+<img alt="Tracing Error Reasons" src="/docs/docs/Doc_Tracing_Error_Reasons.png" class="card w-1200"/>
 
 Now, we're certain that in this specific scenario, 100% of errors were triggered by our intentionally introduced error. 
 It works similarly to manual trace analysis, but CodeXray goes a step further by automatically analyzing ALL affected 
@@ -41,7 +40,7 @@ requests and pinpointing only those spans where errors originated.
 
 Of course, you still have the option to manually analyze any trace and crosscheck.
 
-<img alt="Tracing Error Trace" src="/img/docs/tracing_error_trace.png" class="card w-1200"/>
+<img alt="Tracing Error Trace" src="/docs/docs/Doc_Tracing_Errors.png" class="card w-1200"/>
 
 
 ## Attributes comparison
@@ -51,7 +50,7 @@ compare trace attributes within a selected area of the chart with other requests
 This is extremely useful in cases where the system behaves differently when handling requests with specific input data, 
 such as requests from a particular customer or browser type.
 
-<img alt="Tracing Attribute Comparison" src="/img/docs/tracing_attribute_comparison.png" class="card w-1200"/>
+<img alt="Tracing Attribute Comparison" src="/docs/docs/Doc_Tracing_AttributeComparison.png" class="card w-1200"/>
 
 As you can see, CodeXray has identified that the selected requests have the attribute indicating that the feature flag was enabled. 
 The coolest thing here is that this feature works without any configuration, making it applicable for any custom attributes.
@@ -59,7 +58,7 @@ The coolest thing here is that this feature works without any configuration, mak
 ## Slow requests
 With CodeXray's HeatMap, it's easy to identify an anomaly in request processing: certain requests are taking longer than usual.
 
-<img alt="Tracing Latency Explorer" src="/img/docs/tracing_latency_explorer.png" class="card w-1200"/>
+<img alt="Tracing Latency Explorer" src="/docs/docs/Doc_Tracing_LatencyExplorer.png" class="card w-1200"/>
 
 Instead of manually analyzing each trace within the anomaly, CodeXray can analyze ALL of them and automatically compare 
 operation durations with other requests in just a few seconds.
