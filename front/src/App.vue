@@ -37,7 +37,7 @@
                                 <v-list-item v-for="p in projects" :key="p.name" :to="{ name: 'overview', params: { projectId: p.id } }" class="px-4">
                                     {{ p.name }}
                                 </v-list-item>
-                                <v-list-item :to="{ name: 'project_new' }" exact>
+                                <v-list-item v-if="user.role === 'Admin'" :to="{ name: 'project_new' }" exact>
                                     <v-icon small class="pl-2 pr-1" color="primary">mdi-plus</v-icon> new project
                                 </v-list-item>
                             </v-list>
@@ -92,7 +92,7 @@
             <v-container class="mx-0 px-0 py-0">
                 <div class="main-content-wrapper">
                     <v-alert
-                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings'"
+                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings' && showAlert"
                         color="red"
                         elevation="2"
                         border="left"
@@ -131,6 +131,9 @@
                                 </div>
                                 <v-btn outlined :to="{ name: 'project_settings' }">Install kube-state-metrics</v-btn>
                             </template>
+                            <v-btn icon @click="showAlert = false" class="ml-5" color="black">
+                                <v-icon>mdi-close</v-icon>
+                            </v-btn>
                         </div>
                     </v-alert>
                     <div class="app-content">
