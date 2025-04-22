@@ -16,7 +16,7 @@ and Memcached, making the captured traces invaluable for troubleshooting databas
 In the example below, you can see specific MongoDB queries that exceed the latency objective, and this is 
 achieved without any code changes:
 
-<img alt="eBPF-based Tracing" src="/img/docs/tracing_mongo_spans.png" class="card w-1200"/>
+<img alt="eBPF-based Tracing" src="/docs/docs/Doc_eBPF_Tracing.png" class="card w-1200"/>
 
 
 
