@@ -23,7 +23,7 @@ The Traces tab shows a list of traces for the affected requests during the incid
 ## AI-based Root Cause Analysis
 
 
-AI-powered Root Cause Analysis is available only in Coroot Enterprise (from $1 per CPU core/month). [Start](https://codexray.com/account) your free trial today.
+AI-powered Root Cause Analysis is available only in Codexray Enterprise. [Start](https://codexray.com/account) your free trial today.
 
 
 Codexray's AI-based Root Cause Analysis is a powerful feature that automatically analyzes telemetry data, 
