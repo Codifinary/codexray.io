@@ -1,6 +1,22 @@
 <template>
     <div class="settings-container">
-        <div class="font-weight-bold tab-heading">{{id}}</div>
+        <div class="font-weight-bold tab-heading">{{id}} <v-icon v-if="crashID" class="icon">mdi-chevron-right</v-icon> <router-link 
+                    :to="{
+                        name: 'overview',
+                        params: {
+                            view: 'MRUM',
+                            id: id,
+                            report: 'crash'
+                        },
+                        query: {
+                            ...Object.fromEntries(
+                                Object.entries(this.$route.query).filter(([key]) => key !== 'crashID')
+                            )
+                        }
+                    }" 
+                    class="bread-heading"
+                    v-if="crashID"
+                >Crash </router-link> <v-icon v-if="crashID" class="icon">mdi-chevron-right</v-icon> <span v-if="crashID" class="crash-id-text"> {{ crashID }}</span></div>
 
         <v-tabs v-model="activeTab" height="40" slider-color="success" show-arrows slider-size="2" @change="updateUrl">
             <v-tab v-for="(report, index) in reports" :key="index">{{ report.label }}</v-tab>
@@ -43,6 +59,7 @@ export default {
             activeTab: 0,
             loading: false,
             error: '',
+            crashID: this.$route.query.crashID,
             reports :[
                 { name: 'sessions', label: 'Sessions', component: 'Sessions'},
                 { name: 'users', label: 'Users', component: 'Users'},
@@ -61,6 +78,7 @@ export default {
     watch: {
         report: {immediate: true, handler: 'setActiveTab'},
         '$route.params.report': { immediate: true, handler: 'setActiveTab' },
+        '$route.query.crashID': { immediate: true, handler: 'setCrashID' },
 
     },
 
@@ -113,6 +131,9 @@ export default {
         handleNavigationError(err) {
             if (err.name !== 'NavigationDuplicated') console.error(err);
         },
+        setCrashID() {
+            this.crashID = this.$route.query.crashID;
+        }
     },
 };
 </script>
@@ -149,5 +170,21 @@ export default {
     color: var(--status-ok) !important;
     font-size: 22px !important;
     padding-left: 5px;
+}
+
+.crash-id-text {
+    display: inline-block;
+    max-width: 300px; /* Adjust this value based on your layout needs */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+}
+
+.bread-heading{
+    color: var(--status-ok);
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
 }
 </style>

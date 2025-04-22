@@ -20,7 +20,7 @@
         </div>
         <div class="table-section">
             <div class="d-flex align-center mb-4">
-                <div class="d-flex align-center">
+                <div class="d-flex align-center btn-container">
                     <v-btn-toggle v-model="mode" mandatory class="mode-buttons" dense>
                         <v-btn value="live" text class="mode-btn px-6">Live</v-btn>
                         <v-btn value="historical" text class="mode-btn px-6">Historical</v-btn>
@@ -84,7 +84,7 @@ export default {
     },
     data() {
         return {
-            data: null,
+            data: {}, // Initialize as empty object instead of null
             loading: false,
             error: '',
             mode: 'live',
@@ -246,10 +246,15 @@ export default {
                 limit: this.limit
             };
 
+            // Add session_type if mode is historical
+            if (this.mode === 'historical') {
+                apiPayload.session_type = 'historic';
+            }
 
             this.$api.getMRUMSessionsData(this.id, apiPayload, (data, error) => {
                 if (error) {
                     this.error = error;
+                    this.loading = false; // Ensure loading is set to false on error
                     return;
                 }
                 this.data = data;
@@ -263,12 +268,37 @@ export default {
         this.get();
     },
     watch: {
+        mode(newMode, oldMode) {
+            if (newMode !== oldMode) {
+                // Update URL query based on the new mode
+                const currentQuery = { ...this.$route.query };
+                if (newMode === 'historical') {
+                    currentQuery.session_type = 'historic';
+                } else {
+                    // Remove session_type for 'live' mode or if it's not historical
+                    delete currentQuery.session_type;
+                }
+
+                // Push the updated query to the router
+                this.$router.push({ query: currentQuery }).catch((err) => {
+                    if (err.name !== 'NavigationDuplicated') {
+                        console.error(err);
+                    }
+                });
+
+                // The get() call might be redundant here if the $route.query watcher handles it,
+                // but let's keep it for now to ensure data fetches reliably on mode change.
+                // If the $route.query watcher is robust, we could potentially remove this call.
+                this.get(); // Refetch data when mode changes
+            }
+        },
         rowCount(newVal) {
             // Update URL query parameter for limit
             const currentQuery = { ...this.$route.query }; // Copy existing query parameters
             if (newVal && newVal !== '10') {
                 currentQuery.limit = newVal;
             } else {
+                // If newVal is 10 or undefined/null, remove limit to use default
                 delete currentQuery.limit;
             }
             
@@ -280,94 +310,86 @@ export default {
                 }
             });
 
-            // Existing logic: Trigger recompute of filteredSessions if needed
-            this.$forceUpdate();
+            // No need to call get() here, as the '$route.query' watcher will handle it.
+            // Existing logic: Trigger recompute of filteredSessions if needed - might not be necessary if table updates reactively
+            // this.$forceUpdate(); 
         },
-        '$route.query'(curr) {
-            if (!curr.limit) {
-                this.rowCount = '10';
+        '$route.query'(curr, old) {
+             // Check if relevant query parameters changed before fetching
+             // Also add check for session_type change
+            if (curr.limit !== old.limit || curr.from !== old.from || curr.session_type !== old.session_type) {
+                // Sync mode with URL if session_type is present/absent
+                 if (curr.session_type === 'historic') {
+                     this.mode = 'historical';
+                 } else {
+                     this.mode = 'live'; // Default to live if session_type is missing or different
+                 }
+
+                 // Sync rowCount with URL
+                 if (!curr.limit) {
+                    this.rowCount = '10'; // Reset rowCount if limit is removed from URL
+                } else {
+                    this.rowCount = curr.limit; // Sync rowCount with URL
+                }
+                this.get();
+            } else if (!curr.limit && old.limit) {
+                 // Handle case where limit is removed but other relevant params didn't change
+                 this.rowCount = '10';
+                 this.get(); // Refetch as limit changed
             }
-            this.get();
         },
     },
 };
 </script>
 
 <style scoped>
-.performance-container {
-    margin: 20px;
-}
-
 .cards {
     display: flex;
-    gap: 20px;
+    gap: 1.25rem;
     align-items: center;
 }
 
-.light-green-bg {
-    background-color: rgba(5, 150, 105, 0.1);
-}
-
-.light-red-bg {
-    background-color: rgba(220, 38, 38, 0.1);
-}
-
-.light-orange-bg {
-    background-color: rgba(249, 115, 22, 0.1);
-}
-
 .geomap {
-    margin-top: 50px;
+    margin-top: 3.125rem;
 }
 
 .sessions-container {
-    padding: 20px;
-}
-
-.trend-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    padding: 1.25rem;
 }
 
 .table-section {
-    margin-right: 30px;
-    margin-bottom: 50px;
-    margin-top: 50px;
+    margin-right: 1.875rem;
+    margin-bottom: 3.125rem;
+    margin-top: 3.125rem;
     width: 100%;
 }
 
 .table {
-    margin-top: 30px !important;
+    margin-top: 1.875rem !important;
 }
 
 .table td {
-    font-size: 12px !important;
+    font-size: 0.75rem !important;
 }
 
 .table th {
     font-weight: bold;
 }
 
-.tab-heading {
-    font-size: 1.1rem;
-    margin-left: 20px;
-}
-
-.mode-selector {
-    margin-bottom: 20px;
+.btn-container {
+    height: 3rem;
 }
 
 .mode-btn {
-    border-radius: 3px !important;
-    margin: 0 5px !important;
-    padding: 3px 20px !important;
-    font-size: 14px !important;
+    border-radius: 0.1875rem !important;
+    margin: 0 0.3125rem !important;
+    padding: 0.1875rem 1.25rem !important;
+    font-size: 0.875em !important;
     background-color: #e1e1e1 !important;
     color: #444050 !important;
-    height: 32px !important;
     text-transform: none !important;
+    height: 100%;
+    border-radius: 0 !important;
 }
 
 .mode-btn.v-btn--active {
@@ -378,21 +400,15 @@ export default {
 .mode-buttons {
     background: transparent !important;
     border: none !important;
-    height: 40px;
-}
-
-.mode-btn {
-    text-transform: none;
-    font-size: 14px;
 }
 
 .v-btn-toggle {
-    height: 40px;
+    height: 100%;
 }
 
 .v-btn-toggle .v-btn {
-    height: 40px !important;
-    font-size: 14px;
+    height: 100%;
+    font-size: 0.875em;
     background-color: #1dbf731a !important;
 }
 
@@ -402,21 +418,21 @@ export default {
 }
 
 .search-field {
-    height: 40px;
+    height: 3rem !important;
 }
 
 .search-field :deep(.v-input__control) {
-    min-height: 40px;
+    min-height: 3rem !important;
 }
 
 .recent-label {
-    height: 40px;
-    font-size: 14px;
+    font-size: 0.875rem !important;
     color: rgba(0, 0, 0, 0.87);
     font-weight: 500;
     margin: 0;
     border: thin solid rgba(0, 0, 0, 0.12);
     border-right: none;
+    height: 100%;
 }
 
 .v-btn-toggle.no-border-radius,

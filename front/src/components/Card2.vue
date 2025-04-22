@@ -3,11 +3,11 @@
       <div class="metrics-container">
         <div class="main-metric">
           <div class="metric-label" :style="{ color: 'primary' }">{{ cardData.primaryLabel }}</div>
-          <div class="metric-value">{{ cardData.primaryValue}}</div>
+          <div class="metric-value">{{cardData.primaryValue}} </div>
         </div>
         <div class="secondary-metric">
           <div class="metric-label">{{ cardData.secondaryLabel}}</div>
-          <div class="metric-value">{{ cardData.secondaryValue }}</div>
+          <div class="metric-value">{{cardData.secondaryValue}}</div>
         </div>
     </div>
       <div class="percentage-indicator">
@@ -56,58 +56,66 @@
   .card {
     background: #FFFFFF;
     border-radius: 8px;
-    padding: 24px;
+    padding: 1.5rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    width: 280px;
+    width: 25%;
     position: relative;
   }
+
+  .card-count {
+    font-weight: 700;
+    font-size: 26px;
+    padding: 0;
+    line-height: 33px;
+    color: #013912;
+}
   
   .metrics-container {
     display: flex;
     flex-direction: column;
     height: 100%;
-    gap: 16px;
+    gap: 1rem;
     justify-content: center;
   }
   
   .main-metric, .secondary-metric {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0.25rem;
   }
   
   .metric-label {
     color: #013912;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
   }
   
   .main-metric .metric-value {
     color: #013912;
-    font-size: 32px;
+    font-size: 2rem;
     font-weight: 600;
     line-height: 1;
   }
   
   .secondary-metric .metric-value {
     color: #013912;
-    font-size: 24px;
+    font-size: 1.5rem;
     font-weight: 600;
     line-height: 1;
   }
   
   .percentage-indicator {
     position: absolute;
-    top: 24px;
-    right: 24px;
+    top: 1.5rem;
+    right: 1.5rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 60px;
+    gap: 3.75rem;
   }
   
   .percentage {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
   }
   
