@@ -16,7 +16,7 @@ system performance with just a few clicks.
 
 ## Traces overview
 
-<img alt="Tracing Overview" src="/img/docs/tracing_overview.png" class="card w-1200"/>
+<img alt="Tracing Overview" src="/docs/docs/Doc_Tracing_Overview.png" class="card w-1200"/>
 
 
 Here's a HeatMap showing request distribution over time, their statuses, and durations. 
