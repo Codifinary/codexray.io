@@ -1,7 +1,7 @@
 <template>
     <div class="my-10 mx-5">
-        <div class="error-details">
-            <div class="mr-10">
+        <div class="error-details d-flex">
+            <div class="error-info" style="width: 50%; padding: 16px">
                 <div>
                     <h5>Error message</h5>
                     <p class="error-message">{{ errorDetails.message }}</p>
@@ -14,12 +14,12 @@
                     <h5>Error URL</h5>
                     <p>{{ errorDetails.url }}</p>
                 </div>
-                <div class="error-details__meta">
-                    <div>
+                <div class="error-details__meta d-flex">
+                    <div class="mr-4">
                         <h5>Category</h5>
                         <p>{{ errorDetails.category }}</p>
                     </div>
-                    <div>
+                    <div class="mr-4">
                         <h5>App</h5>
                         <p>{{ errorDetails.app }}</p>
                     </div>
@@ -28,22 +28,31 @@
                         <p>{{ errorDetails.app_version }}</p>
                     </div>
                 </div>
-                <div class="error-details__meta">
-                    <div>
+                <div class="error-details__meta d-flex mt-4">
+                    <div class="mr-4">
                         <h5>Timestamp</h5>
-                        {{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
+                        <p>{{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}</p>
                     </div>
-                    <div class="pl-4">
+                    <div>
                         <h5>Level of Severity</h5>
-                        <p>
-                            {{ errorDetails.level }}
-                        </p>
+                        <p>{{ errorDetails.level }}</p>
                     </div>
                 </div>
             </div>
-            <div>
-                <h5>Stack Trace</h5>
-                <pre>{{ errorDetails.stack }}</pre>
+
+            <div class="stack-trace" style="width: 50%; padding: 16px">
+                <div class="d-flex justify-space-between align-center mb-2">
+                    <h5 class="mb-0">Stack Trace</h5>
+                    <v-btn icon small @click="copyStackTrace">
+                        <v-icon small>mdi-content-copy</v-icon>
+                    </v-btn>
+                </div>
+                <v-card class="pa-2" style="overflow: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0">
+                {{ errorDetails.stack }}
+            </pre
+                    >
+                </v-card>
             </div>
         </div>
 
@@ -194,6 +203,17 @@ export default {
             this.selectedFilter = filterItem.selected ? filterItem.value : 'all';
             this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
+
+        copyStackTrace() {
+            navigator.clipboard
+                .writeText(this.errorDetails.stack)
+                .then(() => {
+                    this.$toast?.success?.('Stack trace copied!') || console.log('Stack trace copied!');
+                })
+                .catch((err) => {
+                    console.error('Failed to copy stack trace:', err);
+                });
+        },
     },
     mounted() {
         this.get(this.eventId, this.selectedFilter);
@@ -240,10 +260,17 @@ h5 {
     color: #ef5350;
 }
 
-.error-details__meta {
-    display: flex;
-}
 .error-details__meta div {
     margin-right: 30px;
+}
+.error-details {
+    display: flex;
+    gap: 24px;
+}
+
+.error-details__meta {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 8px;
 }
 </style>
