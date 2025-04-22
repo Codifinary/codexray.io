@@ -199,9 +199,10 @@ export default {
         },
         views() {
             return {
+                dashboard: 'Dashboard',
                 applications: 'Applications',
                 map: 'Topology',
-                traces: 'Traces',
+                // traces: 'Traces',
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
@@ -210,9 +211,10 @@ export default {
         },
         icons() {
             return {
+                dashboard: { name: 'dashboard', class: 'applications-icon' },
                 applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
-                traces: { name: 'traces', class: 'traces-icon' },
+                // traces: { name: 'traces', class: 'traces-icon' },
                 nodes: { name: 'nodes', class: 'nodes-icon' },
                 incidents: { name: 'incidents', class: 'incident-icon' },
                 EUM: { name: 'eum', class: 'eum-icon' },
