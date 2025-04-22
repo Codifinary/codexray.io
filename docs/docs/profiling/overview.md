@@ -28,7 +28,7 @@ CodeXray's profiling stack consists of several components:
 * ClickHouse is used as a database for storing profiling data.
 * CodeXray queries profiles of a given application and visualizes them as FlameGraphs for analysis.
 
-<img alt="ebpf-based profiling" src="/img/docs/profiling/ebpf-based-profiling.png" class="card w-1200"/>
+<img alt="ebpf-based profiling" src="/docs/docs/ebpf-based-profiling.png" class="card w-1200"/>
 
 When you use Helm to install CodeXray, all these components are automatically installed and seamlessly integrated with each other.
 
@@ -43,7 +43,7 @@ enabling developers to expose profiling data of their Go applications.
 
 `CodeXray-cluster-agent` automatically discovers and periodically retrieves profiles from Golang applications.
 
-<img alt="golang pull profiling" src="/img/docs/profiling/golang-profiling.png" class="card w-1200"/>
+<img alt="golang pull profiling" src="/docs/docs/Doc_golang-profiling.png" class="card w-1200"/>
 
 Supported profile types:
 
