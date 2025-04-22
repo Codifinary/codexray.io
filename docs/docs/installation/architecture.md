@@ -3,7 +3,7 @@ sidebar_position: 2
 ---
 
 # Architecture
-![Architecture Diagram](/img/docs/architecture.svg)
+![Architecture Diagram](docs/docs/Doc_SystemArchitecture.png)
 
 ## Coroot-node-agent
 
