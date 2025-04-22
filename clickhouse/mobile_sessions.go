@@ -361,10 +361,9 @@ func (c *Client) GetSessionLiveData(ctx context.Context, from, to timeseries.Tim
 		s.Country
 	FROM mobile_session_data s
 	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
-	LEFT JOIN mobile_event_data med ON s.SessionId = med.SessionId
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NULL
-	AND med.Service = @service
+	AND p.Service = @service
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.Country
 	ORDER BY NoOfRequest DESC
 	LIMIT @limit
@@ -426,10 +425,9 @@ func (c *Client) GetSessionHistoricData(ctx context.Context, from, to timeseries
 		s.Country
 	FROM mobile_session_data s
 	LEFT JOIN mobile_perf_data p ON s.SessionId = p.SessionId
-	LEFT JOIN mobile_event_data med ON s.SessionId = med.SessionId
 	WHERE s.StartTime BETWEEN @from AND @to
 	AND s.EndTime IS NOT NULL
-	AND med.Service = @service
+	AND p.Service = @service
 	GROUP BY s.SessionId, s.UserId, s.StartTime, s.EndTime, s.Country
 	ORDER BY NoOfRequest DESC
 	LIMIT @limit
@@ -515,7 +513,7 @@ func (c *Client) GetSessionGeoMapData(ctx context.Context, from, to timeseries.T
 
 		switch {
 		case data.Count <= 20:
-			data.GeoMapColorCode = "#f44336" // Red
+			data.GeoMapColorCode = "#ef4f4c" // Red
 		case data.Count <= 80:
 			data.GeoMapColorCode = "#F1AB47" // Yellow
 		default: // > 80
