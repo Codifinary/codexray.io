@@ -22,16 +22,16 @@ The Traces tab shows a list of traces for the affected requests during the incid
 
 ## AI-based Root Cause Analysis
 
-:::info
-AI-powered Root Cause Analysis is available only in Coroot Enterprise (from $1 per CPU core/month). [Start](https://coroot.com/account) your free trial today.
-:::
 
-Coroot's AI-based Root Cause Analysis is a powerful feature that automatically analyzes telemetry data, 
+AI-powered Root Cause Analysis is available only in Coroot Enterprise (from $1 per CPU core/month). [Start](https://codexray.com/account) your free trial today.
+
+
+Codexray's AI-based Root Cause Analysis is a powerful feature that automatically analyzes telemetry data, 
 providing you with a list of possible causes for the incident in just a few seconds. It's not magic ✨, 
-Coroot uses a model of your entire system, acting like an experienced engineer. 
+Codexray uses a model of your entire system, acting like an experienced engineer. 
 It navigates through the graph of service dependencies to identify issues that are likely related to the incident.
 
 
-At Coroot, we believe engineers shouldn't blindly trust any tool. That's why Coroot provides evidence for the issues it identifies, 
+At Codexray, we believe engineers shouldn't blindly trust any tool. That's why Codexray provides evidence for the issues it identifies, 
 making it easy for you to cross-check and verify the findings. Simply click on any hypothesis to review the relevant charts.
 
