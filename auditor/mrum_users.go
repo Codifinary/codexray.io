@@ -8,11 +8,11 @@ import (
 	"fmt"
 )
 
-func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, from, to timeseries.Time, service string) *model.AuditReport {
+func GenerateMrumUsersReport(w *model.World, ch *clickhouse.Client, service string) *model.AuditReport {
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportMobileUsers, true)
 	report.Status = model.OK
 
-	now := timeseries.Now().Truncate(timeseries.Duration(24 * 60 * 60))
+	now := timeseries.Now()
 	sevenDaysAgo := now.Add(-6 * 24 * 60 * 60)
 	oneDayStep := timeseries.Duration(24 * 60 * 60)
 
