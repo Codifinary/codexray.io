@@ -54,8 +54,8 @@ WITH
             count() / (toUInt64(toUnixTimestamp(@to)) - toUInt64(toUnixTimestamp(@from))) AS requestsPerSecond,
             countIf(Status = 0) AS totalErrors,
             countIf(Status = 0) / (toUInt64(toUnixTimestamp(@to)) - toUInt64(toUnixTimestamp(@from))) AS errorsPerSecond,
-            uniqExact(UserID) AS usersImpacted,
-            uniqExact(UserID) / (toUInt64(toUnixTimestamp(@to)) - toUInt64(toUnixTimestamp(@from))) AS usersImpactedPerSecond
+            uniqExactIf(UserID, Status = 0) AS usersImpacted,
+            uniqExactIf(UserID, Status = 0) / (toUInt64(toUnixTimestamp(@to)) - toUInt64(toUnixTimestamp(@from))) AS usersImpactedPerSecond
         FROM 
             mobile_perf_data
         WHERE 
@@ -66,7 +66,7 @@ WITH
         SELECT 
             count() AS totalRequests,
             countIf(Status = 0) AS totalErrors,
-            uniqExact(UserID) AS usersImpacted
+            uniqExactIf(UserID, Status = 0) AS usersImpacted
         FROM 
             mobile_perf_data
         WHERE 
@@ -299,7 +299,7 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 		case overview.ErrorRatePercentage <= 80:
 			overview.GeoMapColorCode = "#F1AB47" // Yellow
 		default: // > 80%
-			overview.GeoMapColorCode = "#EF5350" // Red
+			overview.GeoMapColorCode = "#ef4f4c" // Red
 		}
 
 		results = append(results, overview)
@@ -311,7 +311,7 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 func (c *Client) GetHttpResponsePerfHistogram(ctx context.Context, q SpanQuery, service string) ([]model.HistogramBucket, error) {
 	// Set the service name in the query
 	q.ServiceName = service
-	filter, filterArgs := q.RootSpansFilter()
+	filter, filterArgs := q.RootSpansFilterMrum()
 	return c.getHttpResponsePerfHistogram(ctx, q, filter, filterArgs, service)
 }
 
