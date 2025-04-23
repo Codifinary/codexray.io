@@ -203,7 +203,7 @@ export default {
         },
         views() {
             return {
-                dashboard: 'Dashboard',
+                // dashboard: 'Dashboard',
                 applications: 'Applications',
                 map: 'Topology',
                 // traces: 'Traces',
@@ -215,7 +215,7 @@ export default {
         },
         icons() {
             return {
-                dashboard: { name: 'applications', class: 'dashboard-icon' },
+                // dashboard: { name: 'applications', class: 'dashboard-icon' },
                 applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
                 // traces: { name: 'traces', class: 'traces-icon' },
