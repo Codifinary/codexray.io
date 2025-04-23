@@ -56,9 +56,8 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 		current_period AS (
 			SELECT
 				count(DISTINCT au.UserId) AS total_users,
-				count(DISTINCT nr.UserId) AS new_users
+				(SELECT count(DISTINCT UserId) FROM new_registrations) AS new_users
 			FROM active_users au
-			LEFT JOIN new_registrations nr ON au.UserId = nr.UserId
 		),
 		prev_active_users AS (
 			SELECT DISTINCT UserId
@@ -75,9 +74,8 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 		previous_period AS (
 			SELECT
 				count(DISTINCT pau.UserId) AS total_users,
-				count(DISTINCT pnr.UserId) AS new_users
+				(SELECT count(DISTINCT UserId) FROM prev_new_registrations) AS new_users
 			FROM prev_active_users pau
-			LEFT JOIN prev_new_registrations pnr ON pau.UserId = pnr.UserId
 		),
 		activity_windows AS (
 			SELECT 
@@ -187,7 +185,6 @@ func (c *Client) GetMobileUserResults(ctx context.Context, from, to timeseries.T
 }
 
 func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time, step timeseries.Duration, service string) (map[string]*timeseries.TimeSeries, error) {
-	sevenDaysFrom := to.Add(-7 * timeseries.Day)
 
 	newUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	returningUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
@@ -263,7 +260,7 @@ func (c *Client) GetUserBreakdown(ctx context.Context, from, to timeseries.Time,
 	`
 
 	params := []interface{}{
-		clickhouse.DateNamed("from", sevenDaysFrom.ToStandard(), clickhouse.NanoSeconds),
+		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.Named("service", service),
 		clickhouse.Named("step", int(step)),

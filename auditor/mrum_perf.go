@@ -56,7 +56,8 @@ func GenerateMrumPerfReport(w *model.World, ch *clickhouse.Client, from, to time
 		heatmapWidget.Heatmap.AddSeries("errors", "errors", histogram[0].TimeSeries, "", "err")
 
 		report.Widgets = append(report.Widgets, heatmapWidget)
+	} else {
+		fmt.Println(err, len(histogram))
 	}
-
 	return report
 }
