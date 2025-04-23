@@ -47,8 +47,8 @@
                         <v-icon small>mdi-content-copy</v-icon>
                     </v-btn>
                 </div>
-                <v-card class="pa-2" style="overflow: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2)">
-                    <pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0">
+                <v-card style="overflow: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); background-color: rgba(128, 128, 128, 0.2) !important">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; padding: 0 10px">
                 {{ errorDetails.stack }}
             </pre
                     >
