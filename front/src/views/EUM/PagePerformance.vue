@@ -162,6 +162,6 @@ export default {
 }
 .browser-table {
     width: 40vw;
-    height: 33vh;
+    height: 30vh;
 }
 </style>
