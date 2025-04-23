@@ -13,6 +13,7 @@
                 :iconName="card.iconName"
                 :iconColor="card.iconColor"
                 :trend="card.trend"
+                :unit="card.unit"
             />
         </div>
         <div>
@@ -162,40 +163,72 @@ export default {
             this.from = queryParams.from ?? null;
             this.limit = queryParams.limit ? parseInt(queryParams.limit) : null;
 
+            // Set mode based on URL 'session_type' parameter
+            if (queryParams.session_type === 'historic') {
+                this.mode = 'historical';
+            } else {
+                this.mode = 'live'; // Default to live if session_type is missing or different
+            }
+
             // Update rowCount to match limit if it exists
             if (this.limit) {
                 this.rowCount = this.limit.toString();
             }
 
-            // Update the URL with current parameters
+            // Update the URL with current parameters (ensure session_type is managed elsewhere, e.g., in toggleMode)
+            // We only push from/limit updates here, assuming session_type is handled when mode changes
             const currentQuery = { ...this.$route.query };
-            if (this.from) currentQuery.from = this.from;
-            if (this.limit && this.limit !== 10) currentQuery.limit = this.limit.toString();
+            delete currentQuery.query; // Avoid pushing the potentially large query object back
+
+            let needsPush = false;
+            if (this.from && currentQuery.from !== this.from) {
+                currentQuery.from = this.from;
+                needsPush = true;
+            }
+            if (this.limit && this.limit !== 10 && currentQuery.limit !== this.limit.toString()) {
+                currentQuery.limit = this.limit.toString();
+                needsPush = true;
+            } else if (!this.limit && Object.prototype.hasOwnProperty.call(currentQuery, 'limit')) {
+                // If limit is cleared, remove it from URL
+                delete currentQuery.limit;
+                needsPush = true;
+            }
+
+            // Add back the 'query' param only if it exists
+            if (queryParams.query) {
+                currentQuery.query = queryParams.query;
+            }
             
-            this.$router.push({ query: currentQuery }).catch((err) => {
-                if (err.name !== 'NavigationDuplicated') {
-                    console.error(err);
-                }
-            });
+            // Only update router if query actually changed
+            if (needsPush) { // Push only if from/limit caused a change
+                this.$router.push({ query: currentQuery }).catch((err) => {
+                    if (err.name !== 'NavigationDuplicated') {
+                        console.error(err);
+                    }
+                });
+            }
         },
         updateCards() {
             if (this.data && this.data.summary) {
                 this.cards = [
                     {
                         name: 'Sessions',
-                        count: this.data.summary.totalSessions,
+                        count: this.$format.shortenNumber(this.data.summary.totalSessions).value,
+                        unit: this.$format.shortenNumber(this.data.summary.totalSessions).unit,
                         lineColor: '#1DBF73',
                         trend: this.data.summary.sessionTrend,
                     },
                     {
                         name: 'Users',
-                        count: this.data.summary.totalUsers,
+                        count: this.$format.shortenNumber(this.data.summary.totalUsers).value,
+                        unit: this.$format.shortenNumber(this.data.summary.totalUsers).unit,
                         lineColor: '#AB47BC',
                         trend: this.data.summary.userTrend,
                     },
                     {
                         name: 'Median Length',
-                        count: this.data.summary.avgSession,
+                        count: this.$format.convertLatency(this.data.summary.avgSession * 1000).value,
+                        unit: this.$format.convertLatency(this.data.summary.avgSession * 1000).unit,
                         lineColor: '#42A5F5',
                         trend: this.data.summary.avgSessionTrend,
                     },
@@ -241,15 +274,10 @@ export default {
 
             // Create the payload with separate parameters
             const apiPayload = {
-                query: JSON.stringify({ serviceName: this.id }),
+                query: JSON.stringify({ service: this.id, session_type: this.mode === 'historical' ? 'historic' : 'live' }),
                 from: this.from,
                 limit: this.limit
             };
-
-            // Add session_type if mode is historical
-            if (this.mode === 'historical') {
-                apiPayload.session_type = 'historic';
-            }
 
             this.$api.getMRUMSessionsData(this.id, apiPayload, (data, error) => {
                 if (error) {
@@ -266,6 +294,7 @@ export default {
     },
     mounted() {
         this.get();
+        this.$events.watch(this, this.get, 'refresh');
     },
     watch: {
         mode(newMode, oldMode) {

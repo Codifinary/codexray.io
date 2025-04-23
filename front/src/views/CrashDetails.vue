@@ -1,30 +1,30 @@
 <template>
-    <div class="crash-details">
-        <v-progress-linear indeterminate v-if="loading" color="green" />
-        <div v-else>
-            <!-- <div class="font-weight-bold tab-heading">
-                <router-link 
-                    :to="{
-                        name: 'overview',
-                        params: {
-                            view: 'MRUM',
-                            id: id,
-                            report: 'crash'
-                        },
-                        query: {
-                            ...Object.fromEntries(
-                                Object.entries(this.$route.query).filter(([key]) => key !== 'crashID')
-                            )
-                        }
-                    }" 
-                    class="bread-heading"
-                >Crash </router-link> <v-icon class="icon">mdi-chevron-right</v-icon> <span class="crash-id-text">{{ crashID }}</span>
-            </div> -->
+    <v-progress-linear indeterminate v-if="loading" color="green" />
+    <div v-else class="crash-details">
+        <div>
+           
+            <div class="search-container" >
+            <div class="font-weight-bold tab-heading ">
+
+                Crash Details Table 
+            </div>
+            <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search by ID"
+                    single-line
+                    hide-details
+                    dense
+                    outlined
+                    class="search-field"
+                    style="max-width: 250px"
+                ></v-text-field>
+        </div>
 
             <CustomTable 
                 v-if="data && data.crashDatabyCrashReason"
                 :headers="headers" 
-                :items="data.crashDatabyCrashReason" 
+                :items="filteredData" 
                 class="table"
             >
                 <template #item.id="{ item }">
@@ -118,12 +118,37 @@ export default {
                 { text: 'Crash ID', value: 'id', sortable: false },
                 { text: 'Device ID', value: 'Crashes', sortable: true },
                 { text: 'Crash Timestamp', value: 'timestamp', sortable: true },
-                { text: 'Affected Users', value: 'AffectedUsers', sortable: true },
+                { text: 'Affected User', value: 'AffectedUsers', sortable: true },
             ],
-            data: {
-                crashDatabyCrashReason: []
-            }
+            data: null,
+            search: '', // Add search model
         };
+    },
+    computed: {
+        breadcrumbItems() {
+            return [
+                { text: 'MRUM', to: { name: 'overview', params: { view: 'MRUM', id: this.id, report: 'crash' }, query: this.$route.query } },
+                { text: 'Crash', to: { name: 'crash', params: { id: this.id }, query: this.$route.query } },
+                { text: this.crashID, active: true }
+            ];
+        },
+        filteredData() {
+            if (!this.data || !this.data.crashDatabyCrashReason) {
+                return [];
+            }
+
+            let filtered = this.data.crashDatabyCrashReason;
+
+            // Apply search filter if search term exists
+            if (this.search) {
+                const searchTerm = this.search.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.CrashId && item.CrashId.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            return filtered;
+        }
     },
     watch: {
         '$route.query': {
@@ -182,9 +207,6 @@ export default {
                 this.data = res;
             });
         }
-    },
-    mounted() {
-        this.get();
     }
 };
 </script>
@@ -339,5 +361,26 @@ export default {
     padding: 0.25rem 0.5rem;
     border-radius: 0.25rem;
     font-size: 0.75rem;
+}
+
+
+.search-field {
+    height: 100% !important;
+}
+
+.tab-heading {
+    font-weight: 700;
+    color: var(--status-ok);
+    font-size: 18px !important;
+    margin-top: 0;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: fit-content;
+    justify-content: space-between;
+    width: 100%;
 }
 </style>

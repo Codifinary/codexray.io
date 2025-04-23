@@ -64,7 +64,7 @@ export default {
         computedCards() {
             const { summary = {} } = this.data || {};
             const { 
-                crashFreeUsers = 0,
+                crashFreePercentage = 0,
                 totalUsers = 0,
                 newUsers = 0,
                 returningUsers = 0,
@@ -76,27 +76,31 @@ export default {
             return [
                 {
                     name: 'Crash Free Users',
-                    count: crashFreeUsers,
+                    count: crashFreePercentage,
+                    unit: '%',
                     lineColor: '#009688',
-                    iconName: crashFreeUsers > 0 ? 'arrow-up-thin' : 'arrow-down-thin',
-                    iconColor: crashFreeUsers > 0 ? '#009688' : '#EF5350',
-                    trendIcon: true
+                    iconName: crashFreePercentage > 0 ? 'arrow-up-thin' : 'arrow-down-thin',
+                    iconColor: crashFreePercentage > 0 ? '#009688' : '#EF5350',
+                    trendIcon: crashFreePercentage > 0
                 },
                 { 
                     name: 'Users',
-                    count: totalUsers,
+                    count: this.$format.shortenNumber(totalUsers).value,
+                    unit: this.$format.shortenNumber(totalUsers).unit,
                     lineColor: '#FFA726',
                     trend: userTrend || 0,
                 },
                 { 
                     name: 'New Users', 
-                    count: newUsers,
+                    count: this.$format.shortenNumber(newUsers).value,
+                    unit: this.$format.shortenNumber(newUsers).unit,
                     lineColor: '#AB47BC',
                     trend: newUserTrend || 0,
                 },  
                 { 
                     name: 'Returning Users', 
-                    count: returningUsers,
+                    count: this.$format.shortenNumber(returningUsers).value,
+                    unit: this.$format.shortenNumber(returningUsers).unit,
                     lineColor: '#42A5F5',
                     trend: returningUserTrend || 0,
                 }
@@ -106,7 +110,8 @@ export default {
             return [
                 { 
                     primaryLabel: 'Daily Active Users', 
-                    primaryValue: this.data?.summary?.dailyActiveUsers,
+                    primaryValue: this.$format.shortenNumber(this.data?.summary?.dailyActiveUsers).value,
+                    unit: this.$format.shortenNumber(this.data?.summary?.dailyActiveUsers).unit,
                     percentageChange: this.data?.summary?.dailyTrend,
                     lineColor: '#009688',
                     icon: this.data?.summary?.dailyTrend > 0 ? 'up-green-arrow' : 'up-red-arrow',
@@ -114,7 +119,8 @@ export default {
                 },
                 { 
                     primaryLabel: 'Weekly Active Users', 
-                    primaryValue: this.data?.summary?.weeklyActiveUsers,
+                    primaryValue: this.$format.shortenNumber(this.data?.summary?.weeklyActiveUsers).value,
+                    unit: this.$format.shortenNumber(this.data?.summary?.weeklyActiveUsers).unit,
                 },
             ];
         },

@@ -38,7 +38,7 @@
                         <td>{{ country.Requests }}</td>
                         <td>{{ country.Errors }}</td>
                         <td>{{ country.ErrorRatePercentage.toFixed(2) }}</td>
-                        <td>{{ country.AvgResponseTime }}</td>
+                        <td>{{ formatted(country.AvgResponseTime).value.toFixed(2) }} {{ formatted(country.AvgResponseTime).unit }}</td>
                     </tr>
                 </template>
                 <tr v-else>
@@ -84,6 +84,7 @@ export default {
                 { 
                     primaryLabel: 'Total Requests', 
                     primaryValue: 0, 
+                    unit: '',
                     secondaryLabel: 'Req/sec',
                     secondaryValue: 0,
                     percentageChange: 0, 
@@ -98,6 +99,7 @@ export default {
                     secondaryLabel: 'Errors/sec',
                     secondaryValue: 0,
                     percentageChange: 0, 
+                    unit: '',
                     icon: 'up-red-arrow',
                     iconColor: '',
                     lineColor: '',
@@ -106,6 +108,7 @@ export default {
                 { 
                     primaryLabel: 'Users Impacted', 
                     primaryValue: 0, 
+                    unit: '',
                     secondaryLabel: 'Users impacted/sec',
                     secondaryValue: 0,
                     percentageChange: 0, 
@@ -129,6 +132,9 @@ export default {
         }
     },
     methods: {
+        formatted(latency) {
+            return this.$format.convertLatency(latency);
+        },
         getQuery() {
             const queryParams = this.$route.query;
             
@@ -180,7 +186,8 @@ export default {
                     const summary = res.summary;
                     
                     // Update Total Requests card
-                    this.cards[0].primaryValue = summary.totalRequests || 0;
+                    this.cards[0].primaryValue = this.$format.shortenNumber(summary.totalRequests).value;
+                    this.cards[0].unit = this.$format.shortenNumber(summary.totalRequests).unit;
                     this.cards[0].secondaryValue = summary.requestsPerSecond ? summary.requestsPerSecond.toFixed(2) : 0;
                     this.cards[0].percentageChange = summary.requestsTrend || 0;
                     this.cards[0].iconColor = summary.requestsTrend > 0 ? '#66BB6A' : '#EF5350';
@@ -188,7 +195,8 @@ export default {
                     this.cards[0].trendColor = summary.requestsTrend > 0 ? '#66BB6A' : '#EF5350';
                     
                     // Update Errors card
-                    this.cards[1].primaryValue = summary.totalErrors || 0;
+                    this.cards[1].primaryValue = this.$format.shortenNumber(summary.totalErrors).value;
+                    this.cards[1].unit = this.$format.shortenNumber(summary.totalErrors).unit;
                     this.cards[1].secondaryValue = summary.errorsPerSecond ? summary.errorsPerSecond.toFixed(2) : 0;
                     this.cards[1].percentageChange = summary.errorsTrend || 0;
                     this.cards[1].iconColor = summary.errorsTrend > 0 ? '#EF5350' : '#66BB6A';
@@ -196,7 +204,8 @@ export default {
                     this.cards[1].trendColor = summary.errorsTrend > 0 ? '#EF5350' : '#66BB6A';
                     
                     // Update Users Impacted card
-                    this.cards[2].primaryValue = summary.usersImpacted || 0;
+                    this.cards[2].primaryValue = this.$format.shortenNumber(summary.usersImpacted).value;
+                    this.cards[2].unit = this.$format.shortenNumber(summary.usersImpacted).unit;
                     this.cards[2].secondaryValue = summary.usersImpactedPerSecond ? summary.usersImpactedPerSecond.toFixed(2) : 0;
                     this.cards[2].percentageChange = summary.usersImpactedTrend || 0;
                     this.cards[2].iconColor = summary.usersImpactedTrend > 0 ? '#EF5350' : '#66BB6A';

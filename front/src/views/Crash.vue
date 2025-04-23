@@ -12,15 +12,32 @@
         <div class="charts-container">
             <div v-for="(widget, index) in data.echartReport.widgets" :key="index" class="chart-wrapper">
                 <EChart 
-                    :chartOptions="Object.values(widget.echarts)[0]" 
+                    :chartOptions=getChartOptions(widget.echarts)
                     :style="getChartStyle()"
                 />
             </div>
         </div>
+        <div class="search-container" >
+            <div class="font-weight-bold tab-heading ">
+
+                Crash Table 
+            </div>
+            <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search by Reason"
+                    single-line
+                    hide-details
+                    dense
+                    outlined
+                    class="search-field"
+                    style="max-width: 250px"
+                ></v-text-field>
+        </div>
         <CustomTable 
             v-if="data" 
             :headers="headers" 
-            :items="data.crashReasonWiseOverview" 
+            :items="filteredData" 
             class="table"
         >
             <template #item.CrashReason="{ item: { CrashReason } }">
@@ -51,6 +68,7 @@
                     {{ formatDate(LastOccurance) }}
                 </div>
             </template>
+            
         </CustomTable>
         <Dashboard 
             v-if="data && data.report && data.report.widgets && data.report.widgets.length > 0" 
@@ -123,7 +141,10 @@ export default {
             crashID: null,
             name: 'Crashes',
             count: 0,
-            lineColor: '#F57C00'
+            unit: '',
+            lineColor: '#F57C00',
+            search: '',
+            rowCount: 0
         };
     },
     mounted() {
@@ -133,7 +154,44 @@ export default {
             this.get();
         }, { immediate: true });
     },
+    computed: {
+        filteredData() {
+            if (!this.data || !this.data.crashReasonWiseOverview) {
+                return [];
+            }
+
+            let filtered = this.data.crashReasonWiseOverview;
+
+            // Apply search filter if search term exists
+            if (this.search) {
+                const searchTerm = this.search.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.CrashReason && item.CrashReason.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply pagination (limit number of rows shown)
+            if (this.rowCount > 0) {
+                filtered = filtered.slice(0, this.rowCount);
+            }
+
+            return filtered;
+        }
+    },
     methods: {
+        getChartOptions(echarts) {
+  const options = { ...Object.values(echarts)[0] };
+
+  options.legend = {
+    ...(options.legend || {}),
+    orient: 'vertical',
+    // right: '1%',
+    left: 'middle',
+    top: 'bottom'
+  };
+
+  return options;
+},
         getQuery() {
             const queryParams = this.$route.query;
             
@@ -183,7 +241,8 @@ export default {
                 }
 
                 this.data = res;
-                this.count = res.summary.totalCrashes;
+                this.count = this.$format.shortenNumber(res.summary.totalCrashes).value;
+                this.unit = this.$format.shortenNumber(res.summary.totalCrashes).unit;
             });
         },
         formatDate(epochMicroseconds) {
@@ -202,8 +261,14 @@ export default {
         getChartStyle() {
             return {
                 height: '300px',
-                width: '100%'
-                
+                width: '100%',
+                marginTop: '0',
+                top: '0',
+                right: '0',
+                legend: {
+                    top: 'bottom',
+                    right: '1%'
+                }
             };
         },
         getLinkQuery(crashReason) {
@@ -247,7 +312,7 @@ export default {
 }
 
 .table {
-    margin-top: 3.125rem;
+    margin-top: 1rem;
 }
 
 .crash-reason a,
@@ -264,5 +329,24 @@ export default {
 
 .chart{
     margin-top: 3.125rem;
+}
+
+.search-field {
+    height: 100% !important;
+}
+
+.tab-heading {
+    font-weight: 700;
+    color: var(--status-ok);
+    font-size: 18px !important;
+}
+
+.search-container {
+    margin-top: 3.125rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
 }
 </style>

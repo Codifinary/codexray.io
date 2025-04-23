@@ -3,7 +3,7 @@
       <div class="metrics-container">
         <div class="main-metric">
           <div class="metric-label" :style="{ color: 'primary' }">{{ cardData.primaryLabel }}</div>
-          <div class="metric-value">{{cardData.primaryValue}} </div>
+          <div class="metric-value">{{cardData.primaryValue}} <span v-if="cardData.unit">{{ cardData.unit }}</span> </div>
         </div>
         <div class="secondary-metric">
           <div class="metric-label">{{ cardData.secondaryLabel}}</div>
@@ -46,6 +46,7 @@
           icon: '',
           iconColor: '',
           trendColor: '',
+          unit: '',
         })
       }
     }
