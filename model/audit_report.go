@@ -10,28 +10,32 @@ import (
 type AuditReportName string
 
 const (
-	AuditReportSLO         AuditReportName = "SLO"
-	AuditReportInstances   AuditReportName = "Instances"
-	AuditReportCPU         AuditReportName = "CPU"
-	AuditReportMemory      AuditReportName = "Memory"
-	AuditReportStorage     AuditReportName = "Storage"
-	AuditReportNetwork     AuditReportName = "Net"
-	AuditReportDNS         AuditReportName = "DNS"
-	AuditReportLogs        AuditReportName = "Logs"
-	AuditReportPostgres    AuditReportName = "Postgres"
-	AuditReportRedis       AuditReportName = "Redis"
-	AuditReportMongodb     AuditReportName = "Mongodb"
-	AuditReportMemcached   AuditReportName = "Memcached"
-	AuditReportMysql       AuditReportName = "Mysql"
-	AuditReportJvm         AuditReportName = "JVM"
-	AuditReportDotNet      AuditReportName = ".NET"
-	AuditReportPython      AuditReportName = "Python"
-	AuditReportNode        AuditReportName = "Node"
-	AuditReportDeployments AuditReportName = "Deployments"
-	AuditReportProfiling   AuditReportName = "Profiling"
-	AuditReportTracing     AuditReportName = "Tracing"
-	AuditReportPerformance AuditReportName = "Performance"
-	AuditReportTraces      AuditReportName = "Traces"
+	AuditReportSLO            AuditReportName = "SLO"
+	AuditReportInstances      AuditReportName = "Instances"
+	AuditReportCPU            AuditReportName = "CPU"
+	AuditReportMemory         AuditReportName = "Memory"
+	AuditReportStorage        AuditReportName = "Storage"
+	AuditReportNetwork        AuditReportName = "Net"
+	AuditReportDNS            AuditReportName = "DNS"
+	AuditReportLogs           AuditReportName = "Logs"
+	AuditReportPostgres       AuditReportName = "Postgres"
+	AuditReportRedis          AuditReportName = "Redis"
+	AuditReportMongodb        AuditReportName = "Mongodb"
+	AuditReportMemcached      AuditReportName = "Memcached"
+	AuditReportMysql          AuditReportName = "Mysql"
+	AuditReportJvm            AuditReportName = "JVM"
+	AuditReportDotNet         AuditReportName = ".NET"
+	AuditReportPython         AuditReportName = "Python"
+	AuditReportNode           AuditReportName = "Node"
+	AuditReportDeployments    AuditReportName = "Deployments"
+	AuditReportProfiling      AuditReportName = "Profiling"
+	AuditReportTracing        AuditReportName = "Tracing"
+	AuditReportPerformance    AuditReportName = "Performance"
+	AuditReportTraces         AuditReportName = "Traces"
+	AuditReportMrumPerf       AuditReportName = "Mobile Performance"
+	AuditReportMobileUsers    AuditReportName = "Mobile Users"
+	AuditReportMobileSessions AuditReportName = "Mobile Sessions"
+	AuditReportMobileCrashes  AuditReportName = "Mobile Crashes"
 )
 
 type ConfigurationHint struct {
@@ -99,6 +103,25 @@ func (r *AuditReport) GetOrCreateChart(title string, doc *DocLink) *Chart {
 	ch := NewChart(r.ctx, title)
 	r.Widgets = append(r.Widgets, &Widget{Chart: ch, DocLink: doc})
 	return ch
+}
+
+func (r *AuditReport) GetOrCreateEChart(title string, doc *DocLink) *EChart {
+	if !r.detailed {
+		return nil
+	}
+	for _, w := range r.Widgets {
+		if w.EChart != nil {
+			if echart, exists := w.EChart[title]; exists {
+				return echart
+			}
+		}
+	}
+
+	// If not found, create a new one
+	echart := NewEChart(title)
+	widget := &Widget{EChart: map[string]*EChart{title: echart}, DocLink: doc}
+	r.Widgets = append(r.Widgets, widget)
+	return echart
 }
 
 func (r *AuditReport) GetOrCreateHeatmap(title string) *Heatmap {

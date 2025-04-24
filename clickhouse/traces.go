@@ -883,6 +883,27 @@ func (q SpanQuery) RootSpansFilter() ([]string, []any) {
 	return filter, args
 }
 
+func (q SpanQuery) RootSpansFilterMrum() ([]string, []any) {
+	filter := []string{
+		"NOT startsWith(Service, '/')",
+	}
+	if q.ServiceName != "" {
+		filter = append(filter, "Service = @service")
+	}
+	for _, f := range q.Filters {
+		filter = append(filter, f.String())
+	}
+	var args []any
+	if q.ServiceName != "" {
+		args = append(args, clickhouse.Named("service", q.ServiceName))
+	}
+	if len(q.ExcludePeerAddrs) > 0 {
+		filter = append(filter, "NetSockPeerAddr NOT IN (@addrs)")
+		args = append(args, clickhouse.Named("addrs", q.ExcludePeerAddrs))
+	}
+	return filter, args
+}
+
 func (q SpanQuery) SpansByServiceNameFilter() ([]string, []any) {
 	filter := []string{
 		"SpanKind = 'SPAN_KIND_SERVER'",

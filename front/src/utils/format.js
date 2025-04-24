@@ -146,8 +146,10 @@ export function convertLatency(latency) {
         return { value: parseFloat(latency), unit: 'ms' };
     } else if (latency < 60000) {
         return { value: parseFloat(latency / 1000), unit: 's' };
-    } else {
+    } else if (latency < 3600000) {
         return { value: parseFloat(latency / 60000), unit: 'min' };
+    } else {
+        return { value: parseFloat(latency / 3600000), unit: 'hr' };
     }
 }
 
