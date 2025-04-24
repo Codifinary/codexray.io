@@ -3,7 +3,7 @@
         <template v-if="view === 'dashboard'">
             <Dashboard />
         </template>
-        <template v-if="view === 'applications'">
+        <template v-if="view === 'health'">
             <Application v-if="id" :id="id" :report="report" />
             <Applications v-else />
         </template>
@@ -22,7 +22,7 @@
             <Nodes v-else />
         </template>
 
-        <template v-if="view === 'EUM'">
+        <template v-if="view === 'BRUM'">
             <PagePerformanceGraph v-if="id && pagePath" :id="id" :pagePath="pagePath" />
             <EUMApplicationOverview v-else-if="id" :id="id" />
             <EUM v-else />
@@ -39,10 +39,9 @@
         </template>
 
         <template v-if="view === 'MRUM'">
-            <MRUM v-if="id" :id="id"/>
+            <MRUM v-if="id" :id="id" />
             <MRUMOverview v-else />
         </template>
-
     </div>
 </template>
 
@@ -84,24 +83,24 @@ export default {
         EUMApplicationOverview,
         PagePerformanceGraph,
         MRUMOverview,
-        MRUM
+        MRUM,
     },
     props: {
         view: String,
         id: String,
         report: String,
-        serviceName: String
+        serviceName: String,
     },
 
     computed: {
         views() {
             const res = {
                 dashboard: 'Dashboard',
-                applications: 'Applications',
+                health: 'Applications',
                 map: 'Topology',
                 traces: 'Traces',
                 nodes: 'Nodes',
-                EUM: 'EUM',
+                BRUM: 'BRUM',
                 incidents: 'Incidents',
                 MRUM: 'MRUM',
             };
@@ -119,7 +118,7 @@ export default {
         view: {
             handler(v) {
                 if (!this.views[v]) {
-                    this.$router.replace({ params: { view: 'applications' } }).catch((err) => err);
+                    this.$router.replace({ params: { view: 'health' } }).catch((err) => err);
                 }
             },
             immediate: true,

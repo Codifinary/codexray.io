@@ -92,7 +92,14 @@
             <v-container class="mx-0 px-0 py-0">
                 <div class="main-content-wrapper">
                     <v-alert
-                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings' && $route.params.view !== 'MRUM' && $route.params.view !== 'BRUM'"
+                        v-if="
+                            status &&
+                            status.status === 'warning' &&
+                            $route.name !== 'project_settings' &&
+                            $route.params.view !== 'MRUM' &&
+                            $route.params.view !== 'BRUM' &&
+                            showAlert
+                        "
                         color="red"
                         elevation="2"
                         border="left"
@@ -203,28 +210,20 @@ export default {
         },
         views() {
             return {
-                // dashboard: 'Dashboard',
                 applications: 'Applications',
                 map: 'Topology',
-                // traces: 'Traces',
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
-                MRUM: 'MRUM',
-                // deployments: 'Deployments',
             };
         },
         icons() {
             return {
-                // dashboard: { name: 'applications', class: 'dashboard-icon' },
                 applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
-                // traces: { name: 'traces', class: 'traces-icon' },
                 nodes: { name: 'nodes', class: 'nodes-icon' },
-                incidents: { name: 'incidents', class: 'incident-icon' },
                 EUM: { name: 'eum', class: 'eum-icon' },
-                MRUM: {name: 'eum', class: 'eum-icon'}
-                // deployments: { name: 'deployments', class: 'dep-icon' },
+                incidents: { name: 'incidents', class: 'incident-icon' },
             };
         },
     },

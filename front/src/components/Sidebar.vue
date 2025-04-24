@@ -4,14 +4,13 @@
             <v-list-item-group>
                 <v-list dense nav>
                     <template v-for="(name, id) in views">
+                        <!-- Main Sidebar Items -->
                         <v-list-item
                             :key="id"
                             :class="{
-                                'selected-view':
-                                    selectedView === id ||
-                                    (id === 'applications' && selectedView === 'traces') ||
-                                    (id === 'EUM' && selectedView === 'MRUM'),
+                                'selected-view': selectedView === id,
                             }"
+                            v-if="id !== 'applications' && id !== 'EUM'"
                             @click="setSelectedView(id)"
                             :to="getNavigationLink(id)"
                         >
@@ -22,32 +21,87 @@
                             <v-list-item-content v-if="showTitles">
                                 <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
                             </v-list-item-content>
-                            <v-icon v-if="id === 'applications' || id === 'EUM'" class="toggle-icon">mdi-chevron-down</v-icon>
                         </v-list-item>
-                        <!-- Submenu for Applications -->
-                        <v-list v-if="showTitles && id === 'applications' && expanded.applications" :key="`${id}-submenu`" dense nav>
-                            <v-list-item :class="{ 'selected-subview': selectedView === 'applications' }" :to="getNavigationLink('applications')">
+
+                        <!-- Applications Submenu -->
+                        <v-list-item
+                            v-if="id === 'applications'"
+                            :key="id"
+                            :class="{
+                                'selected-view': expanded[id] || selectedView === 'health' || selectedView === 'traces',
+                            }"
+                            @click.stop="toggleDropdown(id)"
+                        >
+                            <BaseIcon
+                                :name="icons[id].name"
+                                :class="['sidebar-icon', expanded[id] ? `${icons[id].class}-selected` : icons[id].class]"
+                            />
+                            <v-list-item-content v-if="showTitles">
+                                <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
+                            </v-list-item-content>
+                            <v-icon class="toggle-icon">
+                                {{ expanded[id] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                            </v-icon>
+                        </v-list-item>
+                        <v-list v-if="showTitles && id === 'applications' && expanded.applications" dense nav>
+                            <v-list-item
+                                :class="{ 'selected-subview': selectedView === 'health' }"
+                                :to="getNavigationLink('health')"
+                                @click="setSelectedView('health')"
+                            >
                                 <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">Health</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
-                            <v-list-item :class="{ 'selected-subview': selectedView === 'traces' }" :to="getNavigationLink('traces')">
+                            <v-list-item
+                                :class="{ 'selected-subview': selectedView === 'traces' }"
+                                :to="getNavigationLink('traces')"
+                                @click="setSelectedView('traces')"
+                            >
                                 <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
-                                    <v-list-item-title class="sidebar-subname">Tracing</v-list-item-title>
+                                    <v-list-item-title class="sidebar-subname">Traces</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
                         </v-list>
-                        <!-- Submenu for EUM -->
-                        <v-list v-if="showTitles && id === 'EUM' && expanded.EUM" :key="`${id}-submenu`" dense nav>
-                            <v-list-item :class="{ 'selected-subview': selectedView === 'EUM' }" :to="getNavigationLink('EUM')">
+
+                        <!-- EUM Submenu -->
+                        <v-list-item
+                            v-if="id === 'EUM'"
+                            :key="id"
+                            :class="{
+                                'selected-view': expanded[id] || selectedView === 'BRUM' || selectedView === 'MRUM',
+                            }"
+                            @click.stop="toggleDropdown(id)"
+                        >
+                            <BaseIcon
+                                :name="icons[id].name"
+                                :class="['sidebar-icon', expanded[id] ? `${icons[id].class}-selected` : icons[id].class]"
+                            />
+                            <v-list-item-content v-if="showTitles">
+                                <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
+                            </v-list-item-content>
+                            <v-icon class="toggle-icon">
+                                {{ expanded[id] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                            </v-icon>
+                        </v-list-item>
+                        <v-list v-if="showTitles && id === 'EUM' && expanded.EUM" dense nav>
+                            <v-list-item
+                                :class="{ 'selected-subview': selectedView === 'BRUM' }"
+                                :to="getNavigationLink('BRUM')"
+                                @click="setSelectedView('BRUM')"
+                            >
                                 <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">BRUM</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
-                            <v-list-item :class="{ 'selected-subview': selectedView === 'MRUM' }" :to="getNavigationLink('MRUM')">
+                            <v-list-item
+                                :class="{ 'selected-subview': selectedView === 'MRUM' }"
+                                :to="getNavigationLink('MRUM')"
+                                @click="setSelectedView('MRUM')"
+                            >
                                 <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
                                 <v-list-item-content>
                                     <v-list-item-title class="sidebar-subname">MRUM</v-list-item-title>
@@ -102,8 +156,8 @@ export default {
             showTitles: true,
             selectedView: '',
             expanded: {
-                applications: true,
-                EUM: true,
+                applications: false,
+                EUM: false,
             },
         };
     },
@@ -142,6 +196,9 @@ export default {
                 params: { view, app: undefined },
                 query,
             };
+        },
+        toggleDropdown(id) {
+            this.$set(this.expanded, id, !this.expanded[id]);
         },
     },
 };
