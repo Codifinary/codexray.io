@@ -8,19 +8,36 @@
         :crashID="crashID"
     />
     <div v-else class="crash-container">
-        <Card :name="name" :count="count" :lineColor="lineColor"/>
+        <Card :name="name" :count="count" :lineColor="lineColor" :icon="lineColor" :background="background"/>
         <div class="charts-container">
             <div v-for="(widget, index) in data.echartReport.widgets" :key="index" class="chart-wrapper">
                 <EChart 
-                    :chartOptions="Object.values(widget.echarts)[0]" 
+                    :chartOptions=getChartOptions(widget.echarts)
                     :style="getChartStyle()"
                 />
             </div>
         </div>
+        <div class="search-container" >
+            <div class="font-weight-bold tab-heading ">
+
+                Crash Table 
+            </div>
+            <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search by Reason"
+                    single-line
+                    hide-details
+                    dense
+                    outlined
+                    class="search-field"
+                    style="max-width: 250px"
+                ></v-text-field>
+        </div>
         <CustomTable 
-            v-if="data && data.crashReasonWiseOverview && data.crashReasonWiseOverview.length > 0" 
+            v-if="data" 
             :headers="headers" 
-            :items="data.crashReasonWiseOverview" 
+            :items="filteredData" 
             class="table"
         >
             <template #item.CrashReason="{ item: { CrashReason } }">
@@ -32,10 +49,7 @@
                             id: id,
                             report: 'crash',
                         },
-                        query: {
-                            ...query,
-                            crashID: CrashReason
-                        }
+                        query: getLinkQuery(CrashReason)
                     }">{{ CrashReason }}</router-link>
                 </div>
             </template>
@@ -54,6 +68,7 @@
                     {{ formatDate(LastOccurance) }}
                 </div>
             </template>
+            
         </CustomTable>
         <Dashboard 
             v-if="data && data.report && data.report.widgets && data.report.widgets.length > 0" 
@@ -125,18 +140,59 @@ export default {
             chartWidgets: [],
             crashID: null,
             name: 'Crashes',
+            background: 'orange lighten-4',
             count: 0,
-            lineColor: '#F57C00'
+            unit: '',
+            lineColor: '#F57C00',
+            search: '',
+            rowCount: 0
         };
     },
     mounted() {
         this.$watch('$route', (to) => {
-            this.crashID = to.query.crashID || null;
             this.query = { ...to.query };
+            this.crashID = to.query.crashID || null;
             this.get();
         }, { immediate: true });
     },
+    computed: {
+        filteredData() {
+            if (!this.data || !this.data.crashReasonWiseOverview) {
+                return [];
+            }
+
+            let filtered = this.data.crashReasonWiseOverview;
+
+            // Apply search filter if search term exists
+            if (this.search) {
+                const searchTerm = this.search.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.CrashReason && item.CrashReason.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // Apply pagination (limit number of rows shown)
+            if (this.rowCount > 0) {
+                filtered = filtered.slice(0, this.rowCount);
+            }
+
+            return filtered;
+        }
+    },
     methods: {
+        getChartOptions(echarts) {
+  const options = { ...Object.values(echarts)[0] };
+
+  options.legend = {
+    ...(options.legend || {}),
+    orient: 'vertical',
+    // right: '1%',
+    left: 'middle',
+    top: 'bottom'
+  };
+
+  return options;
+},
         getQuery() {
             const queryParams = this.$route.query;
             
@@ -186,6 +242,8 @@ export default {
                 }
 
                 this.data = res;
+                this.count = this.$format.shortenNumber(res.summary.totalCrashes).value;
+                this.unit = this.$format.shortenNumber(res.summary.totalCrashes).unit;
             });
         },
         formatDate(epochMicroseconds) {
@@ -204,34 +262,58 @@ export default {
         getChartStyle() {
             return {
                 height: '300px',
-                width: '100%'
-
+                width: '100%',
+                marginTop: '0',
+                top: '0',
+                right: '0',
+                legend: {
+                    top: 'bottom',
+                    right: '1%'
+                }
             };
+        },
+        getLinkQuery(crashReason) {
+            const currentRouteQuery = this.$route.query;
+            const newQuery = {};
+            // Copy relevant params, excluding nested 'query' and 'crashID'
+            for (const key in currentRouteQuery) {
+                if (key !== 'query' && key !== 'crashID') {
+                    newQuery[key] = currentRouteQuery[key];
+                }
+            }
+            // Set the specific crashID for this link
+            newQuery.crashID = crashReason;
+
+            // Explicitly add 'from' only if it's truthy in the current route
+            if (currentRouteQuery.from) {
+                newQuery.from = currentRouteQuery.from;
+            }
+            return newQuery;
         }
     }
 };
 </script>
 <style scoped>
 .crash-container {
-    padding: 20px;
+    padding: 1.25rem;
 }
 
 .charts-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    margin: 20px 0;
+    gap: 1.25rem;
+    margin: 1.25rem 0;
 }
 
 .chart-wrapper {
     background: white;
-    border-radius: 8px;
-    padding: 16px;
+    border-radius: 0.5rem;
+    padding: 1rem;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .table {
-    margin-top: 50px;
+    margin-top: 1rem;
 }
 
 .crash-reason a,
@@ -247,6 +329,25 @@ export default {
 }
 
 .chart{
-    margin-top: 50px;
+    margin-top: 3.125rem;
+}
+
+.search-field {
+    height: 100% !important;
+}
+
+.tab-heading {
+    font-weight: 700;
+    color: var(--status-ok);
+    font-size: 18px !important;
+}
+
+.search-container {
+    margin-top: 3.125rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+    width: 100%;
 }
 </style>
