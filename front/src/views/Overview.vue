@@ -1,5 +1,8 @@
 <template>
     <div>
+        <template v-if="view === 'dashboard'">
+            <Dashboard />
+        </template>
         <template v-if="view === 'applications'">
             <Application v-if="id" :id="id" :report="report" />
             <Applications v-else />
@@ -60,9 +63,11 @@ import EUMApplicationOverview from '@/views/EUM/EUMApplicationOverview.vue';
 import PagePerformanceGraph from '@/views/EUM/PagePerformanceGraph.vue';
 import MRUMOverview from './MRUMOverview.vue';
 import MRUM from './MRUM.vue';
+import Dashboard from '@/views/Dashboard.vue';
 
 export default {
     components: {
+        Dashboard,
         Applications,
         Application,
         Incidents,
@@ -91,6 +96,7 @@ export default {
     computed: {
         views() {
             const res = {
+                dashboard: 'Dashboard',
                 applications: 'Applications',
                 map: 'Topology',
                 traces: 'Traces',
