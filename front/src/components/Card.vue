@@ -8,7 +8,7 @@
             </v-card-text>
         </v-card-title>
         <v-sparkline
-            v-if="trend"
+            v-if="trend && trend !== 0"
             :value="sparklineData"
             fill
             smooth
@@ -24,7 +24,7 @@
             :max="sparklineData.length ? Math.max(...sparklineData) : 0"
             class="sparkline"
         />
-        <BaseIcon v-else :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <BaseIcon v-if="trend === undefined || trend === null" :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
 
         <div class="bottom-border"></div>
     </v-card>
@@ -63,7 +63,7 @@ export default {
                 const fluctuation = (Math.random() - 0.5) * step * 1.5;
                 value += direction * step + fluctuation;
                 return parseFloat(value.toFixed(2));
-  });
+            });
         },
     },
 };

@@ -48,9 +48,16 @@
                 ></v-text-field>
             </div>
             <CustomTable :headers="tableHeaders" :items="filteredSessions" class="table">
+                <template #item.NoOfRequest="{ item: {  NoOfRequest } }">
+                    <div>{{ NoOfRequest ? formatNumber(NoOfRequest).value + ' ' + formatNumber(NoOfRequest).unit : '-' }}</div>
+                </template>
+                <template #item.SessionDuration="{ item: {  SessionDuration } }">
+                    <div>{{ SessionDuration ? formatDuration(SessionDuration * 1000).value.toFixed(2) + ' ' + formatDuration(SessionDuration * 1000).unit : '-' }}</div>
+                </template>
                 <template #item.LastPageTimestamp="{ item: { LastPageTimestamp } }">
                     <div>{{ LastPageTimestamp ? formatDateTime(LastPageTimestamp) : '-' }}</div>
                 </template>
+
                 <template #item.StartTime="{ item: { StartTime } }">
                     <div>{{ formatDateTime(StartTime) }}</div>
                 </template>
@@ -235,13 +242,6 @@ export default {
                 ];
             }
         },
-        formatDuration(ms) {
-            const minutes = Math.floor(ms / 60000);
-            if (minutes < 60) return `${minutes}m`;
-            const hours = Math.floor(minutes / 60);
-            const remainingMinutes = minutes % 60;
-            return `${hours}h ${remainingMinutes}m`;
-        },
         setQuery() {
             const query = {
                 query: JSON.stringify(this.query),
@@ -254,6 +254,13 @@ export default {
             });
         },
 
+        formatDuration(duration) {
+            return this.$format.convertLatency(duration);
+        },
+
+        formatNumber(value) {
+            return this.$format.shortenNumber(value);
+        },
         formatDateTime(epochMilliseconds) {
             if (!epochMilliseconds) return '-';
             const date = new Date(epochMilliseconds);

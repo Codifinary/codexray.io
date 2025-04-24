@@ -57,9 +57,10 @@
   .card {
     background: #FFFFFF;
     border-radius: 8px;
-    padding: 1.5rem;
+    /* padding: 1.25em; */
+    padding: 25px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    width: 25%;
+    width: 20%;
     position: relative;
   }
 

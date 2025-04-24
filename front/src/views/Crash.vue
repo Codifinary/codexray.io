@@ -8,7 +8,7 @@
         :crashID="crashID"
     />
     <div v-else class="crash-container">
-        <Card :name="name" :count="count" :lineColor="lineColor"/>
+        <Card :name="name" :count="count" :lineColor="lineColor" :icon="lineColor" :background="background"/>
         <div class="charts-container">
             <div v-for="(widget, index) in data.echartReport.widgets" :key="index" class="chart-wrapper">
                 <EChart 
@@ -140,6 +140,7 @@ export default {
             chartWidgets: [],
             crashID: null,
             name: 'Crashes',
+            background: 'orange lighten-4',
             count: 0,
             unit: '',
             lineColor: '#F57C00',

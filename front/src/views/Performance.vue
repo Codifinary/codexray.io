@@ -35,9 +35,9 @@
                 <template v-if="countrywiseOverviews && countrywiseOverviews.length > 0">
                     <tr v-for="country in countrywiseOverviews" :key="country.Country">
                         <td>{{ country.Country }}</td>
-                        <td>{{ country.Requests }}</td>
-                        <td>{{ country.Errors }}</td>
-                        <td>{{ country.ErrorRatePercentage.toFixed(2) }}</td>
+                        <td>{{ formatNumber(country.Requests).value }} {{ formatNumber(country.Requests).unit }}</td>
+                        <td>{{ formatNumber(country.Errors).value }} {{ formatNumber(country.Errors).unit }}</td>
+                        <td>{{ country.ErrorRatePercentage.toFixed(2) }} %</td>
                         <td>{{ formatted(country.AvgResponseTime).value.toFixed(2) }} {{ formatted(country.AvgResponseTime).unit }}</td>
                     </tr>
                 </template>
@@ -134,6 +134,9 @@ export default {
     methods: {
         formatted(latency) {
             return this.$format.convertLatency(latency);
+        },
+        formatNumber(value) {
+            return this.$format.shortenNumber(value);
         },
         getQuery() {
             const queryParams = this.$route.query;
