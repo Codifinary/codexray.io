@@ -7,18 +7,18 @@
         <v-simple-table v-if="!error" dense>
             <thead>
                 <tr class="tab-heading">
-                    <th >Email (Login)</th>
-                    <th >Role</th>
-                    <th >Name</th>
-                    <th ></th>
+                    <th>Email (Login)</th>
+                    <th>Name</th>
+                    <th>Role</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="u in users">
-                    <td >{{ u.email }}</td>
-                    <td >{{ u.name }}</td>
-                    <td >{{ u.role }}</td>
-                    <td >
+                    <td>{{ u.email }}</td>
+                    <td>{{ u.name }}</td>
+                    <td>{{ u.role }}</td>
+                    <td>
                         <template v-if="!u.readonly">
                             <v-btn small icon @click="update(u)"><v-icon small>mdi-pencil</v-icon></v-btn>
                             <v-btn small icon @click="del(u)"><v-icon small>mdi-trash-can-outline</v-icon></v-btn>
@@ -203,15 +203,14 @@ export default {
 </script>
 
 <style scoped>
-.tab-heading{
-    background-color: #E7F8EF;
-
+.tab-heading {
+    background-color: #e7f8ef;
 }
-.v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th:deep(th){
-    height:48px !important;
+.v-data-table--dense > .v-data-table__wrapper > table > thead > tr > th:deep(th) {
+    height: 48px !important;
 }
 
-.table:deep(th:first-child){
+.table:deep(th:first-child) {
     border-bottom: thin solid rgba(0, 0, 0, 0.08);
 }
 </style>
