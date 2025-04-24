@@ -8,7 +8,7 @@ CodeXray's Continuous Profiling allows you easily identify and analyze any unexp
 This allows you to quickly pinpoint and resolve performance bottlenecks, optimize your application's resource utilization,
 and deliver a faster and more reliable user experience.
 
-<img alt="Profiling" src="/img/docs/profiling/profiling.gif" class="card w-1200"/>
+<img alt="Profiling" src="/docs/docs/Doc_Profiles.png" class="card w-1200"/>
 
 There are two ways to obtain profiling data:
 
@@ -109,7 +109,7 @@ spec:
 
 All the available profiles can be accessed through the <b>Profiling</b> tab on the application page.
 
-<img alt="profiles" src="/img/docs/profiling/profiles.png" class="card w-1200"/>
+<img alt="profiles" src="/docs/docs/Doc_Profiles.png" class="card w-1200"/>
 
 
 Additionally, the **CPU** and **Memory** tabs contain shortcuts to the CPU and memory profiles, respectively.
