@@ -61,7 +61,7 @@ func RenderMrumUsers(ctx context.Context, ch *clickhouse.Client, w *model.World,
 		ReturningUserTrend:  rows.ReturningUserTrend,
 	}
 
-	v.Report = auditor.GenerateMrumUsersReport(w, ch, w.Ctx.From, w.Ctx.To, service)
+	v.Report = auditor.GenerateMrumUsersReport(w, ch, service)
 	mobileUserData, err := ch.GetMobileUsersData(ctx, w.Ctx.From, w.Ctx.To, service)
 	if err != nil {
 		klog.Errorln(err)

@@ -11,7 +11,7 @@
                         <v-card-text class="card-sub-count">{{ rps }}</v-card-text>
                     </div>
                     <div class="trend-info">
-                        <span class="trend-percentage">{{ data.requestTrend }}%</span>
+                        <span class="trend-percentage">{{ parseFloat(data.requestTrend).toFixed(2) }}%</span>
                         <img
                             :src="`${$codexray.base_path}static/img/tech-icons/upArrowGreen.svg`"
                             class="card-icon"
@@ -34,7 +34,7 @@
                         <v-card-text class="card-sub-count">{{ rps }}</v-card-text>
                     </div>
                     <div class="trend-info">
-                        <span class="trend-percentage red">{{ data.errorTrend }}%</span>
+                        <span class="trend-percentage red">{{ parseFloat(data.errorTrend).toFixed(2) }}%</span>
                         <img
                             :src="`${$codexray.base_path}static/img/tech-icons/upArrowRed.svg`"
                             class="card-icon"

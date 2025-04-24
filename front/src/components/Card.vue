@@ -119,7 +119,7 @@ export default {
 
 .card-count {
     font-weight: 700;
-    font-size: 26px;
+    font-size: 24px;
     padding: 0;
     line-height: 33px;
     color: #013912;

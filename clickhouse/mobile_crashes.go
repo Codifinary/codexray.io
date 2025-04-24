@@ -65,7 +65,7 @@ func (c *Client) GetCrashesReasonwiseOverview(ctx context.Context, from, to time
 	query := `
 	SELECT
 		cr.CrashReason,
-		count(DISTINCT cr.SessionId) AS TotalCrashes,
+		count(cr.CrashReason) AS TotalCrashes,
 		count(DISTINCT msd.UserId) AS ImpactedUsers,
 		max(cr.CrashTime) AS LastCrashTimestamp
 	FROM mobile_crash_reports cr

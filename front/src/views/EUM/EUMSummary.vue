@@ -1,7 +1,7 @@
 <template>
-    <div>
+    <div class="ml-5 container">
         <div class="mb-5">
-            <span class="heading">ESummary of all browser applications</span>
+            <span class="heading">Summary of all browser applications</span>
         </div>
         <div class="card-container">
             <EUMCard :data="cardData" />
@@ -38,10 +38,10 @@ export default {
         getChartStyle(index) {
             if (index < 2) {
                 // First two charts
-                return { width: '250px', height: '290px' };
+                return { width: '18vw', height: '30vh' };
             } else {
                 // Last chart
-                return { width: '350px', height: '290px' };
+                return { width: '25vw', height: '30vh' };
             }
         },
     },
@@ -49,19 +49,16 @@ export default {
 </script>
 
 <style scoped>
+.container {
+    max-width: 100%;
+    margin-left: 0;
+}
 .card-container {
     display: flex;
     flex-direction: row;
-    width: 100%;
-    justify-content: space-between;
-}
-/* .chart-container {
-    display: flex;
-    flex-direction: row;
+    max-width: 100%;
     gap: 20px;
-    justify-content: center;
-    padding-left: 20px;
-} */
+}
 .chart-wrapper {
     box-shadow:
         0px 3px 1px -2px rgba(0, 0, 0, 0.2),

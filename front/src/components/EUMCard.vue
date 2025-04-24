@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="card-container">
         <v-card class="card-body">
             <div class="card-item">
                 <div class="card-content">
@@ -25,7 +25,9 @@
                         <v-card-text class="card-sub-count">{{ data.errorPerSec }}</v-card-text>
                     </div>
                     <div class="trend-info" v-if="!isFromNowQuery">
-                        <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage"> {{ data.errorTrend }}% </span>
+                        <span :style="{ color: trend === 'upTrend' ? 'green' : 'red' }" class="trend-percentage">
+                            {{ parseFloat(data.errorTrend).toFixed(2) }}%
+                        </span>
                         <img :src="`${$codexray.base_path}static/img/tech-icons/${trend}.svg`" class="card-icon" alt="Trend Icon" />
                     </div>
                 </div>
@@ -64,8 +66,11 @@ export default {
 .card-body {
     display: flex;
     flex-direction: column;
-    width: 300px;
-    padding: 7px 20px;
+    width: 18vw;
+    padding: 0.5rem 1.25rem;
+}
+.card-container {
+    min-height: 30vh;
 }
 
 .card-item {
@@ -82,7 +87,7 @@ export default {
 .trend-percentage {
     opacity: 0.8;
     font-weight: 300;
-    font-size: 14px;
+    font-size: 0.875rem;
 }
 .card-info {
     align-items: center;
@@ -90,30 +95,30 @@ export default {
 
 .card-name {
     font-weight: 300;
-    font-size: 12px;
+    font-size: 0.75rem;
     color: black;
     opacity: 0.5;
-    margin-left: 10px;
+    margin-left: 0.625rem;
 }
 
 .card-count {
     font-weight: 700;
-    font-size: 30px;
+    font-size: 1.875rem;
     color: #013912;
 }
 .card-count2 {
     font-weight: 600;
-    font-size: 26px;
+    font-size: 1.625rem;
     color: #013912;
 }
 .card-sub-count {
     font-weight: 600;
-    font-size: 24px;
+    font-size: 1.5rem;
     color: #013912;
 }
 .card-latency-count {
     font-weight: 600;
-    font-size: 20px;
+    font-size: 1.25rem;
     color: #013912;
 }
 
@@ -124,14 +129,14 @@ export default {
 }
 
 .card-icon {
-    width: 80px;
-    height: 70px;
-    margin-left: 10px;
-    margin-top: 10px;
+    width: 10vw;
+    height: 8vh;
+    margin-left: 0.625rem;
+    margin-top: 0.625rem;
 }
 
 .separator {
-    border: 1px solid grey;
+    border: 0.0625rem solid grey;
     opacity: 0.5;
     width: 90%;
 }
