@@ -94,7 +94,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: 25%;
+    width: 20%;
     height: 100px;
     gap: 20px;
 }

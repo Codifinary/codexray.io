@@ -195,19 +195,6 @@ export default {
             this.from = queryParams.from ?? null;
         },
 
-        // // Update URL with current parameters
-        // setQuery() {
-        //     const query = {
-        //         query: JSON.stringify(this.query)
-        //     };
-        //     this.$router.push({ query }).catch((err) => {
-        //         if (err.name !== 'NavigationDuplicated') {
-        //             console.error(err);
-        //         }
-        //     });
-        // },
-
-        // Main get method to fetch data
         get() {
             this.loading = true;
             this.error = null;
@@ -320,5 +307,6 @@ export default {
 
 .table {
     margin-bottom: 50px;
+    box-shadow: 1px 1px 5px 0 rgba(0, 0, 0, 0.1);
 }
 </style>
