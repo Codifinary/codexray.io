@@ -137,6 +137,14 @@ export default {
         this.get();
         this.$events.watch(this, this.get, 'refresh');
     },
+    watch: {
+        '$route.query': {
+            handler() {
+                this.get();
+            },
+            immediate: true,
+        },
+    },
 
     computed: {
         categories() {
