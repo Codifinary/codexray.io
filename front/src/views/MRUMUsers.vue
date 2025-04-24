@@ -9,9 +9,9 @@
                     v-bind="card"
                 />
             </div>
-            <div class="charts" v-if="data.data && data.data.report && data.data.report.widgets && data.data.report.widgets[0]">
-                <div class="chart-section" v-if="data.data.report.widgets[0].chart">
-                    <Chart :chart="data.data.report.widgets[0].chart" />
+            <div class="charts" v-if="data && data.report && data.report.widgets && data.report.widgets[0]">
+                <div class="chart-section" v-if="data.report.widgets[0].chart">
+                    <Chart :chart="data.report.widgets[0].chart" />
                 </div>
                 <div class="cards-section">
                     <Card2 v-for="card in cards2" :key="card.primaryLabel" :cardData="card"/>
@@ -26,8 +26,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <template v-if="data?.data?.mobileUserData?.length > 0">
-                            <tr v-for="item in data.data.mobileUserData" :key="item.UserID">
+                        <template v-if="data?.mobileUserData?.length > 0">
+                            <tr v-for="item in data.mobileUserData" :key="item.UserID">
                                 <td>{{ item.UserID }}</td>
                                 <td>{{ item.Country }}</td>
                                 <td>{{ formatDate(item.StartTime) }}</td>
@@ -62,9 +62,9 @@ export default {
     },
     computed: {
         computedCards() {
-            const { summary = {} } = this.data?.data || {};
+            const { summary = {} } = this.data || {};
             const { 
-                crashFreeUsers = 0,
+                crashFreePercentage = 0,
                 totalUsers = 0,
                 newUsers = 0,
                 returningUsers = 0,
@@ -76,28 +76,31 @@ export default {
             return [
                 {
                     name: 'Crash Free Users',
-                    count: crashFreeUsers,
+                    count: crashFreePercentage,
+                    unit: '%',
                     lineColor: '#009688',
-                    trend: 0,
-                    iconName: 'arrow-up-thin',
-                    iconColor: '#009688',
-                    trendIcon: true
+                    iconName: crashFreePercentage > 0 ? 'arrow-up-thin' : 'arrow-down-thin',
+                    iconColor: crashFreePercentage > 0 ? '#009688' : '#EF5350',
+                    trendIcon: crashFreePercentage > 0
                 },
                 { 
                     name: 'Users',
-                    count: totalUsers,
+                    count: this.$format.shortenNumber(totalUsers).value,
+                    unit: this.$format.shortenNumber(totalUsers).unit,
                     lineColor: '#FFA726',
                     trend: userTrend || 0,
                 },
                 { 
                     name: 'New Users', 
-                    count: newUsers,
+                    count: this.$format.shortenNumber(newUsers).value,
+                    unit: this.$format.shortenNumber(newUsers).unit,
                     lineColor: '#AB47BC',
                     trend: newUserTrend || 0,
                 },  
                 { 
                     name: 'Returning Users', 
-                    count: returningUsers,
+                    count: this.$format.shortenNumber(returningUsers).value,
+                    unit: this.$format.shortenNumber(returningUsers).unit,
                     lineColor: '#42A5F5',
                     trend: returningUserTrend || 0,
                 }
@@ -107,18 +110,17 @@ export default {
             return [
                 { 
                     primaryLabel: 'Daily Active Users', 
-                    primaryValue: this.data?.data?.summary?.dailyActiveUsers,
-                    percentageChange: this.data?.data?.summary?.dailyTrend,
+                    primaryValue: this.$format.shortenNumber(this.data?.summary?.dailyActiveUsers).value,
+                    unit: this.$format.shortenNumber(this.data?.summary?.dailyActiveUsers).unit,
+                    percentageChange: this.data?.summary?.dailyTrend,
                     lineColor: '#009688',
-                    icon: 'up-green-arrow',
-
+                    icon: this.data?.summary?.dailyTrend > 0 ? 'up-green-arrow' : 'up-red-arrow',
+                    trendColor: this.data?.summary?.dailyTrend > 0 ? '#66BB6A' : '#EF5350',
                 },
                 { 
                     primaryLabel: 'Weekly Active Users', 
-                    primaryValue: this.data?.data?.summary?.weeklyActiveUsers,
-                    iconColor: '#F57C00',
-                    lineColor: '#F57C00',
-
+                    primaryValue: this.$format.shortenNumber(this.data?.summary?.weeklyActiveUsers).value,
+                    unit: this.$format.shortenNumber(this.data?.summary?.weeklyActiveUsers).unit,
                 },
             ];
         },
@@ -136,12 +138,11 @@ export default {
                 { text: 'Last Seen', value: 'lastSeen' },
             ],
             data: {
-                data: {
-                    mobileUserData: [],
-                    summary: {},
-                    report: {
-                        name: '',
-                        widgets: [{
+                mobileUserData: [],
+                summary: {},
+                report: {
+                    name: '',
+                    widgets: [{
                             chart: {
                                 series: [],
                                 ctx: {},
@@ -149,8 +150,7 @@ export default {
                             }
                         }]
                     }
-                }
-            },
+                },
             loading: false,
             error: null,
             from: null,
@@ -195,17 +195,17 @@ export default {
             this.from = queryParams.from ?? null;
         },
 
-        // Update URL with current parameters
-        setQuery() {
-            const query = {
-                query: JSON.stringify(this.query)
-            };
-            this.$router.push({ query }).catch((err) => {
-                if (err.name !== 'NavigationDuplicated') {
-                    console.error(err);
-                }
-            });
-        },
+        // // Update URL with current parameters
+        // setQuery() {
+        //     const query = {
+        //         query: JSON.stringify(this.query)
+        //     };
+        //     this.$router.push({ query }).catch((err) => {
+        //         if (err.name !== 'NavigationDuplicated') {
+        //             console.error(err);
+        //         }
+        //     });
+        // },
 
         // Main get method to fetch data
         get() {
@@ -310,9 +310,8 @@ export default {
 
 .trend-cards {
     display: flex;
-    justify-content: space-between;
     flex-wrap: wrap;
-    gap: 50px;
+    gap: 20px;
     margin-right: 30px;  
     margin-bottom: 50px;
     margin-top: 50px;

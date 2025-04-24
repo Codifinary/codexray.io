@@ -1,7 +1,5 @@
 <template>
     <div>
-        <v-progress-linear indeterminate v-if="loading" color="green" />
-
         <v-alert v-if="error" color="red" icon="mdi-alert-octagon-outline" outlined text>
             {{ error }}
         </v-alert>
@@ -12,16 +10,16 @@
             :items="sessions.summary" 
             class="table"
         >
-            <template #item.serviceName="{ item: { serviceName } }">
+            <template #item.service="{ item: { service } }">
                 <div class="service-name clickable">
                     <router-link
                             :to="{
                                 name: 'overview',
-                                params: { view: 'MRUM', id: serviceName },
+                                params: { view: 'MRUM', id: service },
                                 query: $route.query,
                             }"
                         >
-                            {{ serviceName }}
+                            {{ service }}
                         </router-link>
                 </div>
             </template>
@@ -67,7 +65,7 @@ export default {
             loading: false,
             sessions: {},
             headers: [
-                { text: 'Session Name', value: 'serviceName', width: '20%', sortable: false },
+                { text: 'Session Name', value: 'service', width: '20%', sortable: false },
                 { text: 'No. of users', value: 'totalUsers', width: '20%', sortable: true },
                 { text: 'No. of Requests', value: 'totalRequests', width: '20%', sortable: true },
                 { text: 'No. of Errors', value: 'totalErrors', width: '20%', sortable: true },
@@ -91,7 +89,7 @@ export default {
                     this.error = error;
                     return;
                 }
-                this.sessions = data.data;
+                this.sessions = data;
             });
         }
     },

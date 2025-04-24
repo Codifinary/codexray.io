@@ -1202,9 +1202,34 @@ func (api *Api) Perf(w http.ResponseWriter, r *http.Request, u *db.User) {
 		klog.Warningln(err)
 	}
 
-	report := auditor.GeneratePerformanceReport(world, serviceName, pageName, ch)
+	from := world.Ctx.From.ToStandard()
+	to := world.Ctx.To.ToStandard()
 
-	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+	// Fetch Page Performance Metrics
+	performanceMetrics, err := ch.GetPagePerformanceMetrics(r.Context(), &from, &to, serviceName, pageName)
+	if err != nil {
+		klog.Errorf("Failed to fetch page performance metrics: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to fetch page performance metrics: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch Page Experience Scores
+	experienceScores, err := ch.GetPageExperienceScores(r.Context(), &from, &to, serviceName, pageName)
+	if err != nil {
+		klog.Errorf("Failed to fetch page experience scores: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to fetch page experience scores: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	report := auditor.GeneratePerformanceReport(world, serviceName, pageName, ch)
+	// Prepare the response
+	response := map[string]any{
+		"performanceMetrics": performanceMetrics,
+		"experienceScores":   experienceScores,
+		"performanceCharts":  report,
+	}
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, response))
 }
 
 func (api *Api) EumPerf(w http.ResponseWriter, r *http.Request, u *db.User) {
@@ -1571,7 +1596,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 
 	// for local purpose
 	// project := &db.Project{
-	// 	Id:   "02mn46va",
+	// 	Id:   "rc1niqg7",
 	// 	Name: "default",
 	// 	Prometheus: db.IntegrationsPrometheus{
 	// 		Url: "http://prometheus:9090",
@@ -1584,7 +1609,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 	// 					User:     "default",
 	// 					Password: "vizares",
 	// 				},
-	// 				Addr:     "labs.codexray.io:8023",
+	// 				Addr:     "labs.codexray.io:8043",
 	// 				Protocol: "http",
 	// 			},
 	// 		},

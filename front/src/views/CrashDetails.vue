@@ -1,25 +1,30 @@
 <template>
-    <div class="crash-details">
-        <v-progress-linear indeterminate v-if="loading" color="green" />
-        <div v-else>
-            <div class="font-weight-bold tab-heading">
-                <router-link 
-                    :to="{
-                        name: 'overview',
-                        params: {
-                            view: 'MRUM',
-                            id: id,
-                            report: 'crash'
-                        }
-                    }" 
-                    class="bread-heading"
-                >Crash </router-link> <v-icon class="icon">mdi-chevron-right</v-icon> <span class="crash-id-text">{{ crashID }}</span>
+    <v-progress-linear indeterminate v-if="loading" color="green" />
+    <div v-else class="crash-details">
+        <div>
+           
+            <div class="search-container" >
+            <div class="font-weight-bold tab-heading ">
+
+                Crash Details Table 
             </div>
+            <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search by ID"
+                    single-line
+                    hide-details
+                    dense
+                    outlined
+                    class="search-field"
+                    style="max-width: 250px"
+                ></v-text-field>
+        </div>
 
             <CustomTable 
-                v-if="data.data && data.data.crashDatabyCrashReason"
+                v-if="data && data.crashDatabyCrashReason"
                 :headers="headers" 
-                :items="data.data.crashDatabyCrashReason" 
+                :items="filteredData" 
                 class="table"
             >
                 <template #item.id="{ item }">
@@ -113,14 +118,37 @@ export default {
                 { text: 'Crash ID', value: 'id', sortable: false },
                 { text: 'Device ID', value: 'Crashes', sortable: true },
                 { text: 'Crash Timestamp', value: 'timestamp', sortable: true },
-                { text: 'Affected Users', value: 'AffectedUsers', sortable: true },
+                { text: 'Affected User', value: 'AffectedUsers', sortable: true },
             ],
-            data: {
-                data: {
-                    crashDatabyCrashReason: []
-                }
-            }
+            data: null,
+            search: '', // Add search model
         };
+    },
+    computed: {
+        breadcrumbItems() {
+            return [
+                { text: 'MRUM', to: { name: 'overview', params: { view: 'MRUM', id: this.id, report: 'crash' }, query: this.$route.query } },
+                { text: 'Crash', to: { name: 'crash', params: { id: this.id }, query: this.$route.query } },
+                { text: this.crashID, active: true }
+            ];
+        },
+        filteredData() {
+            if (!this.data || !this.data.crashDatabyCrashReason) {
+                return [];
+            }
+
+            let filtered = this.data.crashDatabyCrashReason;
+
+            // Apply search filter if search term exists
+            if (this.search) {
+                const searchTerm = this.search.toLowerCase();
+                filtered = filtered.filter(item => 
+                    item.CrashId && item.CrashId.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            return filtered;
+        }
     },
     watch: {
         '$route.query': {
@@ -160,6 +188,7 @@ export default {
             this.loading = true;
             
             const query = {
+                ...this.query,
                 service: this.id,
                 crash_reason: this.crashID
             };
@@ -178,16 +207,13 @@ export default {
                 this.data = res;
             });
         }
-    },
-    mounted() {
-        this.get();
     }
 };
 </script>
 
 <style scoped>
 .crash-details {
-    padding: 20px;
+    padding: 1.25rem;
     width: 100%;
 }
 
@@ -196,7 +222,7 @@ export default {
 }
 
 .table {
-    margin-top: 20px;
+    margin-top: 1.25rem;
     width: 100%;
 }
 
@@ -206,7 +232,7 @@ export default {
 }
 
 .crash-id a, .device-id, .timestamp, .affected-users {
-    padding: 8px 0;
+    padding: 0.5rem 0;
     color: #013912;
     width: 100%;
     display: block;
@@ -232,8 +258,8 @@ export default {
 
 .stack-trace {
     background-color: #f5f5f5;
-    padding: 16px;
-    border-radius: 4px;
+    padding: 1rem;
+    border-radius: 0.25rem;
     font-family: monospace;
     white-space: pre-wrap;
     word-break: break-word;
@@ -241,11 +267,11 @@ export default {
 }
 
 .tab-heading {
-    margin-top: 20px;
-    padding: 12px;
+    margin-top: 1.25rem;
+    padding: 0.75rem;
     font-weight: 700;
     color: var(--status-ok);
-    font-size: 18px !important;
+    font-size: 1.125rem !important;
 }
 
 .bread-heading{
@@ -257,7 +283,7 @@ export default {
 
 .crash-id-text {
     display: inline-block;
-    max-width: 300px; /* Adjust this value based on your layout needs */
+    max-width: 300px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -265,20 +291,20 @@ export default {
 }
 
 .stack-container {
-    padding-top: 16px;
-    padding-bottom: 16px;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
 .popup-heading {
     font-weight: 700;
     color: var(--status-ok);
-    font-size: 20px;
+    font-size: 1.25rem;
 }
 
 .copy-btn {
     position: absolute;
-    top: 8px;
-    right: 8px;
+    top: 0.5rem;
+    right: 0.5rem;
     background-color: #f5f5f5 !important;
 }
 
@@ -287,16 +313,16 @@ export default {
 }
 
 .crash-info {
-    margin-top: 20px;
+    margin-top: 1.25rem;
     background-color: #f8f9fa;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
 .info-item {
     display: flex;
-    margin-bottom: 12px;
+    margin-bottom: 0.75rem;
     align-items: center;
 }
 
@@ -307,7 +333,7 @@ export default {
 .label {
     font-weight: 500;
     color: #666;
-    width: 180px;
+    width: 11.25rem;
     flex-shrink: 0;
 }
 
@@ -317,10 +343,44 @@ export default {
 }
 
 .headline {
-    padding: 16px;
+    padding: 1rem;
 }
 
 .icon{
     color: var(--status-ok);
+    margin-right: 0.5rem;
+    padding-right: 0.625rem;
+}
+
+.copied-msg {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background-color: var(--status-ok);
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+
+.search-field {
+    height: 100% !important;
+}
+
+.tab-heading {
+    font-weight: 700;
+    color: var(--status-ok);
+    font-size: 18px !important;
+    margin-top: 0;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    height: fit-content;
+    justify-content: space-between;
+    width: 100%;
 }
 </style>

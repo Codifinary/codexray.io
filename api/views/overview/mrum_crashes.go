@@ -84,7 +84,7 @@ func RenderMrumCrashes(ctx context.Context, ch *clickhouse.Client, w *model.Worl
 
 		v.Report = auditor.GenerateMrumCrashesReport(w, ch, w.Ctx.From, w.Ctx.To, service)
 
-		commonColors := []string{"#1f693f", "#2f985d", "#34b86f", "#38e383", "#5bf29e"}
+		commonColors := []string{"#00A156", "#1DBF73", "#5FD19B", "#B8E8D1", "#EEEEEE"}
 
 		deviceConfig := CrashPieChartConfig{
 			Title:      "Top Devices by Crash Count",

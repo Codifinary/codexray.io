@@ -92,7 +92,7 @@
             <v-container class="mx-0 px-0 py-0">
                 <div class="main-content-wrapper">
                     <v-alert
-                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings'"
+                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings' && $route.params.view !== 'MRUM' && $route.params.view !== 'BRUM'"
                         color="red"
                         elevation="2"
                         border="left"

@@ -18,7 +18,7 @@ type MobilePerfPayload struct {
 	RequestPayloadSize  int    `json:"requestPayloadSize"`
 	EndpointName        string `json:"endpointName"`
 	RequestTime         int64  `json:"requestTime"`
-	Service             string `json:"serviceName"`
+	Service             string `json:"service"`
 	Status              bool   `json:"status"`
 	ResponseTime        int    `json:"responseTime"`
 	ResponsePayloadSize int    `json:"responsePayloadSize"`

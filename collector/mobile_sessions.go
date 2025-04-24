@@ -35,14 +35,15 @@ type MobileSessionBatch struct {
 	lock sync.Mutex
 	done chan struct{}
 
-	Timestamp *chproto.ColDateTime64
-	SessionId *chproto.ColStr
-	UserId    *chproto.ColStr
-	StartTime *chproto.ColDateTime64
-	EndTime   *chproto.ColNullable[time.Time]
-	Country   *chproto.ColStr
-	Device    *chproto.ColStr
-	OS        *chproto.ColStr
+	Timestamp      *chproto.ColDateTime64
+	SessionId      *chproto.ColStr
+	UserId         *chproto.ColStr
+	StartTime      *chproto.ColDateTime64
+	EndTime        *chproto.ColNullable[time.Time]
+	Country        *chproto.ColStr
+	Device         *chproto.ColStr
+	OS             *chproto.ColStr
+	existingCombos map[string]bool
 }
 
 func NewMobileSessionBatch(limit int, timeout time.Duration, exec func(query ch.Query) error) *MobileSessionBatch {
@@ -52,14 +53,15 @@ func NewMobileSessionBatch(limit int, timeout time.Duration, exec func(query ch.
 		exec:  exec,
 		done:  make(chan struct{}),
 
-		Timestamp: new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
-		SessionId: new(chproto.ColStr),
-		UserId:    new(chproto.ColStr),
-		StartTime: new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
-		EndTime:   chproto.NewColNullable[time.Time](endTimeCol),
-		Country:   new(chproto.ColStr),
-		Device:    new(chproto.ColStr),
-		OS:        new(chproto.ColStr),
+		Timestamp:      new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
+		SessionId:      new(chproto.ColStr),
+		UserId:         new(chproto.ColStr),
+		StartTime:      new(chproto.ColDateTime64).WithPrecision(chproto.PrecisionNano),
+		EndTime:        chproto.NewColNullable[time.Time](endTimeCol),
+		Country:        new(chproto.ColStr),
+		Device:         new(chproto.ColStr),
+		OS:             new(chproto.ColStr),
+		existingCombos: make(map[string]bool),
 	}
 
 	go func() {
@@ -85,12 +87,20 @@ func (b *MobileSessionBatch) Close() {
 	b.lock.Lock()
 	b.save()
 	b.lock.Unlock()
+	b.existingCombos = make(map[string]bool)
 }
 
 func (b *MobileSessionBatch) Add(sessionData *MobileSessionRequestType) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 	for _, dataPoint := range sessionData.DataPoints {
+		key := dataPoint.SessionId + "_" + dataPoint.UserId
+
+		if _, exists := b.existingCombos[key]; exists {
+			continue
+		}
+		b.existingCombos[key] = true
+
 		b.Timestamp.Append(time.Unix(0, int64(dataPoint.Timestamp)))
 		b.SessionId.Append(dataPoint.SessionId)
 		b.UserId.Append(dataPoint.UserId)
@@ -134,6 +144,8 @@ func (b *MobileSessionBatch) save() {
 			resettable.Reset()
 		}
 	}
+
+	b.existingCombos = make(map[string]bool)
 }
 
 func (c *Collector) UpdateSessionEndTime(project *db.Project, sessionId string, endTime time.Time) error {
