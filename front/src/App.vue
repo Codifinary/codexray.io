@@ -175,6 +175,7 @@ export default {
             context: this.$api.context,
             changePassword: false,
             isSidebarCollapsed: false,
+            showAlert: true,
         };
     },
 
@@ -215,7 +216,7 @@ export default {
         },
         icons() {
             return {
-                dashboard: { name: 'dashboard', class: 'applications-icon' },
+                dashboard: { name: 'applications', class: 'dashboard-icon' },
                 applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
                 // traces: { name: 'traces', class: 'traces-icon' },

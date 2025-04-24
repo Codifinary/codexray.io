@@ -22,7 +22,7 @@
                             <v-list-item-content v-if="showTitles">
                                 <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
                             </v-list-item-content>
-                            <v-icon v-if="showTitles && (id === 'applications' || id === 'EUM')" class="toggle-icon">mdi-chevron-down</v-icon>
+                            <v-icon v-if="id === 'applications' || id === 'EUM'" class="toggle-icon">mdi-chevron-down</v-icon>
                         </v-list-item>
                         <!-- Submenu for Applications -->
                         <v-list v-if="showTitles && id === 'applications' && expanded.applications" :key="`${id}-submenu`" dense nav>
@@ -174,6 +174,18 @@ export default {
     stroke-linecap: round;
     stroke-linejoin: round;
 }
+.dashboard-icon {
+    fill: none;
+    stroke: #013912;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.dashboard-icon-selected {
+    fill: none;
+    stroke: #1dbf73;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
 .map-icon {
     fill: #013912;
 }
@@ -254,12 +266,12 @@ export default {
 }
 
 .toggle-icon {
-    width: 16px;
-    height: 16px;
-    color: #1dbf73;
-    cursor: pointer;
-    margin-left: auto;
-    margin-right: 10px;
+    width: 16px !important;
+    height: 16px !important;
+    color: #1dbf73 !important;
+    cursor: pointer !important;
+    margin-left: auto !important;
+    margin-right: 10px !important;
 }
 
 .selected-view {
