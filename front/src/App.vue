@@ -92,7 +92,7 @@
             <v-container class="mx-0 px-0 py-0">
                 <div class="main-content-wrapper">
                     <v-alert
-                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings'"
+                        v-if="status && status.status === 'warning' && $route.name !== 'project_settings' && $route.params.view !== 'MRUM' && $route.params.view !== 'BRUM'"
                         color="red"
                         elevation="2"
                         border="left"
@@ -205,6 +205,7 @@ export default {
                 nodes: 'Nodes',
                 EUM: 'EUM',
                 incidents: 'Incidents',
+                MRUM: 'MRUM',
                 // deployments: 'Deployments',
             };
         },
@@ -216,6 +217,7 @@ export default {
                 nodes: { name: 'nodes', class: 'nodes-icon' },
                 incidents: { name: 'incidents', class: 'incident-icon' },
                 EUM: { name: 'eum', class: 'eum-icon' },
+                MRUM: {name: 'eum', class: 'eum-icon'}
                 // deployments: { name: 'deployments', class: 'dep-icon' },
             };
         },

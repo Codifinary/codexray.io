@@ -299,7 +299,7 @@ func (c *Client) GetMobilePerfCountrywiseOverviews(ctx context.Context, from, to
 		case overview.ErrorRatePercentage <= 80:
 			overview.GeoMapColorCode = "#F1AB47" // Yellow
 		default: // > 80%
-			overview.GeoMapColorCode = "#ef4f4c" // Red
+			overview.GeoMapColorCode = "#EF5350"
 		}
 
 		results = append(results, overview)

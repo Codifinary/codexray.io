@@ -513,7 +513,7 @@ func (c *Client) GetSessionGeoMapData(ctx context.Context, from, to timeseries.T
 
 		switch {
 		case data.Count <= 20:
-			data.GeoMapColorCode = "#ef4f4c" // Red
+			data.GeoMapColorCode = "#EF5350" // Red
 		case data.Count <= 80:
 			data.GeoMapColorCode = "#F1AB47" // Yellow
 		default: // > 80
