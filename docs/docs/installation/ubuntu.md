@@ -23,7 +23,7 @@ sudo service clickhouse-server start
 
 **Step #2: Installing Prometheus**
 
-Coroot requires Prometheus with support for Remote Write Receiver, which has been available since v2.25.0.
+codexray requires Prometheus with support for Remote Write Receiver, which has been available since v2.25.0.
 
 ```bash
 sudo apt install -y prometheus
@@ -46,49 +46,49 @@ Restart Prometheus:
 sudo service prometheus restart
 ```
 
-**Step #3: Installing Coroot**
+**Step #3: Installing codexray**
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/coroot/coroot/main/deploy/install.sh | \
+curl -sfL https://raw.githubusercontent.com/codexray/codexray/main/deploy/install.sh | \
   BOOTSTRAP_PROMETHEUS_URL="http://127.0.0.1:9090" \
   BOOTSTRAP_REFRESH_INTERVAL=15s \
   BOOTSTRAP_CLICKHOUSE_ADDRESS=127.0.0.1:9000 \
   sh -
 ```
 
-**Step #4: Installing coroot-node-agent**
+**Step #4: Installing codexray-node-agent**
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/install.sh | \
+curl -sfL https://raw.githubusercontent.com/codexray/codexray-node-agent/main/install.sh | \
   COLLECTOR_ENDPOINT=http://127.0.0.1:8080 \
   SCRAPE_INTERVAL=15s \
   sh -
 ```
 
-**Step #5: Accessing Coroot**
+**Step #5: Accessing codexray**
 
-Access Coroot at: http://NODE_IP:8080.
+Access codexray at: http://NODE_IP:8080.
 
-**Uninstall Coroot**
+**Uninstall codexray**
 
-To uninstall Coroot run the following command:
+To uninstall codexray run the following command:
 
 ```bash
-/usr/bin/coroot-uninstall.sh
+/usr/bin/codexray-uninstall.sh
 ```
 
-Uninstall coroot-node-agent:
+Uninstall codexray-node-agent:
 
 ```bash
-/usr/bin/coroot-node-agent-uninstall.sh
+/usr/bin/codexray-node-agent-uninstall.sh
 ```
   </TabItem>
 
   <TabItem value="ee" label="Enterprise Edition">
 
 :::info
-Coroot Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
-To install the Enterprise Edition, you'll need a license. [Start](https://coroot.com/account) your free trial today.
+codexray Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
+To install the Enterprise Edition, you'll need a license. [Start](https://codexray.com/account) your free trial today.
 :::
 
 **Step #1: Installing ClickHouse**
@@ -104,7 +104,7 @@ sudo service clickhouse-server start
 
 **Step #2: Installing Prometheus**
 
-Coroot requires Prometheus with support for Remote Write Receiver, which has been available since v2.25.0.
+codexray requires Prometheus with support for Remote Write Receiver, which has been available since v2.25.0.
 
 ```bash
 sudo apt install -y prometheus
@@ -127,42 +127,42 @@ Restart Prometheus:
 sudo service prometheus restart
 ```
 
-**Step #3: Installing Coroot**
+**Step #3: Installing Codexray**
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/coroot/coroot-ee/main/deploy/install.sh | \
-  LICENSE_KEY="COROOT-LICENSE-KEY-HERE" \
+curl -sfL https://raw.githubusercontent.com/codexray/codexray-ee/main/deploy/install.sh | \
+  LICENSE_KEY="codexray-LICENSE-KEY-HERE" \
   BOOTSTRAP_PROMETHEUS_URL="http://127.0.0.1:9090" \
   BOOTSTRAP_REFRESH_INTERVAL=15s \
   BOOTSTRAP_CLICKHOUSE_ADDRESS=127.0.0.1:9000 \
   sh -
 ```
 
-**Step #4: Installing coroot-node-agent**
+**Step #4: Installing codexray-node-agent**
 
 ```bash
-curl -sfL https://raw.githubusercontent.com/coroot/coroot-node-agent/main/install.sh | \
+curl -sfL https://raw.githubusercontent.com/codexray/codexray-node-agent/main/install.sh | \
   COLLECTOR_ENDPOINT=http://127.0.0.1:8080 \
   SCRAPE_INTERVAL=15s \
   sh -
 ```
 
-**Step #5: Accessing Coroot**
+**Step #5: Accessing Codexray**
 
-Access Coroot at: http://NODE_IP:8080.
+Access codexray at: http://NODE_IP:8080.
 
-**Uninstall Coroot**
+**Uninstall codexray**
 
-To uninstall Coroot run the following command:
+To uninstall codexray run the following command:
 
 ```bash
-/usr/bin/coroot-ee-uninstall.sh
+/usr/bin/codexray-ee-uninstall.sh
 ```
 
-Uninstall coroot-node-agent:
+Uninstall codexray-node-agent:
 
 ```bash
-/usr/bin/coroot-node-agent-uninstall.sh
+/usr/bin/codexray-node-agent-uninstall.sh
 ```
 </TabItem>
 </Tabs>
