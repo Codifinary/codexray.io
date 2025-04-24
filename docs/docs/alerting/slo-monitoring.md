@@ -33,7 +33,7 @@ This is especially useful for services with low traffic.
 The detailed explanation of SLO-based alerting you can find in [The SRE Workbook](https://sre.google/workbook/alerting-on-slos/).
 :::
 
-When an application significantly violates its SLOs, Codexray triggers an incident and notifies the team through the configured integrations:
+When an application significantly violates its SLOs, codexray triggers an incident and notifies the team through the configured integrations:
 * [Slack](/alerting/slack)
 * [Microsoft Teams](/alerting/teams)
 * [Pagerduty](/alerting/pagerduty)
