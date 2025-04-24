@@ -11,7 +11,7 @@ which can be caused by several reasons:
 * A container competes for CPU time against the other containers running on the same node.
 * A container consumes all available CPU time on its own.
 
-<img alt="CPU" src="/docs/docs/Doc_CPU.pngg" class="card w-1200"/>
+<img alt="CPU" src="/docs/docs/Doc_CPU.png" class="card w-1200"/>
 
 ## Possible failure scenarios
 
@@ -33,7 +33,7 @@ This can result in performance degradation due to a shortage of CPU time.
 
 ### CPU usage
 
-<img alt="CPU usage" src="/img/docs/cpu-usage.png" class="card w-600"/>
+<img alt="CPU usage" src="/docs/docs/Doc_CPU_Usage.png" class="card w-600"/>
 
 This chart can help you answer the following questions:
 
