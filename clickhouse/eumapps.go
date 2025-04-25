@@ -3,6 +3,8 @@ package clickhouse
 import (
 	"context"
 	"time"
+
+	"github.com/ClickHouse/clickhouse-go/v2"
 )
 
 type ServiceOverview struct {
@@ -28,8 +30,8 @@ SELECT
 FROM 
     perf_data
 WHERE 
-    (? IS NULL OR Timestamp >= parseDateTimeBestEffort(?)) 
-    AND (? IS NULL OR Timestamp <= parseDateTimeBestEffort(?))
+    (@from IS NULL OR Timestamp >= @from) 
+    AND (@to IS NULL OR Timestamp <= @to)
 GROUP BY 
     ServiceName, AppType
 ORDER BY 
@@ -46,39 +48,34 @@ SELECT
 FROM 
     err_log_data
 WHERE 
-    (? IS NULL OR Timestamp >= parseDateTimeBestEffort(?)) 
-    AND (? IS NULL OR Timestamp <= parseDateTimeBestEffort(?))
+    (@from IS NULL OR Timestamp >= @from) 
+    AND (@to IS NULL OR Timestamp <= @to)
 GROUP BY 
     ServiceName
 `
 
-	// Format time values or pass nil
-	var fromStr, toStr interface{}
+	var args []any
 	if from != nil {
-		fromStr = from.Format("2006-01-02 15:04:05") // ClickHouse format
+		args = append(args, clickhouse.Named("from", from.Format("2006-01-02 15:04:05")))
+	} else {
+		args = append(args, clickhouse.Named("from", nil))
 	}
 	if to != nil {
-		toStr = to.Format("2006-01-02 15:04:05")
+		args = append(args, clickhouse.Named("to", to.Format("2006-01-02 15:04:05")))
+	} else {
+		args = append(args, clickhouse.Named("to", nil))
 	}
 
-	args := []any{
-		fromStr, fromStr,
-		toStr, toStr,
-	}
-
-	// Execute performance query
 	perfRows, err := c.executePerfQuery(ctx, perfQuery, args)
 	if err != nil {
 		return nil, err
 	}
 
-	// Execute error query
 	errorRows, err := c.executeErrorQuery(ctx, errorQuery, args)
 	if err != nil {
 		return nil, err
 	}
 
-	// Combine results
 	perfData := make(map[string]*ServiceOverview)
 	for _, row := range perfRows {
 		perfData[row.ServiceName] = &row
@@ -92,7 +89,6 @@ GROUP BY
 		}
 	}
 
-	// Convert map to slice
 	var results []ServiceOverview
 	for _, row := range perfData {
 		results = append(results, *row)

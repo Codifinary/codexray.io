@@ -97,7 +97,7 @@
                             status.status === 'warning' &&
                             $route.name !== 'project_settings' &&
                             $route.params.view !== 'MRUM' &&
-                            $route.params.view !== 'EUM' &&
+                            $route.params.view !== 'BRUM' &&
                             showAlert
                         "
                         color="red"

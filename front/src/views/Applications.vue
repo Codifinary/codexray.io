@@ -134,13 +134,13 @@ export default {
     },
 
     mounted() {
-        this.get();
-        this.$events.watch(this, this.get, 'refresh');
+        this.fetchApplicationsOverview();
+        this.$events.watch(this, this.fetchApplicationsOverview, 'refresh');
     },
     watch: {
         '$route.query': {
             handler() {
-                this.get();
+                this.fetchApplicationsOverview();
             },
             immediate: true,
         },
@@ -187,7 +187,7 @@ export default {
     },
 
     methods: {
-        get() {
+        fetchApplicationsOverview() {
             this.loading = true;
             this.error = '';
             this.$api.getOverview('applications', '', (data, error) => {
