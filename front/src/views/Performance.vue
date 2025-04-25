@@ -267,6 +267,7 @@ export default {
 .table {
     margin-bottom: 3.125rem;
     margin-top: 3.125rem;
+    box-shadow: 1px 1px 5px 0 rgba(0, 0, 0, 0.1);
 }
 
 .light-green-bg {

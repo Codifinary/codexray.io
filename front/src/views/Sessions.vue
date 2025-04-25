@@ -67,7 +67,7 @@
             :countrywiseOverviews="data.sessionGeoMapData"
             :title="title"
             :tools="tools"
-            :tooltipLabel="'Session Count'"
+            :tooltipLabel="'Request Count'"
             :tooltipValue="(item) => item.Count"
         />
     </div>
