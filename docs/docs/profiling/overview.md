@@ -23,8 +23,8 @@ allowing for the collection of performance-related data without modifying the so
 
 CodeXray's profiling stack consists of several components:
 
-* `codeXray-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Coroot.
-* `codexray-cluster-agent` gathers profiles from applications and sends them to Coroot.
+* `codeXray-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Codexray.
+* `codexray-cluster-agent` gathers profiles from applications and sends them to Codexray.
 * ClickHouse is used as a database for storing profiling data.
 * CodeXray queries profiles of a given application and visualizes them as FlameGraphs for analysis.
 
@@ -100,8 +100,8 @@ spec:
   template:
     metadata:
       annotations:
-        coroot.com/profile-scrape: "true"
-        coroot.com/profile-port: "8080"
+        Codexray.com/profile-scrape: "true"
+        Codexray.com/profile-port: "8080"
 ...
 ```
 
@@ -116,13 +116,13 @@ Additionally, the **CPU** and **Memory** tabs contain shortcuts to the CPU and m
 
 
 <div class="horizontal-images">
-  <img alt="Profiling CPU shortcut" src="/img/docs/profiling/cpu-shortcut.png" class="card" />
-  <img alt="Profiling Memory shortcut" src="/img/docs/profiling/memory-shortcut.png" class="card" />
+  <img alt="Profiling CPU shortcut" src="/docs/docs/Doc_Profiling_CPU_Shortcut.png" class="card" />
+  <img alt="Profiling Memory shortcut" src="/docs/docs/Doc_Profiling_Memory_Shortcut.png" />
 </div>
 
 By default, you see an aggregated FlameGraph for all profiles within the selected time range.
 
-<img alt="profile" src="/img/docs/profiling/profile.png" class="card w-1200"/>
+<img alt="profile" src="/docs/docs/Doc_Profile.png" class="card w-1200"/>
 
 
 The FlameGraph displays the code hierarchy organized by CPU time consumption,
@@ -135,11 +135,11 @@ resulting in functions from the same package sharing the same color.
 To view the FlameGraph for a specific time sub-range,
 select a chart area and choose the **Zoom** mode.
 
-<img alt="profile zoom" src="/img/docs/profiling/profile-zoom.png" class="card w-1200"/>
+<img alt="profile zoom" src="/docs/docs/Doc_Profile_zoom.png" class="card w-1200"/>
 
 Alternatively, you can opt for the **Comparison** mode to compare the selected time range with the previous one.
 
-<img alt="profile diff" src="/img/docs/profiling/profile-diff.png" class="card w-1200"/>
+<img alt="profile diff" src="/docs/docs/Doc_Profile_diff.png" class="card w-1200"/>
 
 In **Comparison** mode, functions experiencing degraded performance are colored red,
 whereas those performing better are colored green.
