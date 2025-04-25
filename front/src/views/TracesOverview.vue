@@ -178,7 +178,7 @@ export default {
 }
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     margin: 20px 0 20px 0;
 }
 </style>

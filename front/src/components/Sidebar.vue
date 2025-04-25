@@ -310,6 +310,9 @@ export default {
 .v-list--dense .v-list-item {
     margin: 0;
 }
+.v-list--nav .v-list-item {
+    border-radius: 0;
+}
 
 .v-list-item .v-list-item__title {
     font-weight: 400;
