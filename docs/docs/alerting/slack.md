@@ -20,13 +20,13 @@ The manifest just take cares of some settings for your app and helps speed thing
 
 On the Slack site for your newly created app, in the **Settings** > **Basic Information** tab, under **Install your app**, click on **Install to workspace**.
 
-<img alt="Creating a Slack app" src="/img/docs/slack-integration-step1.png" class="card w-800"/>
+<img alt="Creating a Slack app" src="/docs/docs/Doc_Create _Slack_app.png" class="card w-800"/>
 
 On the next screen, click **Allow** to give Codexray access to your Slack workspace.
 
 On the same page you can customize the app icon (you can use the [Codexray logo](https://Codexray.com/static/img/Codexray_512.png))
 
-<img alt="Customize Slack App" src="/img/docs/slack-integration-step2.png" class="card w-600"/>
+<img alt="Customize Slack App" src="/docs/docs/Doc_Configure_Slack.png" class="card w-600"/>
 
 Then go to **OAuth and Permissions** and copy the **Bot User OAuth Token**.
 
