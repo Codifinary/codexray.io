@@ -97,7 +97,7 @@
                             status.status === 'warning' &&
                             $route.name !== 'project_settings' &&
                             $route.params.view !== 'MRUM' &&
-                            $route.params.view !== 'BRUM' &&
+                            $route.params.view !== 'EUM' &&
                             showAlert
                         "
                         color="red"
@@ -210,11 +210,23 @@ export default {
         },
         views() {
             return {
-                applications: 'Applications',
-                map: 'Topology',
-                nodes: 'Nodes',
-                EUM: 'EUM',
-                incidents: 'Incidents',
+                applications: {
+                    name: 'Applications',
+                    subMenu: [
+                        { id: 'health', name: 'Health', route: 'health', icon: 'mdi-circle-outline' },
+                        { id: 'traces', name: 'Traces', route: 'traces', icon: 'mdi-circle-outline' },
+                    ],
+                },
+                map: { name: 'Topology' },
+                nodes: { name: 'Nodes' },
+                EUM: {
+                    name: 'EUM',
+                    subMenu: [
+                        { id: 'BRUM', name: 'BRUM', route: 'BRUM', icon: 'mdi-circle-outline' },
+                        { id: 'MRUM', name: 'MRUM', route: 'MRUM', icon: 'mdi-circle-outline' },
+                    ],
+                },
+                incidents: { name: 'Incidents' },
             };
         },
         icons() {

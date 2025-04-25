@@ -3,108 +3,48 @@
         <v-list dense nav>
             <v-list-item-group>
                 <v-list dense nav>
-                    <template v-for="(name, id) in views">
+                    <template v-for="(view, id) in views">
                         <!-- Main Sidebar Items -->
                         <v-list-item
                             :key="id"
-                            :class="{
-                                'selected-view': selectedView === id,
-                            }"
-                            v-if="id !== 'applications' && id !== 'EUM'"
+                            :class="{ 'selected-view': selectedView === id }"
+                            v-if="!view.subMenu"
                             @click="setSelectedView(id)"
                             :to="getNavigationLink(id)"
                         >
                             <BaseIcon
-                                :name="icons[id].name"
-                                :class="['sidebar-icon', selectedView === id ? `${icons[id].class}-selected` : icons[id].class]"
+                                :name="icons[id]?.name"
+                                :class="['sidebar-icon', selectedView === id ? `${icons[id]?.class}-selected` : icons[id]?.class]"
                             />
                             <v-list-item-content v-if="showTitles">
-                                <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
+                                <v-list-item-title class="sidebar-name">{{ view.name }}</v-list-item-title>
                             </v-list-item-content>
                         </v-list-item>
 
-                        <!-- Applications Submenu -->
-                        <v-list-item
-                            v-if="id === 'applications'"
-                            :key="id"
-                            :class="{
-                                'selected-view': expanded[id] || selectedView === 'health' || selectedView === 'traces',
-                            }"
-                            @click.stop="toggleDropdown(id)"
-                        >
+                        <!-- Submenu -->
+                        <v-list-item v-else :class="{ 'selected-view': isExpanded(id) || isSubmenuSelected(view) }" @click.stop="toggleDropdown(id)">
                             <BaseIcon
-                                :name="icons[id].name"
-                                :class="['sidebar-icon', expanded[id] ? `${icons[id].class}-selected` : icons[id].class]"
+                                :name="icons[id]?.name"
+                                :class="['sidebar-icon', isExpanded(id) ? `${icons[id]?.class}-selected` : icons[id]?.class]"
                             />
                             <v-list-item-content v-if="showTitles">
-                                <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
+                                <v-list-item-title class="sidebar-name">{{ view.name }}</v-list-item-title>
                             </v-list-item-content>
                             <v-icon class="toggle-icon">
-                                {{ expanded[id] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
+                                {{ isExpanded(id) ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
                             </v-icon>
                         </v-list-item>
-                        <v-list v-if="showTitles && id === 'applications' && expanded.applications" dense nav>
+                        <v-list v-if="showTitles && isExpanded(id)" dense nav>
                             <v-list-item
-                                :class="{ 'selected-subview': selectedView === 'health' }"
-                                :to="getNavigationLink('health')"
-                                @click="setSelectedView('health')"
+                                v-for="subMenu in view.subMenu"
+                                :key="subMenu.id"
+                                :class="{ 'selected-subview': selectedView === subMenu.route }"
+                                @click="setSelectedView(subMenu.route)"
+                                :to="getNavigationLink(subMenu.route)"
                             >
-                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
+                                <v-icon class="submenu-circle-icon">{{ subMenu.icon }}</v-icon>
                                 <v-list-item-content>
-                                    <v-list-item-title class="sidebar-subname">Health</v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-                            <v-list-item
-                                :class="{ 'selected-subview': selectedView === 'traces' }"
-                                :to="getNavigationLink('traces')"
-                                @click="setSelectedView('traces')"
-                            >
-                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
-                                <v-list-item-content>
-                                    <v-list-item-title class="sidebar-subname">Traces</v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-                        </v-list>
-
-                        <!-- EUM Submenu -->
-                        <v-list-item
-                            v-if="id === 'EUM'"
-                            :key="id"
-                            :class="{
-                                'selected-view': expanded[id] || selectedView === 'BRUM' || selectedView === 'MRUM',
-                            }"
-                            @click.stop="toggleDropdown(id)"
-                        >
-                            <BaseIcon
-                                :name="icons[id].name"
-                                :class="['sidebar-icon', expanded[id] ? `${icons[id].class}-selected` : icons[id].class]"
-                            />
-                            <v-list-item-content v-if="showTitles">
-                                <v-list-item-title class="sidebar-name">{{ name }}</v-list-item-title>
-                            </v-list-item-content>
-                            <v-icon class="toggle-icon">
-                                {{ expanded[id] ? 'mdi-chevron-up' : 'mdi-chevron-down' }}
-                            </v-icon>
-                        </v-list-item>
-                        <v-list v-if="showTitles && id === 'EUM' && expanded.EUM" dense nav>
-                            <v-list-item
-                                :class="{ 'selected-subview': selectedView === 'BRUM' }"
-                                :to="getNavigationLink('BRUM')"
-                                @click="setSelectedView('BRUM')"
-                            >
-                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
-                                <v-list-item-content>
-                                    <v-list-item-title class="sidebar-subname">BRUM</v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
-                            <v-list-item
-                                :class="{ 'selected-subview': selectedView === 'MRUM' }"
-                                :to="getNavigationLink('MRUM')"
-                                @click="setSelectedView('MRUM')"
-                            >
-                                <v-icon class="submenu-circle-icon">mdi-circle-outline</v-icon>
-                                <v-list-item-content>
-                                    <v-list-item-title class="sidebar-subname">MRUM</v-list-item-title>
+                                    <v-list-item-title class="sidebar-subname">{{ subMenu.name }}</v-list-item-title>
                                 </v-list-item-content>
                             </v-list-item>
                         </v-list>
@@ -155,10 +95,7 @@ export default {
         return {
             showTitles: true,
             selectedView: '',
-            expanded: {
-                applications: false,
-                EUM: false,
-            },
+            expanded: {},
         };
     },
 
@@ -200,6 +137,12 @@ export default {
         toggleDropdown(id) {
             this.$set(this.expanded, id, !this.expanded[id]);
         },
+        isExpanded(id) {
+            return this.expanded[id];
+        },
+        isSubmenuSelected(view) {
+            return view.subMenu && view.subMenu.some((sub) => this.selectedView === sub.route);
+        },
     },
 };
 </script>
@@ -213,7 +156,7 @@ export default {
     transition: width 0.3s;
 }
 .sidebar.collapsed {
-    width: 60px !important;
+    width: 60px;
 }
 
 .sidebar.collapsed .sidebar-menu {
@@ -323,34 +266,38 @@ export default {
 }
 
 .toggle-icon {
-    width: 16px !important;
-    height: 16px !important;
-    color: #1dbf73 !important;
-    cursor: pointer !important;
-    margin-left: auto !important;
-    margin-right: 10px !important;
+    width: 16px;
+    height: 16px;
+    color: #013912;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: 10px;
 }
 
 .selected-view {
     background-color: #e7f8ef;
     color: #1dbf73;
     border-right: 3px solid #1dbf73;
-    border-radius: 0 !important;
+    border-radius: 0;
 }
+
 .selected-view .sidebar-name {
     color: #1dbf73;
-}
-.selected-view .sidebar-icon {
-    color: #1dbf73 !important;
 }
 
 .selected-subview {
     background-color: #e7f8efa9;
     color: #1dbf73;
+    padding-left: 1.5rem;
 }
+
 .selected-subview .sidebar-subname {
-    color: black;
-    font-weight: 600 !important;
+    color: #013912;
+    font-weight: bold;
+}
+
+.selected-view .sidebar-icon {
+    color: #013912;
 }
 
 .v-list-item {
@@ -374,17 +321,17 @@ export default {
     color: #013912;
 }
 
-.sidebar-subname {
+.v-list-item .submenu-circle-icon {
+    font-size: 12px;
     color: #013912;
-    font-size: 11px;
-    margin-left: 20px;
+    margin-left: 2.2rem;
+    margin-right: 1rem;
 }
 
-.submenu-circle-icon {
-    font-size: 12px !important;
-    color: #013912 !important;
-    margin-left: 30px !important;
-    margin-right: 10px !important;
+.v-list-item-content .sidebar-subname {
+    padding-left: 2rem;
+    font-size: 11px;
+    color: #013912;
 }
 
 .v-list {
@@ -399,15 +346,21 @@ export default {
 .sidebar-menu {
     width: 20px;
     height: 20px;
-    color: #013912 !important;
+    color: #013912;
     margin: 10px 30px 30px auto;
-    display: block !important;
+    display: block;
     cursor: pointer;
 }
 .sidebar.collapsed + .content {
-    width: 100% !important;
+    width: 100%;
     padding-left: 30px;
 }
+
+.selected-view .v-icon,
+.selected-subview .v-icon {
+    color: #013912 !important;
+}
+
 @media (min-width: 1441px) {
     /* Styles for larger monitor screens */
     .v-list-item .v-list-item__title {
@@ -428,7 +381,7 @@ export default {
     }
 
     .sidebar.collapsed {
-        width: 60px !important;
+        width: 100px;
     }
 
     .sidebar-menu {

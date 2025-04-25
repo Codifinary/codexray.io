@@ -39,7 +39,7 @@
                 <router-link
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: id, report: 'page-performance' },
+                        params: { view: 'BRUM', id: id, report: 'page-performance' },
                         query: { ...$route.query, pagePath: item.pagePath },
                     }"
                     class="clickable"

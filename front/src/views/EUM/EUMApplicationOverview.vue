@@ -60,7 +60,7 @@ export default {
             this.$router
                 .replace({
                     name: 'overview',
-                    params: { view: 'EUM', id: this.id, report: this.reports[0].name },
+                    params: { view: 'BRUM', id: this.id, report: this.reports[0].name },
                     query: this.$utils.contextQuery(),
                 })
                 .catch(this.handleNavigationError);
@@ -77,7 +77,7 @@ export default {
                 this.$router
                     .push({
                         name: 'overview',
-                        params: { view: 'EUM', id: this.id, report },
+                        params: { view: 'BRUM', id: this.id, report },
                         query: { ...this.$utils.contextQuery(), error: this.selectedError || undefined },
                     })
                     .catch(this.handleNavigationError);

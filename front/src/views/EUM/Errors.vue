@@ -17,7 +17,7 @@
                     class="clickable"
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: id, report: `errors/${item.error_name}` },
+                        params: { view: 'BRUM', id: id, report: `errors/${item.error_name}` },
                         query: { ...$utils.contextQuery() },
                     }"
                     @click.native.prevent="handleErrorClicked(item.error_name)"
@@ -107,7 +107,7 @@ export default {
             this.$router
                 .push({
                     name: 'overview',
-                    params: { view: 'EUM', id: this.id, report: `errors` },
+                    params: { view: 'BRUM', id: this.id, report: `errors` },
                     query: { ...this.$utils.contextQuery(), error: this.selectedError },
                 })
                 .catch((err) => {
@@ -117,7 +117,7 @@ export default {
         handleEventClicked(eventId) {
             this.$router.push({
                 name: 'overview',
-                params: { view: 'EUM', id: this.id, report: `errors` },
+                params: { view: 'BRUM', id: this.id, report: `errors` },
                 query: { ...this.$utils.contextQuery(), error: this.selectedError, eventId },
             });
         },
