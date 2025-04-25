@@ -292,7 +292,7 @@ export default {
             this.loadingError = '';
             this.data.chart = null;
             this.data.entries = null;
-            this.$api.getTracesLogs(this.id, this.$route.query.query, (data, error) => {
+            this.$api.getEUMLogs(this.id, this.$route.query.query, (data, error) => {
                 this.loading = false;
                 const errMsg = 'Failed to load logs';
                 if (error || data.status === 'warning') {
