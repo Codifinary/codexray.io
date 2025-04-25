@@ -225,6 +225,7 @@ export default {
 <style scoped>
 .error-details {
     display: flex;
+    gap: 1.5rem;
 }
 .filter-container {
     width: 100%;
@@ -233,27 +234,27 @@ export default {
     justify-content: flex-end;
 }
 .filterByType {
-    max-width: 400px !important;
-    border-radius: 4px;
-    padding: 5px;
+    max-width: 25rem !important;
+    border-radius: 0.25rem;
+    padding: 0.3125rem;
 }
 
 p {
     color: #1b1f26b8;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
 }
 
 pre {
     color: #013912;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
 }
 
 h5 {
     color: #202224;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .error-message {
@@ -261,16 +262,12 @@ h5 {
 }
 
 .error-details__meta div {
-    margin-right: 30px;
-}
-.error-details {
-    display: flex;
-    gap: 24px;
+    margin-right: 1.875rem;
 }
 
 .error-details__meta {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 8px;
+    margin-top: 0.5rem;
 }
 </style>
