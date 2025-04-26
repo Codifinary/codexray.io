@@ -286,7 +286,7 @@ export default {
 }
 
 .selected-subview {
-    background-color: #e7f8efa9;
+    background-color: #e7f8ef;
     color: #1dbf73;
     padding-left: 1.5rem;
 }

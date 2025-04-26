@@ -95,9 +95,8 @@
                         v-if="
                             status &&
                             status.status === 'warning' &&
+                            !excludedViews.includes($route.params.view) &&
                             $route.name !== 'project_settings' &&
-                            $route.params.view !== 'MRUM' &&
-                            $route.params.view !== 'BRUM' &&
                             showAlert
                         "
                         color="red"
@@ -183,6 +182,7 @@ export default {
             changePassword: false,
             isSidebarCollapsed: false,
             showAlert: true,
+            excludedViews: ['MRUM', 'BRUM'],
         };
     },
 
