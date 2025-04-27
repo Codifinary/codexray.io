@@ -10,7 +10,7 @@
                         <div class="card-name">Requests/sec</div>
                         <v-card-text class="card-sub-count">{{ rps }}</v-card-text>
                     </div>
-                    <div class="trend-info">
+                    <div class="trend-info" v-if="!isFromNowQuery">
                         <span class="trend-percentage">{{ parseFloat(data.requestTrend).toFixed(2) }}%</span>
                         <img
                             :src="`${$codexray.base_path}static/img/tech-icons/upArrowGreen.svg`"
@@ -33,7 +33,7 @@
                         <div class="card-name">Errors/sec</div>
                         <v-card-text class="card-sub-count">{{ rps }}</v-card-text>
                     </div>
-                    <div class="trend-info">
+                    <div class="trend-info" v-if="!isFromNowQuery">
                         <span class="trend-percentage red">{{ parseFloat(data.errorTrend).toFixed(2) }}%</span>
                         <img
                             :src="`${$codexray.base_path}static/img/tech-icons/upArrowRed.svg`"
@@ -67,6 +67,9 @@ export default {
         errorTrend() {
             return this.data.errorTrend >= 0 ? 'upTrend' : 'downTrend';
         },
+        isFromNowQuery() {
+            return this.$route.query.from && this.$route.query.from.startsWith('now-');
+        },
     },
 };
 </script>
@@ -76,7 +79,7 @@ export default {
     display: flex;
     flex-direction: column;
     width: 300px;
-    padding: 7px 20px;
+    padding: 15px 20px;
     margin-top: 10px;
 }
 
@@ -116,6 +119,7 @@ export default {
     color: black;
     opacity: 0.5;
     margin-left: 10px;
+    margin-top: 5px;
 }
 
 .card-count2 {

@@ -9,7 +9,7 @@
                     <router-link
                         :to="{
                             name: 'overview',
-                            params: { view: 'EUM', id: $route.params.id, report: 'errors' },
+                            params: { view: 'BRUM', id: $route.params.id, report: 'errors' },
                             query: { ...$utils.contextQuery(), error: error, eventId: item.event_id },
                         }"
                         class="clickable"
@@ -82,7 +82,7 @@ export default {
         handleEventClick(eventId) {
             this.$router.push({
                 name: 'overview',
-                params: { view: 'EUM', id: this.id, report: 'errors' },
+                params: { view: 'BRUM', id: this.id, report: 'errors' },
                 query: { ...this.$utils.contextQuery(), error: this.error, eventId },
             });
         },

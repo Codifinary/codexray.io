@@ -29,7 +29,7 @@
                             <router-link
                                 :to="{
                                     name: 'overview',
-                                    params: { view: 'EUM', id: item.serviceName },
+                                    params: { view: 'BRUM', id: item.serviceName },
                                     query: $route.query,
                                 }"
                             >
@@ -60,7 +60,7 @@ import EUMSummary from './EUMSummary.vue';
 import Dashboard from '@/components/Dashboard.vue';
 
 export default {
-    name: 'EUM',
+    name: 'BRUM',
     components: {
         CustomTable,
         EUMSummary,
@@ -106,6 +106,7 @@ export default {
             this.$api.getEUMApplications((data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching EUM applications:', error);
                     this.error = error;
                     return;
                 }

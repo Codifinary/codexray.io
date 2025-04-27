@@ -24,7 +24,13 @@
             :max="sparklineData.length ? Math.max(...sparklineData) : 0"
             class="sparkline"
         />
-        <BaseIcon v-if="trend === undefined || trend === null" :name="iconName || 'alert'" :iconColor="icon" :class="['card-icon', background]" style="border-radius: 30%" />
+        <BaseIcon
+            v-if="trend === undefined || trend === null"
+            :name="iconName || 'alert'"
+            :iconColor="icon"
+            :class="['card-icon', background]"
+            style="border-radius: 30%"
+        />
 
         <div class="bottom-border"></div>
     </v-card>
@@ -70,13 +76,11 @@ export default {
 </script>
 
 <style scoped>
-
 .sparkline {
     height: 100%;
     box-sizing: border-box;
     width: 30%;
     padding-right: 10px;
-    
 }
 
 .bottom-border {
@@ -107,7 +111,7 @@ export default {
     color: #013912;
 }
 
-.card-title{
+.card-title {
     display: flex;
     flex-direction: column;
     align-items: flex-start;

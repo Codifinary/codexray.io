@@ -3,6 +3,8 @@ package clickhouse
 import (
 	"context"
 	"time"
+
+	"github.com/ClickHouse/clickhouse-go/v2"
 )
 
 type ServiceOverview struct {
@@ -17,45 +19,86 @@ type ServiceOverview struct {
 }
 
 func (c *Client) GetServiceOverviews(ctx context.Context, from, to *time.Time) ([]ServiceOverview, error) {
-	query := `
+	// Query for performance data from perf_data table
+	perfQuery := `
 SELECT 
-    p.ServiceName, 
-    countDistinct(p.PageName) AS pages,
-    avg(p.LoadPageTime) AS avgLoadPageTime,
-    round(countIf(e.Category = 'js') * 100.0 / count(), 2) AS jsErrorPercentage,
-    round(countIf(e.Category = 'api') * 100.0 / count(), 2) AS apiErrorPercentage,
-    countDistinct(if(e.UserId != '', e.UserId, NULL)) AS impactedUsers,
-    count(p.ServiceName) AS requests,
-    p.AppType
+    ServiceName, 
+    countDistinct(PageName) AS pages,
+    avg(LoadPageTime) AS avgLoadPageTime,
+    count(ServiceName) AS requests,
+    AppType
 FROM 
-    perf_data p
-LEFT JOIN 
-    err_log_data e 
-ON 
-    p.PageName = e.PagePath AND p.ServiceName = e.ServiceName
+    perf_data
 WHERE 
-    (? IS NULL OR p.Timestamp >= parseDateTimeBestEffort(?)) 
-    AND (? IS NULL OR p.Timestamp <= parseDateTimeBestEffort(?))
+    (@from IS NULL OR Timestamp >= @from) 
+    AND (@to IS NULL OR Timestamp <= @to)
 GROUP BY 
-    p.ServiceName, p.AppType
+    ServiceName, AppType
 ORDER BY 
     pages DESC
 `
 
-	// Format time values or pass nil
-	var fromStr, toStr interface{}
+	// Query for error data from err_log_data table
+	errorQuery := `
+SELECT 
+    ServiceName, 
+    round(countIf(Category = 'js') * 100.0 / count(), 2) AS jsErrorPercentage,
+    round(countIf(Category = 'api') * 100.0 / count(), 2) AS apiErrorPercentage,
+    countDistinct(if(UserId != '', UserId, NULL)) AS impactedUsers
+FROM 
+    err_log_data
+WHERE 
+    (@from IS NULL OR Timestamp >= @from) 
+    AND (@to IS NULL OR Timestamp <= @to)
+GROUP BY 
+    ServiceName
+`
+
+	var args []any
 	if from != nil {
-		fromStr = from.Format("2006-01-02 15:04:05") //clickHouse  format
+		args = append(args, clickhouse.Named("from", from.Format("2006-01-02 15:04:05")))
+	} else {
+		args = append(args, clickhouse.Named("from", nil))
 	}
 	if to != nil {
-		toStr = to.Format("2006-01-02 15:04:05")
+		args = append(args, clickhouse.Named("to", to.Format("2006-01-02 15:04:05")))
+	} else {
+		args = append(args, clickhouse.Named("to", nil))
 	}
 
-	args := []any{
-		fromStr, fromStr,
-		toStr, toStr,
+	perfRows, err := c.executePerfQuery(ctx, perfQuery, args)
+	if err != nil {
+		return nil, err
 	}
 
+	errorRows, err := c.executeErrorQuery(ctx, errorQuery, args)
+	if err != nil {
+		return nil, err
+	}
+
+	perfData := make(map[string]*ServiceOverview)
+	for _, row := range perfRows {
+		perfData[row.ServiceName] = &row
+	}
+
+	for _, row := range errorRows {
+		if perfData[row.ServiceName] != nil {
+			perfData[row.ServiceName].JsErrorPercentage = row.JsErrorPercentage
+			perfData[row.ServiceName].ApiErrorPercentage = row.ApiErrorPercentage
+			perfData[row.ServiceName].ImpactedUsers = row.ImpactedUsers
+		}
+	}
+
+	var results []ServiceOverview
+	for _, row := range perfData {
+		results = append(results, *row)
+	}
+
+	return results, nil
+}
+
+// Helper function to execute performance query
+func (c *Client) executePerfQuery(ctx context.Context, query string, args []any) ([]ServiceOverview, error) {
 	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
@@ -65,7 +108,26 @@ ORDER BY
 	var results []ServiceOverview
 	for rows.Next() {
 		var row ServiceOverview
-		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests, &row.AppType); err != nil {
+		if err := rows.Scan(&row.ServiceName, &row.Pages, &row.AvgLoadPageTime, &row.Requests, &row.AppType); err != nil {
+			return nil, err
+		}
+		results = append(results, row)
+	}
+	return results, nil
+}
+
+// Helper function to execute error query
+func (c *Client) executeErrorQuery(ctx context.Context, query string, args []any) ([]ServiceOverview, error) {
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []ServiceOverview
+	for rows.Next() {
+		var row ServiceOverview
+		if err := rows.Scan(&row.ServiceName, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
 			return nil, err
 		}
 		results = append(results, row)

@@ -249,8 +249,8 @@ export default {
             let q = {};
             try {
                 q = JSON.parse(decodeURIComponent(query.query || '{}'));
-            } catch {
-                console.log('Failed to parse query');
+            } catch (err) {
+                console.error('Failed to parse query:', err);
             }
             let severity = q.severity || [];
 
@@ -272,7 +272,9 @@ export default {
                 query: JSON.stringify(this.query),
                 order: this.order,
             };
-            this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => err);
+            this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => {
+                console.error('Error updating query in router:', err);
+            });
         },
         runQuery() {
             this.setQuery();
@@ -281,7 +283,9 @@ export default {
         zoom(s) {
             const { from, to } = s.selection;
             const query = { ...this.$route.query, from, to };
-            this.$router.push({ query }).catch((err) => err);
+            this.$router.push({ query }).catch((err) => {
+                console.error('Error zooming in on logs:', err);
+            });
         },
         getColor(severity) {
             const sev = getSeverity(severity);
@@ -292,10 +296,11 @@ export default {
             this.loadingError = '';
             this.data.chart = null;
             this.data.entries = null;
-            this.$api.getTracesLogs(this.id, this.$route.query.query, (data, error) => {
+            this.$api.getEUMLogs(this.id, this.$route.query.query, (data, error) => {
                 this.loading = false;
                 const errMsg = 'Failed to load logs';
                 if (error || data.status === 'warning') {
+                    console.error('Error fetching logs:', error || data.message);
                     this.loadingError = error || data.message;
                     this.data.status = 'warning';
                     this.data.message = errMsg;
@@ -358,7 +363,7 @@ export default {
 
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
     width: 95%;
 }
 ::v-deep(.card-body) {

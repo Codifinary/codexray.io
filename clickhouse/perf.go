@@ -63,59 +63,114 @@ type rawPageStats struct {
 }
 
 func (c *Client) GetPerformanceOverview(ctx context.Context, from, to *time.Time, serviceName string) ([]PerfRow, error) {
-	// Build the base query
-	query := `
+	// Query for performance data from perf_data table
+	perfQuery := `
 SELECT 
-    p.PageName AS PagePath, 
-    avg(p.LoadPageTime) AS avgLoadPageTime,
-    countIf(e.Category = 'js') * 100.0 / count() AS jsErrorPercentage,
-    countIf(e.Category = 'api') * 100.0 / count() AS apiErrorPercentage,
-    countDistinct(e.UserId) AS impactedUsers,
-    count(p.PageName) AS Requests
+    PageName AS PagePath, 
+    avg(LoadPageTime) AS avgLoadPageTime,
+    count(PageName) AS Requests
 FROM 
-    perf_data p
-LEFT JOIN 
-    err_log_data e 
-ON 
-    p.PageName = e.PagePath
-    AND p.ServiceName = e.ServiceName`
-
-	// Conditionally add time range and service name filtering
-	var filters []string
-	var args []any
-	if from != nil {
-		filters = append(filters, "p.Timestamp >= @from")
-		args = append(args, clickhouse.Named("from", *from))
-	}
-	if to != nil {
-		filters = append(filters, "p.Timestamp <= @to")
-		args = append(args, clickhouse.Named("to", *to))
-	}
-	if serviceName != "" {
-		filters = append(filters, "p.ServiceName = @serviceName")
-		args = append(args, clickhouse.Named("serviceName", serviceName))
-	}
-
-	if len(filters) > 0 {
-		query += " WHERE " + strings.Join(filters, " AND ")
-	}
-
-	query += `
+    perf_data
+WHERE 
+    Timestamp >= @from
+    AND Timestamp <= @to
+    AND ServiceName = @serviceName
 GROUP BY 
-    p.PageName`
+    PageName`
 
-	// Execute the query
+	// Query for error data from err_log_data table
+	errorQuery := `
+SELECT 
+    PagePath, 
+    countIf(Category = 'js') * 100.0 / count() AS jsErrorPercentage,
+    countIf(Category = 'api') * 100.0 / count() AS apiErrorPercentage,
+    countDistinct(UserId) AS impactedUsers
+FROM 
+    err_log_data
+WHERE 
+    Timestamp >= @from
+    AND Timestamp <= @to
+    AND ServiceName = @serviceName
+GROUP BY 
+    PagePath`
+
+	// Execute the queries and combine results
+	var perfRows []PerfRow
+	perfData := make(map[string]*PerfRow)
+
+	// Execute performance query
+	perfResults, err := c.executePerfQueryForPerformance(ctx, perfQuery, from, to, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range perfResults {
+		perfData[row.PagePath] = &row
+	}
+
+	// Execute error query
+	errorResults, err := c.executeErrorQueryForPerformance(ctx, errorQuery, from, to, serviceName)
+	if err != nil {
+		return nil, err
+	}
+	for _, row := range errorResults {
+		if perfData[row.PagePath] != nil {
+			perfData[row.PagePath].JsErrorPercentage = row.JsErrorPercentage
+			perfData[row.PagePath].ApiErrorPercentage = row.ApiErrorPercentage
+			perfData[row.PagePath].ImpactedUsers = row.ImpactedUsers
+		}
+	}
+
+	// Combine results into a single slice
+	for _, row := range perfData {
+		perfRows = append(perfRows, *row)
+	}
+
+	return perfRows, nil
+}
+
+// Helper function to execute performance query
+func (c *Client) executePerfQueryForPerformance(ctx context.Context, query string, from, to *time.Time, serviceName string) ([]PerfRow, error) {
+	args := []any{
+		clickhouse.Named("from", *from),
+		clickhouse.Named("to", *to),
+		clickhouse.Named("serviceName", serviceName),
+	}
+
 	rows, err := c.Query(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Process results
 	var results []PerfRow
 	for rows.Next() {
 		var row PerfRow
-		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers, &row.Requests); err != nil {
+		if err := rows.Scan(&row.PagePath, &row.AvgLoadPageTime, &row.Requests); err != nil {
+			return nil, err
+		}
+		results = append(results, row)
+	}
+	return results, nil
+}
+
+// Helper function to execute error query
+func (c *Client) executeErrorQueryForPerformance(ctx context.Context, query string, from, to *time.Time, serviceName string) ([]PerfRow, error) {
+	args := []any{
+		clickhouse.Named("from", *from),
+		clickhouse.Named("to", *to),
+		clickhouse.Named("serviceName", serviceName),
+	}
+
+	rows, err := c.Query(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var results []PerfRow
+	for rows.Next() {
+		var row PerfRow
+		if err := rows.Scan(&row.PagePath, &row.JsErrorPercentage, &row.ApiErrorPercentage, &row.ImpactedUsers); err != nil {
 			return nil, err
 		}
 		results = append(results, row)
@@ -211,38 +266,48 @@ ORDER BY requests DESC;
 	return results, nil
 }
 func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, pageName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
-	query := fmt.Sprintf(`
+	perfQuery := fmt.Sprintf(`
     SELECT
-        toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
-        avg(p.LoadPageTime) AS loadTime,
-        avg(p.ResTime) AS responseTime,
-        sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
-        sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
-        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted,
-        avg(p.DnsTime) AS dnsTime,
-        avg(p.TcpTime) AS tcpTime,
-        avg(p.SslTime) AS sslTime,
-        avg(p.DomAnalysisTime) AS domAnalysisTime,
-        avg(p.DomReadyTime) AS domReadyTime,
-        avg(p.FirstPackTime) AS firstPackTime,
-        avg(p.FmpTime) AS fmpTime,
-        avg(p.FptTime) AS fptTime,
-        avg(p.RedirectTime) AS redirectTime,
-        avg(p.TtfbTime) AS ttfbTime,
-        avg(p.TtlTime) AS ttlTime,
-        avg(p.TransTime) AS transTime,
-		count(p.PageName) AS requests
+        toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+        avg(LoadPageTime) AS loadTime,
+        avg(ResTime) AS responseTime,
+        avg(DnsTime) AS dnsTime,
+        avg(TcpTime) AS tcpTime,
+        avg(SslTime) AS sslTime,
+        avg(DomAnalysisTime) AS domAnalysisTime,
+        avg(DomReadyTime) AS domReadyTime,
+        avg(FirstPackTime) AS firstPackTime,
+        avg(FmpTime) AS fmpTime,
+        avg(FptTime) AS fptTime,
+        avg(RedirectTime) AS redirectTime,
+        avg(TtfbTime) AS ttfbTime,
+        avg(TtlTime) AS ttlTime,
+        avg(TransTime) AS transTime,
+        count(PageName) AS requests
     FROM
-        perf_data p
-    LEFT JOIN
-        err_log_data e
-    ON
-        p.PageName = e.PagePath
-        AND p.ServiceName = e.ServiceName
+        perf_data
     WHERE
-        p.ServiceName = @serviceName
-        AND p.PageName = @pageName
-        AND p.Timestamp BETWEEN @from AND @to
+        ServiceName = @serviceName
+        AND PageName = @pageName
+        AND Timestamp BETWEEN @from AND @to
+    GROUP BY
+        ts
+    ORDER BY
+        ts ASC;
+    `, step)
+
+	errorQuery := fmt.Sprintf(`
+    SELECT
+        toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+        sum(CASE WHEN Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
+        sum(CASE WHEN Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
+        countDistinct(UserId) AS usersImpacted
+    FROM
+        err_log_data
+    WHERE
+        ServiceName = @serviceName
+        AND PagePath = @pageName
+        AND Timestamp BETWEEN @from AND @to
     GROUP BY
         ts
     ORDER BY
@@ -255,22 +320,21 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		clickhouse.DateNamed("from", from.ToStandard(), clickhouse.NanoSeconds),
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	}
-	var filters []string
-	if len(filters) > 0 {
-		query += " WHERE " + strings.Join(filters, " AND ")
-	}
 
-	rows, err := c.Query(ctx, query, args...)
+	perfRows, err := c.Query(ctx, perfQuery, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer perfRows.Close()
+
+	errorRows, err := c.Query(ctx, errorQuery, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer errorRows.Close()
 
 	loadTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	responseTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
-	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
-	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
-	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	dnsTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	tcpTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	sslTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
@@ -285,20 +349,16 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 	transTimeSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	requestsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	for rows.Next() {
+	for perfRows.Next() {
 		var timestamp uint64
-		var loadTime, responseTime float64
-		var jsErrors, apiErrors, usersImpacted, requests uint64
-		var dnsTime, tcpTime, sslTime, domAnalysisTime, domReadyTime, firstPackTime, fmpTime, fptTime, redirectTime, ttfbTime, ttlTime, transTime float64
-		if err := rows.Scan(&timestamp, &loadTime, &responseTime, &jsErrors, &apiErrors, &usersImpacted, &dnsTime, &tcpTime, &sslTime, &domAnalysisTime, &domReadyTime, &firstPackTime, &fmpTime, &fptTime, &redirectTime, &ttfbTime, &ttlTime, &transTime, &requests); err != nil {
+		var loadTime, responseTime, dnsTime, tcpTime, sslTime, domAnalysisTime, domReadyTime, firstPackTime, fmpTime, fptTime, redirectTime, ttfbTime, ttlTime, transTime float64
+		var requests uint64
+		if err := perfRows.Scan(&timestamp, &loadTime, &responseTime, &dnsTime, &tcpTime, &sslTime, &domAnalysisTime, &domReadyTime, &firstPackTime, &fmpTime, &fptTime, &redirectTime, &ttfbTime, &ttlTime, &transTime, &requests); err != nil {
 			return nil, err
 		}
 		ts := timeseries.Time(timestamp / 1000)
 		loadTimeSeries.Set(ts, float32(loadTime))
 		responseTimeSeries.Set(ts, float32(responseTime))
-		jsErrorsSeries.Set(ts, float32(jsErrors))
-		apiErrorsSeries.Set(ts, float32(apiErrors))
-		usersImpactedSeries.Set(ts, float32(usersImpacted))
 		dnsTimeSeries.Set(ts, float32(dnsTime))
 		tcpTimeSeries.Set(ts, float32(tcpTime))
 		sslTimeSeries.Set(ts, float32(sslTime))
@@ -314,12 +374,25 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		requestsSeries.Set(ts, float32(requests))
 	}
 
+	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
+
+	for errorRows.Next() {
+		var timestamp uint64
+		var jsErrors, apiErrors, usersImpacted uint64
+		if err := errorRows.Scan(&timestamp, &jsErrors, &apiErrors, &usersImpacted); err != nil {
+			return nil, err
+		}
+		ts := timeseries.Time(timestamp / 1000)
+		jsErrorsSeries.Set(ts, float32(jsErrors))
+		apiErrorsSeries.Set(ts, float32(apiErrors))
+		usersImpactedSeries.Set(ts, float32(usersImpacted))
+	}
+
 	return map[string]*timeseries.TimeSeries{
 		"loadTime":        loadTimeSeries,
 		"responseTime":    responseTimeSeries,
-		"jsErrors":        jsErrorsSeries,
-		"apiErrors":       apiErrorsSeries,
-		"usersImpacted":   usersImpactedSeries,
 		"dnsTime":         dnsTimeSeries,
 		"tcpTime":         tcpTimeSeries,
 		"sslTime":         sslTimeSeries,
@@ -333,6 +406,9 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 		"ttlTime":         ttlTimeSeries,
 		"transTime":       transTimeSeries,
 		"requests":        requestsSeries,
+		"jsErrors":        jsErrorsSeries,
+		"apiErrors":       apiErrorsSeries,
+		"usersImpacted":   usersImpactedSeries,
 	}, nil
 }
 
@@ -631,24 +707,32 @@ func (c *Client) GetUsersImpactedTimeSeries(ctx context.Context, serviceName str
 }
 
 func (c *Client) GetErrorAndUsersImpactedSeries(ctx context.Context, serviceName string, from, to timeseries.Time, step timeseries.Duration) (map[string]*timeseries.TimeSeries, error) {
-	query := fmt.Sprintf(`
-  SELECT
-        toUnixTimestamp(toStartOfInterval(p.Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
-
-        sum(CASE WHEN e.Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
-        sum(CASE WHEN e.Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
-		countDistinct(p.UserId) AS totalUsers,
-        countDistinct(CASE WHEN e.UserId IS NOT NULL THEN e.UserId ELSE NULL END) AS usersImpacted
-
+	perfQuery := fmt.Sprintf(`
+    SELECT
+        toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+        countDistinct(UserId) AS totalUsers
     FROM
-        perf_data p
-    LEFT JOIN
-        err_log_data e
-    ON
-        p.PageName = e.PagePath
+        perf_data
     WHERE
-        p.ServiceName = @serviceName
-        AND p.Timestamp BETWEEN @from AND @to
+        ServiceName = @serviceName
+        AND Timestamp BETWEEN @from AND @to
+    GROUP BY
+        ts
+    ORDER BY
+        ts ASC;
+    `, step)
+
+	errorQuery := fmt.Sprintf(`
+    SELECT
+        toUnixTimestamp(toStartOfInterval(Timestamp, INTERVAL %d SECOND)) * 1000 AS ts,
+        sum(CASE WHEN Category = 'js' THEN 1 ELSE 0 END) AS jsErrors,
+        sum(CASE WHEN Category = 'api' THEN 1 ELSE 0 END) AS apiErrors,
+        countDistinct(UserId) AS usersImpacted
+    FROM
+        err_log_data
+    WHERE
+        ServiceName = @serviceName
+        AND Timestamp BETWEEN @from AND @to
     GROUP BY
         ts
     ORDER BY
@@ -661,34 +745,52 @@ func (c *Client) GetErrorAndUsersImpactedSeries(ctx context.Context, serviceName
 		clickhouse.DateNamed("to", to.ToStandard(), clickhouse.NanoSeconds),
 	}
 
-	rows, err := c.Query(ctx, query, args...)
+	perfRows, err := c.Query(ctx, perfQuery, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer perfRows.Close()
+
+	errorRows, err := c.Query(ctx, errorQuery, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer errorRows.Close()
 
 	jsErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	apiErrorsSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	usersImpactedSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 	totalUsersSeries := timeseries.New(from, int(to.Sub(from)/step), step)
 
-	for rows.Next() {
+	totalUsersMap := make(map[uint64]uint64)
+	for perfRows.Next() {
 		var timestamp uint64
-		var jsErrors, apiErrors, usersImpacted, totalUsers uint64
-		if err := rows.Scan(&timestamp, &jsErrors, &apiErrors, &usersImpacted, &totalUsers); err != nil {
+		var totalUsers uint64
+		if err := perfRows.Scan(&timestamp, &totalUsers); err != nil {
+			return nil, err
+		}
+		totalUsersMap[timestamp] = totalUsers
+		ts := timeseries.Time(timestamp / 1000)
+		totalUsersSeries.Set(ts, float32(totalUsers))
+	}
+
+	for errorRows.Next() {
+		var timestamp uint64
+		var jsErrors, apiErrors, usersImpacted uint64
+		if err := errorRows.Scan(&timestamp, &jsErrors, &apiErrors, &usersImpacted); err != nil {
 			return nil, err
 		}
 		ts := timeseries.Time(timestamp / 1000)
-
 		jsErrorsSeries.Set(ts, float32(jsErrors))
 		apiErrorsSeries.Set(ts, float32(apiErrors))
 		usersImpactedSeries.Set(ts, float32(usersImpacted))
-		totalUsersSeries.Set(ts, float32(totalUsers))
 
+		if _, exists := totalUsersMap[timestamp]; !exists {
+			totalUsersSeries.Set(ts, 0)
+		}
 	}
 
 	return map[string]*timeseries.TimeSeries{
-
 		"jsErrors":      jsErrorsSeries,
 		"apiErrors":     apiErrorsSeries,
 		"usersImpacted": usersImpactedSeries,

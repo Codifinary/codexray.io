@@ -117,6 +117,7 @@ export default {
             this.$api.getTracesOverview((data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching traces overview:', error);
                     this.error = error;
                     return;
                 }
@@ -178,7 +179,7 @@ export default {
 }
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     margin: 20px 0 20px 0;
 }
 </style>

@@ -2,7 +2,7 @@
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <router-link :to="{ name: 'overview', params: { view: 'EUM', id: id, report: report }, query: { ...$utils.contextQuery() } }"
+                <router-link :to="{ name: 'overview', params: { view: 'BRUM', id: id, report: report }, query: { ...$utils.contextQuery() } }"
                     >{{ id }}
                 </router-link>
             </li>
@@ -10,7 +10,7 @@
                 <router-link
                     :to="{
                         name: 'overview',
-                        params: { view: 'EUM', id: $route.params.id, report: 'errors' },
+                        params: { view: 'BRUM', id: $route.params.id, report: 'errors' },
                         query: { ...$utils.contextQuery(), error: error },
                     }"
                     >{{ error }}</router-link
