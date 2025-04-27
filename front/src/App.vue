@@ -260,6 +260,7 @@ export default {
             }
             this.$api.user(null, (data, error) => {
                 if (error) {
+                    console.error('Error fetching user:', error);
                     this.user = null;
                     return;
                 }

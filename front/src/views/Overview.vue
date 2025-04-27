@@ -118,8 +118,9 @@ export default {
         view: {
             handler(v) {
                 if (!this.views[v]) {
-                    console.error(`Invalid view: ${v}`);
-                    this.$router.replace({ params: { view: 'health' } }).catch((err) => err);
+                    this.$router.replace({ params: { view: 'health' } }).catch((err) => {
+                        console.error('Error navigating to default view (health):', err);
+                    });
                 }
             },
             immediate: true,

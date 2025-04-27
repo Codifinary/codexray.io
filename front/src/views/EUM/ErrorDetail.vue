@@ -174,6 +174,7 @@ export default {
             this.$api.getErrorDetails(eventId, (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching error details:', error);
                     this.error = error;
                     return;
                 }
@@ -190,6 +191,7 @@ export default {
             this.$api.getErrorDetailsBreadcrumbs(eventId, selectedFilter, (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching breadcrumbs data:', error);
                     this.error = error;
                     return;
                 } else {

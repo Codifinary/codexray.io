@@ -111,7 +111,9 @@ export default {
                     query: { ...this.$utils.contextQuery(), error: this.selectedError },
                 })
                 .catch((err) => {
-                    if (err.name !== 'NavigationDuplicated') console.error(err);
+                    if (err.name !== 'NavigationDuplicated') {
+                        console.error('Error navigating to error details:', err);
+                    }
                 });
         },
         handleEventClicked(eventId) {

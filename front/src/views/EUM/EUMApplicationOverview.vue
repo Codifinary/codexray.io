@@ -107,7 +107,9 @@ export default {
             this.eventId = newEventId;
         },
         handleNavigationError(err) {
-            if (err.name !== 'NavigationDuplicated') console.error(err);
+            if (err.name !== 'NavigationDuplicated') {
+                console.error('Navigation error:', err);
+            }
         },
     },
 };

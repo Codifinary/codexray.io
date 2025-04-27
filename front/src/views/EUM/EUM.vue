@@ -106,6 +106,7 @@ export default {
             this.$api.getEUMApplications((data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching EUM applications:', error);
                     this.error = error;
                     return;
                 }

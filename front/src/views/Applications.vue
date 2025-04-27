@@ -193,6 +193,7 @@ export default {
             this.$api.getOverview('applications', '', (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching applications overview:', error);
                     this.error = error;
                     return;
                 }
