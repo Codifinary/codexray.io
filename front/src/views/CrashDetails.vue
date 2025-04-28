@@ -178,12 +178,13 @@ export default {
         },
         copyStackTrace() {
             if (this.selectedCrash?.StackTrace) {
-                navigator.clipboard.writeText(this.selectedCrash.StackTrace)
-                    .then(() => {
-                        this.dialogVisible = false;
-                    });
+                const stackTrace = this.selectedCrash.StackTrace;
+                if(this.$format.copyToClipboard(stackTrace)){
+                    this.dialogVisible = false;
+                }
             }
         },
+
         get() {
             this.loading = true;
             

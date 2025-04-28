@@ -64,6 +64,7 @@
             </CustomTable>
         </div>
         <GeoMap
+            v-if="data && data.sessionGeoMapData && data.sessionGeoMapData.length > 0"
             :countrywiseOverviews="data.sessionGeoMapData"
             :title="title"
             :tools="tools"
@@ -281,7 +282,10 @@ export default {
 
             // Create the payload with separate parameters
             const apiPayload = {
-                query: JSON.stringify({ service: this.id, session_type: this.mode === 'historical' ? 'historic' : 'live' }),
+                query: JSON.stringify({
+                    service: this.id,
+                    ...(this.mode === 'historical' && { session_type: 'historic' })
+                }),
                 from: this.from,
                 limit: this.limit
             };
@@ -301,7 +305,6 @@ export default {
     },
     mounted() {
         this.get();
-        this.$events.watch(this, this.get, 'refresh');
     },
     watch: {
         mode(newMode, oldMode) {
@@ -325,7 +328,6 @@ export default {
                 // The get() call might be redundant here if the $route.query watcher handles it,
                 // but let's keep it for now to ensure data fetches reliably on mode change.
                 // If the $route.query watcher is robust, we could potentially remove this call.
-                this.get(); // Refetch data when mode changes
             }
         },
         rowCount(newVal) {

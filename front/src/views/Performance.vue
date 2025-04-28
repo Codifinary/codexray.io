@@ -47,7 +47,7 @@
             </tbody>
         </v-simple-table>
 
-        <GeoMap class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"
+        <GeoMap v-if="countrywiseOverviews && countrywiseOverviews.length > 0" class="geomap" :title="'Geo-Wise Error Distribution'" :countrywiseOverviews="countrywiseOverviews"
             :tools="tools"
             :tooltipLabel="'Errors'"
             :tooltipValue="(item) => item.Errors"
@@ -174,7 +174,7 @@ export default {
             this.getQuery(); // Extract query and from parameter
 
             const apiPayload = {
-                query: encodeURIComponent(JSON.stringify({ serviceName: this.id })),
+                query: encodeURIComponent(JSON.stringify({ service: this.id })),
                 from: this.from
             };
 

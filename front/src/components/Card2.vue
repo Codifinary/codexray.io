@@ -7,7 +7,7 @@
         <v-card-text class="card-title">{{ cardData.primaryLabel }}</v-card-text>
         <v-card-subtitle class="card-subtitle pri">{{ cardData.primaryValue }}</v-card-subtitle>
       </div>
-    <div v-if="cardData.secondaryLabel">
+    <div v-if="cardData.secondaryLabel" class="secondary-container">
       <v-card-text class="card-title">{{ cardData.secondaryLabel }}</v-card-text>
       <v-card-subtitle class="card-subtitle sec">{{ cardData.secondaryValue }}</v-card-subtitle>
     </div>
@@ -25,7 +25,7 @@
       />
   </div>
   <div v-else class="icon-container placeholder-icon">
-    <BaseIcon :name="'users'" :iconColor="cardData.iconColor" :class="['card-icon', cardData.background]" style="border-radius: 30% ; width: 3rem" />
+    <BaseIcon :width="iconWidth" :height="iconHeight" :name="'users'" :iconColor="cardData.iconColor" :class="['card-icon', cardData.background]" style="border-radius: 30% ; width: 3rem" />
 
   </div>
 </div>
@@ -42,6 +42,12 @@
 export default {
   components: {
     BaseIcon,
+  },
+  data() {
+    return{
+      iconHeight: '',
+      iconWidth: ''
+    };
   },
   props: {
     cardData: {
@@ -65,15 +71,20 @@ export default {
 </script>
 
 <style scoped>
-
-.placeholder-icon{
-  margin: auto;
-  height: 2rem;
-
+.icon-styles{
+  width: 1rem;
+  height: 1rem;
 }
 
 .card-container{
   position: relative;
+  width: 20vw;
+  height: 20vh;
+  max-height: 100%;
+}
+
+.secondary-container{
+  margin-top: auto;
 }
 
 .percentage.positive {
@@ -88,7 +99,8 @@ export default {
   height: 100%;
   padding: 20px;
   display: flex;
-  gap: 7rem;
+  justify-content: space-between;
+  /* gap: 7rem; */
 }
 
 .card-icon {
@@ -98,27 +110,28 @@ export default {
 .title-container{
   display: flex;
   flex-direction: column;
-  gap: 1rem;
   justify-content: center;
+  height: 100%;
 }
 
 .icon-container{
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 4rem;
+  justify-content: center;
+  height: 100%;
 }
 
 .percentage{
   text-align: end;
   padding: 0;
   font-weight: 500;
+  margin-bottom: auto;
 }
 
 .card-title{
-  margin: 0;
   padding: 0;
-  font-size: 14px;
+  /* font-size: 14px; */
+  font-size: 1em;
   font-weight: 400;
   color: #013912;
 }
