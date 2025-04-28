@@ -177,56 +177,13 @@ export default {
             this.dialogVisible = true;
         },
         copyStackTrace() {
-  if (this.selectedCrash?.StackTrace) {
-    const stackTrace = this.selectedCrash.StackTrace;
-
-    // Check if Clipboard API is available
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      // Modern Clipboard API
-      navigator.clipboard.writeText(stackTrace)
-        .then(() => {
-          this.dialogVisible = false;
-        })
-        .catch((err) => {
-          console.error('Failed to copy using Clipboard API:', err);
-          this.fallbackCopy(stackTrace);
-        });
-    } else {
-      // Fallback to document.execCommand('copy')
-      this.fallbackCopy(stackTrace);
-    }
-  }
-},
-
-// Fallback method using document.execCommand
-fallbackCopy(text) {
-  const storage = document.createElement('textarea');
-  storage.value = text;
-  
-  // Style the textarea to be off-screen
-  storage.style.position = 'fixed'; // Ensure it doesn't affect layout
-  storage.style.opacity = '0';      // Make it invisible
-  document.body.appendChild(storage);
-
-  // Select and copy the text
-  storage.select();
-  storage.setSelectionRange(0, 99999);  // For mobile support
-
-  try {
-    const successful = document.execCommand('copy');
-    if (successful) {
-      console.log('Text successfully copied using fallback method!');
-      this.dialogVisible = false;
-    } else {
-      console.error('Failed to copy text using fallback method.');
-    }
-  } catch (err) {
-    console.error('Error copying text with fallback method:', err);
-  }
-
-  // Clean up by removing the temporary textarea
-  document.body.removeChild(storage);
-},
+            if (this.selectedCrash?.StackTrace) {
+                const stackTrace = this.selectedCrash.StackTrace;
+                if(this.$format.copyToClipboard(stackTrace)){
+                    this.dialogVisible = false;
+                }
+            }
+        },
 
         get() {
             this.loading = true;
