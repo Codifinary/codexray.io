@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div class="map-container">
     <div class="title">{{ title }}</div>
     <div class="content">
@@ -72,6 +72,7 @@ export default {
     this.$nextTick(() => {
       this.initChart();
     });
+
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize);
@@ -152,6 +153,12 @@ export default {
       }
       
       await this.$nextTick();
+
+      if (!this.countryCodeMap || Object.keys(this.countryCodeMap).length === 0) {
+        console.warn("GeoMap: countryCodeMap not loaded yet, delaying initChart...");
+        setTimeout(() => this.initChart(), 100);
+        return;
+      }
       
       const container = this.$refs.chartContainer;
       

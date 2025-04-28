@@ -152,7 +152,9 @@ export default {
         this.$watch('$route', (to) => {
             this.query = { ...to.query };
             this.crashID = to.query.crashID || null;
-            this.get();
+            if (!to.query.crashID) {
+                this.get();
+            }
         }, { immediate: true });
     },
     computed: {
@@ -181,14 +183,13 @@ export default {
     },
     methods: {
         getChartOptions(echarts) {
+            console.log(echarts)
   const options = { ...Object.values(echarts)[0] };
 
   options.legend = {
     ...(options.legend || {}),
-    orient: 'vertical',
-    // right: '1%',
     left: 'middle',
-    top: 'bottom'
+    top: 'bottom',
   };
 
   return options;
