@@ -8,7 +8,7 @@
 
             <!-- <div class="chart-container"> -->
             <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
-                <EChart :chartOptions="getChartOptions(config)" class="chart-box" :style="getChartStyle(index)" width/>
+                <EChart :chartOptions="getChartOptions(config)" class="chart-box" :style="getChartStyle(index)" width />
             </div>
             <!-- </div> -->
         </div>
@@ -43,10 +43,9 @@ export default {
                 // Last chart
                 return { width: '25vw', height: '40vh' };
             }
- 
         },
         getChartOptions(echarts) {
-            console.log(echarts)
+            console.log(echarts);
             // return echarts
             const options = { ...echarts };
             options.legend = {

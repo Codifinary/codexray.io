@@ -38,7 +38,8 @@
                         </div>
                     </template>
                     <template v-slot:item.avgLoadPageTime="{ item }">
-                        {{ format(item.avgLoadPageTime, 'ms') }}
+                        {{ $format.convertLatency(item.avgLoadPageTime).value.toFixed(2) }}
+                        {{ $format.convertLatency(item.avgLoadPageTime).unit }}
                     </template>
                 </CustomTable>
 
@@ -115,9 +116,6 @@ export default {
                 this.chartData = data.eumapps.Echartreport.widgets.map((widget) => Object.values(widget.echarts)[0]) || [];
                 this.performanceCharts = data.eumapps.report || {};
             });
-        },
-        format(duration, unit) {
-            return `${duration.toFixed(2)} ${unit}`;
         },
     },
 };

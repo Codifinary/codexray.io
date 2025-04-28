@@ -207,14 +207,7 @@ export default {
         },
 
         copyStackTrace() {
-            navigator.clipboard
-                .writeText(this.errorDetails.stack)
-                .then(() => {
-                    this.$toast?.success?.('Stack trace copied!') || console.log('Stack trace copied!');
-                })
-                .catch((err) => {
-                    console.error('Failed to copy stack trace:', err);
-                });
+            this.$format.copyToClipboard(this.errorDetails.stack);
         },
     },
     mounted() {
