@@ -61,14 +61,14 @@ export default {
     },
 };
 </script>
-
 <style scoped>
 .card-body {
     display: flex;
     flex-direction: column;
     width: 18vw;
-    padding: 0.5rem 1.25rem;
+    padding: 0.75rem 1.25rem;
 }
+
 .card-container {
     min-height: 30vh;
 }
@@ -77,48 +77,53 @@ export default {
     display: flex;
     flex-direction: column;
     width: 100%;
+    margin: 0.25rem 0;
 }
 
 .card-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 0.25rem 0;
 }
+
 .trend-percentage {
     opacity: 0.8;
     font-weight: 300;
-    font-size: 0.875rem;
+    font-size: 0.9rem;
 }
+
 .card-info {
     align-items: center;
 }
 
 .card-name {
     font-weight: 300;
-    font-size: 0.75rem;
+    font-size: 0.78rem;
     color: black;
     opacity: 0.5;
     margin-left: 0.625rem;
+    margin-bottom: 0.2rem;
 }
 
 .card-count {
     font-weight: 700;
-    font-size: 1.875rem;
+    font-size: 1.95rem;
     color: #013912;
 }
 .card-count2 {
     font-weight: 600;
-    font-size: 1.625rem;
+    font-size: 1.65rem;
     color: #013912;
 }
 .card-sub-count {
     font-weight: 600;
-    font-size: 1.5rem;
+    font-size: 1.55rem;
     color: #013912;
 }
 .card-latency-count {
     font-weight: 600;
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     color: #013912;
 }
 
@@ -130,7 +135,7 @@ export default {
 
 .card-icon {
     width: 10vw;
-    height: 8vh;
+    height: 9vh;
     margin-left: 0.625rem;
     margin-top: 0.625rem;
 }
@@ -139,5 +144,6 @@ export default {
     border: 0.0625rem solid grey;
     opacity: 0.5;
     width: 90%;
+    margin: 0.75rem 0;
 }
 </style>

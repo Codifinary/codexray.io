@@ -22,7 +22,9 @@
                         <tr v-for="item in browserStats" :key="item.name">
                             <td>{{ item.name }}</td>
                             <td>{{ item.requests }}</td>
-                            <td>{{ format(item.responseTime, 'ms') }}</td>
+                            <td>
+                                {{ $format.convertLatency(item.responseTime).value.toFixed(2) }} {{ $format.convertLatency(item.responseTime).unit }}
+                            </td>
                             <td>{{ item.errors }}</td>
                         </tr>
                     </tbody>
@@ -48,7 +50,8 @@
                 </router-link>
             </template>
             <template v-slot:item.avgLoadPageTime="{ item }">
-                {{ format(item.avgLoadPageTime, 'ms') }}
+                {{ $format.convertLatency(item.avgLoadPageTime).value.toFixed(2) }}
+                {{ $format.convertLatency(item.avgLoadPageTime).unit }}
             </template>
         </CustomTable>
     </div>
@@ -114,9 +117,6 @@ export default {
                 this.badges = data.badgeView || {};
             });
         },
-        format(duration, unit) {
-            return `${duration.toFixed(2)} ${unit}`;
-        },
     },
     mounted() {
         this.get();
@@ -134,7 +134,7 @@ export default {
     display: flex;
     flex-direction: row;
     width: 100%;
-    gap: 1.25rem;
+    gap: 1rem;
 }
 .clickable {
     cursor: pointer;
@@ -156,12 +156,12 @@ export default {
 }
 .chart-box {
     width: 25vw;
-    height: 30vh;
+    height: 35vh;
     transform: scale(0.9);
     transform-origin: center;
 }
 .browser-table {
-    width: 40vw;
-    height: 30vh;
+    min-width: 40vw;
+    height: 35vh;
 }
 </style>
