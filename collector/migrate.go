@@ -251,6 +251,7 @@ CREATE TABLE IF NOT EXISTS perf_data @on_cluster (
 	 RedirectTime 	  Int64 CODEC(ZSTD(1)),
 	 TtfbTime 	 	  Int64 CODEC(ZSTD(1)),
 	 TtlTime 		  Int64 CODEC(ZSTD(1)),
+	Browser           String CODEC(ZSTD(1)),
 
      INDEX idx_service_name ServiceName TYPE bloom_filter(0.001) GRANULARITY 1,
      INDEX idx_page_name PageName TYPE bloom_filter(0.001) GRANULARITY 1,
@@ -293,6 +294,146 @@ PARTITION BY toDate(Timestamp)
 ORDER BY (ServiceName, PagePath, toUnixTimestamp(Timestamp))
 SETTINGS index_granularity = 8192;
 `,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_event_data @on_cluster (
+     Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     UserId              String CODEC(ZSTD(1)),
+     ProjectId           String CODEC(ZSTD(1)),
+     Name                String CODEC(ZSTD(1)),
+     StartTime           Int64 CODEC(ZSTD(1)),
+     SessionId           String CODEC(ZSTD(1)),
+     Os                  String CODEC(ZSTD(1)),
+     Platform            String CODEC(ZSTD(1)),
+     ServiceVersion      String CODEC(ZSTD(1)),
+     Device              String CODEC(ZSTD(1)),
+     Service             String CODEC(ZSTD(1)),
+     Country             String CODEC(ZSTD(1)),
+     RawData             String CODEC(ZSTD(1)),
+
+     INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (Service, Name, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_session_data @on_cluster (
+     Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     SessionId           String CODEC(ZSTD(1)),
+     UserId              String CODEC(ZSTD(1)),
+     StartTime           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     EndTime             Nullable(DateTime64(9)) CODEC(Delta, ZSTD(1)),
+     Country             String CODEC(ZSTD(1)),
+     Device              String CODEC(ZSTD(1)),
+     OS                  String CODEC(ZSTD(1)),
+
+     INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_timestamp Timestamp TYPE minmax GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(StartTime) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(StartTime)
+ORDER BY (UserId, SessionId, toUnixTimestamp(StartTime))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_perf_data @on_cluster (
+     Timestamp           DateTime64(9) CODEC(Delta, ZSTD(1)),
+     ProjectId           String CODEC(ZSTD(1)),
+     Platform            String CODEC(ZSTD(1)),
+     RequestPayloadSize  Int64 CODEC(ZSTD(1)),
+     EndpointName        String CODEC(ZSTD(1)),
+     RequestTime         Int64 CODEC(ZSTD(1)),
+     Service             LowCardinality(String) CODEC(ZSTD(1)),
+     Status              Bool CODEC(ZSTD(1)),
+     ResponseTime        Int64 CODEC(ZSTD(1)),
+     ResponsePayloadSize Int64 CODEC(ZSTD(1)),
+     UserID              String CODEC(ZSTD(1)),
+     SessionId           String CODEC(ZSTD(1)),
+     Host                String CODEC(ZSTD(1)),
+     Device              String CODEC(ZSTD(1)),
+     StatusCode          Int64 CODEC(ZSTD(1)),
+     ServiceVersion      String CODEC(ZSTD(1)),
+     Country             String CODEC(ZSTD(1)),
+     OS                  String CODEC(ZSTD(1)),
+     AppType             String CODEC(ZSTD(1)),
+     RawData             String CODEC(ZSTD(1)),
+
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_endpoint_name EndpointName TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_user_id UserID TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_status_code StatusCode TYPE minmax GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (Service, EndpointName, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_crash_reports @on_cluster (
+     Timestamp       DateTime64(9) CODEC(Delta, ZSTD(1)),
+     ProjectId       String CODEC(ZSTD(1)),
+     UniqueId        String CODEC(ZSTD(1)),
+     SessionId       String CODEC(ZSTD(1)),
+     CrashTime       Int64 CODEC(ZSTD(1)),
+     CrashReason     String CODEC(ZSTD(1)),
+     FileName        String CODEC(ZSTD(1)),
+     LineNo          String CODEC(ZSTD(1)),
+     CrashStackTrace String CODEC(ZSTD(1)),
+     MemoryUsage     Int64 CODEC(ZSTD(1)),
+     Os              String CODEC(ZSTD(1)),
+     Platform        String CODEC(ZSTD(1)),
+     ServiceVersion  String CODEC(ZSTD(1)),
+     DeviceInfo      String CODEC(ZSTD(1)),
+     Service         LowCardinality(String) CODEC(ZSTD(1)),
+     Country         String CODEC(ZSTD(1)),
+     RawData         String CODEC(ZSTD(1)),
+
+     INDEX idx_service Service TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_unique_id UniqueId TYPE bloom_filter(0.001) GRANULARITY 1,
+     INDEX idx_session_id SessionId TYPE bloom_filter(0.01) GRANULARITY 1,
+     INDEX idx_crash_reason CrashReason TYPE bloom_filter(0.01) GRANULARITY 1
+) ENGINE @merge_tree
+TTL toDateTime(Timestamp) + toIntervalDay(@ttl_days)
+PARTITION BY toDate(Timestamp)
+ORDER BY (Service, UniqueId, toUnixTimestamp(Timestamp))
+SETTINGS index_granularity=8192, ttl_only_drop_parts = 1
+`,
+
+		`
+CREATE TABLE IF NOT EXISTS mobile_user_registration @on_cluster ( 
+	Timestamp 			DateTime64(9) CODEC(Delta, ZSTD(1)),
+	UserId 				String CODEC(ZSTD(1)), 
+	OS 					LowCardinality(String) CODEC(ZSTD(1)), 
+	Platform 			String CODEC(ZSTD(1)), 
+	ServiceVersion 		LowCardinality(String) CODEC(ZSTD(1)), 
+	Device 				String CODEC(ZSTD(1)), 
+	Service 			String CODEC(ZSTD(1)), 
+	Country 			LowCardinality(String) CODEC(ZSTD(1)), 
+	RegistrationTime 	DateTime64(9) CODEC(Delta, ZSTD(1)), 
+	IpAddress 			String CODEC(ZSTD(1)), 
+	TimeBucket 			Int32 CODEC(ZSTD(1)),
+	ProjectId 			String CODEC(ZSTD(1)), 
+	RawData 			String CODEC(ZSTD(1)),
+
+ 	INDEX idx_user_id UserId TYPE bloom_filter(0.01) GRANULARITY 1, 
+	INDEX idx_os OS TYPE bloom_filter(0.001) GRANULARITY 1, 
+	INDEX idx_service_version ServiceVersion TYPE bloom_filter(0.001) GRANULARITY 1, 
+	INDEX idx_country Country TYPE bloom_filter(0.001) GRANULARITY 1 
+) ENGINE @merge_tree 
+ TTL toDateTime(RegistrationTime) + toIntervalDay(@ttl_days) 
+ PARTITION BY toDate(RegistrationTime) 
+ ORDER BY (OS, Country, toUnixTimestamp(RegistrationTime)) 
+ SETTINGS index_granularity=8192
+ `,
 	}
 
 	distributedTables = []string{

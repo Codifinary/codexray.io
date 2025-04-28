@@ -1202,9 +1202,34 @@ func (api *Api) Perf(w http.ResponseWriter, r *http.Request, u *db.User) {
 		klog.Warningln(err)
 	}
 
-	report := auditor.GeneratePerformanceReport(world, serviceName, pageName, ch)
+	from := world.Ctx.From.ToStandard()
+	to := world.Ctx.To.ToStandard()
 
-	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, report))
+	// Fetch Page Performance Metrics
+	performanceMetrics, err := ch.GetPagePerformanceMetrics(r.Context(), &from, &to, serviceName, pageName)
+	if err != nil {
+		klog.Errorf("Failed to fetch page performance metrics: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to fetch page performance metrics: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch Page Experience Scores
+	experienceScores, err := ch.GetPageExperienceScores(r.Context(), &from, &to, serviceName, pageName)
+	if err != nil {
+		klog.Errorf("Failed to fetch page experience scores: %v", err)
+		http.Error(w, fmt.Sprintf("Failed to fetch page experience scores: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	report := auditor.GeneratePerformanceReport(world, serviceName, pageName, ch)
+	// Prepare the response
+	response := map[string]any{
+		"performanceMetrics": performanceMetrics,
+		"experienceScores":   experienceScores,
+		"performanceCharts":  report,
+	}
+
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, response))
 }
 
 func (api *Api) EumPerf(w http.ResponseWriter, r *http.Request, u *db.User) {
@@ -1571,7 +1596,7 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 
 	// for local purpose
 	// project := &db.Project{
-	// 	Id:   "ywajvh3s",
+	// 	Id:   "rc1niqg7",
 	// 	Name: "default",
 	// 	Prometheus: db.IntegrationsPrometheus{
 	// 		Url: "http://prometheus:9090",
@@ -1580,7 +1605,11 @@ func (api *Api) LoadWorldByRequest(r *http.Request) (*model.World, *db.Project, 
 	// 		Integrations: db.Integrations{
 	// 			Clickhouse: &db.IntegrationClickhouse{
 	// 				Database: "default",
-	// 				Addr:     "34.47.154.246:31137",
+	// 				Auth: utils.BasicAuth{
+	// 					User:     "default",
+	// 					Password: "vizares",
+	// 				},
+	// 				Addr:     "labs.codexray.io:8043",
 	// 				Protocol: "http",
 	// 			},
 	// 		},
@@ -1654,4 +1683,61 @@ func (api *Api) getClickhouseClient(project *db.Project) (*clickhouse.Client, er
 		return nil, err
 	}
 	return clickhouse.NewClient(config, distributed)
+}
+
+func (api *Api) MrumView(w http.ResponseWriter, r *http.Request, u *db.User) {
+	vars := mux.Vars(r)
+	service := vars["serviceName"]
+	view := vars["view"]
+
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	switch view {
+	case "perf":
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumPerf(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
+	case "users":
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumUsers(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
+	case "crashes":
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumCrashes(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
+	default:
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, overview.RenderMrumSessions(r.Context(), ch, world, r.URL.Query().Get("query"), service)))
+
+	}
+}
+
+func (api *Api) MrumOverview(w http.ResponseWriter, r *http.Request, u *db.User) {
+	world, project, cacheStatus, err := api.LoadWorldByRequest(r)
+	if err != nil {
+		klog.Errorln(err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if project == nil || world == nil {
+		utils.WriteJson(w, api.WithContext(project, cacheStatus, world, nil))
+		return
+	}
+
+	ch, err := api.getClickhouseClient(project)
+	if err != nil {
+		klog.Warningln(err)
+	}
+
+	view := overview.RenderMrumOverview(r.Context(), ch, world)
+	utils.WriteJson(w, api.WithContext(project, cacheStatus, world, view))
 }

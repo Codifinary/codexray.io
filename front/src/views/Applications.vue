@@ -134,8 +134,16 @@ export default {
     },
 
     mounted() {
-        this.get();
-        this.$events.watch(this, this.get, 'refresh');
+        this.fetchApplicationsOverview();
+        this.$events.watch(this, this.fetchApplicationsOverview, 'refresh');
+    },
+    watch: {
+        '$route.query': {
+            handler() {
+                this.fetchApplicationsOverview();
+            },
+            immediate: true,
+        },
     },
 
     computed: {
@@ -179,12 +187,13 @@ export default {
     },
 
     methods: {
-        get() {
+        fetchApplicationsOverview() {
             this.loading = true;
             this.error = '';
             this.$api.getOverview('applications', '', (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching applications overview:', error);
                     this.error = error;
                     return;
                 }
@@ -259,7 +268,7 @@ export default {
 
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     margin: 20px 0 20px 0;
 }
 </style>

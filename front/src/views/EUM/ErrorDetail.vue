@@ -1,7 +1,7 @@
 <template>
     <div class="my-10 mx-5">
-        <div class="error-details">
-            <div class="mr-10">
+        <div class="error-details d-flex">
+            <div class="error-info" style="width: 50%; padding: 16px">
                 <div>
                     <h5>Error message</h5>
                     <p class="error-message">{{ errorDetails.message }}</p>
@@ -14,12 +14,12 @@
                     <h5>Error URL</h5>
                     <p>{{ errorDetails.url }}</p>
                 </div>
-                <div class="error-details__meta">
-                    <div>
+                <div class="error-details__meta d-flex">
+                    <div class="mr-4">
                         <h5>Category</h5>
                         <p>{{ errorDetails.category }}</p>
                     </div>
-                    <div>
+                    <div class="mr-4">
                         <h5>App</h5>
                         <p>{{ errorDetails.app }}</p>
                     </div>
@@ -28,22 +28,31 @@
                         <p>{{ errorDetails.app_version }}</p>
                     </div>
                 </div>
-                <div class="error-details__meta">
-                    <div>
+                <div class="error-details__meta d-flex mt-4">
+                    <div class="mr-4">
                         <h5>Timestamp</h5>
-                        {{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}
+                        <p>{{ $format.date(errorDetails.timestamp, '{MMM} {DD}, {HH}:{mm}:{ss}') }}</p>
                     </div>
-                    <div class="pl-4">
+                    <div>
                         <h5>Level of Severity</h5>
-                        <p>
-                            {{ errorDetails.level }}
-                        </p>
+                        <p>{{ errorDetails.level }}</p>
                     </div>
                 </div>
             </div>
-            <div>
-                <h5>Stack Trace</h5>
-                <pre>{{ errorDetails.stack }}</pre>
+
+            <div class="stack-trace" style="width: 50%; padding: 16px">
+                <div class="d-flex justify-space-between align-center mb-2">
+                    <h5 class="mb-0">Stack Trace</h5>
+                    <v-btn icon small @click="copyStackTrace">
+                        <v-icon small>mdi-content-copy</v-icon>
+                    </v-btn>
+                </div>
+                <v-card style="overflow: auto; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); background-color: rgba(128, 128, 128, 0.2) !important">
+                    <pre style="white-space: pre-wrap; word-wrap: break-word; margin: 0; padding: 0 10px">
+                {{ errorDetails.stack }}
+            </pre
+                    >
+                </v-card>
             </div>
         </div>
 
@@ -165,6 +174,7 @@ export default {
             this.$api.getErrorDetails(eventId, (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching error details:', error);
                     this.error = error;
                     return;
                 }
@@ -181,6 +191,7 @@ export default {
             this.$api.getErrorDetailsBreadcrumbs(eventId, selectedFilter, (data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching breadcrumbs data:', error);
                     this.error = error;
                     return;
                 } else {
@@ -194,6 +205,10 @@ export default {
             this.selectedFilter = filterItem.selected ? filterItem.value : 'all';
             this.fetchBreadcrumbsData(this.eventId, this.selectedFilter);
         },
+
+        copyStackTrace() {
+            this.$format.copyToClipboard(this.errorDetails.stack);
+        },
     },
     mounted() {
         this.get(this.eventId, this.selectedFilter);
@@ -205,6 +220,7 @@ export default {
 <style scoped>
 .error-details {
     display: flex;
+    gap: 1.5rem;
 }
 .filter-container {
     width: 100%;
@@ -213,37 +229,40 @@ export default {
     justify-content: flex-end;
 }
 .filterByType {
-    max-width: 400px !important;
-    border-radius: 4px;
-    padding: 5px;
+    max-width: 25rem !important;
+    border-radius: 0.25rem;
+    padding: 0.3125rem;
 }
 
 p {
     color: #1b1f26b8;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
 }
 
 pre {
     color: #013912;
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 400;
 }
 
 h5 {
     color: #202224;
     font-weight: 700;
-    font-size: 12px;
+    font-size: 0.75rem;
 }
 
 .error-message {
     color: #ef5350;
 }
 
+.error-details__meta div {
+    margin-right: 1.875rem;
+}
+
 .error-details__meta {
     display: flex;
-}
-.error-details__meta div {
-    margin-right: 30px;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
 }
 </style>

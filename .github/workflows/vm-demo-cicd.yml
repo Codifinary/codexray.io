@@ -6,13 +6,13 @@ name: CI/CD Pipeline for Codexray (VM Deployment using GHCR)
 on:
   push:
     branches:
-      - demo
+      - develop
 
 # -------------------------------------
 # Define Environment Variables
 # -------------------------------------
 env:
-  GHCR_IMAGE: ghcr.io/codifinary/codexray:latest
+  GHCR_IMAGE: ghcr.io/codifinary/codexray-dev:latest
   VM_INSTANCE: ${{ secrets.VM_INSTANCE_IP }}
   VM_USER: 'codexray'
   VM_SSH_KEY: ${{ secrets.VM_SSH_PRIVATE_KEY }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: Copy Docker Compose Files to VM
         run: |
-          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7004 deploy/docker-compose.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
+          scp -o StrictHostKeyChecking=no -i private_key.pem -P 7004 deploy/docker-compose-dev.yaml $VM_USER@$VM_INSTANCE:/home/$VM_USER/docker-compose.yaml
 
       - name: Pull Latest Image and Restart Containers
         run: |

@@ -146,8 +146,10 @@ export function convertLatency(latency) {
         return { value: parseFloat(latency), unit: 'ms' };
     } else if (latency < 60000) {
         return { value: parseFloat(latency / 1000), unit: 's' };
-    } else {
+    } else if (latency < 3600000) {
         return { value: parseFloat(latency / 60000), unit: 'min' };
+    } else {
+        return { value: parseFloat(latency / 3600000), unit: 'hr' };
     }
 }
 
@@ -162,3 +164,51 @@ export function shortenNumber(value) {
         return { value: parseFloat(value), unit: '' };
     }
 }
+
+export function copyToClipboard(text) {
+    if (!text) {
+      console.warn('copyToClipboard: No text provided to copy.');
+      return;
+    }
+  
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Use the modern Clipboard API
+      navigator.clipboard.writeText(text).catch((err) => {
+        console.error('copyToClipboard: Failed with Clipboard API, falling back.', err);
+        fallbackCopy(text);
+      });
+      return true;
+    } else {
+      // Fallback immediately if Clipboard API is not available
+      return fallbackCopy(text);
+    }
+  
+    function fallbackCopy(text) {
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+  
+      // Make textarea invisible and off-screen
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+  
+      textarea.focus();
+      textarea.select();
+      textarea.setSelectionRange(0, 99999); // For mobile devices
+  
+      try {
+        const successful = document.execCommand('copy');
+        if (!successful) {
+          console.error('copyToClipboard: Fallback copy failed.');
+          return false;
+        }
+      } catch (err) {
+        console.error('copyToClipboard: Error using fallback method.', err);
+        return false;
+      }
+  
+      document.body.removeChild(textarea);
+      return true;
+    }
+  }
+  

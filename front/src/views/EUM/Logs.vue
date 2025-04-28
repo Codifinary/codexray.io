@@ -1,5 +1,16 @@
 <template>
     <div>
+        <div class="cards mt-5">
+            <Card
+                v-for="value in summary"
+                :key="value.name"
+                :name="value.name"
+                :iconName="value.icon"
+                :count="value.value"
+                :icon="value.color"
+                :lineColor="value.color"
+            />
+        </div>
         <v-card outlined class="pa-4 mb-2 mt-6">
             <v-form>
                 <v-progress-linear v-if="loading" indeterminate height="4" style="bottom: 0; left: 0" />
@@ -127,6 +138,7 @@
 <script>
 import Chart from '@/components/Chart.vue';
 import { palette } from '@/utils/colors';
+import Card from '@/components/Card.vue';
 
 const getSeverity = (s) => {
     s = s.toLowerCase();
@@ -139,7 +151,7 @@ const getSeverity = (s) => {
 };
 
 export default {
-    components: { Chart },
+    components: { Chart, Card },
     props: {
         id: String,
     },
@@ -156,6 +168,7 @@ export default {
                 search: '',
                 limit: 100,
             },
+            summary: [],
         };
     },
 
@@ -236,8 +249,8 @@ export default {
             let q = {};
             try {
                 q = JSON.parse(decodeURIComponent(query.query || '{}'));
-            } catch {
-                console.log('Failed to parse query');
+            } catch (err) {
+                console.error('Failed to parse query:', err);
             }
             let severity = q.severity || [];
 
@@ -259,7 +272,9 @@ export default {
                 query: JSON.stringify(this.query),
                 order: this.order,
             };
-            this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => err);
+            this.$router.push({ query: { ...this.$route.query, ...query } }).catch((err) => {
+                console.error('Error updating query in router:', err);
+            });
         },
         runQuery() {
             this.setQuery();
@@ -268,7 +283,9 @@ export default {
         zoom(s) {
             const { from, to } = s.selection;
             const query = { ...this.$route.query, from, to };
-            this.$router.push({ query }).catch((err) => err);
+            this.$router.push({ query }).catch((err) => {
+                console.error('Error zooming in on logs:', err);
+            });
         },
         getColor(severity) {
             const sev = getSeverity(severity);
@@ -279,10 +296,11 @@ export default {
             this.loadingError = '';
             this.data.chart = null;
             this.data.entries = null;
-            this.$api.getTracesLogs(this.id, this.$route.query.query, (data, error) => {
+            this.$api.getEUMLogs(this.id, this.$route.query.query, (data, error) => {
                 this.loading = false;
                 const errMsg = 'Failed to load logs';
                 if (error || data.status === 'warning') {
+                    console.error('Error fetching logs:', error || data.message);
                     this.loadingError = error || data.message;
                     this.data.status = 'warning';
                     this.data.message = errMsg;
@@ -293,6 +311,32 @@ export default {
                 if (!this.query.severity.length) {
                     this.query.severity = this.data.all_severity;
                 }
+
+                // Process summary data
+                this.summary = [
+                    {
+                        name: 'Total Logs',
+                        value: this.data.summary.total_logs,
+                        color: '#42A5F5 ',
+
+                        icon: 'logs',
+                    },
+                    {
+                        name: 'Total Errors',
+                        value: this.data.summary.total_errs,
+                        color: '#EF5350 ',
+
+                        icon: 'errors',
+                    },
+                    {
+                        name: 'Total Warnings',
+                        value: this.data.summary.total_warn,
+                        background: '#FFA726 lighten-4',
+
+                        color: '#FFA726 ',
+                        icon: 'warning',
+                    },
+                ];
             });
         },
     },
@@ -315,5 +359,14 @@ export default {
 
 .entry:deep(tr:hover) {
     background-color: unset !important;
+}
+
+.cards {
+    display: flex;
+    gap: 1rem;
+    width: 95%;
+}
+::v-deep(.card-body) {
+    width: 20vw;
 }
 </style>

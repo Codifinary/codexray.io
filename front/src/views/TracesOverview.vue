@@ -5,7 +5,15 @@
             <OpenTelemetryIntegration small color="success">Integrate OpenTelemetry</OpenTelemetryIntegration>
         </div>
         <div class="cards">
-            <Card v-for="value in summary" :key="value.name" :name="value.name" :iconName="value.icon" :count="value.value" :unit="value.unit" />
+            <Card
+                v-for="value in summary"
+                :key="value.name"
+                :name="value.name"
+                :iconName="value.icon"
+                :count="value.value"
+                :unit="value.unit"
+                :lineColor="value.color"
+            />
         </div>
         <CustomTable :headers="headers" :items="tableItems" item-key="service_name" class="elevation-1">
             <template v-slot:item.service_name="{ item }">
@@ -109,6 +117,7 @@ export default {
             this.$api.getTracesOverview((data, error) => {
                 this.loading = false;
                 if (error) {
+                    console.error('Error fetching traces overview:', error);
                     this.error = error;
                     return;
                 }
@@ -121,8 +130,9 @@ export default {
                         name: 'Total Services',
                         value: services.value,
                         unit: services.unit,
-                        background: 'red lighten-4',
+                        background: 'green lighten-4',
                         icon: 'services',
+                        color: '#33925d',
                     },
                     request_count: {
                         name: 'Total Requests',
@@ -130,25 +140,29 @@ export default {
                         unit: totalRequest.unit,
                         background: 'blue lighten-4',
                         icon: 'requests',
+                        color: '#42A5F5',
                     },
                     request_per_second: {
                         name: 'Request/Sec',
                         value: data.traces_view.summary.request_per_second,
-                        background: 'orange lighten-4',
+                        background: 'purple lighten-4',
                         icon: 'rps',
+                        color: '#AB47BC',
                     },
                     error_rate: {
                         name: 'Error/Sec',
                         value: data.traces_view.summary.error_rate,
-                        background: 'purple lighten-4',
+                        background: 'red lighten-4',
                         icon: 'errors',
+                        color: '#EF5350',
                     },
                     avg_latency: {
                         name: 'Avg. Latency',
                         value: avgLatency.value,
                         unit: avgLatency.unit,
-                        background: 'green lighten-4',
+                        background: 'orange lighten-4',
                         icon: 'latency',
+                        color: '#FFA726',
                     },
                 };
             });
@@ -165,7 +179,7 @@ export default {
 }
 .cards {
     display: flex;
-    justify-content: space-between;
+    gap: 0.5rem;
     margin: 20px 0 20px 0;
 }
 </style>
