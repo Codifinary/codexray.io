@@ -4,44 +4,44 @@ sidebar_position: 4
 
 # Kubernetes Operator 
 
-The best way to deploy Coroot into a Kubernetes or OpenShift cluster is by using the [coroot-operator](https://github.com/coroot/coroot-operator). 
+The best way to deploy codexray into a Kubernetes or OpenShift cluster is by using the [codexray-operator](https://github.com/codexray/codexray-operator). 
 The operator simplifies the deployment of all required components and enables scaling as needed. 
-It supports the deployment of both Coroot Community and Enterprise editions.
+It supports the deployment of both codexray Community and Enterprise editions.
 
 ## Operator installation 
 
-Add the Coroot helm chart repo:
+Add the codexray helm chart repo:
 
 ```bash
-helm repo add coroot https://coroot.github.io/helm-charts
-helm repo update coroot
+helm repo add codexray https://codexray.github.io/helm-charts
+helm repo update codexray
 ```
 
-Next, install the Coroot Operator:
+Next, install the codexray Operator:
 
 ```bash
-helm install -n coroot --create-namespace coroot-operator coroot/coroot-operator
+helm install -n codexray --create-namespace codexray-operator codexray/codexray-operator
 ```
 
-## Coroot CR (Custom Resource)
+## codexray CR (Custom Resource)
 
-To deploy Coroot, you need to create a Coroot resource. Below is an example specification of the Coroot custom resource. 
+To deploy codexray, you need to create a codexray resource. Below is an example specification of the codexray custom resource. 
 The operator continuously monitors these resources and adjusts the configuration if necessary. 
-Additionally, the operator checks for new versions of Coroot components and automatically updates them unless you specify particular versions.
+Additionally, the operator checks for new versions of codexray components and automatically updates them unless you specify particular versions.
 
 ```yaml
-apiVersion: coroot.com/v1
-kind: Coroot
+apiVersion: codexray.com/v1
+kind: codexray
 metadata:
-  name: coroot
-  namespace: coroot
+  name: codexray
+  namespace: codexray
 spec:
 #  metricsRefreshInterval: 15s # Specifies the metric resolution interval.
-#  apiKey: # The API key used by agents when sending telemetry to Coroot.
-#  cacheTTL: 7d # Duration for which Coroot retains the metric cache.
-#  authAnonymousRole: Admin # Allows access to Coroot without authentication if set.
+#  apiKey: # The API key used by agents when sending telemetry to codexray.
+#  cacheTTL: 7d # Duration for which codexray retains the metric cache.
+#  authAnonymousRole: Admin # Allows access to codexray without authentication if set.
 #  authBootstrapAdminPassword: # Initial admin password for bootstrapping.
-#  env: # Environment variables for Coroot.
+#  env: # Environment variables for codexray.
 
 #  service: 
 #    type: # Service type (e.g., ClusterIP, NodePort, LoadBalancer).
@@ -49,14 +49,14 @@ spec:
 #    nodePort: # NodePort number (if type is NodePort).
 
 #  communityEdition:
-#    version: x.y.z # If unspecified, the operator will automatically update Coroot CE to the latest version.
+#    version: x.y.z # If unspecified, the operator will automatically update codexray CE to the latest version.
 
-#  enterpriseEdition: # Configurations for Coroot Enterprise Edition.
-#    version: x.y.z # If unspecified, the operator will automatically update Coroot EE to the latest version.
-#    licenseKey: COROOT-1111-111 # License key for Coroot Enterprise Edition.
+#  enterpriseEdition: # Configurations for codexray Enterprise Edition.
+#    version: x.y.z # If unspecified, the operator will automatically update codexray EE to the latest version.
+#    licenseKey: codexray-1111-111 # License key for codexray Enterprise Edition.
 
 #  agentsOnly: # Configures the operator to install only the node-agent and cluster-agent.
-#    corootUrl: http://COROOT_IP:PORT/ # URL of the Coroot instance to which agents send metrics, logs, traces, and profiles.
+#    codexrayUrl: http://codexray_IP:PORT/ # URL of the codexray instance to which agents send metrics, logs, traces, and profiles.
 
 #  nodeAgent:
 #    version: x.y.z # If unspecified, the operator will automatically update the node-agent to the latest version.
@@ -111,8 +111,8 @@ spec:
 #    password: # Password for accessing the external ClickHouse.
 #    database: # Name of the database to be used.
 
-#  replicas: 1 # Number of Coroot StatefulSet pods.
+#  replicas: 1 # Number of codexray StatefulSet pods.
 
 #  postgres: # Store configuration in a Postgres db instead of SQLite (required if replicas > 1).
-#    connectionString: "postgres://coroot:password@127.0.0.1:5432/coroot?sslmode=disable"
+#    connectionString: "postgres://codexray:password@127.0.0.1:5432/codexray?sslmode=disable"
 ```

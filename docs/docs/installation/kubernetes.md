@@ -10,141 +10,141 @@ import TabItem from '@theme/TabItem';
 <Tabs queryString="edition">
   <TabItem value="ce" label="Community Edition (operator)" default>
 
-Add the Coroot helm chart repo:
+Add the codexray helm chart repo:
 
 ```bash
-helm repo add coroot https://coroot.github.io/helm-charts
-helm repo update coroot
+helm repo add codexray https://codexray.github.io/helm-charts
+helm repo update codexray
 ```
 
-Next, install the Coroot Operator:
+Next, install the codexray Operator:
 
 ```bash
-helm install -n coroot --create-namespace coroot-operator coroot/coroot-operator
+helm install -n codexray --create-namespace codexray-operator codexray/codexray-operator
 ```
 
-Install the Coroot Community Edition. This chart creates a minimal [Coroot Custom Resource](/installation/k8s-operator):
+Install the codexray Community Edition. This chart creates a minimal [codexray Custom Resource](/installation/k8s-operator):
 
 ```bash
-helm install -n coroot coroot coroot/coroot-ce \
+helm install -n codexray codexray codexray/codexray-ce \
   --set "clickhouse.shards=2,clickhouse.replicas=2"
 ```
 
 The helm chart 
 
-Forward the Coroot port to your machine:
+Forward the codexray port to your machine:
 
 ```bash
-kubectl port-forward -n coroot service/coroot-coroot 8080:8080
+kubectl port-forward -n codexray service/codexray-codexray 8080:8080
 ```
 
-Then, you can access Coroot at http://localhost:8080
+Then, you can access codexray at http://localhost:8080
 
 **Upgrade**
 
-The Coroot Operator for Kubernetes automatically upgrades all components.
+The codexray Operator for Kubernetes automatically upgrades all components.
 
 **Uninstall**
 
-To uninstall Coroot run the following command:
+To uninstall codexray run the following command:
 
 ```bash
-helm uninstall coroot -n coroot
-helm uninstall coroot-operator -n coroot
+helm uninstall codexray -n codexray
+helm uninstall codexray-operator -n codexray
 ```
   </TabItem>
 
   <TabItem value="ee" label="Enterprise Edition (operator)">
 
 :::info
-Coroot Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
-To install the Enterprise Edition, you'll need a license. [Start](https://coroot.com/account) your free trial today.
+codexray Enterprise Edition is a paid subscription (from $1 per CPU core/month) that offers extra features and priority support.
+To install the Enterprise Edition, you'll need a license. [Start](https://codexray.com/account) your free trial today.
 :::
 
-Add the Coroot helm chart repo:
+Add the codexray helm chart repo:
 
 ```bash
-helm repo add coroot https://coroot.github.io/helm-charts
-helm repo update coroot
+helm repo add codexray https://codexray.github.io/helm-charts
+helm repo update codexray
 ```
 
-Next, install the Coroot Operator:
+Next, install the codexray Operator:
 
 ```bash
-helm install -n coroot --create-namespace coroot-operator coroot/coroot-operator
+helm install -n codexray --create-namespace codexray-operator codexray/codexray-operator
 ```
 
-Install the Coroot Enterprise Edition.This chart creates a minimal [Coroot Custom Resource](/installation/k8s-operator):
+Install the codexray Enterprise Edition.This chart creates a minimal [codexray Custom Resource](/installation/k8s-operator):
 
 ```
-helm install -n coroot coroot coroot/coroot-ee \
-  --set "licenseKey=COROOT-LICENSE-KEY-HERE,clickhouse.shards=2,clickhouse.replicas=2"
+helm install -n codexray codexray codexray/codexray-ee \
+  --set "licenseKey=codexray-LICENSE-KEY-HERE,clickhouse.shards=2,clickhouse.replicas=2"
 ```
 
-Forward the Coroot port to your machine:
+Forward the codexray port to your machine:
 
 ```
-kubectl port-forward -n coroot service/coroot-coroot 8080:8080
+kubectl port-forward -n codexray service/codexray-codexray 8080:8080
 ```
 
-Then, you can access Coroot at http://localhost:8080
+Then, you can access codexray at http://localhost:8080
 
 **Upgrade**
 
-The Coroot Operator for Kubernetes automatically upgrades all components.
+The codexray Operator for Kubernetes automatically upgrades all components.
 
 **Uninstall**
 
-To uninstall Coroot run the following command:
+To uninstall codexray run the following command:
 
 ```
-helm uninstall coroot -n coroot
-helm uninstall coroot-operator -n coroot
+helm uninstall codexray -n codexray
+helm uninstall codexray-operator -n codexray
 ```
   </TabItem>
 
 <TabItem value="ce-helm" label="Community Edition (Helm, deprecated)">
 
 :::warning
-Installing Coroot via the Helm chart is deprecated. Please use the Coroot Operator instead.
+Installing codexray via the Helm chart is deprecated. Please use the codexray Operator instead.
 :::
 
-Add the Coroot helm chart repo:
+Add the codexray helm chart repo:
 
 ```
-helm repo add coroot https://coroot.github.io/helm-charts
-helm repo update coroot
+helm repo add codexray https://codexray.github.io/helm-charts
+helm repo update codexray
 ```
 
 Next, install the chart that includes:
 
 ```
-helm install --namespace coroot --create-namespace coroot coroot/coroot
+helm install --namespace codexray --create-namespace codexray codexray/codexray
 ```
 
-Forward the Coroot port to your machine:
+Forward the codexray port to your machine:
 
 ```
-kubectl port-forward -n coroot service/coroot 8080:8080
+kubectl port-forward -n codexray service/codexray 8080:8080
 ```
 
-Then, you can access Coroot at http://localhost:8080
+Then, you can access codexray at http://localhost:8080
 
 **Upgrade**
 
-To upgrade Coroot to the latest version:
+To upgrade codexray to the latest version:
 
 ```
-helm repo update coroot
-helm upgrade coroot --namespace coroot coroot/coroot
+helm repo update codexray
+helm upgrade codexray --namespace codexray codexray/codexray
 ```
 
 **Uninstall**
 
-To uninstall Coroot run the following command:
+To uninstall codexray run the following command:
 
 ```
-helm uninstall coroot -n coroot
+helm uninstall codexray -n codexray
 ```
   </TabItem>
 

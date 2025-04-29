@@ -11,7 +11,7 @@ which can be caused by several reasons:
 * A container competes for CPU time against the other containers running on the same node.
 * A container consumes all available CPU time on its own.
 
-<img alt="CPU" src="/img/docs/cpu.png" class="card w-1200"/>
+<img alt="CPU" src="/docs/docs/Doc_CPU.png" class="card w-1200"/>
 
 ## Possible failure scenarios
 
@@ -33,7 +33,7 @@ This can result in performance degradation due to a shortage of CPU time.
 
 ### CPU usage
 
-<img alt="CPU usage" src="/img/docs/cpu-usage.png" class="card w-600"/>
+<img alt="CPU usage" src="/docs/docs/Doc_CPU_Usage.png" class="card w-600"/>
 
 This chart can help you answer the following questions:
 
@@ -48,12 +48,12 @@ If the application Pods contain more than one container, this chart provides you
 The **profile** button opens the CPU profiling data, allowing you to identify and analyze unexpected spikes in CPU usage down to the precise line of code.
 
 :::info
-Learn more about [Continuous profiling](/profiling/) in Coroot.
+Learn more about [Continuous profiling](/profiling/) in codexray.
 :::
         
 ### CPU delay
 
-<img alt="CPU delay" src="/img/docs/cpu-delay.png" class="card w-600"/>
+<img alt="CPU delay" src="/docs/docs/Doc_CPU_Delay.png" class="card w-600"/>
 
 A lack of CPU time can be estimated by `container_resources_cpu_delay_seconds_total` metric.
 The Linux kernel reports [CPU delay](https://www.kernel.org/doc/html/latest/accounting/delay-accounting.html),
@@ -69,12 +69,12 @@ To identify the specific reason, please refer to the <i>Throttled time</i> and <
 
 :::info
 Related blog post:
-[Delay accounting: an underrated feature of the Linux kernel](https://coroot.com/blog/linux-delay-accounting)
+[Delay accounting: an underrated feature of the Linux kernel](https://codexray.com/blog/linux-delay-accounting)
 :::
 
 ### Throttled time
 
-<img alt="CPU throttled time" src="/img/docs/cpu-throttled-time.png" class="card w-600"/>
+<img alt="CPU throttled time" src="/docs/docs/Doc_CPU_Throttled_time.png" class="card w-600"/>
  
 The Linux kernel offers several mechanisms to manage the distribution of CPU time among applications.
 One of these mechanisms is CPU Bandwidth Control, which allows to set a quota (limit) for the amount of CPU time that a container (cgroup) is allowed to consume.
@@ -92,15 +92,14 @@ it sets up a CPU quota of 10ms for each 100ms period.
 This clarifies situations where the container has been throttled, even though its CPU consumption was significantly lower than the limit:
 
 <div class="horizontal-images">
-  <img alt="CPU delay" src="/img/docs/cpu-delay.png" class="card"/>
-  <img alt="CPU throttled time" src="/img/docs/cpu-throttled-time.png" class="card"/>
+  <img alt="CPU delay" src="/docs/docs/Doc_CPU_Delay.png" class="card"/>
+  <img alt="CPU throttled time" src="/docs/docs/Doc_CPU_Throttled_time.pngg" class="card"/>
 </div>
 
 ### Node CPU usage
 
 <div class="horizontal-images">
-  <img alt="CPU Nodes" src="/img/docs/cpu-nodes.png" class="card"/>
-  <img alt="CPU Node" src="/img/docs/cpu-node.png" class="card"/>
+  <img alt="CPU Nodes" src="/docs/docs/Doc_Node CPU_Usage.png" class="card"/>
 </div>
 
  
@@ -127,8 +126,7 @@ The chart is based on the `node_resources_cpu_usage_seconds_total` metric.
 ### CPU consumers
 
 <div class="horizontal-images">
-  <img alt="CPU consumers" src="/img/docs/cpu-consumers-1.png" class="card" />
-  <img alt="CPU consumers" src="/img/docs/cpu-consumers-2.png" class="card" />
+  <img alt="CPU consumers" src="/docs/docs/Doc_CPU_Consumers.png" class="card" />
 </div>
 
 

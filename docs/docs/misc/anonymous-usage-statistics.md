@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Anonymous usage statistics
 
-To improve Coroot we collect anonymous usage statistics. The collection of statistics is enabled by default, but you can opt out at any time.
+To improve Codexray we collect anonymous usage statistics. The collection of statistics is enabled by default, but you can opt out at any time.
 
 ## What exactly is being collected
 
@@ -14,13 +14,13 @@ The following is an example of the reported payload:
 {
     "instance": {
         "uuid": "4423595b-9d97-4e01-a19f-8e3d60c83b2a", // generated upon the first startup and stored in `data-dir/instance.uuid`
-        "version": "0.20.0", // Coroot version
+        "version": "0.20.0", // codexray version
         "database_type": "sqlite" // the type of database being used
     },
     "integration": {
         "prometheus": true, // shows whether a Prometheus integration has been configured or not
-        "node_agent": true, // shows whether Coroot has seen the metrics gathered by `node-agent` or not
-        "kube_state_metrics": true, // shows whether Coroot has seen the metrics gathered by `kube-state-metrics` or not
+        "node_agent": true, // shows whether codexray has seen the metrics gathered by `node-agent` or not
+        "kube_state_metrics": true, // shows whether codexray has seen the metrics gathered by `kube-state-metrics` or not
         "inspection_overrides": { // the number of overridden inspection thresholds
             "CPUNode": {"project_level": 1, "application_level": 2},
             "NetworkRTT": {"project_level": 0, "application_level": 1}
@@ -88,8 +88,8 @@ The following is an example of the reported payload:
                 }
             }
         },
-        "cpu_usage": [0.079, 0,071, ...], // CPU usage of the Coroot process
-        "memory_usage": [27086848, 27086848, ...], // memory usage of the Coroot process
+        "cpu_usage": [0.079, 0,071, ...], // CPU usage of the codexray process
+        "memory_usage": [27086848, 27086848, ...], // memory usage of the codexray process
     },
     "profile": {
         "from": 1678113877,
@@ -104,8 +104,8 @@ As you can see, the data is absolutely anonymous.
 
 ## How we process the data
 
-Anonymous usage statistics are reported to our collector at https://coroot.com/ce/usage-statistics. 
-Coroot Inc uses the described statistics for its own purposes (improving the product) and does not share the data with any third parties.
+Anonymous usage statistics are reported to our collector at https://codexray.com/ce/usage-statistics. 
+Codexray Inc uses the described statistics for its own purposes (improving the product) and does not share the data with any third parties.
 
 ## Disable usage statistics
 You can disable the collecting of usage statistics by using the `--disable-usage-statistics` command line argument.
@@ -113,7 +113,7 @@ You can disable the collecting of usage statistics by using the `--disable-usage
 Docker:
 
 ```bash
-docker run ... ghcr.io/coroot/coroot --disable-usage-statistics
+docker run ... ghcr.io/codexray/codexray --disable-usage-statistics
 ```
 
 Kubernetes:
@@ -122,8 +122,8 @@ Kubernetes:
 ...
 spec:
 containers:
-- name: coroot
-  image: ghcr.io/coroot/coroot
+- name: codexray
+  image: ghcr.io/codexray/codexray
   args: ["--disable-usage-statistics"]
   ...
 ```

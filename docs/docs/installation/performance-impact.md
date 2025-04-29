@@ -4,12 +4,12 @@ sidebar_position: 8
 
 # Performance Impact
 
-Coroot leverages eBPF to collect telemetry data, such as metrics and traces. 
+Codexray leverages eBPF to collect telemetry data, such as metrics and traces. 
 This approach involves running small observer programs in the kernel space. 
 The Linux kernel guarantees that eBPF programs will not significantly interrupt kernel code execution by verifying each program before it runs.
 
 Program must have a finite complexity. The verifier will evaluate all possible execution paths and must be capable of completing the analysis within the limits of the configured upper complexity limit.
-At Coroot, we assess the performance of every component to ensure our users enjoy observability without any negative impact. This page presents the benchmark results for Coroot's monitoring agent.
+At Codexray, we assess the performance of every component to ensure our users enjoy observability without any negative impact. This page presents the benchmark results for Codexray's monitoring agent.
 
 ## Lab
 
@@ -53,30 +53,30 @@ taskset -c 2-3 go run app.go
 
 It's important to note that tests for maximum throughput can be impacted by any additional CPU-consuming processes on the node. 
 Our approach involves measuring a baseline latency under a fixed number of requests per second (10,000 RPS) and then repeating 
-the experiment with the Coroot's agent enabled.
+the experiment with the Codexray's agent enabled.
 
 ```bash
 # threads:4, connections: 100, test duration: 5 minute, CPU cores #4-7
 docker run --rm --cpuset-cpus 4-7 -ti cylab/wrk2 -t4 -c100 -d300s -R10000 --u_latency http://172.17.0.1:8090/
 ```
 
-### coroot-node-agent
+### Codexray-node-agent
 
 ```bash
 # CPU cores #0-1
-docker run -d --name coroot-node-agent \
+docker run -d --name Codexray-node-agent \
   --cpuset-cpus 0-1 \
   --privileged --pid host \
   -v /sys/kernel/debug:/sys/kernel/debug:rw \
   -v /sys/fs/cgroup:/host/sys/fs/cgroup:ro \
-  ghcr.io/coroot/coroot-node-agent --cgroupfs-root=/host/sys/fs/cgroup
+  ghcr.io/Codexray/Codexray-node-agent --cgroupfs-root=/host/sys/fs/cgroup
 ```
 
 ## Test Results
 
 ![Agent Performance Test](/img/docs/agent_performance_test.png)
 
-The latency difference with and without coroot-node-agent enabled falls within the margin of measurement error. 
+The latency difference with and without Codexray-node-agent enabled falls within the margin of measurement error. 
 During the test the agent consumed 200m CPU (20% of one CPU core).
 
 It's essential to understand that eBPF ensures that the observer program cannot impact kernel operations, 
@@ -86,10 +86,10 @@ In other words, this might result in some statistics not being entirely accurate
 
 ## Conclusion
 
-If you are running loads around 10,000 requests per second, you can be confident that Coroot will have no noticeable 
-impact on your application's performance or response time. In this scenario, the Coroot agent's CPU consumption will 
+If you are running loads around 10,000 requests per second, you can be confident that Codexray will have no noticeable 
+impact on your application's performance or response time. In this scenario, the Codexray agent's CPU consumption will 
 be approximately 20% of a single CPU core.
 
 If your workloads are significantly larger, we highly recommend conducting a similar load test. 
-The Coroot team is here to assist you with this, please feel free to reach out to us.
+The Codexray team is here to assist you with this, please feel free to reach out to us.
 

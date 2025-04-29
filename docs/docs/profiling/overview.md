@@ -4,11 +4,11 @@ sidebar_position: 1
 
 # Overview
 
-Coroot's Continuous Profiling allows you easily identify and analyze any unexpected spikes in CPU and memory usage down to the precise line of code.
+CodeXray's Continuous Profiling allows you easily identify and analyze any unexpected spikes in CPU and memory usage down to the precise line of code.
 This allows you to quickly pinpoint and resolve performance bottlenecks, optimize your application's resource utilization,
 and deliver a faster and more reliable user experience.
 
-<img alt="Profiling" src="/img/docs/profiling/profiling.gif" class="card w-1200"/>
+<img alt="Profiling" src="/docs/docs/Doc_Profiles.png" class="card w-1200"/>
 
 There are two ways to obtain profiling data:
 
@@ -21,29 +21,29 @@ These profilers operate at the user-space level and provide insights into the be
 eBPF-based profiling relies on the ability to attach eBPF programs to various events in the kernel,
 allowing for the collection of performance-related data without modifying the source code of the applications being profiled.
 
-Coroot's profiling stack consists of several components:
+CodeXray's profiling stack consists of several components:
 
-* `Coroot-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Coroot.
-* `coroot-cluster-agent` gathers profiles from applications and sends them to Coroot.
+* `codeXray-node-agent` monitors running processes, gathers their profiles, and sends the profiles to the Codexray.
+* `codexray-cluster-agent` gathers profiles from applications and sends them to Codexray.
 * ClickHouse is used as a database for storing profiling data.
-* Coroot queries profiles of a given application and visualizes them as FlameGraphs for analysis.
+* CodeXray queries profiles of a given application and visualizes them as FlameGraphs for analysis.
 
-<img alt="ebpf-based profiling" src="/img/docs/profiling/ebpf-based-profiling.png" class="card w-1200"/>
+<img alt="ebpf-based profiling" src="/docs/docs/ebpf-based-profiling.png" class="card w-1200"/>
 
-When you use Helm to install Coroot, all these components are automatically installed and seamlessly integrated with each other.
+When you use Helm to install CodeXray, all these components are automatically installed and seamlessly integrated with each other.
 
 The eBFP-based approach can only gather CPU profiles.
 To collect other profile types, such as memory or lock contention, user-space profilers need to be integrated.
-Currently, Coroot only supports the built-in Golang profiler.
+Currently, CodeXray only supports the built-in Golang profiler.
 
 ## Golang pull mode
 
 The Go standard library includes the [pprof](https://pkg.go.dev/net/http/pprof) package,
 enabling developers to expose profiling data of their Go applications.
 
-`Coroot-cluster-agent` automatically discovers and periodically retrieves profiles from Golang applications.
+`CodeXray-cluster-agent` automatically discovers and periodically retrieves profiles from Golang applications.
 
-<img alt="golang pull profiling" src="/img/docs/profiling/golang-profiling.png" class="card w-1200"/>
+<img alt="golang pull profiling" src="/docs/docs/Doc_golang-profiling.png" class="card w-1200"/>
 
 Supported profile types:
 
@@ -55,7 +55,7 @@ including unbuffered channels and locks.
 * Mutex profile allows to identify areas where goroutines contend for access to shared resources protected by mutexes.
 
 To enable collecting profiles of a Go application, you need to expose `pprof` endpoints
-and allow Coroot to discover the application pods.
+and allow CodeXray to discover the application pods.
 
 ### Step #1: exposing pprof endpoints
 
@@ -82,8 +82,8 @@ router.PathPrefix("/debug/pprof").Handler(http.DefaultServeMux)
 ### Step #2: annotating application Pods
 
 
-Coroot-cluster-agent automatically discovers and fetches profiles from pods
-annotated with `coroot.com/profile-scrape` and `coroot.com/profile-port` annotations:
+CodeXray-cluster-agent automatically discovers and fetches profiles from pods
+annotated with `codexray.com/profile-scrape` and `codexray.com/profile-port` annotations:
 
 ```yaml
 apiVersion: apps/v1
@@ -100,8 +100,8 @@ spec:
   template:
     metadata:
       annotations:
-        coroot.com/profile-scrape: "true"
-        coroot.com/profile-port: "8080"
+        Codexray.com/profile-scrape: "true"
+        Codexray.com/profile-port: "8080"
 ...
 ```
 
@@ -109,20 +109,20 @@ spec:
 
 All the available profiles can be accessed through the <b>Profiling</b> tab on the application page.
 
-<img alt="profiles" src="/img/docs/profiling/profiles.png" class="card w-1200"/>
+<img alt="profiles" src="/docs/docs/Doc_Profiles.png" class="card w-1200"/>
 
 
 Additionally, the **CPU** and **Memory** tabs contain shortcuts to the CPU and memory profiles, respectively.
 
 
 <div class="horizontal-images">
-  <img alt="Profiling CPU shortcut" src="/img/docs/profiling/cpu-shortcut.png" class="card" />
-  <img alt="Profiling Memory shortcut" src="/img/docs/profiling/memory-shortcut.png" class="card" />
+  <img alt="Profiling CPU shortcut" src="/docs/docs/Doc_Profiling_CPU_Shortcut.png" class="card" />
+  <img alt="Profiling Memory shortcut" src="/docs/docs/Doc_Profiling_Memory_Shortcut.png" />
 </div>
 
 By default, you see an aggregated FlameGraph for all profiles within the selected time range.
 
-<img alt="profile" src="/img/docs/profiling/profile.png" class="card w-1200"/>
+<img alt="profile" src="/docs/docs/Doc_Profile.png" class="card w-1200"/>
 
 
 The FlameGraph displays the code hierarchy organized by CPU time consumption,
@@ -135,11 +135,11 @@ resulting in functions from the same package sharing the same color.
 To view the FlameGraph for a specific time sub-range,
 select a chart area and choose the **Zoom** mode.
 
-<img alt="profile zoom" src="/img/docs/profiling/profile-zoom.png" class="card w-1200"/>
+<img alt="profile zoom" src="/docs/docs/Doc_Profile_zoom.png" class="card w-1200"/>
 
 Alternatively, you can opt for the **Comparison** mode to compare the selected time range with the previous one.
 
-<img alt="profile diff" src="/img/docs/profiling/profile-diff.png" class="card w-1200"/>
+<img alt="profile diff" src="/docs/docs/Doc_Profile_diff.png" class="card w-1200"/>
 
 In **Comparison** mode, functions experiencing degraded performance are colored red,
 whereas those performing better are colored green.
