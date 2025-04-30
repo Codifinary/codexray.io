@@ -46,7 +46,7 @@
             <v-dialog v-model="dialogVisible" max-width="800px">
                 <v-card>
                     <v-card-title class="headline d-flex justify-space-between align-center">
-                        <span class="popup-heading">Stack Trace</span>
+                        <span class="popup-heading">Crash Details</span>
                         <v-btn icon @click="dialogVisible = false">
                             <v-icon>mdi-close</v-icon>
                         </v-btn>
@@ -76,14 +76,18 @@
                             </div>
                         </div>
                         <div class="stack-container">
-                            <pre class="stack-trace"><v-btn
+                            <div class="stack-trace-title">
+                                <h5>Stack Trace</h5>
+                                <v-btn
                                 small
                                 icon
                                 @click="copyStackTrace"
                                 class="copy-btn"
                             >
                                 <v-icon>mdi-content-copy</v-icon>
-                            </v-btn>{{ selectedCrash?.StackTrace || 'No stack trace available' }}</pre>
+                            </v-btn>
+                        </div>
+                        <pre class="stack-trace">{{ selectedCrash?.StackTrace || 'No stack trace available' }}</pre>
                         </div>
                     </v-card-text>
                 </v-card>
@@ -248,6 +252,17 @@ export default {
     opacity: 0.8;
 }
 
+.stack-trace-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.stack-trace-title h5{
+    font-size: 16px;
+}
+
 .crash-link {
     text-decoration: none;
     color: inherit;
@@ -294,6 +309,7 @@ export default {
 .stack-container {
     padding-top: 1rem;
     padding-bottom: 1rem;
+    position: relative;
 }
 
 .popup-heading {
