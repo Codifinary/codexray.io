@@ -9,6 +9,7 @@ import (
 )
 
 type Overview struct {
+	Dashboard    *DashboardView              `json:"dashboard"`
 	Applications []*ApplicationStatus        `json:"applications"`
 	Health       []*ApplicationStatus        `json:"health"`
 	Incidents    []incident.Summary          `json:"incidents"`
@@ -28,6 +29,8 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 	}
 
 	switch view {
+	case "dashboard":
+		v.Dashboard = renderDashboard(ctx, ch, w)
 	case "applications":
 		v.Applications = renderApplications(w)
 	case "incidents":

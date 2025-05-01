@@ -184,7 +184,7 @@ WITH browser_requests AS (
     SELECT 
         Browser AS browser_name,
         COUNT(*) AS requests,
-        AVG(ResTime) AS response_time
+        avg(LoadPageTime) AS response_time
     FROM perf_data
     WHERE ServiceName = @serviceName
       AND Timestamp BETWEEN @from AND @to

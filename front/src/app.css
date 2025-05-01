@@ -12,9 +12,9 @@
     --border-dark: rgba(255, 255, 255, 0.2);
     --tooltip-light: white;
     --tooltip-dark: #424242;
-
     --status-unknown: gray;
     --status-ok: #1dbf73;
+    --primary-green:#013912;
     --status-warning: #ffa726;
     --status-critical: #ef5350;
 }
