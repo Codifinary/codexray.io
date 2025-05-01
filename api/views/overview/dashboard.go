@@ -82,8 +82,8 @@ func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.T
 	}
 
 	badge := EumBadge{
-		BrowserApps: appCounts.browserApps,
-		MobileApps:  appCounts.mobileApps,
+		BrowserApps: appCounts.BrowserApps,
+		MobileApps:  appCounts.MobileApps,
 	}
 
 	return eumOverviews, badge, nil
