@@ -2,3 +2,4 @@
 /static/
 /data*
 /node_modules/
+logs

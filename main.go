@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"net"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
@@ -26,7 +27,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/soheilhy/cmux"
 	"golang.org/x/term"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 	"gopkg.in/alecthomas/kingpin.v2"
 	"k8s.io/klog"
 )
@@ -298,8 +302,38 @@ func main() {
 	})
 
 	router.PathPrefix("").Handler(http.RedirectHandler(*urlBasePath, http.StatusMovedPermanently))
-	klog.Infoln("listening on", *listen)
-	klog.Fatalln(http.ListenAndServe(*listen, router))
+
+	lis, err := net.Listen("tcp", *listen)
+	if err != nil {
+		klog.Fatalf("failed to listen: %v", err)
+	}
+
+	m := cmux.New(lis)
+
+	grpcL := m.MatchWithWriters(cmux.HTTP2MatchHeaderFieldSendSettings("content-type", "application/grpc"))
+	httpL := m.Match(cmux.Any())
+
+	grpcServer := grpc.NewServer()
+	collector.InitDbMonitoringServices(grpcServer)
+
+	reflection.Register(grpcServer)
+
+	go func() {
+		klog.Infoln("gRPC server listening at", grpcL.Addr())
+		if err := grpcServer.Serve(grpcL); err != nil {
+			klog.Fatalf("failed to serve gRPC: %v", err)
+		}
+	}()
+
+	go func() {
+		klog.Infoln("HTTP server listening at", httpL.Addr())
+		if err := http.Serve(httpL, router); err != nil {
+			klog.Fatalf("failed to serve HTTP: %v", err)
+		}
+	}()
+
+	klog.Infoln("cmux multiplexer listening on", lis.Addr())
+	klog.Fatalln(m.Serve())
 }
 
 func readIndexHtml(basePath, version, instanceUuid string, checkForUpdates bool, developerMode bool) []byte {
