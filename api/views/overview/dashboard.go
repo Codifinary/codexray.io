@@ -88,10 +88,10 @@ type NodesTable struct {
 }
 
 type IncidentStats struct {
-	TotalIncidents    int64 `json:"totalIncidents"`
-	CriticalIncidents int64 `json:"criticalIncidents"`
-	WarningIncidents  int64 `json:"warningIncidents"`
-	ClosedIncidents   int64 `json:"closedIncidents"`
+	TotalIncidents    int `json:"totalIncidents"`
+	CriticalIncidents int `json:"criticalIncidents"`
+	WarningIncidents  int `json:"warningIncidents"`
+	ClosedIncidents   int `json:"closedIncidents"`
 }
 
 type IncidentTable struct {
@@ -103,21 +103,28 @@ type IncidentTable struct {
 func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World) *DashboardView {
 	v := &DashboardView{}
 
-	from := w.Ctx.From.ToStandard()
-	to := w.Ctx.To.ToStandard()
+	// from := w.Ctx.From.ToStandard()
+	// to := w.Ctx.To.ToStandard()
 
 	// EUM Overview
-	var eumOverview EumOverview
-	eumApps, badge, err := getEumOverviews(ctx, ch, from, to)
-	if err != nil {
-		klog.Errorln(err)
-		v.Status = model.WARNING
-		v.Message = err.Error()
-		return v
-	}
-	eumOverview.EumApps = eumApps
-	eumOverview.BadgeView = badge
-	v.EumOverview = eumOverview
+	// var eumOverview EumOverview
+	// eumApps, badge, err := getEumOverviews(ctx, ch, from, to)
+	// if err != nil {
+	// 	klog.Errorln(err)
+	// 	v.Status = model.WARNING
+	// 	v.Message = err.Error()
+	// 	return v
+	// }
+	// eumOverview.EumApps = eumApps
+	// eumOverview.BadgeView = badge
+
+	nodesOverview := renderNode(w)
+
+	incidentOverview := renderIncidents(w)
+
+	// v.EumOverview = eumOverview
+	v.Nodes = nodesOverview
+	v.Incidents = incidentOverview
 	v.Status = model.OK
 	return v
 }
@@ -262,5 +269,70 @@ func renderNode(w *model.World) NodeOverview {
 			AvgDiskUsage:   avgDisk,
 		},
 		Nodes: topNodes,
+	}
+}
+
+func renderIncidents(w *model.World) IncidentOverview {
+	var totalIncidents, criticalIncidents, warningIncidents, closedIncidents int
+	var incidentTable []IncidentTable
+
+	for _, app := range w.Applications {
+		switch {
+		case app.IsK8s():
+		case app.Id.Kind == model.ApplicationKindNomadJobGroup:
+		case !app.IsStandalone():
+		default:
+			continue
+		}
+
+		sort.Slice(app.Incidents, func(i, j int) bool {
+			return app.Incidents[i].OpenedAt.Before(app.Incidents[j].OpenedAt)
+		})
+
+		criticalCount := 0
+		warningCount := 0
+		closedCount := 0
+		for _, incident := range app.Incidents {
+			if incident.Resolved() {
+				closedCount++
+			}
+			switch incident.Severity {
+			case model.CRITICAL:
+				criticalCount++
+			case model.WARNING:
+				warningCount++
+			}
+		}
+
+		totalIncidents += len(app.Incidents)
+		criticalIncidents += criticalCount
+		warningIncidents += warningCount
+		closedIncidents += closedCount
+
+		if len(app.Incidents) > 0 {
+			incidentTable = append(incidentTable, IncidentTable{
+				ApplicationName: app.Id.Name,
+				OpenIncidents:   int64(len(app.Incidents) - closedCount),
+				LastOccurence:   app.Incidents[len(app.Incidents)-1].OpenedAt.ToStandard(),
+			})
+		}
+	}
+
+	sort.Slice(incidentTable, func(i, j int) bool {
+		return incidentTable[i].OpenIncidents > incidentTable[j].OpenIncidents
+	})
+
+	if len(incidentTable) > 5 {
+		incidentTable = incidentTable[:5]
+	}
+
+	return IncidentOverview{
+		IncidentStats: IncidentStats{
+			TotalIncidents:    totalIncidents,
+			CriticalIncidents: criticalIncidents,
+			WarningIncidents:  warningIncidents,
+			ClosedIncidents:   closedIncidents,
+		},
+		Incidents: incidentTable,
 	}
 }
