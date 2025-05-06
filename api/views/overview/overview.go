@@ -34,16 +34,27 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 	case "applications":
 		v.Applications = renderApplications(w)
 	case "incidents":
-		for _, app := range w.Applications {
-			switch {
-			case app.IsK8s():
-			case app.Id.Kind == model.ApplicationKindNomadJobGroup:
-			case !app.IsStandalone():
-			default:
-				continue
+		if query != "" {
+			for _, app := range w.Applications {
+				if app.Id.Name == query {
+					for _, i := range app.Incidents {
+						v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
+					}
+					break
+				}
 			}
-			for _, i := range app.Incidents {
-				v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
+		} else {
+			for _, app := range w.Applications {
+				switch {
+				case app.IsK8s():
+				case app.Id.Kind == model.ApplicationKindNomadJobGroup:
+				case !app.IsStandalone():
+				default:
+					continue
+				}
+				for _, i := range app.Incidents {
+					v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
+				}
 			}
 		}
 	case "map":
