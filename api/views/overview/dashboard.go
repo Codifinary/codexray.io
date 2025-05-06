@@ -23,7 +23,7 @@ type DashboardView struct {
 
 type ApplicationOverview struct {
 	ApplicationStatus ApplicationsStats  `json:"applicationsStats"`
-	Applications      []ApplicationTable `json:"applications"`
+	Applications      []ApplicationTable `json:"applicationTable"`
 }
 
 type EumOverview struct {
@@ -33,20 +33,20 @@ type EumOverview struct {
 
 type NodeOverview struct {
 	NodeStats NodeStats    `json:"nodeStats"`
-	Nodes     []NodesTable `json:"nodes"`
+	Nodes     []NodesTable `json:"nodesTable"`
 }
 
 type IncidentOverview struct {
 	IncidentStats IncidentStats   `json:"incidentStats"`
-	Incidents     []IncidentTable `json:"incidents"`
+	Incidents     []IncidentTable `json:"incidentTable"`
 }
 
 type ApplicationTable struct {
-	ID                   string  `json:"id"`
-	Status               string  `json:"status"`
-	TransactionPerSecond float64 `json:"transactionPerSecond"`
-	ResponseTime         float64 `json:"responseTime"`
-	Errors               uint64  `json:"errors"`
+	ID                   string       `json:"id"`
+	Status               model.Status `json:"status"`
+	TransactionPerSecond float32      `json:"transactionPerSecond"`
+	ResponseTime         float32      `json:"responseTime"`
+	Errors               float32      `json:"errors"`
 }
 
 type ApplicationsStats struct {
@@ -103,6 +103,8 @@ type IncidentTable struct {
 func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World) *DashboardView {
 	v := &DashboardView{}
 
+	applicationOverview := getApplications(w)
+
 	// from := w.Ctx.From.ToStandard()
 	// to := w.Ctx.To.ToStandard()
 
@@ -122,11 +124,93 @@ func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World)
 
 	incidentOverview := renderIncidents(w)
 
+	v.Applications = applicationOverview
 	// v.EumOverview = eumOverview
 	v.Nodes = nodesOverview
 	v.Incidents = incidentOverview
 	v.Status = model.OK
 	return v
+}
+
+func getApplications(w *model.World) ApplicationOverview {
+	var applicationTable []ApplicationTable
+	var totalCount, goodCount, fairCount, poorCount int64
+
+	for _, app := range w.Applications {
+		switch {
+		case app.IsK8s():
+		case app.Id.Kind == model.ApplicationKindNomadJobGroup:
+		case !app.IsStandalone():
+		default:
+			continue
+		}
+
+		totalRequests, totalLatency, totalErrors, connectionCount := calculateMetrics(app.Downstreams)
+
+		var averageLatency float32
+		if connectionCount > 0 && totalLatency > 0 {
+			averageLatency = totalLatency / float32(connectionCount)
+		}
+
+		applicationTable = append(applicationTable, ApplicationTable{
+			ID:                   app.Id.Name,
+			Status:               app.Status,
+			TransactionPerSecond: totalRequests,
+			ResponseTime:         averageLatency,
+			Errors:               totalErrors,
+		})
+
+		totalCount++
+		switch app.Status {
+		case model.OK:
+			goodCount++
+		case model.WARNING:
+			fairCount++
+		case model.CRITICAL:
+			poorCount++
+		}
+
+	}
+
+	sort.Slice(applicationTable, func(i, j int) bool {
+		return applicationTable[i].TransactionPerSecond > applicationTable[j].TransactionPerSecond
+	})
+
+	if len(applicationTable) > 5 {
+		applicationTable = applicationTable[:5]
+	}
+
+	return ApplicationOverview{
+		ApplicationStatus: ApplicationsStats{
+			Total: totalCount,
+			Good:  goodCount,
+			Fair:  fairCount,
+			Poor:  poorCount,
+		},
+		Applications: applicationTable,
+	}
+}
+
+func calculateMetrics(connections []*model.Connection) (float32, float32, float32, int) {
+	var totalRequests float32
+	var totalLatency float32
+	var totalErrors float32
+
+	requests := model.GetConnectionsRequestsSum(connections, nil).Last()
+	latency := model.GetConnectionsRequestsLatency(connections, nil).Last()
+	errors := model.GetConnectionsErrorsSum(connections, nil).Last()
+
+	if !timeseries.IsNaN(requests) {
+		totalRequests += requests
+	}
+	if !timeseries.IsNaN(latency) {
+		totalLatency += latency
+	}
+	if !timeseries.IsNaN(errors) {
+		totalErrors += errors
+	}
+
+	return totalRequests, totalLatency, totalErrors, len(connections)
 }
 
 func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.Time) ([]EumTable, EumBadge, error) {
@@ -277,6 +361,10 @@ func renderIncidents(w *model.World) IncidentOverview {
 	var incidentTable []IncidentTable
 
 	for _, app := range w.Applications {
+		if len(app.Incidents) == 0 {
+			continue
+		}
+
 		switch {
 		case app.IsK8s():
 		case app.Id.Kind == model.ApplicationKindNomadJobGroup:
@@ -295,6 +383,7 @@ func renderIncidents(w *model.World) IncidentOverview {
 		for _, incident := range app.Incidents {
 			if incident.Resolved() {
 				closedCount++
+				continue
 			}
 			switch incident.Severity {
 			case model.CRITICAL:
