@@ -2,10 +2,12 @@ package overview
 
 import (
 	"context"
+	"sort"
 	"time"
 
 	"codexray/clickhouse"
 	"codexray/model"
+	"codexray/timeseries"
 
 	"k8s.io/klog"
 )
@@ -72,17 +74,17 @@ type NodeStats struct {
 	TotalNodes     int64   `json:"totalNodes"`
 	UpNodes        int64   `json:"upNodes"`
 	DownNodes      int64   `json:"downNodes"`
-	AvgCPUUsage    float64 `json:"avgCpuUsage"`
-	AvgMemoryUsage float64 `json:"avgMemoryUsage"`
-	AvgDiskUsage   float64 `json:"avgDiskUsage"`
+	AvgCPUUsage    float32 `json:"avgCpuUsage"`
+	AvgMemoryUsage float32 `json:"avgMemoryUsage"`
+	AvgDiskUsage   float32 `json:"avgDiskUsage"`
 }
 
 type NodesTable struct {
 	NodeName    string  `json:"nodeName"`
 	NodeStatus  string  `json:"nodeStatus"`
-	CpuUsage    float64 `json:"cpuUsage"`
-	MemoryUsage float64 `json:"memoryUsage"`
-	DiskUsage   float64 `json:"diskUsage"`
+	CpuUsage    float32 `json:"cpuUsage"`
+	MemoryUsage float32 `json:"memoryUsage"`
+	DiskUsage   float32 `json:"diskUsage"`
 }
 
 type IncidentStats struct {
@@ -156,4 +158,109 @@ func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.T
 	}
 
 	return eumTable, badge, nil
+}
+
+func renderNode(w *model.World) NodeOverview {
+	var totalNodes, upNodes, downNodes int64
+	var totalCPU, totalMemory, totalDisk float32
+	var cpuCount, memoryCount, diskCount int64
+
+	var nodesTable []NodesTable
+
+	for _, n := range w.Nodes {
+		totalNodes++
+
+		name := n.GetName()
+		if name == "" {
+			klog.Warningln("empty node name for", n.Id)
+			continue
+		}
+
+		status := "up"
+		switch {
+		case !n.IsAgentInstalled():
+			status = "no agent installed"
+		case n.IsDown():
+			status = "down"
+			downNodes++
+		default:
+			upNodes++
+		}
+
+		var cpuUsage float32
+		if l := n.CpuUsagePercent.Last(); !timeseries.IsNaN(l) {
+			cpuUsage = l
+			totalCPU += cpuUsage
+			cpuCount++
+		}
+
+		var memoryUsage float32
+		if total := n.MemoryTotalBytes.Last(); !timeseries.IsNaN(total) {
+			if avail := n.MemoryAvailableBytes.Last(); !timeseries.IsNaN(avail) {
+				memoryUsage = 100 - (avail / total * 100)
+				totalMemory += memoryUsage
+				memoryCount++
+			}
+		}
+
+		var diskUsage float32
+		var totalDiskSpace, usedDiskSpace float32
+
+		for _, i := range n.Instances {
+			for _, v := range i.Volumes {
+				if capacity := v.CapacityBytes.Last(); !timeseries.IsNaN(capacity) {
+					totalDiskSpace += capacity
+				}
+				if used := v.UsedBytes.Last(); !timeseries.IsNaN(used) {
+					usedDiskSpace += used
+				}
+			}
+		}
+
+		if totalDiskSpace > 0 {
+			diskUsage = (usedDiskSpace / totalDiskSpace) * 100
+			totalDisk += diskUsage
+			diskCount++
+		}
+
+		nodesTable = append(nodesTable, NodesTable{
+			NodeName:    name,
+			NodeStatus:  status,
+			CpuUsage:    cpuUsage,
+			MemoryUsage: memoryUsage,
+			DiskUsage:   diskUsage,
+		})
+	}
+
+	sort.Slice(nodesTable, func(i, j int) bool {
+		return nodesTable[i].CpuUsage > nodesTable[j].CpuUsage
+	})
+
+	topNodes := nodesTable
+	if len(nodesTable) > 5 {
+		topNodes = nodesTable[:5]
+	}
+
+	var avgCPU, avgMemory, avgDisk float32
+	if cpuCount > 0 {
+		avgCPU = totalCPU / float32(cpuCount)
+	}
+	if memoryCount > 0 {
+		avgMemory = totalMemory / float32(memoryCount)
+	}
+	if diskCount > 0 {
+		avgDisk = totalDisk / float32(diskCount)
+	}
+
+	return NodeOverview{
+		NodeStats: NodeStats{
+			TotalNodes:     totalNodes,
+			UpNodes:        upNodes,
+			DownNodes:      downNodes,
+			AvgCPUUsage:    avgCPU,
+			AvgMemoryUsage: avgMemory,
+			AvgDiskUsage:   avgDisk,
+		},
+		Nodes: topNodes,
+	}
 }
