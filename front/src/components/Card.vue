@@ -164,24 +164,4 @@ export default {
         font-size: 30px;
     }
 }
-
-@media only screen and (max-width: 1600px) {
-  .card-body {
-    width: 20%;
-    height: 100px;
-    gap: 20px;
-  }
-
-  .card-name {
-    font-size: 12px;
-    line-height: 18px;
-    word-break: normal;
-    overflow-wrap: normal;
-    white-space: normal;
-  }
-
-  .card-count {
-    font-size: 24px;
-  }
-}
 </style>

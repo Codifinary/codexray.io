@@ -39,6 +39,9 @@ export default {
 };
 </script>
 <style scoped>
+.v-card__text {
+    padding-left: 0;
+}
 .page-experience-card {
     border-radius: 12px;
     width: 90vw;
@@ -93,6 +96,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-left: 1rem;
 }
 
 .experience-title {

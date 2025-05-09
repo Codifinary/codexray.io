@@ -10,7 +10,7 @@
             </div>
             <div class="mt-3 browser-table">
                 <span class="span">Browser Types</span>
-                <v-simple-table class="elevation-1 mt-3">
+                <v-simple-table class="elevation-1 mt-3 pb-3">
                     <thead>
                         <tr>
                             <th v-for="header in browserHeaders" :key="header.value">
@@ -127,12 +127,8 @@ export default {
 
 <style scoped>
 .main-container {
-    /* display: flex; */
-    /* flex-direction: column; */
-    /* gap: 1rem; */
     margin-left: 0 !important;
-    margin-right: 0 !important;
-    /* width: 100vw; */
+    margin-right: 5px !important;
 }
 
 .span {
@@ -177,5 +173,4 @@ export default {
 .page-table {
     width: 100%;
 }
-
 </style>
