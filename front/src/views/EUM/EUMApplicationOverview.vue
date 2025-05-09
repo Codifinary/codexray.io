@@ -1,5 +1,5 @@
 <template>
-    <div class="eum-container my-10 mx-5">
+    <div class="eum-container my-10">
         <Navigation class="my-3" :id="id" :error="selectedError" :eventId="eventId" @update:error="updateError" @update:eventId="updateEventId" />
 
         <v-tabs v-model="activeTab" height="40" slider-color="success" show-arrows slider-size="2" @change="updateUrl">
@@ -133,7 +133,5 @@ export default {
 }
 .eum-container {
     padding-bottom: 70px;
-    margin-left: 20px !important;
-    margin-right: 20px !important;
 }
 </style>

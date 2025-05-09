@@ -1,5 +1,5 @@
 <template>
-    <div class="my-10 mx-5">
+    <div class="my-10">
         <!-- Heatmap -->
         <TracesSummary :id="id" />
         <Heatmap v-if="view.heatmap" :heatmap="view.heatmap" :selection="selection" @select="setSelection" :loading="loading" />

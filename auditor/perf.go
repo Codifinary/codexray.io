@@ -36,10 +36,10 @@ func GeneratePerformanceReport(w *model.World, serviceName, pageName string, ch 
 	usersImpactedChart.AddSeries("Users Impacted", metrics["usersImpacted"], "red")
 
 	// 4) Chart Group for JS and API Errors
-	errorChartGroup := report.GetOrCreateChartGroup("Errors <selector>", nil)
-	errorChartGroup.GetOrCreateChart("Errors").Stacked().
-		AddSeries("JS Errors", metrics["jsErrors"], "orange").
-		AddSeries("API Errors", metrics["apiErrors"], "purple")
+
+	errorChart := report.GetOrCreateChart("Errors", nil).Stacked()
+	errorChart.AddSeries("JS Errors", metrics["jsErrors"], "orange")
+	errorChart.AddSeries("API Errors", metrics["apiErrors"], "purple")
 
 	// 5) User-Centric Metrics Chart
 	userCentric := model.NewChart(w.Ctx, "User-Centric Metrics").Stacked()
