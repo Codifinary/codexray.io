@@ -66,8 +66,8 @@ type EumTable struct {
 }
 
 type EumBadge struct {
-	BrowserApps uint64 `json:"browserApps" ch:"browserApps"`
-	MobileApps  uint64 `json:"mobileApps" ch:"mobileApps"`
+	BrowserApps int `json:"browserApps" ch:"browserApps"`
+	MobileApps  int `json:"mobileApps" ch:"mobileApps"`
 }
 
 type NodeStats struct {
@@ -105,27 +105,27 @@ func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World)
 
 	applicationOverview := getApplications(w)
 
-	// from := w.Ctx.From.ToStandard()
-	// to := w.Ctx.To.ToStandard()
+	from := w.Ctx.From.ToStandard()
+	to := w.Ctx.To.ToStandard()
 
 	// EUM Overview
-	// var eumOverview EumOverview
-	// eumApps, badge, err := getEumOverviews(ctx, ch, from, to)
-	// if err != nil {
-	// 	klog.Errorln(err)
-	// 	v.Status = model.WARNING
-	// 	v.Message = err.Error()
-	// 	return v
-	// }
-	// eumOverview.EumApps = eumApps
-	// eumOverview.BadgeView = badge
+	var eumOverview EumOverview
+	eumApps, badge, err := getEumOverviews(ctx, ch, from, to)
+	if err != nil {
+		klog.Errorln(err)
+		v.Status = model.WARNING
+		v.Message = err.Error()
+		return v
+	}
+	eumOverview.EumApps = eumApps
+	eumOverview.BadgeView = badge
 
 	nodesOverview := renderNode(w)
 
 	incidentOverview := renderIncidents(w)
 
 	v.Applications = applicationOverview
-	// v.EumOverview = eumOverview
+	v.EumOverview = eumOverview
 	v.Nodes = nodesOverview
 	v.Incidents = incidentOverview
 	v.Status = model.OK
@@ -238,14 +238,14 @@ func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.T
 		})
 
 	}
-	appCounts, err := ch.GetAppCounts(ctx, &from, &to)
+	browserApps, mobileApps, err := ch.GetAppCounts(ctx, &from, &to)
 	if err != nil {
 		return nil, EumBadge{}, err
 	}
 
 	badge := EumBadge{
-		BrowserApps: appCounts.BrowserApps,
-		MobileApps:  appCounts.MobileApps,
+		BrowserApps: browserApps,
+		MobileApps:  mobileApps,
 	}
 
 	return eumTable, badge, nil
