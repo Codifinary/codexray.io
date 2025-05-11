@@ -60,17 +60,17 @@ type ApplicationsStats struct {
 }
 
 type EumTable struct {
-	ServiceName       string  `json:"serviceName" ch:"ServiceName"`
-	AppType           string  `json:"appType" ch:"AppType"`
-	RequestsPerSecond float64 `json:"requestsPerSecond" ch:"requestsPerSecond"`
-	ResponseTime      float64 `json:"responseTime" ch:"responseTime"`
-	Errors            uint64  `json:"errors" ch:"errors"`
-	AffectedUsers     uint64  `json:"affectedUsers" ch:"affectedUsers"`
+	ServiceName       string  `json:"serviceName"`
+	AppType           string  `json:"appType"`
+	RequestsPerSecond float64 `json:"requestsPerSecond"`
+	ResponseTime      float64 `json:"responseTime"`
+	Errors            uint64  `json:"errors" `
+	AffectedUsers     uint64  `json:"affectedUsers" `
 }
 
 type EumBadge struct {
-	BrowserApps int `json:"browserApps" ch:"browserApps"`
-	MobileApps  int `json:"mobileApps" ch:"mobileApps"`
+	BrowserApps uint64 `json:"browserApps" ch:"browserApps"`
+	MobileApps  uint64 `json:"mobileApps" ch:"mobileApps"`
 }
 
 type NodeStats struct {
@@ -222,18 +222,12 @@ func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.T
 	}
 
 	var eumTable []EumTable
-	durationSeconds := to.Sub(from).Seconds()
 
 	for _, row := range rows {
-		var requestsPerSecond float64
-		if durationSeconds > 0 {
-			requestsPerSecond = float64(row.Requests) / durationSeconds
-		}
-
 		eumTable = append(eumTable, EumTable{
 			ServiceName:       row.ServiceName,
 			AppType:           row.AppType,
-			RequestsPerSecond: requestsPerSecond,
+			RequestsPerSecond: row.RequestsPerSecond,
 			ResponseTime:      row.ResponseTime,
 			Errors:            row.Errors,
 			AffectedUsers:     row.AffectedUsers,

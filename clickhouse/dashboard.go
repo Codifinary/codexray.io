@@ -9,12 +9,12 @@ import (
 )
 
 type ServiceMetric struct {
-	ServiceName   string
-	AppType       string
-	Requests      float64
-	ResponseTime  float64
-	Errors        uint64
-	AffectedUsers uint64
+	ServiceName       string
+	AppType           string
+	RequestsPerSecond float64
+	ResponseTime      float64
+	Errors            uint64
+	AffectedUsers     uint64
 }
 
 func (c *Client) GetEUMOverview(ctx context.Context, from, to *time.Time) ([]ServiceMetric, error) {
@@ -55,10 +55,10 @@ func (c *Client) getTop5Applications(ctx context.Context, from, to *time.Time) (
         SELECT 
             Service AS ServiceName,
             'Mobile' AS AppType,
-            SUM(Requests) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
-            SUM(ResponseTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTimePerSecond,
-            COUNTIF(Status = 0) AS Errors,
-            COUNTIF(Status = 0, DISTINCT UserID) AS AffectedUsers
+            COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
+            SUM(ResponseTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
+            SUM(CASE WHEN Status = 0 THEN 1 ELSE 0 END) AS Errors,
+            COUNT(DISTINCT CASE WHEN Status = 0 THEN UserID END) AS AffectedUsers
         FROM mobile_perf_data
         WHERE (@from IS NULL OR Timestamp >= @from)
           AND (@to IS NULL OR Timestamp <= @to)
@@ -71,8 +71,8 @@ func (c *Client) getTop5Applications(ctx context.Context, from, to *time.Time) (
         SELECT 
             ServiceName,
             'Browser' AS AppType,
-            SUM(Requests) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
-            SUM(ResponseTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTimePerSecond,
+            COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
+            SUM(ResTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
             0 AS Errors,
             0 AS AffectedUsers
         FROM perf_data
@@ -83,16 +83,12 @@ func (c *Client) getTop5Applications(ctx context.Context, from, to *time.Time) (
         LIMIT 5
     `
 
-	args := make([]any, 0, 2)
+	var args []any
 	if from != nil {
-		args = append(args, clickhouse.Named("from", from.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("from", nil))
+		args = append(args, clickhouse.Named("from", *from))
 	}
 	if to != nil {
-		args = append(args, clickhouse.Named("to", to.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("to", nil))
+		args = append(args, clickhouse.Named("to", *to))
 	}
 
 	var metrics []ServiceMetric
@@ -130,16 +126,12 @@ func (c *Client) getBrowserErrorsAndAffectedUsers(ctx context.Context, serviceNa
         GROUP BY ServiceName
     `, inClause)
 
-	args := make([]any, 0, 2)
+	var args []any
 	if from != nil {
-		args = append(args, clickhouse.Named("from", from.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("from", nil))
+		args = append(args, clickhouse.Named("from", *from))
 	}
 	if to != nil {
-		args = append(args, clickhouse.Named("to", to.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("to", nil))
+		args = append(args, clickhouse.Named("to", *to))
 	}
 
 	var metrics []ServiceMetric
@@ -150,36 +142,39 @@ func (c *Client) getBrowserErrorsAndAffectedUsers(ctx context.Context, serviceNa
 	return metrics, nil
 }
 
-func (c *Client) GetAppCounts(ctx context.Context, from, to *time.Time) (int, int, error) {
-	query := `
+func (c *Client) GetAppCounts(ctx context.Context, from, to *time.Time) (uint64, uint64, error) {
+	browserQuery := `
         SELECT 
             COUNT(DISTINCT ServiceName) AS BrowserServiceCount
         FROM perf_data
         WHERE (@from IS NULL OR Timestamp >= @from)
-          AND (@to IS NULL OR Timestamp <= @to);
+          AND (@to IS NULL OR Timestamp <= @to)
+    `
 
+	mobileQuery := `
         SELECT 
             COUNT(DISTINCT Service) AS MobileServiceCount
         FROM mobile_perf_data
         WHERE (@from IS NULL OR Timestamp >= @from)
-          AND (@to IS NULL OR Timestamp <= @to);
+          AND (@to IS NULL OR Timestamp <= @to)
     `
 
-	args := make([]any, 0, 2)
+	var args []any
 	if from != nil {
-		args = append(args, clickhouse.Named("from", from.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("from", nil))
+		args = append(args, clickhouse.Named("from", *from))
 	}
 	if to != nil {
-		args = append(args, clickhouse.Named("to", to.Format("2006-01-02 15:04:05")))
-	} else {
-		args = append(args, clickhouse.Named("to", nil))
+		args = append(args, clickhouse.Named("to", *to))
 	}
 
-	var browserServiceCount, mobileServiceCount int
-	if err := c.conn.QueryRow(ctx, query, args...).Scan(&browserServiceCount, &mobileServiceCount); err != nil {
-		return 0, 0, fmt.Errorf("failed to execute query: %w", err)
+	var browserServiceCount uint64
+	if err := c.conn.QueryRow(ctx, browserQuery, args...).Scan(&browserServiceCount); err != nil {
+		return 0, 0, fmt.Errorf("failed to execute browser query: %w", err)
+	}
+
+	var mobileServiceCount uint64
+	if err := c.conn.QueryRow(ctx, mobileQuery, args...).Scan(&mobileServiceCount); err != nil {
+		return 0, 0, fmt.Errorf("failed to execute mobile query: %w", err)
 	}
 
 	return browserServiceCount, mobileServiceCount, nil
