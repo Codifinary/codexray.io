@@ -9,16 +9,19 @@ import (
 	"codexray/model"
 	"codexray/timeseries"
 
+	"golang.org/x/exp/maps"
 	"k8s.io/klog"
 )
 
 type DashboardView struct {
-	Status       model.Status        `json:"status"`
-	Message      string              `json:"message"`
-	Applications ApplicationOverview `json:"applications"`
-	EumOverview  EumOverview         `json:"eumOverview"`
-	Nodes        NodeOverview        `json:"nodes"`
-	Incidents    IncidentOverview    `json:"incidents"`
+	Status             model.Status        `json:"status"`
+	Message            string              `json:"message"`
+	Applications       ApplicationOverview `json:"applications"`
+	EumOverview        EumOverview         `json:"eumOverview"`
+	Nodes              NodeOverview        `json:"nodes"`
+	Incidents          IncidentOverview    `json:"incidents"`
+	AppStatsChart      *model.EChart       `json:"appStatsChart,omitempty"`
+	IncidentStatsChart *model.EChart       `json:"incidentStatsChart,omitempty"`
 }
 
 type ApplicationOverview struct {
@@ -95,6 +98,7 @@ type IncidentStats struct {
 }
 
 type IncidentTable struct {
+	Icon            string    `json:"icon"`
 	ApplicationName string    `json:"applicationName"`
 	OpenIncidents   int64     `json:"openIncidents"`
 	LastOccurence   time.Time `json:"lastOccurrence"`
@@ -124,52 +128,50 @@ func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World)
 
 	incidentOverview := renderIncidents(w)
 
+	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
+
+	appStatsChart := renderApplicationsStatsDonutChart(applicationOverview.ApplicationStatus, report)
+	incidentStatsChart := renderIncidentStatsDonutChart(incidentOverview.IncidentStats, report)
+
 	v.Applications = applicationOverview
 	v.EumOverview = eumOverview
 	v.Nodes = nodesOverview
 	v.Incidents = incidentOverview
+	v.AppStatsChart = appStatsChart
+	v.IncidentStatsChart = incidentStatsChart
 	v.Status = model.OK
 	return v
 }
 
 func getApplications(w *model.World) ApplicationOverview {
+	applicationStatuses := renderApplications(w)
+
 	var applicationTable []ApplicationTable
 	var totalCount, goodCount, fairCount, poorCount int64
 
-	for _, app := range w.Applications {
-		switch {
-		case app.IsK8s():
-		case app.Id.Kind == model.ApplicationKindNomadJobGroup:
-		case !app.IsStandalone():
-		default:
-			continue
-		}
-
-		totalRequests, totalLatency, totalErrors, connectionCount := calculateMetrics(app.Downstreams)
-
-		var averageLatency float32
-		if connectionCount > 0 && totalLatency > 0 {
-			averageLatency = totalLatency / float32(connectionCount)
-		}
+	for _, appStatus := range applicationStatuses {
+		totalRequests, totalLatency, totalErrors := calculateMetrics(w.GetApplication(appStatus.Id).Downstreams)
 
 		applicationTable = append(applicationTable, ApplicationTable{
-			ID:                   app.Id.Name,
-			Status:               app.Status,
+			ID:                   appStatus.Id.Name,
+			Status:               appStatus.Status,
 			TransactionPerSecond: totalRequests,
-			ResponseTime:         averageLatency,
+			ResponseTime:         totalLatency,
 			Errors:               totalErrors,
 		})
 
 		totalCount++
-		switch app.Status {
+		switch appStatus.Status {
 		case model.OK:
 			goodCount++
 		case model.WARNING:
 			fairCount++
+		case model.INFO:
+			fairCount++
 		case model.CRITICAL:
 			poorCount++
-		}
 
+		}
 	}
 
 	sort.Slice(applicationTable, func(i, j int) bool {
@@ -191,7 +193,7 @@ func getApplications(w *model.World) ApplicationOverview {
 	}
 }
 
-func calculateMetrics(connections []*model.Connection) (float32, float32, float32, int) {
+func calculateMetrics(connections []*model.Connection) (float32, float32, float32) {
 	var totalRequests float32
 	var totalLatency float32
 	var totalErrors float32
@@ -210,7 +212,7 @@ func calculateMetrics(connections []*model.Connection) (float32, float32, float3
 		totalErrors += errors
 	}
 
-	return totalRequests, totalLatency, totalErrors, len(connections)
+	return totalRequests, totalLatency, totalErrors
 }
 
 func getEumOverviews(ctx context.Context, ch *clickhouse.Client, from, to time.Time) ([]EumTable, EumBadge, error) {
@@ -399,7 +401,10 @@ func renderIncidents(w *model.World) IncidentOverview {
 		closedIncidents += closedCount
 
 		if len(app.Incidents) > 0 {
+			icon := getApplicationIcon(app)
+
 			incidentTable = append(incidentTable, IncidentTable{
+				Icon:            icon,
 				ApplicationName: app.Id.Name,
 				OpenIncidents:   int64(len(app.Incidents) - closedCount),
 				LastOccurence:   app.Incidents[len(app.Incidents)-1].OpenedAt.ToStandard(),
@@ -424,4 +429,75 @@ func renderIncidents(w *model.World) IncidentOverview {
 		},
 		Incidents: incidentTable,
 	}
+}
+
+func getApplicationIcon(app *model.Application) string {
+	types := maps.Keys(app.ApplicationTypes())
+	if len(types) == 0 {
+		return ""
+	}
+
+	var t model.ApplicationType
+	if len(types) == 1 {
+		t = types[0]
+	} else {
+		sort.Slice(types, func(i, j int) bool {
+			ti, tj := types[i], types[j]
+			tiw, tjw := ti.Weight(), tj.Weight()
+			if tiw == tjw {
+				return ti < tj
+			}
+			return tiw < tjw
+		})
+		t = types[0]
+	}
+
+	return t.Icon()
+}
+func renderApplicationsStatsDonutChart(appStats ApplicationsStats, report *model.AuditReport) *model.EChart {
+	data := []model.DataPoint{
+		{Value: int(appStats.Good), Name: "Good"},
+		{Value: int(appStats.Fair), Name: "Fair"},
+		{Value: int(appStats.Poor), Name: "Poor"},
+	}
+
+	colors := []string{"#66BB6A", "#F99737", "#E7514E"}
+
+	chart := report.GetOrCreateEChart("Node Applications", nil)
+	chart.Title = model.TextTitle{
+		Text: "Node Applications",
+		TextStyle: &model.TextStyle{
+			FontSize:   16,
+			FontWeight: "normal",
+		},
+	}
+	chart.Tooltip = model.Tooltip{Trigger: "item"}
+	chart.Legend = model.Legend{Bottom: "0"}
+	chart.SetDonutChartSeries("Applications", data, colors)
+
+	return chart
+}
+
+func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.AuditReport) *model.EChart {
+	data := []model.DataPoint{
+		{Value: int(incidentStats.CriticalIncidents), Name: "Critical"},
+		{Value: int(incidentStats.WarningIncidents), Name: "Warning"},
+		{Value: int(incidentStats.ClosedIncidents), Name: "Closed"},
+	}
+
+	colors := []string{"#EF5350", "#FFA726", "#66BB6A"}
+
+	chart := report.GetOrCreateEChart("Incidents Summary", nil)
+	chart.Title = model.TextTitle{
+		Text: "Incident Summary",
+		TextStyle: &model.TextStyle{
+			FontSize:   16,
+			FontWeight: "normal",
+		},
+	}
+	chart.Tooltip = model.Tooltip{Trigger: "item"}
+	chart.Legend = model.Legend{Bottom: "0"}
+	chart.SetDonutChartSeries("Incidents", data, colors)
+
+	return chart
 }
