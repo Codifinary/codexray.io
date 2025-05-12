@@ -9,7 +9,7 @@
                         <EChart :chartOptions="config" class="chart-box" />
                     </div>
                     <div class="d-flex justify-center align-items-center">
-                        <div v-for="(item, index) in statusLegend" :key="index" class="status-item">
+                        <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
                             <div class="status-label">
                                 <Led :status="item.status" />
                                 <span class="sub-heading label-text">{{ item.label }}</span>
@@ -21,7 +21,7 @@
                 <div class="mt-3">
                     <span class="sub-heading">Top applications</span>
                     <span class="sub-heading-light">(By volume)</span>
-                    <v-simple-table class="elevation-2 mt-3 nodeApps-table">
+                    <v-simple-table v-if="nodeApplications" class="elevation-2 mt-3 nodeApps-table">
                         <thead>
                             <tr>
                                 <th v-for="header in nodeApplicationsHeaders" :key="header.value">
@@ -31,21 +31,21 @@
                         </thead>
                         <tbody>
                             <template v-if="nodeApplications && nodeApplications.length">
-                                <tr v-for="item in nodeApplications" :key="item.name">
+                                <tr v-for="item in nodeApplications" :key="item.id">
                                     <td>
                                         <div class="name d-flex">
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: item.name },
+                                                    params: { view: 'health', id: item.id },
                                                     query: $route.query,
                                                 }"
                                             >
-                                                {{ item.name }}
+                                                {{ item.id }}
                                             </router-link>
                                         </div>
                                     </td>
-                                    <td>{{ item.requests }}</td>
+                                    <td>{{ item.transactionPerSecond.toFixed(2) }}</td>
                                     <td>
                                         {{ $format.convertLatency(item.responseTime).value.toFixed(2) }}
                                     </td>
@@ -61,6 +61,7 @@
                             </template>
                         </tbody>
                     </v-simple-table>
+                    <EmptyState v-else class="mt-3 elevation-2 nodeApps-table" :title="emptyState.title" :description="emptyState.description" height="30vh" :iconName="emptyState.iconName" />
                 </div>
             </div>
 
@@ -69,7 +70,7 @@
                     <span class="sub-heading">EUM Overview</span>
                     <span class="sub-heading-light">(By requests)</span>
                 </div>
-                <div class="d-flex">
+                <div v-if="eumApplications" class="d-flex">
                     <div class="app-count-container mt-3 mx-7">
                         <div class="app-count-item">
                             <span class="sub-heading-light">Browser Apps</span>
@@ -128,35 +129,36 @@
                         </tbody>
                     </v-simple-table>
                 </div>
+                <EmptyState v-else class="mt-3 elevation-2 eum-table" :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" />
             </v-card>
             <v-card class="mobileApps">
                 <div class="mt-5 ml-8">
                     <span class="sub-heading">Node status</span>
                     <span class="sub-heading-light">(By CPU usage)</span>
                 </div>
-                <div>
+                <div v-if="nodes">
                     <v-row class="status-summary" align="center" no-gutters>
                         <div class="hex-container up">
-                            <div class="hex">200k</div>
+                            <div class="hex">{{ $format.shortenNumber(nodeStats.upNodes).value  +  $format.shortenNumber(nodeStats.upNodes).unit }}</div>
                             <span class="node-status">Up</span>
                         </div>
                         <div class="hex-container down">
-                            <div class="hex">13k</div>
+                            <div class="hex">{{ $format.shortenNumber(nodeStats.downNodes).value + $format.shortenNumber(nodeStats.downNodes).unit }}</div>
                             <span class="node-status">Down</span>
                         </div>
                         <v-divider vertical class="mx-4" />
                         <div class="metrics">
                             <div class="metric">
                                 <span class="label">Avg CPU Utilisation</span>
-                                <span class="value">68%</span>
+                                <span class="value">{{nodeStats?.avgCpuUsage?.toFixed(2)}}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Memory Utilisation</span>
-                                <span class="value">74%</span>
+                                <span class="value">{{nodeStats?.avgMemoryUsage?.toFixed(2)}}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Disk Utilisation</span>
-                                <span class="value">81%</span>
+                                <span class="value">{{nodeStats?.avgDiskUsage?.toFixed(2)}}%</span>
                             </div>
                         </div>
                     </v-row>
@@ -171,17 +173,17 @@
                         </thead>
                         <tbody>
                             <template v-if="nodes && nodes.length">
-                                <tr v-for="item in nodes" :key="item.name">
+                                <tr v-for="item in nodes" :key="item.nodeName">
                                     <td>
                                         <div class="name d-flex">
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: item.name },
+                                                    params: { view: 'health', id: item.nodeName },
                                                     query: $route.query,
                                                 }"
                                             >
-                                                {{ item.name }}
+                                                {{ item.nodeName }}
                                             </router-link>
                                         </div>
                                     </td>
@@ -193,7 +195,7 @@
                                                 color="blue lighten-1"
                                                 :value="item.cpuUsage"
                                             />
-                                            <span class="progress-value">{{ item.cpuUsage }}%</span>
+                                            <span class="progress-value">{{ item.cpuUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
                                     <td>
@@ -204,7 +206,7 @@
                                                 color="purple lighten-1"
                                                 :value="item.memoryUsage"
                                             />
-                                            <span class="progress-value">{{ item.memoryUsage }}%</span>
+                                            <span class="progress-value">{{ item.memoryUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
                                     <td>
@@ -215,7 +217,7 @@
                                                 color="green lighten-1"
                                                 :value="item.diskUsage"
                                             />
-                                            <span class="progress-value">{{ item.diskUsage }}%</span>
+                                            <span class="progress-value">{{ item.diskUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -230,6 +232,7 @@
                         </tbody>
                     </v-simple-table>
                 </div>
+                <EmptyState v-else class="mt-3 elevation-2 nodes-table" :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" />
             </v-card>
             <div class="bottom-container">
                 <v-card class="incidents-container">
@@ -238,7 +241,7 @@
                             <EChart :chartOptions="config" class="chart-box" />
                         </div>
                         <div class="d-flex justify-center align-items-center">
-                            <div v-for="(item, index) in statusLegend" :key="index" class="status-item">
+                            <div v-for="(item, index) in incidentStatusLegend" :key="index" class="status-item">
                                 <div class="status-label">
                                     <Led :status="item.status" />
                                     <span class="sub-heading incident-label-text">{{ item.label }}</span>
@@ -258,23 +261,25 @@
                             </thead>
                             <tbody>
                                 <template v-if="incidents && incidents.length">
-                                    <tr v-for="item in incidents" :key="item.name">
+                                    <tr v-for="item in incidents" :key="item.applicationName">
                                         <td>
                                             <div class="name d-flex">
-                                                <img :src="item.icon" alt="App Icon" />
+                                                <img  
+                                                    :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`"
+                                                    alt="App Icon" />
                                                 <router-link
                                                     :to="{
                                                         name: 'overview',
-                                                        params: { view: 'incidents', id: item.name },
+                                                        params: { view: 'incidents', id: item.applicationName },
                                                         query: $route.query,
                                                     }"
                                                 >
-                                                    {{ item.service }}
+                                                    {{ item.applicationName }}
                                                 </router-link>
                                             </div>
                                         </td>
                                         <td>{{ item.openIncidents }}</td>
-                                        <td>{{ item.lastIncident }}</td>
+                                        <td>{{ $format.timeSinceNow(new Date(item.lastOccurrence))}} ago</td>
                                     </tr>
                                 </template>
                                 <template v-else>
@@ -287,6 +292,7 @@
                             </tbody>
                         </v-simple-table>
                     </div>
+                <!-- <EmptyState v-else class="mt-3 elevation-2 " :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" /> -->
                 </v-card>
                 <v-card class="pa-4 db-insights-card" elevation="1">
                     <div class="d-flex justify-space-between align-center mb-4">
@@ -321,16 +327,23 @@
 <script>
 import EChart from '@/components/EChart.vue';
 import Led from '@/components/Led.vue';
-import data from './data.json';
+import EmptyState from '@/views/EmptyState.vue';
+import mockData from '@/views/data.json';
+
 export default {
-    components: { EChart, Led },
+    components: { EChart, Led, EmptyState },
     data() {
         return {
             chartData: [],
-            statusLegend: [
-                { status: 'ok', label: 'Good', value: 50 },
-                { status: 'warning', label: 'Fair', value: 10 },
-                { status: 'critical', label: 'Poor', value: 10 },
+            incidentStatusLegend: [
+                { status: 'ok', label: 'Resolved', value: 0 },
+                { status: 'warning', label: 'Warning', value: 0 },
+                { status: 'critical', label: 'Critical', value: 0 },
+            ],
+            applicationStatusLegend: [
+                { status: 'ok', label: 'Good', value: 0 },
+                { status: 'warning', label: 'Fair', value: 0 },
+                { status: 'critical', label: 'Poor', value: 0 },
             ],
             nodeApplicationsHeaders: [
                 { text: 'Top apps', value: 'name' },
@@ -338,7 +351,7 @@ export default {
                 { text: 'Response time (ms)', value: 'responseTime' },
                 { text: 'Error %', value: 'errors' },
             ],
-            nodeApplications: [],
+            nodeApplications: null,
             eumApplicationsHeaders: [
                 { text: 'Top apps', value: 'name' },
                 { text: 'Req/sec', value: 'rps' },
@@ -346,25 +359,31 @@ export default {
                 { text: 'Errors', value: 'errors' },
                 { text: 'Affected users', value: 'affectedUsers' },
             ],
-            eumApplications: [],
+            eumApplications: null,
             nodesHeaders: [
                 { text: 'Top VMs', value: 'name' },
                 { text: 'CPU', value: 'cpuUsage' },
                 { text: 'Memory', value: 'memoryUsage' },
                 { text: 'Disk Space', value: 'diskUsage' },
             ],
+            emptyState: {
+                title: 'No Data Available',
+                description: 'No data available for this view',
+                iconName: 'NoData',
+            },
             incidentsHeaders: [
                 { text: 'Service/Application', value: 'name' },
                 { text: 'Open Incidents', value: 'openIncidents' },
                 { text: 'Last Incident', value: 'lastIncident' },
             ],
-            incidents: [],
-            nodes: [],
+            incidents: null,
+            nodes: null,
             browserAppsCount: 0,
             mobileAppsCount: 0,
             loading: false,
             error: '',
-            incidentChartData: [],
+            incidentChartData: null,
+            nodeStats: null 
         };
     },
     mounted() {
@@ -374,22 +393,32 @@ export default {
         fetchDashboardData() {
             this.loading = true;
             this.error = '';
-            // this.$api.get('./data.json', (data, error) => {
-            //     this.loading = false;
-            //     if (error) {
-            //         console.error('Error fetching dashboard data:', error);
-            //         this.error = error;
-            //         return;
-            //     }
-
-            this.nodeApplications = data.nodeApplications || [];
-            this.eumApplications = data.eumApplications || [];
-            this.nodes = data.nodes || [];
-            this.chartData = data.chartData || [];
-            this.incidentChartData = data.incidentChartData || [];
-            this.browserAppsCount = data.browserAppsCount || 0;
-            this.mobileAppsCount = data.mobileAppsCount || 0;
-            this.incidents = data.incidents || [];
+            this.$api.getDashboardData((data, error) => {
+                this.loading = false;
+                console.log(error)
+                if (error) {
+                    console.error('Error fetching dashboard data:', error);
+                    this.error = error;
+                    return;
+                }
+                this.nodeApplications = data.dashboard.applications.applicationTable;
+                this.eumApplications = data.dashboard.eumOverview.eumOverview;
+                this.nodes = data.dashboard.nodes.nodesTable;
+                this.nodeStats = data.dashboard.nodes.nodeStats;
+                // this.chartData = data.dashboard.appStatsChart;
+                this.chartData = mockData.appStatsChart; //mock
+                // this.incidentChartData = data.dashboard.incidentStatsChart;
+                this.incidentChartData = mockData.incidentStatsChart; //mock
+                this.browserAppsCount = data.dashboard.eumOverview.badgeView.browserApps;
+                this.mobileAppsCount = data.dashboard.eumOverview.badgeView.mobileApps;
+                this.incidents =data.dashboard.incidents.incidentTable;
+                this.incidentStatusLegend[0].value = mockData?.incidentStatsChart[0]?.series[0]?.data[2]?.value;//mock
+                this.incidentStatusLegend[1].value = mockData?.incidentStatsChart[0]?.series[0]?.data[1]?.value; //mock
+                this.incidentStatusLegend[2].value = mockData?.incidentStatsChart[0]?.series[0]?.data[0]?.value;//mock
+                this.applicationStatusLegend[0].value = mockData?.appStatsChart[0]?.series[0]?.data[0]?.value;//mock
+                this.applicationStatusLegend[1].value = mockData?.appStatsChart[0]?.series[0]?.data[1]?.value; //mock
+                this.applicationStatusLegend[2].value = mockData?.appStatsChart[0]?.series[0]?.data[2]?.value;//mock
+            });
         },
     },
 };

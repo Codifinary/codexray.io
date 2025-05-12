@@ -51,7 +51,6 @@ export default {
     },
     buttonText: {
       type: String,
-      required: true
     },
     iconName: {
       type: String,

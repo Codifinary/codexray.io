@@ -351,4 +351,8 @@ export default class Api {
     getMRUMSessionsData(serviceName, query,cb){
         this.get(this.projectPath(`mrum/${serviceName}/sessions`), query, cb);
     }
+
+    getDashboardData(cb){
+        this.get(this.projectPath(`overview/dashboard`),{}, cb);
+    }
 }
