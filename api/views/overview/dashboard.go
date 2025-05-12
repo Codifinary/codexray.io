@@ -20,8 +20,8 @@ type DashboardView struct {
 	EumOverview        EumOverview         `json:"eumOverview"`
 	Nodes              NodeOverview        `json:"nodes"`
 	Incidents          IncidentOverview    `json:"incidents"`
-	AppStatsChart      *model.EChart       `json:"appStatsChart,omitempty"`
-	IncidentStatsChart *model.EChart       `json:"incidentStatsChart,omitempty"`
+	AppStatsChart      *[]model.EChart     `json:"appStatsChart,omitempty"`
+	IncidentStatsChart *[]model.EChart     `json:"incidentStatsChart,omitempty"`
 }
 
 type ApplicationOverview struct {
@@ -53,10 +53,10 @@ type ApplicationTable struct {
 }
 
 type ApplicationsStats struct {
-	Total int64 `json:"total"`
-	Good  int64 `json:"good"`
-	Fair  int64 `json:"fair"`
-	Poor  int64 `json:"poor"`
+	Total int64
+	Good  int64
+	Fair  int64
+	Poor  int64
 }
 
 type EumTable struct {
@@ -91,10 +91,10 @@ type NodesTable struct {
 }
 
 type IncidentStats struct {
-	TotalIncidents    int `json:"totalIncidents"`
-	CriticalIncidents int `json:"criticalIncidents"`
-	WarningIncidents  int `json:"warningIncidents"`
-	ClosedIncidents   int `json:"closedIncidents"`
+	TotalIncidents    int
+	CriticalIncidents int
+	WarningIncidents  int
+	ClosedIncidents   int
 }
 
 type IncidentTable struct {
@@ -107,7 +107,7 @@ type IncidentTable struct {
 func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World) *DashboardView {
 	v := &DashboardView{}
 
-	applicationOverview := getApplications(w)
+	applicationOverview, appStats := getApplications(w)
 
 	from := w.Ctx.From.ToStandard()
 	to := w.Ctx.To.ToStandard()
@@ -126,12 +126,12 @@ func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World)
 
 	nodesOverview := renderNode(w)
 
-	incidentOverview := renderIncidents(w)
+	incidentOverview, incidentStats := renderIncidents(w)
 
 	report := model.NewAuditReport(nil, w.Ctx, nil, model.AuditReportPerformance, true)
 
-	appStatsChart := renderApplicationsStatsDonutChart(applicationOverview.ApplicationStatus, report)
-	incidentStatsChart := renderIncidentStatsDonutChart(incidentOverview.IncidentStats, report)
+	appStatsChart := renderApplicationsStatsDonutChart(appStats, report)
+	incidentStatsChart := renderIncidentStatsDonutChart(incidentStats, report)
 
 	v.Applications = applicationOverview
 	v.EumOverview = eumOverview
@@ -140,10 +140,11 @@ func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World)
 	v.AppStatsChart = appStatsChart
 	v.IncidentStatsChart = incidentStatsChart
 	v.Status = model.OK
+
 	return v
 }
 
-func getApplications(w *model.World) ApplicationOverview {
+func getApplications(w *model.World) (ApplicationOverview, ApplicationsStats) {
 	applicationStatuses := renderApplications(w)
 
 	var applicationTable []ApplicationTable
@@ -183,14 +184,13 @@ func getApplications(w *model.World) ApplicationOverview {
 	}
 
 	return ApplicationOverview{
-		ApplicationStatus: ApplicationsStats{
+			Applications: applicationTable,
+		}, ApplicationsStats{
 			Total: totalCount,
 			Good:  goodCount,
 			Fair:  fairCount,
 			Poor:  poorCount,
-		},
-		Applications: applicationTable,
-	}
+		}
 }
 
 func calculateMetrics(connections []*model.Connection) (float32, float32, float32) {
@@ -352,7 +352,7 @@ func renderNode(w *model.World) NodeOverview {
 	}
 }
 
-func renderIncidents(w *model.World) IncidentOverview {
+func renderIncidents(w *model.World) (IncidentOverview, IncidentStats) {
 	var totalIncidents, criticalIncidents, warningIncidents, closedIncidents int
 	var incidentTable []IncidentTable
 
@@ -415,14 +415,13 @@ func renderIncidents(w *model.World) IncidentOverview {
 	}
 
 	return IncidentOverview{
-		IncidentStats: IncidentStats{
+			Incidents: incidentTable,
+		}, IncidentStats{
 			TotalIncidents:    totalIncidents,
 			CriticalIncidents: criticalIncidents,
 			WarningIncidents:  warningIncidents,
 			ClosedIncidents:   closedIncidents,
-		},
-		Incidents: incidentTable,
-	}
+		}
 }
 
 func getApplicationIcon(app *model.Application) string {
@@ -448,7 +447,7 @@ func getApplicationIcon(app *model.Application) string {
 
 	return t.Icon()
 }
-func renderApplicationsStatsDonutChart(appStats ApplicationsStats, report *model.AuditReport) *model.EChart {
+func renderApplicationsStatsDonutChart(appStats ApplicationsStats, report *model.AuditReport) *[]model.EChart {
 	data := []model.DataPoint{
 		{Value: int(appStats.Good), Name: "Good"},
 		{Value: int(appStats.Fair), Name: "Fair"},
@@ -469,14 +468,13 @@ func renderApplicationsStatsDonutChart(appStats ApplicationsStats, report *model
 	chart.Legend = model.Legend{Bottom: "0"}
 	chart.SetDonutChartSeries("Applications", data, colors)
 
-	return chart
+	return &[]model.EChart{*chart}
 }
-
-func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.AuditReport) *model.EChart {
+func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.AuditReport) *[]model.EChart {
 	data := []model.DataPoint{
 		{Value: int(incidentStats.CriticalIncidents), Name: "Critical"},
 		{Value: int(incidentStats.WarningIncidents), Name: "Warning"},
-		{Value: int(incidentStats.ClosedIncidents), Name: "Closed"},
+		{Value: int(incidentStats.ClosedIncidents), Name: "Resolved"},
 	}
 
 	colors := []string{"#EF5350", "#FFA726", "#66BB6A"}
@@ -493,5 +491,5 @@ func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.Au
 	chart.Legend = model.Legend{Bottom: "0"}
 	chart.SetDonutChartSeries("Incidents", data, colors)
 
-	return chart
+	return &[]model.EChart{*chart}
 }

@@ -590,20 +590,7 @@ func (ec *EChart) SetDonutChartSeries(name string, data []DataPoint, colors []st
 		Type:   "pie",
 		Data:   data,
 		Radius: []string{"40%", "70%"},
-		Label: &Label{
-			Show:     true,
-			Position: "outside",
-			FontSize: 12,
-		},
-		Emphasis: &Emphasis{
-			Label: &EmphasisLabel{
-				Show:       true,
-				FontSize:   14,
-				FontWeight: "bold",
-			},
-		},
 	}
-
 	if len(colors) > 0 {
 		ec.Color = colors
 	}
