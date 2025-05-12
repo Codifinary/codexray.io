@@ -2,7 +2,28 @@
     <div class="mt-5">
         <span class="heading ml-8">Executive Dashboard</span>
 
-        <div class="dashboard-container">
+        <EmptyState
+            v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
+            class="mt-3"
+            :title="'Set-up your application'"
+            :description="'Install Prometheus agent to get started'"
+            height="29vh"
+            :iconName="emptyState.iconName"
+            :helpText="'Need help? See our docs'"
+            :buttonText="'Configure Prometheus'"
+        />
+        <EmptyState
+            v-else-if="status.node_agent.status !== 'ok'"
+            class="mt-3"
+            :title="'Set-up your application'"
+            :description="'Set up node agent to get started'"
+            height="29vh"
+            :iconName="emptyState.iconName"
+            :helpText="'Need help? See our docs'"
+            :buttonText="'Install node-agent'"
+        />
+
+        <div v-else class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
                     <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
@@ -427,12 +448,22 @@ export default {
             loading: false,
             error: '',
             incidentChartData: null,
+            context: null,
             nodeStats: null,
         };
     },
     mounted() {
         this.fetchDashboardData();
     },
+    computed: {
+        status() {
+            return this.context?.status || {};
+        },
+    },
+    created() {
+        this.context = this.$api.context;
+    },
+
     methods: {
         fetchDashboardData() {
             this.loading = true;
@@ -449,8 +480,8 @@ export default {
                 this.eumApplications = data.dashboard.eumOverview.eumOverview;
                 this.nodes = data.dashboard.nodes.nodesTable;
                 this.nodeStats = data.dashboard.nodes.nodeStats;
-                // this.chartData = data.dashboard.appStatsChart;
-                this.chartData = mockData.appStatsChart; //mock
+                this.chartData = Array.isArray(data.dashboard.appStatsChart) ? data.dashboard.appStatsChart : [data.dashboard.appStatsChart];
+                // this.chartData = mockData.chartData; //mock
                 // this.incidentChartData = data.dashboard.incidentStatsChart;
                 this.incidentChartData = mockData.incidentStatsChart; //mock
                 this.browserAppsCount = data.dashboard.eumOverview.badgeView.browserApps;
@@ -459,9 +490,14 @@ export default {
                 this.incidentStatusLegend[0].value = mockData?.incidentStatsChart[0]?.series[0]?.data[2]?.value; //mock
                 this.incidentStatusLegend[1].value = mockData?.incidentStatsChart[0]?.series[0]?.data[1]?.value; //mock
                 this.incidentStatusLegend[2].value = mockData?.incidentStatsChart[0]?.series[0]?.data[0]?.value; //mock
-                this.applicationStatusLegend[0].value = mockData?.appStatsChart[0]?.series[0]?.data[0]?.value; //mock
-                this.applicationStatusLegend[1].value = mockData?.appStatsChart[0]?.series[0]?.data[1]?.value; //mock
-                this.applicationStatusLegend[2].value = mockData?.appStatsChart[0]?.series[0]?.data[2]?.value; //mock
+                this.applicationStatusLegend[0].value = data.dashboard.applications.applicationsStats.good;
+                console.log(data.dashboard.applications.applicationsStats);
+                console.log(data.dashboard);
+                this.applicationStatusLegend[1].value = data.dashboard.applications.applicationsStats.fair;
+                this.applicationStatusLegend[2].value = data.dashboard.applications.applicationsStats.poor;
+                // this.applicationStatusLegend[0].value = data.dashboard.appStatsChart.series.data[0]?.value; //mock
+                // this.applicationStatusLegend[1].value = data.dashboard.appStatsChart.series.data[1]?.value; //mock
+                // this.applicationStatusLegend[2].value = data.dashboard.appStatsChart.series.data[2]?.value; //mock
             });
         },
     },
