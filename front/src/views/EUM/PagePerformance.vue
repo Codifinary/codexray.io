@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="main-container">
         <div class="summary-container">
             <DataCards :data="badges" />
 
@@ -8,9 +8,9 @@
                     <EChart :chartOptions="config" class="chart-box" />
                 </div>
             </div>
-            <div class="mt-3">
+            <div class="browser-table-div">
                 <span class="span">Browser Types</span>
-                <v-simple-table class="elevation-1 mt-3 browser-table">
+                <v-simple-table class="browser-table elevation-1">
                     <thead>
                         <tr>
                             <th v-for="header in browserHeaders" :key="header.value">
@@ -36,7 +36,7 @@
             <Dashboard :name="'Browser performance'" :widgets="widgets" />
         </div>
 
-        <CustomTable :headers="headers" :items="pagePerformance" item-key="pagePath" class="elevation-1 mt-10">
+        <CustomTable :headers="headers" :items="pagePerformance" item-key="pagePath" class="elevation-1 mt-10 page-table">
             <template v-slot:[`item.pagePath`]="{ item }">
                 <router-link
                     :to="{
@@ -126,6 +126,11 @@ export default {
 </script>
 
 <style scoped>
+.main-container {
+    margin-left: 0 !important;
+    margin-right: 5px !important;
+}
+
 .span {
     font-size: 1.25rem;
     font-weight: 500;
@@ -160,8 +165,20 @@ export default {
     transform: scale(0.9);
     transform-origin: center;
 }
+
+.browser-table-div {
+    min-width: 30vw;
+    width: 100%;
+    margin-top: 0.5rem;
+}
 .browser-table {
-    min-width: 40vw;
+    min-width: 30vw;
+    width: 100%;
     height: 35vh;
+    margin-top: 0.5rem;
+}
+
+.page-table {
+    width: 100%;
 }
 </style>

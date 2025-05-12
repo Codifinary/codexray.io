@@ -267,10 +267,9 @@ func createLineCharts(w *model.World, ctx context.Context, ch *clickhouse.Client
 		return report, err
 	}
 
-	errorChartGroup := report.GetOrCreateChartGroup("Errors <selector>", nil)
-	errorChartGroup.GetOrCreateChart("Errors").Stacked().
-		AddSeries("JS Errors", metrics["jsErrors"], "orange").
-		AddSeries("API Errors", metrics["apiErrors"], "purple")
+	errorChart := report.GetOrCreateChart("Errors", nil).Stacked()
+	errorChart.AddSeries("JS Errors", metrics["jsErrors"], "orange")
+	errorChart.AddSeries("API Errors", metrics["apiErrors"], "purple")
 
 	usersImpactedChart := report.GetOrCreateChart("Users Impacted", nil).Stacked().Column()
 	usersImpactedChart.AddSeries("Total Users", metrics["totalUsers"], "green")

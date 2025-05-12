@@ -118,7 +118,6 @@ export default {
 <style scoped>
 .page-experience {
     display: flex;
-
     flex-direction: row;
     gap: 16px;
 }

@@ -16,9 +16,11 @@
                     <div class="icon-placeholder">
                         <img :src="`${$codexray.base_path}static/img/tech-icons/${item.status.toLowerCase()}.svg`" alt="Trend Icon" />
                     </div>
-                    <div class="experience-title">{{ item.title }}</div>
-                    <div class="experience-status" :style="{ color: item.color || '#f97316' }">
-                        {{ item.status }}
+                    <div class="experience-content">
+                        <div class="experience-title">{{ item.title }}</div>
+                        <div class="experience-status" :style="{ color: item.color || '#f97316' }">
+                            {{ item.status }}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -37,6 +39,9 @@ export default {
 };
 </script>
 <style scoped>
+.v-card__text {
+    padding-left: 0;
+}
 .page-experience-card {
     border-radius: 12px;
     width: 90vw;
@@ -65,6 +70,13 @@ export default {
     width: 100%;
 }
 
+.experience-content {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
 .experience-box {
     position: relative;
     width: 15vw;
@@ -84,10 +96,10 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    padding-left: 1rem;
 }
 
 .experience-title {
-    margin-top: 2rem;
     color: #4b5563;
     font-size: 1rem;
 }

@@ -184,7 +184,7 @@ WITH browser_requests AS (
     SELECT 
         Browser AS browser_name,
         COUNT(*) AS requests,
-        AVG(ResTime) AS response_time
+        AVG(LoadPageTime) AS response_time
     FROM perf_data
     WHERE ServiceName = @serviceName
       AND Timestamp BETWEEN @from AND @to
@@ -414,36 +414,31 @@ func (c *Client) GetPerformanceTimeSeries(ctx context.Context, serviceName, page
 
 func (c *Client) GetTotalRequests(ctx context.Context, from, to *time.Time, serviceName, pagePath string) (uint64, error) {
 	query := `
-		SELECT
-			count(*) AS totalRequests
-		FROM
-			perf_data p
-		LEFT JOIN
-			err_log_data e
-		ON
-			p.PageName = e.PagePath
-			AND p.ServiceName = e.ServiceName`
+        SELECT
+            count(*) AS totalRequests
+        FROM
+            perf_data`
 
 	var filters []string
 	var args []any
 
 	// Add time range filters
 	if from != nil {
-		filters = append(filters, "p.Timestamp >= @from")
+		filters = append(filters, "Timestamp >= @from")
 		args = append(args, clickhouse.Named("from", *from))
 	}
 	if to != nil {
-		filters = append(filters, "p.Timestamp <= @to")
+		filters = append(filters, "Timestamp <= @to")
 		args = append(args, clickhouse.Named("to", *to))
 	}
 
 	// Add service name and page path filters
 	if serviceName != "" {
-		filters = append(filters, "p.ServiceName = @serviceName")
+		filters = append(filters, "ServiceName = @serviceName")
 		args = append(args, clickhouse.Named("serviceName", serviceName))
 	}
 	if pagePath != "" {
-		filters = append(filters, "p.PageName = @pagePath OR e.PagePath = @pagePath")
+		filters = append(filters, "PageName = @pagePath")
 		args = append(args, clickhouse.Named("pagePath", pagePath))
 	}
 
