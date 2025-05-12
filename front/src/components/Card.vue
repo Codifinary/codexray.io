@@ -123,7 +123,7 @@ export default {
 
 .card-count {
     font-weight: 700;
-    font-size: 24px;
+    font-size: 1.5rem;
     padding: 0;
     line-height: 33px;
     color: #013912;
@@ -152,12 +152,6 @@ export default {
     .card-name {
         font-size: 12px;
         line-height: 18px;
-    }
-
-    .card-count {
-        font-weight: 800;
-        font-size: 36px;
-        line-height: 38px;
     }
 
     .v-icon {
