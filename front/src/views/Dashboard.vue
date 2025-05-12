@@ -3,12 +3,12 @@
         <span class="heading ml-8">Executive Dashboard</span>
 
         <div class="dashboard-container">
-            <div class="applications-container">
+            <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
                     <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
                         <EChart :chartOptions="config" class="chart-box" />
                     </div>
-                    <div class="d-flex justify-center align-items-center">
+                    <div v-if="chartData" class="d-flex justify-center align-items-center">
                         <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
                             <div class="status-label">
                                 <Led :status="item.status" />
@@ -21,7 +21,7 @@
                 <div class="mt-3">
                     <span class="sub-heading">Top applications</span>
                     <span class="sub-heading-light">(By volume)</span>
-                    <v-simple-table v-if="nodeApplications" class="elevation-2 mt-3 nodeApps-table">
+                    <v-simple-table class="elevation-2 mt-3 nodeApps-table">
                         <thead>
                             <tr>
                                 <th v-for="header in nodeApplicationsHeaders" :key="header.value">
@@ -61,8 +61,17 @@
                             </template>
                         </tbody>
                     </v-simple-table>
-                    <EmptyState v-else class="mt-3 elevation-2 nodeApps-table" :title="emptyState.title" :description="emptyState.description" height="30vh" :iconName="emptyState.iconName" />
                 </div>
+            </div>
+            <div v-else>
+                <EmptyState
+                    class="mt-3 elevation-2 nodeApps-table"
+                    :heading="'Node Applications'"
+                    :title="emptyState.title"
+                    :description="emptyState.description"
+                    height="30vh"
+                    :iconName="emptyState.iconName"
+                />
             </div>
 
             <v-card class="eum-container">
@@ -98,23 +107,31 @@
                         </thead>
                         <tbody>
                             <template v-if="eumApplications && eumApplications.length">
-                                <tr v-for="item in eumApplications" :key="item.name">
+                                <tr v-for="item in eumApplications" :key="item.serviceName">
                                     <td>
                                         <div class="name d-flex">
-                                            <img :src="`${$codexray.base_path}static/img/tech-icons/${item.appType}.svg`" alt="App Icon" />
+                                            <img
+                                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType === 'Browser' ? 'browserApps' : 'mobileApps'}.svg`"
+                                                alt="App Icon"
+                                            />
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'BRUM', id: item.name },
+                                                    params: { view: 'BRUM', id: item.serviceName },
                                                     query: $route.query,
                                                 }"
                                             >
-                                                {{ item.name }}
+                                                {{ item.serviceName }}
                                             </router-link>
                                         </div>
                                     </td>
-                                    <td>{{ item.rps }}</td>
-                                    <td>{{ $format.convertLatency(item.responseTime).value.toFixed(2) }}</td>
+                                    <td>
+                                        {{ $format.convertLatency(item.requestsPerSecond).value.toFixed(2) }}
+                                        {{ $format.convertLatency(item.requestsPerSecond).unit }}
+                                    </td>
+                                    <td>
+                                        {{ $format.convertLatency(item.responseTime).value.toFixed(2) }}
+                                    </td>
                                     <td>{{ item.errors }}</td>
                                     <td>{{ item.affectedUsers }}</td>
                                 </tr>
@@ -129,7 +146,14 @@
                         </tbody>
                     </v-simple-table>
                 </div>
-                <EmptyState v-else class="mt-3 elevation-2 eum-table" :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" />
+                <EmptyState
+                    v-else
+                    class="mt-3 elevation-2 eum-table"
+                    :title="emptyState.title"
+                    :description="emptyState.description"
+                    height="30vh"
+                    :iconName="emptyState.iconName"
+                />
             </v-card>
             <v-card class="mobileApps">
                 <div class="mt-5 ml-8">
@@ -139,26 +163,30 @@
                 <div v-if="nodes">
                     <v-row class="status-summary" align="center" no-gutters>
                         <div class="hex-container up">
-                            <div class="hex">{{ $format.shortenNumber(nodeStats.upNodes).value  +  $format.shortenNumber(nodeStats.upNodes).unit }}</div>
+                            <div class="hex">
+                                {{ $format.shortenNumber(nodeStats.upNodes).value + $format.shortenNumber(nodeStats.upNodes).unit }}
+                            </div>
                             <span class="node-status">Up</span>
                         </div>
                         <div class="hex-container down">
-                            <div class="hex">{{ $format.shortenNumber(nodeStats.downNodes).value + $format.shortenNumber(nodeStats.downNodes).unit }}</div>
+                            <div class="hex">
+                                {{ $format.shortenNumber(nodeStats.downNodes).value + $format.shortenNumber(nodeStats.downNodes).unit }}
+                            </div>
                             <span class="node-status">Down</span>
                         </div>
                         <v-divider vertical class="mx-4" />
                         <div class="metrics">
                             <div class="metric">
                                 <span class="label">Avg CPU Utilisation</span>
-                                <span class="value">{{nodeStats?.avgCpuUsage?.toFixed(2)}}%</span>
+                                <span class="value">{{ nodeStats?.avgCpuUsage?.toFixed(2) }}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Memory Utilisation</span>
-                                <span class="value">{{nodeStats?.avgMemoryUsage?.toFixed(2)}}%</span>
+                                <span class="value">{{ nodeStats?.avgMemoryUsage?.toFixed(2) }}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Disk Utilisation</span>
-                                <span class="value">{{nodeStats?.avgDiskUsage?.toFixed(2)}}%</span>
+                                <span class="value">{{ nodeStats?.avgDiskUsage?.toFixed(2) }}%</span>
                             </div>
                         </div>
                     </v-row>
@@ -232,67 +260,83 @@
                         </tbody>
                     </v-simple-table>
                 </div>
-                <EmptyState v-else class="mt-3 elevation-2 nodes-table" :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" />
+                <EmptyState
+                    v-else
+                    class="mt-3 nodes-table"
+                    :title="emptyState.title"
+                    :description="emptyState.description"
+                    height="30vh"
+                    :iconName="emptyState.iconName"
+                />
             </v-card>
             <div class="bottom-container">
-                <v-card class="incidents-container">
-                    <div class="incidents-chart-container">
-                        <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
-                            <EChart :chartOptions="config" class="chart-box" />
-                        </div>
-                        <div class="d-flex justify-center align-items-center">
-                            <div v-for="(item, index) in incidentStatusLegend" :key="index" class="status-item">
-                                <div class="status-label">
-                                    <Led :status="item.status" />
-                                    <span class="sub-heading incident-label-text">{{ item.label }}</span>
+                <v-card v-if="incidents" class="incidents-container">
+                    <div>
+                        <div class="incidents-chart-container">
+                            <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
+                                <EChart :chartOptions="config" class="chart-box" />
+                            </div>
+                            <div v-if="incidentChartData" class="d-flex justify-center align-items-center">
+                                <div v-for="(item, index) in incidentStatusLegend" :key="index" class="status-item">
+                                    <div class="status-label">
+                                        <Led :status="item.status" />
+                                        <span class="sub-heading incident-label-text">{{ item.label }}</span>
+                                    </div>
+                                    <span class="sub-heading incident-value-text">{{ item.value }}</span>
                                 </div>
-                                <span class="sub-heading incident-value-text">{{ item.value }}</span>
                             </div>
                         </div>
-                    </div>
-                    <div>
-                        <v-simple-table class="elevation-0 incidents-table">
-                            <thead>
-                                <tr>
-                                    <th v-for="header in incidentsHeaders" :key="header.value">
-                                        {{ header.text }}
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <template v-if="incidents && incidents.length">
-                                    <tr v-for="item in incidents" :key="item.applicationName">
-                                        <td>
-                                            <div class="name d-flex">
-                                                <img  
-                                                    :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`"
-                                                    alt="App Icon" />
-                                                <router-link
-                                                    :to="{
-                                                        name: 'overview',
-                                                        params: { view: 'incidents', id: item.applicationName },
-                                                        query: $route.query,
-                                                    }"
-                                                >
-                                                    {{ item.applicationName }}
-                                                </router-link>
-                                            </div>
-                                        </td>
-                                        <td>{{ item.openIncidents }}</td>
-                                        <td>{{ $format.timeSinceNow(new Date(item.lastOccurrence))}} ago</td>
-                                    </tr>
-                                </template>
-                                <template v-else>
+                        <div>
+                            <v-simple-table class="elevation-0 incidents-table">
+                                <thead>
                                     <tr>
-                                        <td colspan="4" class="text-center">
-                                            <span>No Data Available</span>
-                                        </td>
+                                        <th v-for="header in incidentsHeaders" :key="header.value">
+                                            {{ header.text }}
+                                        </th>
                                     </tr>
-                                </template>
-                            </tbody>
-                        </v-simple-table>
+                                </thead>
+                                <tbody>
+                                    <template v-if="incidents && incidents.length">
+                                        <tr v-for="item in incidents" :key="item.applicationName">
+                                            <td>
+                                                <div class="name d-flex">
+                                                    <img :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`" alt="App Icon" />
+                                                    <router-link
+                                                        :to="{
+                                                            name: 'overview',
+                                                            params: { view: 'incidents', id: item.applicationName },
+                                                            query: $route.query,
+                                                        }"
+                                                    >
+                                                        {{ item.applicationName }}
+                                                    </router-link>
+                                                </div>
+                                            </td>
+                                            <td>{{ item.openIncidents }}</td>
+                                            <td>{{ $format.timeSinceNow(new Date(item.lastOccurrence)) }} ago</td>
+                                        </tr>
+                                    </template>
+                                    <template v-else>
+                                        <tr>
+                                            <td colspan="4" class="text-center">
+                                                <span>No Data Available</span>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </v-simple-table>
+                        </div>
                     </div>
-                <!-- <EmptyState v-else class="mt-3 elevation-2 " :title="emptyState.title" :description="emptyState.description" height="50vh" :iconName="emptyState.iconName" /> -->
+                </v-card>
+                <v-card v-else>
+                    <EmptyState
+                        class="mt-3 nodeApps-table"
+                        :heading="'Incidents'"
+                        :title="emptyState.title"
+                        :description="emptyState.description"
+                        height="29vh"
+                        :iconName="emptyState.iconName"
+                    />
                 </v-card>
                 <v-card class="pa-4 db-insights-card" elevation="1">
                     <div class="d-flex justify-space-between align-center mb-4">
@@ -383,7 +427,7 @@ export default {
             loading: false,
             error: '',
             incidentChartData: null,
-            nodeStats: null 
+            nodeStats: null,
         };
     },
     mounted() {
@@ -395,7 +439,7 @@ export default {
             this.error = '';
             this.$api.getDashboardData((data, error) => {
                 this.loading = false;
-                console.log(error)
+                console.log(error);
                 if (error) {
                     console.error('Error fetching dashboard data:', error);
                     this.error = error;
@@ -411,13 +455,13 @@ export default {
                 this.incidentChartData = mockData.incidentStatsChart; //mock
                 this.browserAppsCount = data.dashboard.eumOverview.badgeView.browserApps;
                 this.mobileAppsCount = data.dashboard.eumOverview.badgeView.mobileApps;
-                this.incidents =data.dashboard.incidents.incidentTable;
-                this.incidentStatusLegend[0].value = mockData?.incidentStatsChart[0]?.series[0]?.data[2]?.value;//mock
+                this.incidents = data.dashboard.incidents.incidentTable;
+                this.incidentStatusLegend[0].value = mockData?.incidentStatsChart[0]?.series[0]?.data[2]?.value; //mock
                 this.incidentStatusLegend[1].value = mockData?.incidentStatsChart[0]?.series[0]?.data[1]?.value; //mock
-                this.incidentStatusLegend[2].value = mockData?.incidentStatsChart[0]?.series[0]?.data[0]?.value;//mock
-                this.applicationStatusLegend[0].value = mockData?.appStatsChart[0]?.series[0]?.data[0]?.value;//mock
+                this.incidentStatusLegend[2].value = mockData?.incidentStatsChart[0]?.series[0]?.data[0]?.value; //mock
+                this.applicationStatusLegend[0].value = mockData?.appStatsChart[0]?.series[0]?.data[0]?.value; //mock
                 this.applicationStatusLegend[1].value = mockData?.appStatsChart[0]?.series[0]?.data[1]?.value; //mock
-                this.applicationStatusLegend[2].value = mockData?.appStatsChart[0]?.series[0]?.data[2]?.value;//mock
+                this.applicationStatusLegend[2].value = mockData?.appStatsChart[0]?.series[0]?.data[2]?.value; //mock
             });
         },
     },
@@ -476,12 +520,12 @@ export default {
     flex-direction: column;
 
     justify-content: flex-start;
-    min-width: 15vw;
+    min-width: 19vw;
     min-height: 20vh;
 }
 
 .incidents-chart-wrapper {
-    width: 20vw;
+    width: 19vw;
     height: 25vh;
 }
 .chart-box {
@@ -572,8 +616,8 @@ export default {
 }
 
 .name img {
-    width: 1rem;
-    height: 1rem;
+    width: 1.5rem;
+    height: 1.5rem;
 }
 
 .app-count-container {
@@ -588,6 +632,7 @@ export default {
 
 .app-count-item {
     display: flex;
+    justify-content: center;
     flex-direction: column;
     gap: 0.5rem;
 }
@@ -595,12 +640,8 @@ export default {
 .app-icon-count {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 0.5rem;
-}
-
-.app-icon-count img {
-    width: 1.5rem;
-    height: 1.5rem;
 }
 
 .app-count {
@@ -611,6 +652,7 @@ export default {
 
 .eum-container {
     width: auto;
+    min-height: 30vh;
 }
 
 /* Status Summary */
