@@ -91,10 +91,10 @@ type NodesTable struct {
 }
 
 type IncidentStats struct {
-	TotalIncidents    int
-	CriticalIncidents int
-	WarningIncidents  int
-	ClosedIncidents   int
+	TotalIncidents    int64
+	CriticalIncidents int64
+	WarningIncidents  int64
+	ClosedIncidents   int64
 }
 
 type IncidentTable struct {
@@ -417,10 +417,10 @@ func renderIncidents(w *model.World) (IncidentOverview, IncidentStats) {
 	return IncidentOverview{
 			Incidents: incidentTable,
 		}, IncidentStats{
-			TotalIncidents:    totalIncidents,
-			CriticalIncidents: criticalIncidents,
-			WarningIncidents:  warningIncidents,
-			ClosedIncidents:   closedIncidents,
+			TotalIncidents:    int64(totalIncidents),
+			CriticalIncidents: int64(criticalIncidents),
+			WarningIncidents:  int64(warningIncidents),
+			ClosedIncidents:   int64(closedIncidents),
 		}
 }
 
