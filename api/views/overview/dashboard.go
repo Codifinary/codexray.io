@@ -3,6 +3,7 @@ package overview
 import (
 	"context"
 	"sort"
+	"strconv"
 	"time"
 
 	"codexray/clickhouse"
@@ -468,6 +469,19 @@ func renderApplicationsStatsDonutChart(appStats ApplicationsStats, report *model
 	chart.Legend = model.Legend{Bottom: "0"}
 	chart.SetDonutChartSeries("Applications", data, colors)
 
+	chart.Graphic = &model.Graphic{
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: model.GraphicStyle{
+			Text:       strconv.FormatInt(appStats.Total, 10),
+			FontSize:   26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center",
+		},
+	}
+
 	return &[]model.EChart{*chart}
 }
 func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.AuditReport) *[]model.EChart {
@@ -490,6 +504,18 @@ func renderIncidentStatsDonutChart(incidentStats IncidentStats, report *model.Au
 	chart.Tooltip = model.Tooltip{Trigger: "item"}
 	chart.Legend = model.Legend{Bottom: "0"}
 	chart.SetDonutChartSeries("Incidents", data, colors)
+	chart.Graphic = &model.Graphic{
+		Type: "text",
+		Left: "center",
+		Top:  "center",
+		Style: model.GraphicStyle{
+			Text:       strconv.FormatInt(incidentStats.TotalIncidents, 10),
+			FontSize:   26,
+			FontWeight: "bold",
+			Fill:       "#333",
+			TextAlign:  "center",
+		},
+	}
 
 	return &[]model.EChart{*chart}
 }
