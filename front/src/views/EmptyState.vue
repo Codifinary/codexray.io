@@ -1,6 +1,6 @@
 <template>
-    <div :style="{ height, width }">
-        <span class="ml-8 mt-5 sub-heading">{{ heading }}</span>
+    <div :style="{ height, width }" class="empty-state-wrapper">
+        <span v-if="heading" class="ml-8 mt-5 sub-heading">{{ heading }}</span>
 
         <div class="empty-state-container">
             <div class="empty-state-content">
@@ -12,8 +12,33 @@
                 <div v-if="title" class="empty-state-title">{{ title }}</div>
                 <!-- Description -->
                 <div v-if="description" class="empty-state-description">{{ description }}</div>
-                <!-- Button -->
-                <button v-if="buttonText" class="empty-state-button">{{ buttonText }}</button>
+
+                  <template v-if="buttonText">
+                    <AgentInstallation 
+                        v-if="buttonType === 'agent-installation'"
+                        color="primary"
+                    >
+                        {{ buttonText }}
+                    </AgentInstallation>
+                    <button 
+                        v-else-if="buttonType === 'prometheus-configuration'"
+                        class="empty-state-button"
+                    >
+                        <router-link :to="{
+                            name: 'project_new',
+                            params: {
+                                view: 'Settings',
+                                tab: 'prometheus',
+                            },
+                        }">{{ buttonText }}</router-link>
+                    </button>
+                    <button 
+                        v-else 
+                        class="empty-state-button disabled"
+                    >
+                        {{ buttonText }}
+                    </button>
+                </template>
 
                 <div v-if="helpText" class="help-text">
                     <span>{{ helpText }}</span>
@@ -25,13 +50,14 @@
 
 <script>
 import BaseIcon from '@/components/BaseIcon.vue';
+import AgentInstallation from '@/views/AgentInstallation.vue';
 
 export default {
     name: 'EmptyState',
     props: {
         height: {
             type: String,
-            default: '70vh',
+            default: '100%',
         },
         width: {
             type: String,
@@ -61,47 +87,67 @@ export default {
         },
         iconName: {
             type: String,
-            default: 'NoData',
+            default: 'emptyState',
         },
         helpText: {
             type: String,
         },
+        buttonType: {
+            type: String,
+        },
+        buttonClick: {
+            type: Function,
+        },
     },
     components: {
         BaseIcon,
+        AgentInstallation,
     },
 };
 </script>
 
 <style scoped>
+.empty-state-wrapper {
+    overflow: hidden;
+}
+
 .empty-state-container {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
+    overflow: hidden;
 }
+
 .empty-state-content {
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2rem;
 }
+
 .empty-state-icon {
     margin-bottom: 0.5rem;
 }
+
 .sub-heading {
     font-size: 1.2rem;
     font-weight: 500;
     color: #333;
 }
+
 .empty-state-title {
     font-size: 1.25rem;
     font-weight: 600;
     margin-bottom: 0.25rem;
 }
+
 .empty-state-description {
     color: #666;
     font-size: 1rem;
     margin-bottom: 0.75rem;
 }
+
 .empty-state-button {
     background: #22c55e;
     color: #fff;
@@ -110,12 +156,19 @@ export default {
     padding: 0.625rem 1.5rem;
     font-size: 1rem;
     font-weight: 500;
-    cursor: pointer;
     transition: background 0.2s;
 }
+
 .empty-state-button:hover {
     background: #16a34a;
 }
+
+.empty-state-button .disabled {
+    background: #16a34a;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .help-text {
     display: flex;
     flex-direction: column;

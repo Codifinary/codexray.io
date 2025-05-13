@@ -1,33 +1,36 @@
 <template>
-    <div class="mt-5">
+    <div class="pt-5 main-container">
         <span class="heading ml-8">Executive Dashboard</span>
 
-        <EmptyState
+        <!-- <EmptyState
             v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
-            class="mt-3"
+            class="ma-auto empty-state-container"
             :title="'Set-up your application'"
             :description="'Install Prometheus agent to get started'"
-            height="29vh"
             :iconName="emptyState.iconName"
             :helpText="'Need help? See our docs'"
             :buttonText="'Configure Prometheus'"
-        />
-        <EmptyState
+            :buttonType="'prometheus-configuration'"
+            height="calc(100vh - 120px)"
+        /> -->
+        <!-- <EmptyState
             v-else-if="status.node_agent.status !== 'ok'"
-            class="mt-3"
+            class="ma-auto empty-state-container"
             :title="'Set-up your application'"
             :description="'Set up node agent to get started'"
-            height="29vh"
             :iconName="emptyState.iconName"
             :helpText="'Need help? See our docs'"
             :buttonText="'Install node-agent'"
-        />
+            :buttonType="'agent-installation'"
+        /> -->
 
-        <div v-else class="dashboard-container">
+        <div class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
+                    <span class="sub-heading mt-3 ml-8">Node Applications</span>
+
                     <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
-                        <EChart :chartOptions="config" class="chart-box" />
+                        <EChart :chartOptions="getConfig(config)" :style="{margin: '0'}" class="chart-box" />
                     </div>
                     <div v-if="chartData" class="d-flex justify-center align-items-center">
                         <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
@@ -55,10 +58,11 @@
                                 <tr v-for="item in nodeApplications" :key="item.id">
                                     <td>
                                         <div class="name d-flex">
+                                            <Led :status="item.status" />
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: item.id },
+                                                    params: { view: 'health', id: `_:Unknown:${item.id}` },
                                                     query: $route.query,
                                                 }"
                                             >
@@ -84,99 +88,17 @@
                     </v-simple-table>
                 </div>
             </div>
-            <div v-else>
-                <EmptyState
-                    class="mt-3 elevation-2 nodeApps-table"
-                    :heading="'Node Applications'"
-                    :title="emptyState.title"
-                    :description="emptyState.description"
-                    height="30vh"
-                    :iconName="emptyState.iconName"
-                />
-            </div>
-
-            <v-card class="eum-container">
-                <div class="ml-8 mt-5">
-                    <span class="sub-heading">EUM Overview</span>
-                    <span class="sub-heading-light">(By requests)</span>
-                </div>
-                <div v-if="eumApplications" class="d-flex">
-                    <div class="app-count-container mt-3 mx-7">
-                        <div class="app-count-item">
-                            <span class="sub-heading-light">Browser Apps</span>
-                            <div class="app-icon-count">
-                                <img :src="`${$codexray.base_path}static/img/tech-icons/browserApps.svg`" alt="App Icon" />
-                                <span class="app-count">{{ browserAppsCount }}</span>
-                            </div>
-                        </div>
-                        <div class="app-count-item">
-                            <span class="sub-heading-light">Mobile Apps</span>
-                            <div class="app-icon-count">
-                                <img :src="`${$codexray.base_path}static/img/tech-icons/mobileApps.svg`" alt="App Icon" />
-                                <span class="app-count">{{ mobileAppsCount }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <v-simple-table class="elevation-0 mt-3 eum-table">
-                        <thead>
-                            <tr>
-                                <th v-for="header in eumApplicationsHeaders" :key="header.value">
-                                    {{ header.text }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template v-if="eumApplications && eumApplications.length">
-                                <tr v-for="item in eumApplications" :key="item.serviceName">
-                                    <td>
-                                        <div class="name d-flex">
-                                            <img
-                                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType === 'Browser' ? 'browserApps' : 'mobileApps'}.svg`"
-                                                alt="App Icon"
-                                            />
-                                            <router-link
-                                                :to="{
-                                                    name: 'overview',
-                                                    params: { view: 'BRUM', id: item.serviceName },
-                                                    query: $route.query,
-                                                }"
-                                            >
-                                                {{ item.serviceName }}
-                                            </router-link>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        {{ $format.convertLatency(item.requestsPerSecond).value.toFixed(2) }}
-                                        {{ $format.convertLatency(item.requestsPerSecond).unit }}
-                                    </td>
-                                    <td>
-                                        {{ $format.convertLatency(item.responseTime).value.toFixed(2) }}
-                                    </td>
-                                    <td>{{ item.errors }}</td>
-                                    <td>{{ item.affectedUsers }}</td>
-                                </tr>
-                            </template>
-                            <template v-else>
-                                <tr>
-                                    <td colspan="5" class="text-center">
-                                        <span>No Data Available</span>
-                                    </td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </v-simple-table>
-                </div>
-                <EmptyState
+            <EmptyState
                     v-else
-                    class="mt-3 elevation-2 eum-table"
+                    class="pt-3 elevation-2 nodes-table"
                     :title="emptyState.title"
+                    :heading="'Node Applications'"
                     :description="emptyState.description"
-                    height="30vh"
+                    height="40vh"
                     :iconName="emptyState.iconName"
                 />
-            </v-card>
-            <v-card class="mobileApps">
+
+                <v-card class="mobileApps">
                 <div class="mt-5 ml-8">
                     <span class="sub-heading">Node status</span>
                     <span class="sub-heading-light">(By CPU usage)</span>
@@ -228,7 +150,7 @@
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: item.nodeName },
+                                                    params: { view: 'nodes', id: item.nodeName },
                                                     query: $route.query,
                                                 }"
                                             >
@@ -290,12 +212,111 @@
                     :iconName="emptyState.iconName"
                 />
             </v-card>
+            <v-card class="eum-container">
+                <div class="ml-8 mt-5 ">
+                    <span class="sub-heading">EUM Overview</span>
+                    <span class="sub-heading-light">(By requests)</span>
+                </div>
+                <div v-if="eumApplications" class="d-flex">
+                    <div class="app-count-container mt-3 mx-7">
+                        <div class="app-count-item">
+                            <span class="sub-heading-light">Browser Apps</span>
+                            <div class="app-icon-count">
+                                <img
+                                    :src="`${$codexray.base_path}static/img/tech-icons/browserApps.svg`"
+                                    onerror="this.style.display='none'"
+                                    height="40"
+                                    width="40"
+                                    class="icon"
+                    />
+                                <span class="app-count">{{ browserAppsCount }}</span>
+                            </div>
+                        </div>
+                        <div class="app-count-item">
+                            <span class="sub-heading-light">Mobile Apps</span>
+                            <div class="app-icon-count">
+                                <img
+                                    :src="`${$codexray.base_path}static/img/tech-icons/mobileApps.svg`"
+                                    onerror="this.style.display='none'"
+                                    height="40"
+                                    width="40"
+                                    class="icon"
+                    />
+                                <span class="app-count">{{ mobileAppsCount }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <v-simple-table class="elevation-0 mt-3 eum-table">
+                        <thead>
+                            <tr >
+                                <th v-for="header in eumApplicationsHeaders" :key="header.value" class="sticky-header">
+                                    {{ header.text }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template v-if="eumApplications && eumApplications.length">
+                                <tr v-for="item in eumApplications" :key="item.serviceName">
+                                    <td>
+                                        <div class="name d-flex">
+                                            <img
+                                                :src="`${$codexray.base_path}static/img/tech-icons/${item.appType === 'Browser' ? 'browserApps' : 'mobileApps'}.svg`"
+                                                alt="App Icon"
+                                            />
+                                            <router-link
+                                                :to="{
+                                                    name: 'overview',
+                                                    params: { view: item.appType === 'Browser' ? 'BRUM' : 'MRUM', id: item.serviceName },
+                                                    query: $route.query,
+                                                }"
+                                            >
+                                                {{ item.serviceName }}
+                                            </router-link>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {{ $format.convertLatency(item.requestsPerSecond).value.toFixed(2) }}
+                                        {{ $format.convertLatency(item.requestsPerSecond).unit }}
+                                    </td>
+                                    <td>
+                                        {{ $format.convertLatency(item.responseTime).value.toFixed(2) }}
+                                    </td>
+                                    <td>{{ item.errors }}</td>
+                                    <td>{{ item.affectedUsers }}</td>
+                                </tr>
+                            </template>
+                            <template v-else>
+                                <tr>
+                                    <td colspan="5" class="text-center">
+                                        <span>No Data Available</span>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </v-simple-table>
+                </div>
+                <EmptyState
+                    v-else
+                    class="mt-3 eum-table"
+                    height="50vh"
+                    :title="'Agent not found'"
+                    :description="'Install EUM agents to fetch user experience data.'"
+                    iconName="NoData"
+                    :iconWidth="'10vw'"
+                    :iconHeight="'10vh'"
+                    :buttonText="'Contact Support'"
+                    :buttonType="'disabled'"
+                />
+            </v-card>
+            
             <div class="bottom-container">
-                <v-card v-if="incidents" class="incidents-container">
-                    <div>
+                <v-card  class="incidents-container">
+                    <div v-if="incidents" class="d-flex">
                         <div class="incidents-chart-container">
+                    <span class="sub-heading mt-3 ml-8">Incidents Summary</span>
+
                             <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
-                                <EChart :chartOptions="config" class="chart-box" />
+                                <EChart :chartOptions="getConfig(config)" class="chart-box" />
                             </div>
                             <div v-if="incidentChartData" class="d-flex justify-center align-items-center">
                                 <div v-for="(item, index) in incidentStatusLegend" :key="index" class="status-item">
@@ -321,7 +342,7 @@
                                         <tr v-for="item in incidents" :key="item.applicationName">
                                             <td>
                                                 <div class="name d-flex">
-                                                    <img :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`" alt="App Icon" />
+                                                    <img v-if="item.icon" :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`" alt="App Icon" />
                                                     <router-link
                                                         :to="{
                                                             name: 'overview',
@@ -348,14 +369,14 @@
                             </v-simple-table>
                         </div>
                     </div>
-                </v-card>
-                <v-card v-else>
                     <EmptyState
-                        class="mt-3 nodeApps-table"
+                    v-else
+                        class="pt-3 nodeApps-table"
                         :heading="'Incidents'"
+                        :iconWidth="'10vw'"
+                        :iconHeight="'10vh'"
                         :title="emptyState.title"
                         :description="emptyState.description"
-                        height="29vh"
                         :iconName="emptyState.iconName"
                     />
                 </v-card>
@@ -393,10 +414,9 @@
 import EChart from '@/components/EChart.vue';
 import Led from '@/components/Led.vue';
 import EmptyState from '@/views/EmptyState.vue';
-import mockData from '@/views/data.json';
 
 export default {
-    components: { EChart, Led, EmptyState },
+    components: { EChart, Led, EmptyState},
     data() {
         return {
             chartData: [],
@@ -432,8 +452,8 @@ export default {
                 { text: 'Disk Space', value: 'diskUsage' },
             ],
             emptyState: {
-                title: 'No Data Available',
-                description: 'No data available for this view',
+                title: 'No Results Found',
+                description: 'Try selecting a different time range to view data',
                 iconName: 'NoData',
             },
             incidentsHeaders: [
@@ -465,6 +485,25 @@ export default {
     },
 
     methods: {
+        getConfig(config) {
+    return {
+        ...config,
+        legend: {
+            show: false, // Hide the legend
+        },
+        title:{
+            show: false,
+        },
+        series: [
+            {
+                ...config.series, // Copy the first series configuration
+                label: {
+                    show: false, // Hide labels for the pie chart slices
+                },
+            },
+        ],
+    };
+},
         fetchDashboardData() {
             this.loading = true;
             this.error = '';
@@ -480,24 +519,17 @@ export default {
                 this.eumApplications = data.dashboard.eumOverview.eumOverview;
                 this.nodes = data.dashboard.nodes.nodesTable;
                 this.nodeStats = data.dashboard.nodes.nodeStats;
-                this.chartData = Array.isArray(data.dashboard.appStatsChart) ? data.dashboard.appStatsChart : [data.dashboard.appStatsChart];
-                // this.chartData = mockData.chartData; //mock
-                // this.incidentChartData = data.dashboard.incidentStatsChart;
-                this.incidentChartData = mockData.incidentStatsChart; //mock
+                this.chartData = data.dashboard.appStatsChart;
+                this.incidentChartData = data.dashboard.incidentStatsChart;
                 this.browserAppsCount = data.dashboard.eumOverview.badgeView.browserApps;
                 this.mobileAppsCount = data.dashboard.eumOverview.badgeView.mobileApps;
                 this.incidents = data.dashboard.incidents.incidentTable;
-                this.incidentStatusLegend[0].value = mockData?.incidentStatsChart[0]?.series[0]?.data[2]?.value; //mock
-                this.incidentStatusLegend[1].value = mockData?.incidentStatsChart[0]?.series[0]?.data[1]?.value; //mock
-                this.incidentStatusLegend[2].value = mockData?.incidentStatsChart[0]?.series[0]?.data[0]?.value; //mock
-                this.applicationStatusLegend[0].value = data.dashboard.applications.applicationsStats.good;
-                console.log(data.dashboard.applications.applicationsStats);
-                console.log(data.dashboard);
-                this.applicationStatusLegend[1].value = data.dashboard.applications.applicationsStats.fair;
-                this.applicationStatusLegend[2].value = data.dashboard.applications.applicationsStats.poor;
-                // this.applicationStatusLegend[0].value = data.dashboard.appStatsChart.series.data[0]?.value; //mock
-                // this.applicationStatusLegend[1].value = data.dashboard.appStatsChart.series.data[1]?.value; //mock
-                // this.applicationStatusLegend[2].value = data.dashboard.appStatsChart.series.data[2]?.value; //mock
+                this.incidentStatusLegend[0].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[2]?.value;//mock
+                this.incidentStatusLegend[1].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[1]?.value; //mock
+                this.incidentStatusLegend[2].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[0]?.value;//mock
+                this.applicationStatusLegend[0].value = data?.dashboard?.appStatsChart[0]?.series?.data[0]?.value;//mock
+                this.applicationStatusLegend[1].value = data?.dashboard?.appStatsChart[0]?.series?.data[1]?.value; //mock
+                this.applicationStatusLegend[2].value = data?.dashboard?.appStatsChart[0]?.series?.data[2]?.value;//mock
             });
         },
     },
@@ -505,6 +537,26 @@ export default {
 </script>
 
 <style scoped>
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 64px);
+    /* overflow: hidden; */
+}
+
+.app-icon {
+    /* margin-right: 10px; */
+    /* padding-top: 8px; */
+    /* margin: auto; */
+}
+
+.empty-state-container {
+    flex-grow: 1;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
 .dashboard-container {
     display: flex;
     flex-direction: column;
@@ -558,6 +610,7 @@ export default {
     justify-content: flex-start;
     min-width: 19vw;
     min-height: 20vh;
+    margin-bottom: 1rem;
 }
 
 .incidents-chart-wrapper {
@@ -608,7 +661,7 @@ export default {
 
 .nodeApps-table {
     min-width: 54vw;
-    height: 30vh;
+    height: 35vh;
     border-radius: 0.5rem;
     overflow-x: auto;
 }
@@ -633,17 +686,18 @@ export default {
 
 .nodeApps-table th,
 .eum-table th,
-.nodes-table th .incidents-table th {
-    font-size: 1rem !important;
-    padding: 0.5rem !important;
+.nodes-table th,
+.incidents-table th {
+    font-size: 0.75rem !important;
+    padding: 1rem !important;
 }
 
 .nodeApps-table td,
 .eum-table td,
 .nodes-table td,
 .incidents-table td {
-    font-size: 0.9rem;
-    padding: 0.75rem;
+    font-size: 0.5rem;
+    padding: 1rem;
 }
 
 .name.d-flex {
@@ -885,14 +939,14 @@ export default {
     }
 
     .nodeApps-table th,
-    .eum-tableth,
+    .eum-table th,
     .nodes-table th {
         font-size: 0.8rem;
         padding: 0.5rem;
     }
 
     .nodeApps-table td,
-    .eum-tabletd,
+    .eum-table td,
     .nodes-table td {
         font-size: 0.8rem;
         padding: 0.5rem;
