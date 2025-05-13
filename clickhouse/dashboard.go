@@ -52,33 +52,34 @@ func (c *Client) GetEUMOverview(ctx context.Context, from, to *time.Time) ([]Ser
 
 func (c *Client) getTop5Applications(ctx context.Context, from, to *time.Time) ([]ServiceMetric, error) {
 	query := `
-        SELECT 
-            Service AS ServiceName,
-            'Mobile' AS AppType,
-            COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
-            SUM(ResponseTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
-            SUM(CASE WHEN Status = 0 THEN 1 ELSE 0 END) AS Errors,
-            COUNT(DISTINCT CASE WHEN Status = 0 THEN UserID END) AS AffectedUsers
-        FROM mobile_perf_data
-        WHERE (@from IS NULL OR Timestamp >= @from)
-          AND (@to IS NULL OR Timestamp <= @to)
-        GROUP BY Service
-        ORDER BY RequestsPerSecond DESC
-        LIMIT 5
+        SELECT *
+        FROM (
+            SELECT 
+                Service AS ServiceName,
+                'Mobile' AS AppType,
+                COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
+                SUM(ResponseTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
+                SUM(CASE WHEN Status = 0 THEN 1 ELSE 0 END) AS Errors,
+                COUNT(DISTINCT CASE WHEN Status = 0 THEN UserID END) AS AffectedUsers
+            FROM mobile_perf_data
+            WHERE (@from IS NULL OR Timestamp >= @from)
+              AND (@to IS NULL OR Timestamp <= @to)
+            GROUP BY Service
 
-        UNION ALL
+            UNION ALL
 
-        SELECT 
-            ServiceName,
-            'Browser' AS AppType,
-            COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
-            SUM(ResTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
-            0 AS Errors,
-            0 AS AffectedUsers
-        FROM perf_data
-        WHERE (@from IS NULL OR Timestamp >= @from)
-          AND (@to IS NULL OR Timestamp <= @to)
-        GROUP BY ServiceName
+            SELECT 
+                ServiceName,
+                'Browser' AS AppType,
+                COUNT(*) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS RequestsPerSecond,
+                SUM(ResTime) / NULLIF(toUnixTimestamp(@to) - toUnixTimestamp(@from), 0) AS ResponseTime,
+                0 AS Errors,
+                0 AS AffectedUsers
+            FROM perf_data
+            WHERE (@from IS NULL OR Timestamp >= @from)
+              AND (@to IS NULL OR Timestamp <= @to)
+            GROUP BY ServiceName
+        ) AS CombinedResults
         ORDER BY RequestsPerSecond DESC
         LIMIT 5
     `
