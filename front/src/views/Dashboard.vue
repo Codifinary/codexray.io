@@ -2,7 +2,7 @@
     <div class="pt-5 main-container">
         <span class="heading ml-8">Executive Dashboard</span>
 
-        <EmptyState
+        <!-- <EmptyState
             v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
             class="ma-auto empty-state-container"
             :title="'No Data'"
@@ -32,9 +32,9 @@
             :helpText="'Need help? See our docs'"
             :buttonText="'Configure Node Agent'"
             :buttonType="'agent-installation'"
-        />
+        /> -->
 
-        <div v-else class="dashboard-container">
+        <div class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
                     <div class="d-flex justify-space-between align-items-center">
@@ -61,8 +61,6 @@
                     </div>
                     <div v-if="chartData" class="d-flex justify-center align-items-center">
                         <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
-                    <div v-if="chartData" class="d-flex justify-center align-items-center">
-                        <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
                             <div class="status-label">
                                 <Led :status="item.status" />
                                 <span class="sub-heading label-text">{{ item.label }}</span>
@@ -85,14 +83,12 @@
                         <tbody>
                             <template v-if="nodeApplications && nodeApplications.length">
                                 <tr v-for="item in nodeApplications" :key="item.id">
-                                <tr v-for="item in nodeApplications" :key="item.id">
                                     <td>
                                         <div class="name d-flex">
                                             <Led :status="item.status" />
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: item.id },
                                                     params: { view: 'health', id: item.id },
                                                     query: $route.query,
                                                 }"
@@ -101,7 +97,6 @@
                                             </router-link>
                                         </div>
                                     </td>
-                                    <td>{{ item.transactionPerSecond.toFixed(2) }}</td>
                                     <td>{{ item.transactionPerSecond.toFixed(2) }}</td>
                                     <td>
                                         {{ $format.convertLatency(item.responseTime).value.toFixed(2) }}
@@ -156,15 +151,9 @@
                             <div class="hex">
                                 {{ $format.shortenNumber(nodeStats.upNodes).value + $format.shortenNumber(nodeStats.upNodes).unit }}
                             </div>
-                            <div class="hex">
-                                {{ $format.shortenNumber(nodeStats.upNodes).value + $format.shortenNumber(nodeStats.upNodes).unit }}
-                            </div>
                             <span class="node-status">Up</span>
                         </div>
                         <div class="hex-container down">
-                            <div class="hex">
-                                {{ $format.shortenNumber(nodeStats.downNodes).value + $format.shortenNumber(nodeStats.downNodes).unit }}
-                            </div>
                             <div class="hex">
                                 {{ $format.shortenNumber(nodeStats.downNodes).value + $format.shortenNumber(nodeStats.downNodes).unit }}
                             </div>
@@ -175,16 +164,13 @@
                             <div class="metric">
                                 <span class="label">Avg CPU Utilisation</span>
                                 <span class="value">{{ nodeStats?.avgCpuUsage?.toFixed(2) }}%</span>
-                                <span class="value">{{ nodeStats?.avgCpuUsage?.toFixed(2) }}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Memory Utilisation</span>
                                 <span class="value">{{ nodeStats?.avgMemoryUsage?.toFixed(2) }}%</span>
-                                <span class="value">{{ nodeStats?.avgMemoryUsage?.toFixed(2) }}%</span>
                             </div>
                             <div class="metric">
                                 <span class="label">Avg Disk Utilisation</span>
-                                <span class="value">{{ nodeStats?.avgDiskUsage?.toFixed(2) }}%</span>
                                 <span class="value">{{ nodeStats?.avgDiskUsage?.toFixed(2) }}%</span>
                             </div>
                         </div>
@@ -201,7 +187,6 @@
                         <tbody>
                             <template v-if="nodes && nodes.length">
                                 <tr v-for="item in nodes" :key="item.nodeName">
-                                <tr v-for="item in nodes" :key="item.nodeName">
                                     <td>
                                         <div class="name d-flex">
                                             <router-link
@@ -211,7 +196,6 @@
                                                     query: $route.query,
                                                 }"
                                             >
-                                                {{ item.nodeName }}
                                                 {{ item.nodeName }}
                                             </router-link>
                                         </div>
@@ -225,7 +209,6 @@
                                                 :value="item.cpuUsage"
                                             />
                                             <span class="progress-value">{{ item.cpuUsage.toFixed(2) }}%</span>
-                                            <span class="progress-value">{{ item.cpuUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
                                     <td>
@@ -237,7 +220,6 @@
                                                 :value="item.memoryUsage"
                                             />
                                             <span class="progress-value">{{ item.memoryUsage.toFixed(2) }}%</span>
-                                            <span class="progress-value">{{ item.memoryUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
                                     <td>
@@ -248,7 +230,6 @@
                                                 color="green lighten-1"
                                                 :value="item.diskUsage"
                                             />
-                                            <span class="progress-value">{{ item.diskUsage.toFixed(2) }}%</span>
                                             <span class="progress-value">{{ item.diskUsage.toFixed(2) }}%</span>
                                         </div>
                                     </td>
@@ -264,14 +245,6 @@
                         </tbody>
                     </v-simple-table>
                 </div>
-                <EmptyState
-                    v-else
-                    class="mt-3 nodes-table"
-                    :title="emptyState.title"
-                    :description="emptyState.description"
-                    height="30vh"
-                    :iconName="emptyState.iconName"
-                />
                 <EmptyState
                     v-else
                     class="mt-3 nodes-table"
@@ -496,16 +469,6 @@
                         :iconName="emptyState.iconName"
                     />
                 </v-card>
-                <v-card v-else>
-                    <EmptyState
-                        class="mt-3 nodeApps-table"
-                        :heading="'Incidents'"
-                        :title="emptyState.title"
-                        :description="emptyState.description"
-                        height="29vh"
-                        :iconName="emptyState.iconName"
-                    />
-                </v-card>
                 <v-card class="pa-4 db-insights-card" elevation="1">
                     <div class="d-flex justify-space-between align-center mb-4">
                         <span class="font-weight-bold text-body-1">Database Insights</span>
@@ -555,15 +518,6 @@ export default {
                 { status: 'ok', label: 'Good', value: 0 },
                 { status: 'warning', label: 'Fair', value: 0 },
                 { status: 'critical', label: 'Poor', value: 0 },
-            incidentStatusLegend: [
-                { status: 'ok', label: 'Resolved', value: 0 },
-                { status: 'warning', label: 'Warning', value: 0 },
-                { status: 'critical', label: 'Critical', value: 0 },
-            ],
-            applicationStatusLegend: [
-                { status: 'ok', label: 'Good', value: 0 },
-                { status: 'warning', label: 'Fair', value: 0 },
-                { status: 'critical', label: 'Poor', value: 0 },
             ],
             nodeApplicationsHeaders: [
                 { text: 'Top apps', value: 'name' },
@@ -572,7 +526,6 @@ export default {
                 { text: 'Error %', value: 'errors' },
             ],
             nodeApplications: null,
-            nodeApplications: null,
             eumApplicationsHeaders: [
                 { text: 'Top apps', value: 'name' },
                 { text: 'Req/sec', value: 'rps' },
@@ -580,7 +533,6 @@ export default {
                 { text: 'Errors', value: 'errors' },
                 { text: 'Affected users', value: 'affectedUsers' },
             ],
-            eumApplications: null,
             eumApplications: null,
             nodesHeaders: [
                 { text: 'Top VMs', value: 'name' },
@@ -600,15 +552,10 @@ export default {
             ],
             incidents: null,
             nodes: null,
-            incidents: null,
-            nodes: null,
             browserAppsCount: 0,
             mobileAppsCount: 0,
             loading: false,
             error: '',
-            incidentChartData: null,
-            context: null,
-            nodeStats: null,
             incidentChartData: null,
             context: null,
             nodeStats: null,
@@ -617,15 +564,6 @@ export default {
     mounted() {
         this.fetchDashboardData();
     },
-    computed: {
-        status() {
-            return this.context?.status || {};
-        },
-    },
-    created() {
-        this.context = this.$api.context;
-    },
-
     computed: {
         status() {
             return this.context?.status || {};
@@ -808,13 +746,11 @@ export default {
 
     justify-content: flex-start;
     min-width: 19vw;
-    min-width: 19vw;
     min-height: 20vh;
     margin-bottom: 1rem;
 }
 
 .incidents-chart-wrapper {
-    width: 19vw;
     width: 19vw;
     height: 25vh;
 }
@@ -912,8 +848,6 @@ export default {
 .name img {
     width: 1.5rem;
     height: 1.5rem;
-    width: 1.5rem;
-    height: 1.5rem;
 }
 
 .app-count-container {
@@ -929,7 +863,6 @@ export default {
 .app-count-item {
     display: flex;
     justify-content: center;
-    justify-content: center;
     flex-direction: column;
     gap: 0.5rem;
 }
@@ -937,7 +870,6 @@ export default {
 .app-icon-count {
     display: flex;
     align-items: center;
-    justify-content: center;
     justify-content: center;
     gap: 0.5rem;
 }
@@ -950,7 +882,6 @@ export default {
 
 .eum-container {
     width: auto;
-    min-height: 30vh;
     min-height: 30vh;
 }
 
