@@ -2,7 +2,7 @@
     <div class="pt-5 main-container">
         <span class="heading ml-8">Executive Dashboard</span>
 
-        <!-- <EmptyState
+        <EmptyState
             v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
             class="ma-auto empty-state-container"
             :title="'Set-up your application'"
@@ -12,8 +12,8 @@
             :buttonText="'Configure Prometheus'"
             :buttonType="'prometheus-configuration'"
             height="calc(100vh - 120px)"
-        /> -->
-        <!-- <EmptyState
+        />
+        <EmptyState
             v-else-if="status.node_agent.status !== 'ok'"
             class="ma-auto empty-state-container"
             :title="'Set-up your application'"
@@ -22,7 +22,7 @@
             :helpText="'Need help? See our docs'"
             :buttonText="'Install node-agent'"
             :buttonType="'agent-installation'"
-        /> -->
+        />
 
         <div class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
@@ -42,7 +42,7 @@
                         </div>
                     </div>
                 </v-card>
-                <div class="mt-3">
+                <div class="mt-3 nodeApps-table-container">
                     <span class="sub-heading">Top applications</span>
                     <span class="sub-heading-light">(By volume)</span>
                     <v-simple-table class="elevation-2 mt-3 nodeApps-table">
@@ -328,7 +328,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div>
+                        <div class="incidents-table-container">
                             <v-simple-table class="elevation-0 incidents-table">
                                 <thead>
                                     <tr>
@@ -545,10 +545,12 @@ export default {
     /* overflow: hidden; */
 }
 
-.app-icon {
-    /* margin-right: 10px; */
-    /* padding-top: 8px; */
-    /* margin: auto; */
+.nodeApps-table-container{
+    width: 100%;
+}
+
+.incidents-table-container{
+    width: 100%;
 }
 
 .empty-state-container {
@@ -585,7 +587,6 @@ export default {
 /* Nodes Container */
 .applications-container {
     display: flex;
-    flex-direction: row;
     gap: 1.4rem;
 }
 
@@ -658,9 +659,9 @@ export default {
 }
 
 /* Tables */
-
 .nodeApps-table {
-    min-width: 54vw;
+    flex: 1;
+    width: 100%;
     height: 35vh;
     border-radius: 0.5rem;
     overflow-x: auto;
@@ -936,6 +937,10 @@ export default {
         height: 40vw;
         min-width: 180px;
         min-height: 180px;
+    }
+
+    .incidents-table{
+        width: 100%;
     }
 
     .nodeApps-table th,

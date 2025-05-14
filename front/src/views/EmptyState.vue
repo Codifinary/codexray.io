@@ -33,8 +33,8 @@
                         }">{{ buttonText }}</router-link>
                     </button>
                     <button 
-                        v-else 
-                        class="empty-state-button disabled"
+                        v-else-if="buttonType === 'disabled'"
+                        class="empty-state-button-disabled"
                     >
                         {{ buttonText }}
                     </button>
@@ -157,16 +157,24 @@ export default {
     font-size: 1rem;
     font-weight: 500;
     transition: background 0.2s;
+    cursor: pointer;
 }
 
 .empty-state-button:hover {
     background: #16a34a;
 }
 
-.empty-state-button .disabled {
+.empty-state-button-disabled {
     background: #16a34a;
     opacity: 0.5;
     cursor: not-allowed;
+    color: #fff;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.625rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background 0.2s;
 }
 
 .help-text {
