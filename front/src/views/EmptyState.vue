@@ -26,6 +26,7 @@
                     >
                         <router-link :to="{
                             name: 'project_new',
+                            class: 'empty-state-button',
                             params: {
                                 view: 'Settings',
                                 tab: 'prometheus',
@@ -35,6 +36,13 @@
                     <button 
                         v-else-if="buttonType === 'disabled'"
                         class="empty-state-button-disabled"
+                    >
+                        {{ buttonText }}
+                    </button>
+                    <button 
+                        v-else-if="buttonType === 'refresh'"
+                        class="empty-state-button-disabled"
+                        @click="refresh"
                     >
                         {{ buttonText }}
                     </button>
@@ -65,11 +73,9 @@ export default {
         },
         iconWidth: {
             type: String,
-            default: '15vw',
         },
         iconHeight: {
             type: String,
-            default: '15vh',
         },
         heading: {
             type: String,
@@ -102,6 +108,11 @@ export default {
     components: {
         BaseIcon,
         AgentInstallation,
+    },
+    methods: {
+        refresh() {
+            this.$events.emit('refresh');
+        },
     },
 };
 </script>
@@ -150,14 +161,18 @@ export default {
 
 .empty-state-button {
     background: #22c55e;
-    color: #fff;
+    color: #fff !important;
     border: none;
-    border-radius: 0.375rem;
+    border-radius: 4px;
     padding: 0.625rem 1.5rem;
     font-size: 1rem;
     font-weight: 500;
     transition: background 0.2s;
     cursor: pointer;
+}
+
+.v-application a{
+    color: #fff !important;
 }
 
 .empty-state-button:hover {

@@ -5,29 +5,56 @@
         <EmptyState
             v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
             class="ma-auto empty-state-container"
-            :title="'Set-up your application'"
-            :description="'Install Prometheus agent to get started'"
+            :title="'No Data'"
+            :description="'Prometheus configuration is required to display data.'"
             :iconName="emptyState.iconName"
-            :helpText="'Need help? See our docs'"
             :buttonText="'Configure Prometheus'"
             :buttonType="'prometheus-configuration'"
+            :helpText="'Need help? See our docs'"
             height="calc(100vh - 120px)"
         />
         <EmptyState
+            v-else-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'wait'"
+            class="ma-auto empty-state-container"
+            :title="'No Data'"
+            :description="status.prometheus.message"
+            :iconName="emptyState.iconName"
+            :buttonText="'Refresh'"
+            :buttonType="'refresh'"
+            height="calc(100vh - 120px)"
+        /> 
+        <EmptyState
             v-else-if="status.node_agent.status !== 'ok'"
             class="ma-auto empty-state-container"
-            :title="'Set-up your application'"
-            :description="'Set up node agent to get started'"
+            :title="'Node Agent not found'"
+            :description="'Install node-agent to get started'"
             :iconName="emptyState.iconName"
             :helpText="'Need help? See our docs'"
-            :buttonText="'Install node-agent'"
+            :buttonText="'Configure Node Agent'"
             :buttonType="'agent-installation'"
         />
 
-        <div class="dashboard-container">
+        <div v-else class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
-                    <span class="sub-heading mt-3 ml-8">Node Applications</span>
+                    <div class="d-flex justify-space-between align-items-center">
+                        <span class="sub-heading mt-3 ml-8">Node Applications</span>
+                        <router-link
+                            :to="{
+                                    name: 'overview',
+                                    params: { view: 'health'},
+                                    query: $route.query,
+                                }"
+                                            class="redirect-btn"
+                                            >
+                                            <img
+                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
+                            alt="Redirect Icon"
+                            @click="refresh"
+                        />
+                                            </router-link>
+                        
+                    </div>
 
                     <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
                         <EChart :chartOptions="getConfig(config)" :style="{margin: '0'}" class="chart-box" />
@@ -62,11 +89,11 @@
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
-                                                    params: { view: 'health', id: `_:Unknown:${item.id}` },
+                                                    params: { view: 'health', id: item.id },
                                                     query: $route.query,
                                                 }"
                                             >
-                                                {{ item.id }}
+                                                {{ $utils.appId(item.id).name }}
                                             </router-link>
                                         </div>
                                     </td>
@@ -99,9 +126,24 @@
                 />
 
                 <v-card class="mobileApps">
-                <div class="mt-5 ml-8">
-                    <span class="sub-heading">Node status</span>
-                    <span class="sub-heading-light">(By CPU usage)</span>
+                <div class="d-flex justify-space-between align-items-center mt-5 ml-8">
+                    <div class="d-flex">
+                        <span class="sub-heading">Node status</span>
+                        <span class="sub-heading-light">(By CPU usage)</span>
+                    </div>
+                    <router-link
+                                                :to="{
+                                                    name: 'overview',
+                                                    params: { view: 'nodes'},
+                                                    query: $route.query,
+                                                }"
+                                            class="redirect-btn-nodes"
+                                            >
+                                            <img
+                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
+                            alt="Redirect Icon"
+                        />
+                    </router-link>
                 </div>
                 <div v-if="nodes">
                     <v-row class="status-summary" align="center" no-gutters>
@@ -220,27 +262,61 @@
                 <div v-if="eumApplications" class="d-flex">
                     <div class="app-count-container mt-3 mx-7">
                         <div class="app-count-item">
-                            <span class="sub-heading-light">Browser Apps</span>
+                            <div class="d-flex justify-space-between align-items-center">
+                                <span class="sub-heading-light">Browser Apps</span>
+                                <router-link
+                                                :to="{
+                                                    name: 'overview',
+                                                    params: { view: 'BRUM'},
+                                                    query: $route.query,
+                                                }"
+                                    class="eum-redirect-icon"
+
+                                            >
+                                                <img
+                                    :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
+                                    onerror="this.style.display='none'"
+                                />
+                                            </router-link>
+                            </div>
                             <div class="app-icon-count">
                                 <img
                                     :src="`${$codexray.base_path}static/img/tech-icons/browserApps.svg`"
                                     onerror="this.style.display='none'"
+                                    class="icon"
                                     height="40"
                                     width="40"
-                                    class="icon"
                     />
-                                <span class="app-count">{{ browserAppsCount }}</span>
+                            <span class="app-count">{{ browserAppsCount }}</span>
+
                             </div>
                         </div>
                         <div class="app-count-item">
-                            <span class="sub-heading-light">Mobile Apps</span>
+                            <div class="d-flex justify-space-between align-items-center">
+                                <span class="sub-heading-light">Mobile Apps</span>
+                                <router-link
+                                                :to="{
+                                                    name: 'overview',
+                                                    params: { view: 'MRUM'},
+                                                    query: $route.query,
+                                                }"
+                                    class="eum-redirect-icon"
+                                            
+                                            >
+
+                                                <img
+                                    :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
+                                    onerror="this.style.display='none'"
+                                />
+                                            </router-link>
+                            </div>
                             <div class="app-icon-count">
                                 <img
                                     :src="`${$codexray.base_path}static/img/tech-icons/mobileApps.svg`"
                                     onerror="this.style.display='none'"
+                                    class="icon"
                                     height="40"
                                     width="40"
-                                    class="icon"
                     />
                                 <span class="app-count">{{ mobileAppsCount }}</span>
                             </div>
@@ -301,9 +377,7 @@
                     height="50vh"
                     :title="'Agent not found'"
                     :description="'Install EUM agents to fetch user experience data.'"
-                    iconName="NoData"
-                    :iconWidth="'10vw'"
-                    :iconHeight="'10vh'"
+                    iconName="emptyState"
                     :buttonText="'Contact Support'"
                     :buttonType="'disabled'"
                 />
@@ -313,7 +387,22 @@
                 <v-card  class="incidents-container">
                     <div v-if="incidents" class="d-flex">
                         <div class="incidents-chart-container">
-                    <span class="sub-heading mt-3 ml-8">Incidents Summary</span>
+                            <div class="d-flex justify-space-between align-items-center mt-3 ml-8">
+                                <span class="sub-heading">Incidents Summary</span>
+                                <router-link
+                                                :to="{
+                                                    name: 'overview',
+                                                    params: { view: 'incidents'},
+                                                    query: { ...$utils.contextQuery()},
+                                                }"
+                                            class="redirect-btn-nodes"
+                                            >
+                                            <img
+                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
+                            alt="Redirect Icon"
+                        />
+                    </router-link>
+                            </div>
 
                             <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
                                 <EChart :chartOptions="getConfig(config)" class="chart-box" />
@@ -346,8 +435,8 @@
                                                     <router-link
                                                         :to="{
                                                             name: 'overview',
-                                                            params: { view: 'incidents', id: item.applicationName },
-                                                            query: $route.query,
+                                                            params: { view: 'incidents'},
+                                                            query: { ...$utils.contextQuery(), applicationName: item.applicationName },
                                                         }"
                                                     >
                                                         {{ item.applicationName }}
@@ -486,24 +575,47 @@ export default {
 
     methods: {
         getConfig(config) {
-    return {
-        ...config,
-        legend: {
-            show: false, // Hide the legend
-        },
-        title:{
-            show: false,
-        },
-        series: [
-            {
-                ...config.series, // Copy the first series configuration
-                label: {
-                    show: false, // Hide labels for the pie chart slices
+            return {
+                ...config,
+                legend: {
+                    show: false,
                 },
-            },
-        ],
-    };
-},
+                title: {
+                    show: true,
+                },
+                series: [
+                    {
+                        ...config.series,
+                        label: {
+                            show: false,
+                        },
+                    },
+                ],
+            };
+        },
+        getIncidentConfig(config) {
+            return {
+                ...config,
+                legend: {
+                    show: false,
+                },
+                title: {
+                    show: false,
+                },
+                series: [
+                    {
+                        ...config.series,
+                        label: {
+                            show: false,
+                        },
+                    },
+                ],
+            };
+        },
+        refresh() {
+            this.$events.emit('refresh');
+            this.fetchDashboardData();
+        },
         fetchDashboardData() {
             this.loading = true;
             this.error = '';
@@ -524,12 +636,13 @@ export default {
                 this.browserAppsCount = data.dashboard.eumOverview.badgeView.browserApps;
                 this.mobileAppsCount = data.dashboard.eumOverview.badgeView.mobileApps;
                 this.incidents = data.dashboard.incidents.incidentTable;
-                this.incidentStatusLegend[0].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[2]?.value;//mock
-                this.incidentStatusLegend[1].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[1]?.value; //mock
-                this.incidentStatusLegend[2].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[0]?.value;//mock
-                this.applicationStatusLegend[0].value = data?.dashboard?.appStatsChart[0]?.series?.data[0]?.value;//mock
-                this.applicationStatusLegend[1].value = data?.dashboard?.appStatsChart[0]?.series?.data[1]?.value; //mock
-                this.applicationStatusLegend[2].value = data?.dashboard?.appStatsChart[0]?.series?.data[2]?.value;//mock
+                this.incidentStatusLegend[0].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[2]?.value;
+                this.incidentStatusLegend[1].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[1]?.value;
+                this.incidentStatusLegend[2].value = data?.dashboard?.incidentStatsChart[0]?.series?.data[0]?.value;
+                this.applicationStatusLegend[0].value = data?.dashboard?.appStatsChart[0]?.series?.data[0]?.value;
+                this.applicationStatusLegend[1].value = data?.dashboard?.appStatsChart[0]?.series?.data[1]?.value;
+                this.applicationStatusLegend[2].value = data?.dashboard?.appStatsChart[0]?.series?.data[2]?.value;
+                console.log(this.incidents[0].applicationName)
             });
         },
     },
@@ -537,6 +650,29 @@ export default {
 </script>
 
 <style scoped>
+
+.eum-redirect-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+}
+
+.redirect-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    margin-right: 20px;
+}
+
+.redirect-btn-nodes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 0;
+    margin-right: 20px;
+}
 
 .main-container {
     display: flex;
@@ -665,11 +801,13 @@ export default {
     height: 35vh;
     border-radius: 0.5rem;
     overflow-x: auto;
+    overflow-y: hidden;
 }
 .eum-table {
     width: 60vw;
     height: 30vh;
     overflow-x: auto;
+    overflow-y: hidden;
 }
 .nodes-table {
     width: 81vw;
@@ -683,6 +821,7 @@ export default {
     border-radius: 0.5rem;
     overflow-x: auto;
     margin-left: 1rem;
+    overflow: hidden;
 }
 
 .nodeApps-table th,
