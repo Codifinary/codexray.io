@@ -39,7 +39,9 @@
                 <v-card class="chart-container">
                     <div class="d-flex justify-space-between align-items-center">
                         <span class="sub-heading mt-3 ml-8">Node Applications</span>
+                        <HoverTooltip :text="'View all applications'" >
                         <router-link
+
                             :to="{
                                     name: 'overview',
                                     params: { view: 'health'},
@@ -53,6 +55,7 @@
                             @click="refresh"
                         />
                                             </router-link>
+                                        </HoverTooltip>
                         
                     </div>
 
@@ -131,6 +134,7 @@
                         <span class="sub-heading">Node status</span>
                         <span class="sub-heading-light">(By CPU usage)</span>
                     </div>
+                    <HoverTooltip :text="'View all nodes'" >
                     <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -144,6 +148,7 @@
                             alt="Redirect Icon"
                         />
                     </router-link>
+                    </HoverTooltip>
                 </div>
                 <div v-if="nodes">
                     <v-row class="status-summary" align="center" no-gutters>
@@ -264,6 +269,8 @@
                         <div class="app-count-item">
                             <div class="d-flex justify-space-between align-items-center">
                                 <span class="sub-heading-light">Browser Apps</span>
+                        <HoverTooltip :text="'View all applications'" >
+
                                 <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -278,6 +285,7 @@
                                     onerror="this.style.display='none'"
                                 />
                                             </router-link>
+                                        </HoverTooltip>
                             </div>
                             <div class="app-icon-count">
                                 <img
@@ -294,6 +302,8 @@
                         <div class="app-count-item">
                             <div class="d-flex justify-space-between align-items-center">
                                 <span class="sub-heading-light">Mobile Apps</span>
+                                <HoverTooltip :text="'View all applications'" >
+
                                 <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -309,6 +319,7 @@
                                     onerror="this.style.display='none'"
                                 />
                                             </router-link>
+                                        </HoverTooltip>
                             </div>
                             <div class="app-icon-count">
                                 <img
@@ -389,6 +400,8 @@
                         <div class="incidents-chart-container">
                             <div class="d-flex justify-space-between align-items-center mt-3 ml-8">
                                 <span class="sub-heading">Incidents Summary</span>
+                                <HoverTooltip :text="'View all incidents'" >
+
                                 <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -402,6 +415,7 @@
                             alt="Redirect Icon"
                         />
                     </router-link>
+                    </HoverTooltip>
                             </div>
 
                             <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
@@ -503,9 +517,10 @@
 import EChart from '@/components/EChart.vue';
 import Led from '@/components/Led.vue';
 import EmptyState from '@/views/EmptyState.vue';
+import HoverTooltip from '@/components/HoverTooltip.vue';
 
 export default {
-    components: { EChart, Led, EmptyState},
+    components: { EChart, Led, EmptyState, HoverTooltip},
     data() {
         return {
             chartData: [],
@@ -657,6 +672,7 @@ export default {
     justify-content: center;
     margin-left: 10px;
 }
+
 
 .redirect-btn {
     display: flex;
