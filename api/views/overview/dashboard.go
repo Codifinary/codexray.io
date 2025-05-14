@@ -46,11 +46,11 @@ type IncidentOverview struct {
 }
 
 type ApplicationTable struct {
-	ID                   string       `json:"id"`
-	Status               model.Status `json:"status"`
-	TransactionPerSecond float32      `json:"transactionPerSecond"`
-	ResponseTime         float32      `json:"responseTime"`
-	Errors               float32      `json:"errors"`
+	ID                   model.ApplicationId `json:"id"`
+	Status               model.Status        `json:"status"`
+	TransactionPerSecond float32             `json:"transactionPerSecond"`
+	ResponseTime         float32             `json:"responseTime"`
+	Errors               float32             `json:"errors"`
 }
 
 type ApplicationsStats struct {
@@ -155,7 +155,7 @@ func getApplications(w *model.World) (ApplicationOverview, ApplicationsStats) {
 		totalRequests, totalLatency, totalErrors := calculateMetrics(w.GetApplication(appStatus.Id).Downstreams)
 
 		applicationTable = append(applicationTable, ApplicationTable{
-			ID:                   appStatus.Id.Name,
+			ID:                   appStatus.Id,
 			Status:               appStatus.Status,
 			TransactionPerSecond: totalRequests,
 			ResponseTime:         totalLatency,
