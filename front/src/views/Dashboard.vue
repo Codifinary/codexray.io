@@ -125,6 +125,8 @@
                     :heading="'Node Applications'"
                     :description="emptyState.description"
                     height="40vh"
+                    :iconWidth="'10vw'"
+                    :iconHeight="'10vh'"
                     :iconName="emptyState.iconName"
                 />
 
@@ -256,6 +258,8 @@
                     :title="emptyState.title"
                     :description="emptyState.description"
                     height="30vh"
+                     :iconWidth="'10vw'"
+                    :iconHeight="'10vh'"
                     :iconName="emptyState.iconName"
                 />
             </v-card>
@@ -425,7 +429,7 @@
                                 <div v-for="(item, index) in incidentStatusLegend" :key="index" class="status-item">
                                     <div class="status-label">
                                         <Led :status="item.status" />
-                                        <span class="sub-heading incident-label-text">{{ item.label }}</span>
+                                        <span class="sub-heading incident-label-text special-text">{{ item.label }}</span>
                                     </div>
                                     <span class="sub-heading incident-value-text">{{ item.value }}</span>
                                 </div>
@@ -476,11 +480,11 @@
                     v-else
                         class="pt-3 nodeApps-table"
                         :heading="'Incidents'"
-                        :iconWidth="'10vw'"
-                        :iconHeight="'10vh'"
                         :title="emptyState.title"
                         :description="emptyState.description"
                         :iconName="emptyState.iconName"
+                         :iconWidth="'10vw'"
+                    :iconHeight="'10vh'"
                     />
                 </v-card>
                 <v-card class="pa-4 db-insights-card" elevation="1">
@@ -1128,4 +1132,40 @@ export default {
         margin-left: none !important;
     }
 } */
+
+ @media (max-height: 768px) {
+    .container {
+        height: 100vh;
+    }
+
+    .nodeApps-table {
+        height: 40vh;
+    }
+
+    .eum-table {
+        height: 40vh;
+    }
+
+    .incidents-container {
+        height: 40vh;
+    }
+
+    .incidents-table {
+        height: 40vh;
+    }
+
+    .db-insights-card {
+        height: 40vh;
+    }
+    
+    .status-item{
+        margin-left: 0.5rem;
+    }
+
+    .incident-label-text.special-text{
+        font-size: 0.8rem;
+        margin-left: 0.3rem;
+    }
+    
+ }
 </style>
