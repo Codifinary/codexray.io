@@ -134,7 +134,7 @@
                         <span class="sub-heading">Node status</span>
                         <span class="sub-heading-light">(By CPU usage)</span>
                     </div>
-                    <HoverTooltip :text="'View all nodes'" >
+                    <HoverTooltip v-if="nodes" :text="'View all nodes'" >
                     <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -450,7 +450,7 @@
                                                         :to="{
                                                             name: 'overview',
                                                             params: { view: 'incidents'},
-                                                            query: { ...$utils.contextQuery(), applicationName: item.applicationName },
+                                                            query: { ...$utils.contextQuery(), applicationName: item.name },
                                                         }"
                                                     >
                                                         {{ item.applicationName }}
@@ -634,7 +634,7 @@ export default {
         fetchDashboardData() {
             this.loading = true;
             this.error = '';
-            this.$api.getDashboardData((data, error) => {
+            this.$api.getOverview('dashboard', '' ,(data, error) => {
                 this.loading = false;
                 console.log(error);
                 if (error) {
