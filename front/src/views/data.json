@@ -1,0 +1,230 @@
+{
+    "nodeApplications": [
+        {
+            "name": "CheckoutFlow",
+            "requests": 1751,
+            "responseTime": 250,
+            "errors": 45
+        },
+        {
+            "name": "TrafficMonitor",
+            "requests": 651,
+            "responseTime": 100,
+            "errors": 12
+        },
+        {
+            "name": "ErrorScope",
+            "requests": 421,
+            "responseTime": 99,
+            "errors": 7
+        },
+        {
+            "name": "RefundTrack",
+            "requests": 321,
+            "responseTime": 90,
+            "errors": 42
+        },
+        {
+            "name": "FraudShield",
+            "requests": 90,
+            "responseTime": 50,
+            "errors": 13
+        }
+    ],
+    "eumApplications": [
+        {
+            "name": "CheckoutFlow",
+            "appType": "browserApps",
+            "rps": 1751,
+            "responseTime": 45,
+            "errors": 45,
+            "affectedUsers": 320
+        },
+        {
+            "name": "TrafficMonitor",
+            "appType": "mobileApps",
+            "rps": 651,
+            "responseTime": 12,
+            "errors": 12,
+            "affectedUsers": 243
+        },
+        {
+            "name": "ErrorScope",
+            "appType": "browserApps",
+            "rps": 421,
+            "responseTime": 7,
+            "errors": 7,
+            "affectedUsers": 135
+        },
+        {
+            "name": "RefundTrack",
+            "appType": "mobileApps",
+            "rps": 321,
+            "responseTime": 42,
+            "errors": 42,
+            "affectedUsers": 34
+        },
+        {
+            "name": "FraudShield",
+            "appType": "browserApps",
+            "rps": 90,
+            "responseTime": 13,
+            "errors": 13,
+            "affectedUsers": 13
+        }
+    ],
+    "nodes": [
+        {
+            "name": "VM1",
+            "appType": "browserApps",
+            "cpuUsage": 40,
+            "memoryUsage": 25,
+            "diskUsage": 50
+        },
+        {
+            "name": "VM2",
+            "appType": "mobileApps",
+            "cpuUsage": 70,
+            "memoryUsage": 40,
+            "diskUsage": 40
+        },
+        {
+            "name": "VM3",
+            "appType": "browserApps",
+            "cpuUsage": 50,
+            "memoryUsage": 75,
+            "diskUsage": 25
+        },
+        {
+            "name": "VM4",
+            "appType": "mobileApps",
+            "cpuUsage": 25,
+            "memoryUsage": 40,
+            "diskUsage": 40
+        },
+        {
+            "name": "VM5",
+            "appType": "browserApps",
+            "cpuUsage": 64,
+            "memoryUsage": 50,
+            "diskUsage": 64
+        }
+    ],
+    "chartData": [
+        {
+            "title": {
+                "text": "Node Applications",
+                "left": "left",
+                "textStyle": { "color": "#333", "fontSize": "1.5rem", "fontWeight": "600" }
+            },
+            "tooltip": {},
+            "series": [
+                {
+                    "name": "Status",
+                    "type": "pie",
+                    "radius": ["50%", "87%"],
+                    "center": ["50%", "56%"],
+                    "data": [
+                        { "value": 50, "name": "Good", "itemStyle": { "color": "#4CAF50" } },
+                        { "value": 10, "name": "Fair", "itemStyle": { "color": "#FF9800" } },
+                        { "value": 10, "name": "Poor", "itemStyle": { "color": "#F44336" } }
+                    ],
+                    "label": {
+                        "show": true,
+                        "position": "center",
+                        "color": "#333",
+                        "formatter": "{b|60}\n{a|Applications}",
+                        "rich": {
+                            "a": {
+                                "fontSize": "1rem",
+                                "color": "#333"
+                            },
+                            "b": {
+                                "fontSize": "3rem",
+                                "color": "black",
+                                "fontWeight": "bold"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "incidentChartData": [
+        {
+            "title": {
+                "text": "Incidents Summary",
+                "left": "left",
+                "textStyle": { "color": "#333", "fontSize": "1.6rem", "fontWeight": "600" }
+            },
+            "tooltip": {},
+            "series": [
+                {
+                    "name": "Status",
+                    "type": "pie",
+                    "radius": ["45%", "80%"],
+                    "center": ["50%", "60%"],
+                    "data": [
+                        { "value": 50, "name": "Good", "itemStyle": { "color": "#4CAF50" } },
+                        { "value": 10, "name": "Fair", "itemStyle": { "color": "#FF9800" } },
+                        { "value": 10, "name": "Poor", "itemStyle": { "color": "#F44336" } }
+                    ],
+                    "label": {
+                        "show": true,
+                        "position": "center",
+                        "color": "#333",
+                        "formatter": "{b|60}\n{a|Incidents}",
+                        "rich": {
+                            "a": {
+                                "fontSize": "1rem",
+                                "color": "#333"
+                            },
+                            "b": {
+                                "fontSize": "2rem",
+                                "color": "black",
+                                "fontWeight": "bold"
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "incidents": [
+        {
+            "service": "CheckoutFlow",
+            "icon": "🛒",
+            "openIncidents": 1751,
+            "lastIncident": "2 hours ago"
+        },
+        {
+            "service": "ErrorScope",
+            "icon": "🧪",
+            "openIncidents": 421,
+            "lastIncident": "7 hours ago"
+        },
+        {
+            "service": "RefundTrack",
+            "icon": "🔄",
+            "openIncidents": 321,
+            "lastIncident": "8 hours ago"
+        },
+        {
+            "service": "FraudShield",
+            "icon": "🛡️",
+            "openIncidents": 90,
+            "lastIncident": "13 hours ago"
+        },
+        {
+            "service": "PerformanceAnalytics",
+            "icon": "📊",
+            "openIncidents": 890,
+            "lastIncident": "22 hours ago"
+        }
+    ],
+    "browserAppsCount": 200,
+    "mobileAppsCount": 154,
+    "avgMemory": 50,
+    "avgCpu": 60,
+    "avgDisk": 50
+}

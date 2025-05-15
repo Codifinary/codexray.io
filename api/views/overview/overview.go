@@ -9,6 +9,7 @@ import (
 )
 
 type Overview struct {
+	Dashboard    *DashboardView              `json:"dashboard"`
 	Applications []*ApplicationStatus        `json:"applications"`
 	Health       []*ApplicationStatus        `json:"health"`
 	Incidents    []incident.Summary          `json:"incidents"`
@@ -28,19 +29,30 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 	}
 
 	switch view {
+	case "dashboard":
+		v.Dashboard = renderDashboard(ctx, ch, w)
 	case "applications":
 		v.Applications = renderApplications(w)
 	case "incidents":
-		for _, app := range w.Applications {
-			switch {
-			case app.IsK8s():
-			case app.Id.Kind == model.ApplicationKindNomadJobGroup:
-			case !app.IsStandalone():
-			default:
-				continue
-			}
+		if query != "" {
+			appId, _ := model.NewApplicationIdFromString(query)
+			app := w.GetApplication(appId)
 			for _, i := range app.Incidents {
 				v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
+			}
+
+		} else {
+			for _, app := range w.Applications {
+				switch {
+				case app.IsK8s():
+				case app.Id.Kind == model.ApplicationKindNomadJobGroup:
+				case !app.IsStandalone():
+				default:
+					continue
+				}
+				for _, i := range app.Incidents {
+					v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
+				}
 			}
 		}
 	case "map":

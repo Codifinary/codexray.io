@@ -182,7 +182,7 @@ export default {
             changePassword: false,
             isSidebarCollapsed: false,
             showAlert: true,
-            excludedViews: ['MRUM', 'BRUM'],
+            excludedViews: ['MRUM', 'BRUM', 'dashboard'],
         };
     },
 
@@ -210,6 +210,7 @@ export default {
         },
         views() {
             return {
+                dashboard: { name: 'Dashboard' },
                 applications: {
                     name: 'Applications',
                     subMenu: [
@@ -231,6 +232,7 @@ export default {
         },
         icons() {
             return {
+                dashboard: { name: 'dashboard', class: 'applications-icon' },
                 applications: { name: 'applications', class: 'applications-icon' },
                 map: { name: 'map', class: 'map-icon' },
                 nodes: { name: 'nodes', class: 'nodes-icon' },

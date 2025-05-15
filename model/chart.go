@@ -584,3 +584,17 @@ func (ec *EChart) AddAnnotation(annotations ...Annotation) *EChart {
 func (ec *EChart) IsEmpty() bool {
 	return len(ec.Series.Data) == 0
 }
+func (ec *EChart) SetDonutChartSeries(name string, data []DataPoint, colors []string) *EChart {
+	s := EChartSeries{
+		Name:   name,
+		Type:   "pie",
+		Data:   data,
+		Radius: []string{"40%", "70%"},
+	}
+	if len(colors) > 0 {
+		ec.Color = colors
+	}
+
+	ec.Series = s
+	return ec
+}
