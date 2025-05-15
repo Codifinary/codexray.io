@@ -44,4 +44,7 @@ export default {
 .status-critical {
     background-color: var(--status-critical);
 }
+.status-unknown {
+    background-color: var(--status-unknown);
+}
 </style>

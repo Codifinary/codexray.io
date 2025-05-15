@@ -2,7 +2,7 @@
     <div class="pt-5 main-container">
         <span class="heading ml-8">Executive Dashboard</span>
 
-        <!-- <EmptyState
+        <EmptyState
             v-if="status.prometheus.status !== 'ok' && status.prometheus.action === 'configure'"
             class="ma-auto empty-state-container"
             :title="'No Data'"
@@ -22,7 +22,7 @@
             :buttonText="'Refresh'"
             :buttonType="'refresh'"
             height="calc(100vh - 120px)"
-        /> 
+        />
         <EmptyState
             v-else-if="status.node_agent.status !== 'ok'"
             class="ma-auto empty-state-container"
@@ -32,35 +32,29 @@
             :helpText="'Need help? See our docs'"
             :buttonText="'Configure Node Agent'"
             :buttonType="'agent-installation'"
-        /> -->
+        />
 
         <div class="dashboard-container">
             <div v-if="nodeApplications" class="applications-container">
                 <v-card class="chart-container">
                     <div class="d-flex justify-space-between align-items-center">
                         <span class="sub-heading mt-3 ml-8">Node Applications</span>
-                        <HoverTooltip :text="'View all applications'" >
-                        <router-link
-
-                            :to="{
+                        <HoverTooltip :text="'View all applications'">
+                            <router-link
+                                :to="{
                                     name: 'overview',
-                                    params: { view: 'health'},
+                                    params: { view: 'health' },
                                     query: $route.query,
                                 }"
-                                            class="redirect-btn"
-                                            >
-                                            <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
-                            alt="Redirect Icon"
-                            @click="refresh"
-                        />
-                                            </router-link>
-                                        </HoverTooltip>
-                        
+                                class="redirect-btn"
+                            >
+                                <img :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`" alt="Redirect Icon" @click="refresh" />
+                            </router-link>
+                        </HoverTooltip>
                     </div>
 
                     <div v-for="(config, index) in chartData" :key="index" class="chart-wrapper">
-                        <EChart :chartOptions="getConfig(config)" :style="{margin: '0'}" class="chart-box" />
+                        <EChart :chartOptions="getConfig(config)" :style="{ margin: '0' }" class="chart-box" />
                     </div>
                     <div v-if="chartData" class="d-flex justify-center align-items-center">
                         <div v-for="(item, index) in applicationStatusLegend" :key="index" class="status-item">
@@ -88,7 +82,7 @@
                                 <tr v-for="item in nodeApplications" :key="item.id">
                                     <td>
                                         <div class="name d-flex">
-                                            <Led :status="item.status" />
+                                            <Led :status="item.status === 'info' ? 'warning' : item.status" />
                                             <router-link
                                                 :to="{
                                                     name: 'overview',
@@ -119,37 +113,34 @@
                 </div>
             </div>
             <EmptyState
-                    v-else
-                    class="pt-3 elevation-2 nodes-table"
-                    :title="emptyState.title"
-                    :heading="'Node Applications'"
-                    :description="emptyState.description"
-                    height="40vh"
-                    :iconWidth="'10vw'"
-                    :iconHeight="'10vh'"
-                    :iconName="emptyState.iconName"
-                />
+                v-else
+                class="pt-3 elevation-2 nodes-table"
+                :title="emptyState.title"
+                :heading="'Node Applications'"
+                :description="emptyState.description"
+                height="40vh"
+                :iconWidth="'10vw'"
+                :iconHeight="'10vh'"
+                :iconName="emptyState.iconName"
+            />
 
-                <v-card class="mobileApps">
+            <v-card class="mobileApps">
                 <div class="d-flex justify-space-between align-items-center mt-5 ml-8">
                     <div class="d-flex">
                         <span class="sub-heading">Node status</span>
                         <span class="sub-heading-light">(By CPU usage)</span>
                     </div>
-                    <HoverTooltip v-if="nodes" :text="'View all nodes'" >
-                    <router-link
-                                                :to="{
-                                                    name: 'overview',
-                                                    params: { view: 'nodes'},
-                                                    query: $route.query,
-                                                }"
-                                            class="redirect-btn-nodes"
-                                            >
-                                            <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
-                            alt="Redirect Icon"
-                        />
-                    </router-link>
+                    <HoverTooltip v-if="nodes" :text="'View all nodes'">
+                        <router-link
+                            :to="{
+                                name: 'overview',
+                                params: { view: 'nodes' },
+                                query: $route.query,
+                            }"
+                            class="redirect-btn-nodes"
+                        >
+                            <img :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`" alt="Redirect Icon" />
+                        </router-link>
                     </HoverTooltip>
                 </div>
                 <div v-if="nodes">
@@ -258,13 +249,13 @@
                     :title="emptyState.title"
                     :description="emptyState.description"
                     height="30vh"
-                     :iconWidth="'10vw'"
+                    :iconWidth="'10vw'"
                     :iconHeight="'10vh'"
                     :iconName="emptyState.iconName"
                 />
             </v-card>
             <v-card class="eum-container">
-                <div class="ml-8 mt-5 ">
+                <div class="ml-8 mt-5">
                     <span class="sub-heading">EUM Overview</span>
                     <span class="sub-heading-light">(By requests)</span>
                 </div>
@@ -273,23 +264,18 @@
                         <div class="app-count-item">
                             <div class="d-flex justify-space-between align-items-center">
                                 <span class="sub-heading-light">Browser Apps</span>
-                        <HoverTooltip :text="'View all applications'" >
-
-                                <router-link
-                                                :to="{
-                                                    name: 'overview',
-                                                    params: { view: 'BRUM'},
-                                                    query: $route.query,
-                                                }"
-                                    class="eum-redirect-icon"
-
-                                            >
-                                                <img
-                                    :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
-                                    onerror="this.style.display='none'"
-                                />
-                                            </router-link>
-                                        </HoverTooltip>
+                                <HoverTooltip :text="'View all applications'">
+                                    <router-link
+                                        :to="{
+                                            name: 'overview',
+                                            params: { view: 'BRUM' },
+                                            query: $route.query,
+                                        }"
+                                        class="eum-redirect-icon"
+                                    >
+                                        <img :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`" onerror="this.style.display='none'" />
+                                    </router-link>
+                                </HoverTooltip>
                             </div>
                             <div class="app-icon-count">
                                 <img
@@ -298,32 +284,25 @@
                                     class="icon"
                                     height="40"
                                     width="40"
-                    />
-                            <span class="app-count">{{ browserAppsCount }}</span>
-
+                                />
+                                <span class="app-count">{{ browserAppsCount }}</span>
                             </div>
                         </div>
                         <div class="app-count-item">
                             <div class="d-flex justify-space-between align-items-center">
                                 <span class="sub-heading-light">Mobile Apps</span>
-                                <HoverTooltip :text="'View all applications'" >
-
-                                <router-link
-                                                :to="{
-                                                    name: 'overview',
-                                                    params: { view: 'MRUM'},
-                                                    query: $route.query,
-                                                }"
-                                    class="eum-redirect-icon"
-                                            
-                                            >
-
-                                                <img
-                                    :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
-                                    onerror="this.style.display='none'"
-                                />
-                                            </router-link>
-                                        </HoverTooltip>
+                                <HoverTooltip :text="'View all applications'">
+                                    <router-link
+                                        :to="{
+                                            name: 'overview',
+                                            params: { view: 'MRUM' },
+                                            query: $route.query,
+                                        }"
+                                        class="eum-redirect-icon"
+                                    >
+                                        <img :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`" onerror="this.style.display='none'" />
+                                    </router-link>
+                                </HoverTooltip>
                             </div>
                             <div class="app-icon-count">
                                 <img
@@ -332,14 +311,14 @@
                                     class="icon"
                                     height="40"
                                     width="40"
-                    />
+                                />
                                 <span class="app-count">{{ mobileAppsCount }}</span>
                             </div>
                         </div>
                     </div>
                     <v-simple-table class="elevation-0 mt-3 eum-table">
                         <thead>
-                            <tr >
+                            <tr>
                                 <th v-for="header in eumApplicationsHeaders" :key="header.value" class="sticky-header">
                                     {{ header.text }}
                                 </th>
@@ -397,29 +376,25 @@
                     :buttonType="'disabled'"
                 />
             </v-card>
-            
+
             <div class="bottom-container">
-                <v-card  class="incidents-container">
+                <v-card class="incidents-container">
                     <div v-if="incidents" class="d-flex">
                         <div class="incidents-chart-container">
                             <div class="d-flex justify-space-between align-items-center mt-3 ml-8">
                                 <span class="sub-heading">Incidents Summary</span>
-                                <HoverTooltip :text="'View all incidents'" >
-
-                                <router-link
-                                                :to="{
-                                                    name: 'overview',
-                                                    params: { view: 'incidents'},
-                                                    query: { ...$utils.contextQuery()},
-                                                }"
-                                            class="redirect-btn-nodes"
-                                            >
-                                            <img
-                            :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`"
-                            alt="Redirect Icon"
-                        />
-                    </router-link>
-                    </HoverTooltip>
+                                <HoverTooltip :text="'View all incidents'">
+                                    <router-link
+                                        :to="{
+                                            name: 'overview',
+                                            params: { view: 'incidents' },
+                                            query: { ...$utils.contextQuery() },
+                                        }"
+                                        class="redirect-btn-nodes"
+                                    >
+                                        <img :src="`${$codexray.base_path}static/img/tech-icons/Redirect.svg`" alt="Redirect Icon" />
+                                    </router-link>
+                                </HoverTooltip>
                             </div>
 
                             <div v-for="(config, index) in incidentChartData" :key="index" class="incidents-chart-wrapper">
@@ -449,11 +424,15 @@
                                         <tr v-for="item in incidents" :key="item.applicationName">
                                             <td>
                                                 <div class="name d-flex">
-                                                    <img v-if="item.icon" :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`" alt="App Icon" />
+                                                    <img
+                                                        v-if="item.icon"
+                                                        :src="`${$codexray.base_path}static/img/tech-icons/${item.icon}.svg`"
+                                                        alt="App Icon"
+                                                    />
                                                     <router-link
                                                         :to="{
                                                             name: 'overview',
-                                                            params: { view: 'incidents'},
+                                                            params: { view: 'incidents' },
                                                             query: { ...$utils.contextQuery(), applicationName: item.name },
                                                         }"
                                                     >
@@ -477,14 +456,14 @@
                         </div>
                     </div>
                     <EmptyState
-                    v-else
+                        v-else
                         class="pt-3 nodeApps-table"
                         :heading="'Incidents'"
                         :title="emptyState.title"
                         :description="emptyState.description"
                         :iconName="emptyState.iconName"
-                         :iconWidth="'10vw'"
-                    :iconHeight="'10vh'"
+                        :iconWidth="'10vw'"
+                        :iconHeight="'10vh'"
                     />
                 </v-card>
                 <v-card class="pa-4 db-insights-card" elevation="1">
@@ -524,7 +503,7 @@ import EmptyState from '@/views/EmptyState.vue';
 import HoverTooltip from '@/components/HoverTooltip.vue';
 
 export default {
-    components: { EChart, Led, EmptyState, HoverTooltip},
+    components: { EChart, Led, EmptyState, HoverTooltip },
     data() {
         return {
             chartData: [],
@@ -638,9 +617,8 @@ export default {
         fetchDashboardData() {
             this.loading = true;
             this.error = '';
-            this.$api.getOverview('dashboard', '' ,(data, error) => {
+            this.$api.getOverview('dashboard', '', (data, error) => {
                 this.loading = false;
-                console.log(error);
                 if (error) {
                     console.error('Error fetching dashboard data:', error);
                     this.error = error;
@@ -661,7 +639,6 @@ export default {
                 this.applicationStatusLegend[0].value = data?.dashboard?.appStatsChart[0]?.series?.data[0]?.value;
                 this.applicationStatusLegend[1].value = data?.dashboard?.appStatsChart[0]?.series?.data[1]?.value;
                 this.applicationStatusLegend[2].value = data?.dashboard?.appStatsChart[0]?.series?.data[2]?.value;
-                console.log(this.incidents[0].applicationName)
             });
         },
     },
@@ -669,14 +646,12 @@ export default {
 </script>
 
 <style scoped>
-
 .eum-redirect-icon {
     display: flex;
     align-items: center;
     justify-content: center;
     margin-left: 10px;
 }
-
 
 .redirect-btn {
     display: flex;
@@ -698,14 +673,13 @@ export default {
     display: flex;
     flex-direction: column;
     height: calc(100vh - 64px);
-    /* overflow: hidden; */
 }
 
-.nodeApps-table-container{
+.nodeApps-table-container {
     width: 100%;
 }
 
-.incidents-table-container{
+.incidents-table-container {
     width: 100%;
 }
 
@@ -1098,7 +1072,7 @@ export default {
         min-height: 180px;
     }
 
-    .incidents-table{
+    .incidents-table {
         width: 100%;
     }
 
@@ -1133,7 +1107,7 @@ export default {
     }
 } */
 
- @media (max-height: 768px) {
+@media (max-height: 768px) {
     .container {
         height: 100vh;
     }
@@ -1157,15 +1131,14 @@ export default {
     .db-insights-card {
         height: 40vh;
     }
-    
-    .status-item{
+
+    .status-item {
         margin-left: 0.5rem;
     }
 
-    .incident-label-text.special-text{
+    .incident-label-text.special-text {
         font-size: 0.8rem;
         margin-left: 0.3rem;
     }
-    
- }
+}
 </style>
