@@ -35,14 +35,12 @@ func Render(ctx context.Context, ch *clickhouse.Client, w *model.World, view, qu
 		v.Applications = renderApplications(w)
 	case "incidents":
 		if query != "" {
-			for _, app := range w.Applications {
-				if app.Id.Name == query {
-					for _, i := range app.Incidents {
-						v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
-					}
-					break
-				}
+			appId, _ := model.NewApplicationIdFromString(query)
+			app := w.GetApplication(appId)
+			for _, i := range app.Incidents {
+				v.Incidents = append(v.Incidents, incident.CalcSummary(w, app, i))
 			}
+
 		} else {
 			for _, app := range w.Applications {
 				switch {

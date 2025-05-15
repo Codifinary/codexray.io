@@ -99,10 +99,10 @@ type IncidentStats struct {
 }
 
 type IncidentTable struct {
-	Icon            string    `json:"icon"`
-	ApplicationName string    `json:"applicationName"`
-	OpenIncidents   int64     `json:"openIncidents"`
-	LastOccurence   time.Time `json:"lastOccurrence"`
+	Icon            string              `json:"icon"`
+	ApplicationName model.ApplicationId `json:"applicationName"`
+	OpenIncidents   int64               `json:"openIncidents"`
+	LastOccurence   time.Time           `json:"lastOccurrence"`
 }
 
 func renderDashboard(ctx context.Context, ch *clickhouse.Client, w *model.World) *DashboardView {
@@ -400,7 +400,7 @@ func renderIncidents(w *model.World) (IncidentOverview, IncidentStats) {
 
 			incidentTable = append(incidentTable, IncidentTable{
 				Icon:            icon,
-				ApplicationName: app.Id.Name,
+				ApplicationName: app.Id,
 				OpenIncidents:   int64(len(app.Incidents) - closedCount),
 				LastOccurence:   app.Incidents[len(app.Incidents)-1].OpenedAt.ToStandard(),
 			})
