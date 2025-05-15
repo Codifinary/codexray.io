@@ -182,7 +182,7 @@ export default {
             changePassword: false,
             isSidebarCollapsed: false,
             showAlert: true,
-            excludedViews: ['MRUM', 'BRUM'],
+            excludedViews: ['MRUM', 'BRUM', 'dashboard'],
         };
     },
 

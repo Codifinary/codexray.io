@@ -214,7 +214,8 @@ export default {
         get() {
             this.loading = true;
             this.error = '';
-            this.$api.getOverview('incidents', '', (data, error) => {
+            const applicationName = this.$route.query.applicationName || '';
+            this.$api.getOverview('incidents', { applicationName }, (data, error) => {
                 this.loading = false;
                 if (error) {
                     this.error = error;
