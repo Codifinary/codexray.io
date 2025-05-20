@@ -45,14 +45,35 @@ export default {
             }
         },
         getChartOptions(echarts) {
-            console.log(echarts);
-            // return echarts
-            const options = { ...echarts };
-            options.legend = {
-                bottom: '2%',
-            };
-            return options;
+    const options = { ...echarts };
+
+    const MAX_LEN = 10;
+
+    options.legend = {
+        bottom: -5,
+        orient: 'horizontal',
+        left: 'center',
+        itemWidth: 14,
+        itemHeight: 14,
+        textStyle: {
+            rich: {
+                truncate: {
+                    width: 80,
+                    overflow: 'truncate',
+                }
+            }
         },
+        formatter: function (name) {
+            const short = name.length > MAX_LEN ? name.slice(0, MAX_LEN) + '...' : name;
+            return `{truncate|${short}}`; // Apply rich style
+        },
+        tooltip: {
+            show: true, // This only works in some ECharts versions for legends
+        }
+    };
+    return options;
+},
+
     },
 };
 </script>

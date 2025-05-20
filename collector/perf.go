@@ -220,6 +220,19 @@ func (b *PerfBatch) save() {
 	}
 }
 
+// validateDataPoint checks if any performance metric in the DataPoint is negative
+func (dp *DataPoint) validateDataPoint() bool {
+	// Check all time-related fields for negative values
+	if dp.TransTime < 0 || dp.LoadPageTime < 0 || dp.ResTime < 0 ||
+		dp.DnsTime < 0 || dp.TcpTime < 0 || dp.SslTime < 0 ||
+		dp.DomAnalysisTime < 0 || dp.DomReadyTime < 0 ||
+		dp.FirstPackTime < 0 || dp.FmpTime < 0 || dp.FptTime < 0 ||
+		dp.RedirectTime < 0 || dp.TtfbTime < 0 || dp.TtlTime < 0 {
+		return false
+	}
+	return true
+}
+
 func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 	project, err := c.getProject(r.Header.Get(ApiKeyHeader))
 	if err != nil {
@@ -274,6 +287,14 @@ func (c *Collector) Perf(w http.ResponseWriter, r *http.Request) {
 		AppType:           "Browser",
 		Browser:           payload.Browser,
 	}
+
+	// Validate the DataPoint before adding to Clickhouse
+	if !dp.validateDataPoint() {
+		klog.Warningf("Rejected performance data with negative values for service: %s, page: %s", dp.ServiceName, dp.PageName)
+		http.Error(w, "invalid performance data: negative values detected", http.StatusBadRequest)
+		return
+	}
+
 	perfReq := &PerfRequestType{DataPoints: []DataPoint{dp}}
 	c.getPerfBatch(project).Add(perfReq, string(data))
 	w.Header().Set("Content-Type", "application/json")
