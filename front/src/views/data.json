@@ -1,0 +1,67 @@
+{
+    "processes": [
+        {
+            "pid": 1,
+            "name": "process1",
+            "path": "/usr/bin/process1",
+            "processCPU": {
+                "percent": 20,
+                "color": "blue"
+            },
+            "processMemory": {
+                "percent": 6,
+                "color": "blue"
+            }
+        },
+        {
+            "pid": 2,
+            "name": "process2",
+            "path": "/usr/bin/process2",
+            "processCPU": {
+                "percent": 6,
+                "color": "blue"
+            },
+            "processMemory": {
+                "percent": 6,
+                "color": "blue"
+            }
+        }
+    ],
+    "cards": [
+        {
+            "name": "CPU Usage (%)",
+            "count": 6,
+            "color": "blue",
+            "iconName": "Cpu Usage",
+            "background": "purple lighten-4"
+        },
+        {
+            "name": "Available RAM (GB)",
+            "count": 6,
+            "color": "blue",
+            "iconName": "Memory",
+            "background": "purple lighten-4"
+        },
+        {
+            "name": "CPU Cores",
+            "count": 6,
+            "color": "blue",
+            "iconName": "Cores",
+            "background": "purple lighten-4"
+        },
+        {
+            "name": "Active CPU Processes",
+            "count": 6,
+            "color": "blue",
+            "iconName": "Active CPU processes",
+            "background": "purple lighten-4"
+        },
+        {
+            "name": "Processes in Memory",
+            "count": 6,
+            "color": "blue",
+            "iconName": "Stack",
+            "background": "purple lighten-4"
+        }
+    ]
+}
